@@ -10,14 +10,14 @@ form.addEventListener("submit", async (e) => {
     .insert([
       {
         exercise: inputs[0].value,
-        reps: inputs[1].value,
-        weight: inputs[2].value
+        reps: Number(inputs[1].value),
+        weight: Number(inputs[2].value)
       }
     ]);
 
   if (error) {
-    alert("Error al guardar");
     console.error(error);
+    alert("Error al guardar");
   } else {
     alert("Entrenamiento guardado 💪");
     form.reset();
