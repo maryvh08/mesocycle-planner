@@ -1,13 +1,6 @@
 const form = document.getElementById("workout-form");
 const workoutList = document.getElementById("workout-list");
 
-<script>
-  const supabaseClient = supabase.createClient(
-    "https://TU-PROYECTO.supabase.co",
-    "TU_PUBLIC_ANON_KEY"
-  );
-</script>
-
 async function loadWorkouts() {
   const { data, error } = await supabaseClient
     .from("workouts")
