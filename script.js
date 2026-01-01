@@ -17,7 +17,12 @@ async function loadWorkouts() {
 
   data.forEach(workout => {
     const li = document.createElement("li");
-    li.textContent = `${workout.exercise} – ${workout.reps} reps – ${workout.weight} kg`;
+    const date = new Date(workout.created_at).toLocaleDateString();
+    li.innerHTML = `
+      <strong>${workout.exercise}</strong><br>
+      ${workout.reps} reps · ${workout.weight} kg<br>
+      <small>${date}</small>
+    `;
     workoutList.appendChild(li);
   });
 }
