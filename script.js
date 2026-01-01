@@ -20,6 +20,15 @@ async function loadWorkouts() {
   }
 
   workoutList.innerHTML = "";
+  const emptyMessage = document.getElementById("empty-message");
+
+  if (data.length === 0) {
+    emptyMessage.style.display = "block";
+    return;
+  } else {
+    emptyMessage.style.display = "none";
+  }
+
 
   data.forEach(workout => {
     const li = document.createElement("li");
@@ -72,7 +81,10 @@ form.addEventListener("submit", async (e) => {
     console.error(error);
     alert("Error al guardar");
   } else {
-    alert("Entrenamiento guardado 💪");
+    form.querySelector("button").textContent = "Guardado ✔";
+    setTimeout(() => {
+      form.querySelector("button").textContent = "Guardar";
+    }, 1000);
     form.reset();
     loadWorkouts();
   }
