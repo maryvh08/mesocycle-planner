@@ -78,4 +78,18 @@ li {
     font-weight: bold;
   }
 }
+.delete-btn {
+  margin-top: 0.4rem;
+  background: #c0392b;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.delete-btn:hover {
+  background: #e74c3c;
+}
 
