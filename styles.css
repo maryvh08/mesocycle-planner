@@ -65,4 +65,17 @@ li {
 .history-section h2 {
   margin-top: 0;
 }
+@media (max-width: 480px) {
+  body {
+    background: #eee;
+  }
+
+  section {
+    padding: 1.2rem;
+  }
+
+  button {
+    font-weight: bold;
+  }
+}
 
