@@ -4,9 +4,32 @@
   <meta charset="UTF-8">
   <title>Workout Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Workout Tracker</h1>
-  <p>Mi primera app web</p>
+
+  <header>
+    <h1>🏋️ Workout Tracker</h1>
+  </header>
+
+  <main>
+    <section class="form-section">
+      <h2>Nuevo entrenamiento</h2>
+
+      <form id="workout-form">
+        <input type="text" placeholder="Ejercicio (ej: Sentadilla)" required>
+        <input type="number" placeholder="Repeticiones" required>
+        <input type="number" placeholder="Peso (kg)" required>
+        <button type="submit">Guardar</button>
+      </form>
+    </section>
+
+    <section class="history-section">
+      <h2>Historial</h2>
+      <p>Aún no hay entrenamientos</p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
 </body>
 </html>
