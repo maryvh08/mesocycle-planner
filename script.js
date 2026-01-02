@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginBtn = document.getElementById("login-btn");
   const logoutBtn = document.getElementById("logout-btn");
 
-  const authInputs = document.getElementById("auth-inputs");
+  const Inputs = document.getElementById("-inputs");
   const userInfo = document.getElementById("user-info");
   const userEmail = document.getElementById("user-email");
 
@@ -24,14 +24,14 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeMesocycle = null;
 
   // =======================
-  // AUTH ACTIONS
+  //  ACTIONS
   // =======================
 
   signupBtn?.addEventListener("click", async () => {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    const { error } = await supabaseClient.auth.signUp({ email, password });
+    const { error } = await supabaseClient..signUp({ email, password });
 
     if (error) alert(error.message);
     else alert("Usuario registrado. Revisa tu correo.");
@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const password = document.getElementById("password").value;
   
     const { data, error } =
-      await supabaseClient.auth.signInWithPassword({
+      await supabaseClient..signInWithPassword({
         email,
         password,
       });
@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
   logoutBtn.addEventListener("click", async (e) => {
     e.preventDefault();
   
-    const { error } = await supabaseClient.auth.signOut();
+    const { error } = await supabaseClient..signOut();
   
     if (error) {
       alert(error.message);
@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("active-mesocycle-dates").textContent = "";
   
     // 🔥 MOSTRAR LOGIN / OCULTAR APP
-    authInputs.style.display = "block";
+    Inputs.style.display = "block";
     logoutBtn.style.display = "none";
     userInfo.style.display = "none";
   
@@ -101,53 +101,38 @@ document.addEventListener("DOMContentLoaded", () => {
   // =======================
 
   supabaseClient.auth.onAuthStateChange(async (_event, session) => {
-
     if (!session) {
+      // 🔒 USUARIO FUERA
       activeMesocycle = null;
   
-      mesocycleSelect.innerHTML =
-        `<option value="">Inicia sesión</option>`;
+      authInputs.style.display = "block";
+      logoutBtn.style.display = "none";
+      userInfo.style.display = "none";
   
-      exerciseSelect.innerHTML =
-        `<option value="">—</option>`;
+      workoutList.innerHTML = "";
+      emptyMessage.style.display = "block";
+  
+      mesocycleSelect.innerHTML = "";
+      exerciseSelect.innerHTML = "";
   
       return;
     }
   
-    // 1️⃣ Plantillas (crear mesociclo)
-    await loadMesocycleTemplates();
+    // ✅ USUARIO LOGUEADO
+    authInputs.style.display = "none";
+    logoutBtn.style.display = "inline-block";
+    userInfo.style.display = "block";
+    userEmail.textContent = session.user.email;
   
-    // 2️⃣ Lista de mesociclos (selector)
+    await loadMesocycleTemplates();
     await loadMesocycles();
   
-    // 3️⃣ Mesociclo activo
     const m = await loadActiveMesocycle();
+    if (!m) return;
   
-    if (!m) {
-      exerciseSelect.innerHTML =
-        `<option value="">Crea un mesociclo</option>`;
-      return;
-    }
-  
-    // 4️⃣ Ejercicios del mesociclo
     await loadExercisesForMesocycle();
-  
-    // 5️⃣ Entrenamientos
     loadWorkouts();
   });
-
-  function resetUI() {
-    authInputs.style.display = "block";
-    logoutBtn.style.display = "none";
-    userInfo.style.display = "none";
-
-    mesocycleSelect.innerHTML = "";
-    exerciseSelect.innerHTML = "";
-    workoutList.innerHTML = "";
-    emptyMessage.style.display = "block";
-
-    activeMesocycle = null;
-  }
 
   // =======================
   // MESOCYCLES
