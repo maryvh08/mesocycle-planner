@@ -59,6 +59,15 @@ async function loadWorkouts() {
     return;
   }
 
+  const user = (await supabaseClient.auth.getUser()).data.user;
+  
+  const { data, error } = await supabaseClient
+    .from("workouts")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+
   workoutList.innerHTML = "";
   const emptyMessage = document.getElementById("empty-message");
 
@@ -80,6 +89,24 @@ async function loadWorkouts() {
       <button class="edit-btn">Editar</button>
       <button class="delete-btn">Eliminar</button>
     `;
+
+    li.querySelector(".delete-btn").addEventListener("click", async () => {
+      const confirmDelete = confirm("¿Eliminar este entrenamiento?");
+      if (!confirmDelete) return;
+    
+      const { error } = await supabaseClient
+        .from("workouts")
+        .delete()
+        .eq("id", workout.id);
+    
+      if (error) {
+        alert("Error al eliminar");
+        console.error(error);
+      } else {
+        loadWorkouts();
+        loadStats();
+      }
+    });
 
     li.querySelector(".edit-btn").addEventListener("click", () => {
       const inputs = form.querySelectorAll("input");
@@ -174,6 +201,14 @@ form.addEventListener("submit", async (e) => {
       return;
     }
   }
+  const user = (await supabaseClient.auth.getUser()).data.user;
+
+  await supabaseClient.from("workouts").insert([{
+    exercise: inputs[0].value,
+    reps: Number(inputs[1].value),
+    weight: Number(inputs[2].value),
+    user_id: user.id
+  }])
 
   form.reset();
   loadWorkouts();
