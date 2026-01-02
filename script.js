@@ -10,6 +10,8 @@ const logoutBtn = document.getElementById("logout-btn");
 const emptyMessage = document.getElementById("empty-message");
 
 let editingWorkoutId = null;
+let activeMesocycle = null;
+let allowedExercises = [];
 
 // =======================
 // AUTH
@@ -463,5 +465,26 @@ await supabaseClient
     weight,
     mesocycle_id: mesocycleId
   });
+
+async function loadActiveMesocycle() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) return null;
+
+  const { data, error } = await supabaseClient
+    .from("mesocycles")
+    .select("id, name, template_id")
+    .eq("user_id", user.id)
+    .eq("active", true)
+    .single();
+
+  if (error) {
+    console.warn("No hay mesociclo activo");
+    return null;
+  }
+
+  activeMesocycle = data;
+  document.getElementById("active-mesocycle-name").textContent = data.name;
+  return data;
+}
 
 console.log("SCRIPT CARGADO COMPLETO");
