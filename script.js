@@ -38,20 +38,32 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   loginBtn.addEventListener("click", async (e) => {
-    e.preventDefault(); // ⬅️ CLAVE
+    e.preventDefault();
   
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
   
-    const { error } =
-      await supabaseClient.auth.signInWithPassword({ email, password });
+    const { data, error } =
+      await supabaseClient.auth.signInWithPassword({
+        email,
+        password,
+      });
   
-    if (error) alert(error.message);
+    if (error) {
+      alert(error.message);
+      return;
+    }
+  
+    // 🔥 FUERZA ACTUALIZACIÓN UI
+    await loadMesocycleTemplates();
+    await loadMesocycles();
+  
+    const m = await loadActiveMesocycle();
+    if (m) {
+      await loadExercisesForMesocycle();
+      loadWorkouts();
+    }
   });
-  
-    logoutBtn?.addEventListener("click", async () => {
-      await supabaseClient.auth.signOut();
-    });
 
   // =======================
   // SESSION STATE
