@@ -54,35 +54,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // =======================
 
   supabaseClient.auth.onAuthStateChange(async (_event, session) => {
-    if (!session) return;
+    if (!session) {
+      activeMesocycle = null;
+      return;
+    }
   
     await loadMesocycleTemplates();
-    await loadMesocycles();          // 🔥 ESTO FALTABA
-    await loadActiveMesocycle();
+    const m = await loadActiveMesocycle();
   
-    if (activeMesocycle) {
-      await loadExercisesForMesocycle();
-      loadWorkouts();
-      loadStats();
-      loadVolumeChart();
-      loadPRs();
-    }
-  });
-
-
-    authInputs.style.display = "none";
-    logoutBtn.style.display = "inline-block";
-    userInfo.style.display = "block";
-    userEmail.textContent = session.user.email;
-
-    await loadMesocycleTemplates();
-    await loadMesocycles();
-    await loadActiveMesocycle();
-
-    if (activeMesocycle) {
-      await loadExercisesForMesocycle();
-      loadWorkouts();
-    }
+    if (!m) return;
+  
+    await loadExercisesForMesocycle();
+    loadWorkouts();
   });
 
   // =======================
