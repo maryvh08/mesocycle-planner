@@ -622,9 +622,10 @@ async function loadMesocycles() {
   }
 }
 
-document
-  .getElementById("mesocycle-select")
-  .addEventListener("change", async (e) => {
+const mesocycleSelect = document.getElementById("mesocycle-select");
+
+if (mesocycleSelect) {
+  mesocycleSelect.addEventListener("change", async (e) => {
     const mesocycleId = e.target.value;
 
     const { error } = await supabaseClient
@@ -636,12 +637,12 @@ document
       return;
     }
 
-    // Recargar todo el contexto
     loadMesocycles();
     loadWorkouts();
     loadStats();
     loadVolumeChart();
     loadPRs();
   });
+}
 
 console.log("SCRIPT CARGADO COMPLETO");
