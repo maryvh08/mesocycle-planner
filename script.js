@@ -487,4 +487,30 @@ async function loadActiveMesocycle() {
   return data;
 }
 
+async function loadExercisesForMesocycle() {
+  if (!activeMesocycle) return;
+
+  const { data, error } = await supabaseClient
+    .rpc("get_exercises_for_mesocycle", {
+      mesocycle_id: activeMesocycle.id
+    });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  allowedExercises = data;
+
+  const exerciseInput = document.getElementById("exercise");
+  exerciseInput.innerHTML = "";
+
+  data.forEach(e => {
+    const option = document.createElement("option");
+    option.value = e.id;
+    option.textContent = e.name;
+    exerciseInput.appendChild(option);
+  });
+}
+
 console.log("SCRIPT CARGADO COMPLETO");
