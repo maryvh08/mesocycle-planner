@@ -115,5 +115,35 @@ supabaseClient.auth.onAuthStateChange((_event, session) => {
   }
 });
 
+async function loadStats() {
+  const { data, error } = await supabaseClient
+    .from("workouts")
+    .select("exercise, reps, weight");
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  let totalVolume = 0;
+  let maxWeight = 0;
+  const exerciseCount = {};
+
+  data.forEach(w => {
+    totalVolume += w.reps * w.weight;
+    maxWeight = Math.max(maxWeight, w.weight);
+
+    exerciseCount[w.exercise] = (exerciseCount[w.exercise] || 0) + 1;
+  });
+
+  const topExercise = Object.entries(exerciseCount)
+    .sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
+
+  document.getElementById("stat-volume").textContent = totalVolume;
+  document.getElementById("stat-count").textContent = data.length;
+  document.getElementById("stat-max").textContent = maxWeight;
+  document.getElementById("stat-top").textContent = topExercise;
+}
+
 console.log("SCRIPT CARGADO COMPLETO");
 
