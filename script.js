@@ -216,12 +216,13 @@ supabaseClient.auth.onAuthStateChange((_event, session) => {
   if (session) {
     authInputs.style.display = "none";
     logoutBtn.style.display = "inline-block";
-
+  
     userInfo.style.display = "block";
     userEmail.textContent = session.user.email;
-
+  
     loadWorkouts();
     loadStats();
+    loadVolumeChart(); // 👈 ESTA LÍNEA
   } else {
     authInputs.style.display = "block";
     logoutBtn.style.display = "none";
