@@ -408,5 +408,27 @@ document
     loadProgressChart(e.target.value);
   });
 
+async function loadMesocycles() {
+  const { data, error } = await supabaseClient
+    .from("mesocycles")
+    .select("id, name, is_active")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const select = document.getElementById("mesocycle-select");
+  select.innerHTML = "";
+
+  data.forEach(m => {
+    const option = document.createElement("option");
+    option.value = m.id;
+    option.textContent = m.name;
+    if (m.is_active) option.selected = true;
+    select.appendChild(option);
+  });
+}
 
 console.log("SCRIPT CARGADO COMPLETO");
