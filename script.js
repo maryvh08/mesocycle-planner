@@ -135,6 +135,7 @@ async function loadStats() {
     .from("workouts")
     .select("exercise, reps, weight")
     .eq("user_id", user.id);
+    .eq("mesocycle_id", activeMesocycle.id)
 
   if (error) {
     console.error(error);
@@ -196,7 +197,8 @@ form.addEventListener("submit", async (e) => {
     const { error } = await supabaseClient
       .from("workouts")
       .insert([{
-        exercise: inputs[0].value,
+        exercise_id: document.getElementById("exercise").value,
+        mesocycle_id: activeMesocycle.id,
         reps: Number(inputs[1].value),
         weight: Number(inputs[2].value),
         user_id: user.id,
@@ -512,5 +514,17 @@ async function loadExercisesForMesocycle() {
     exerciseInput.appendChild(option);
   });
 }
+
+const { data, error } = await supabaseClient
+  .from("workouts")
+  .select(`
+    id,
+    reps,
+    weight,
+    created_at,
+    exercises(name)
+  `)
+  .eq("mesocycle_id", activeMesocycle.id)
+  .order("created_at", { ascending: false });
 
 console.log("SCRIPT CARGADO COMPLETO");
