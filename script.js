@@ -645,4 +645,5 @@ if (mesocycleSelect) {
   });
 }
 
+console.log(signupBtn, loginBtn);
 console.log("SCRIPT CARGADO COMPLETO");
