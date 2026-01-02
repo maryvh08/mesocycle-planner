@@ -227,18 +227,26 @@ const { error } = await supabaseClient
 // =======================
 
 supabaseClient.auth.onAuthStateChange((_event, session) => {
+  const userInfo = document.getElementById("user-info");
+  const userEmail = document.getElementById("user-email");
+
   if (session) {
     loginBtn.style.display = "none";
     signupBtn.style.display = "none";
     logoutBtn.style.display = "block";
+
+    userInfo.style.display = "block";
+    userEmail.textContent = session.user.email;
+
     loadWorkouts();
     loadStats();
   } else {
     loginBtn.style.display = "block";
     signupBtn.style.display = "block";
     logoutBtn.style.display = "none";
+
+    userInfo.style.display = "none";
     workoutList.innerHTML = "";
-    emptyMessage.style.display = "block";
   }
 });
 
