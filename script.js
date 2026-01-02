@@ -1,8 +1,14 @@
+// =======================
+// ELEMENTOS
+// =======================
+
 const form = document.getElementById("workout-form");
 const workoutList = document.getElementById("workout-list");
 const signupBtn = document.getElementById("signup-btn");
 const loginBtn = document.getElementById("login-btn");
 const logoutBtn = document.getElementById("logout-btn");
+const emptyMessage = document.getElementById("empty-message");
+
 let editingWorkoutId = null;
 
 // =======================
@@ -13,15 +19,12 @@ signupBtn.addEventListener("click", async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const { error } = await supabaseClient.auth.signUp({
-    email,
-    password,
-  });
+  const { error } = await supabaseClient.auth.signUp({ email, password });
 
   if (error) {
     alert(error.message);
   } else {
-    alert("Usuario registrado. Revisa tu correo y luego entra.");
+    alert("Usuario registrado. Revisa tu correo y luego inicia sesión.");
   }
 });
 
@@ -34,14 +37,13 @@ loginBtn.addEventListener("click", async () => {
     password,
   });
 
-  if (error) {
-    alert(error.message);
-  }
+  if (error) alert(error.message);
 });
 
 logoutBtn.addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
   workoutList.innerHTML = "";
+  emptyMessage.style.display = "block";
 });
 
 // =======================
@@ -49,9 +51,13 @@ logoutBtn.addEventListener("click", async () => {
 // =======================
 
 async function loadWorkouts() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) return;
+
   const { data, error } = await supabaseClient
     .from("workouts")
     .select("*")
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -59,17 +65,7 @@ async function loadWorkouts() {
     return;
   }
 
-  const user = (await supabaseClient.auth.getUser()).data.user;
-  
-  const { data, error } = await supabaseClient
-    .from("workouts")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
-
-
   workoutList.innerHTML = "";
-  const emptyMessage = document.getElementById("empty-message");
 
   if (data.length === 0) {
     emptyMessage.style.display = "block";
@@ -84,21 +80,32 @@ async function loadWorkouts() {
     li.innerHTML = `
       <strong>${workout.exercise}</strong><br>
       ${workout.reps} reps · ${workout.weight} kg<br>
-      <small>${new Date(workout.created_at).toLocaleDateString()}</small>
-      <br>
+      <small>${new Date(workout.created_at).toLocaleDateString()}</small><br>
       <button class="edit-btn">Editar</button>
       <button class="delete-btn">Eliminar</button>
     `;
 
+    // EDITAR
+    li.querySelector(".edit-btn").addEventListener("click", () => {
+      const inputs = form.querySelectorAll("input");
+      inputs[0].value = workout.exercise;
+      inputs[1].value = workout.reps;
+      inputs[2].value = workout.weight;
+
+      editingWorkoutId = workout.id;
+      form.querySelector("button").textContent = "Actualizar ✏️";
+    });
+
+    // ELIMINAR
     li.querySelector(".delete-btn").addEventListener("click", async () => {
       const confirmDelete = confirm("¿Eliminar este entrenamiento?");
       if (!confirmDelete) return;
-    
+
       const { error } = await supabaseClient
         .from("workouts")
         .delete()
         .eq("id", workout.id);
-    
+
       if (error) {
         alert("Error al eliminar");
         console.error(error);
@@ -108,30 +115,22 @@ async function loadWorkouts() {
       }
     });
 
-    li.querySelector(".edit-btn").addEventListener("click", () => {
-      const inputs = form.querySelectorAll("input");
-    
-      inputs[0].value = workout.exercise;
-      inputs[1].value = workout.reps;
-      inputs[2].value = workout.weight;
-    
-      editingWorkoutId = workout.id;
-      form.querySelector("button").textContent = "Actualizar ✏️";
-    });
-
-
     workoutList.appendChild(li);
   });
 }
 
 // =======================
-// STATS (E)
+// STATS
 // =======================
 
 async function loadStats() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) return;
+
   const { data, error } = await supabaseClient
     .from("workouts")
-    .select("exercise, reps, weight");
+    .select("exercise, reps, weight")
+    .eq("user_id", user.id);
 
   if (error) {
     console.error(error);
@@ -158,13 +157,15 @@ async function loadStats() {
 }
 
 // =======================
-// INSERT
+// INSERT / UPDATE
 // =======================
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const inputs = form.querySelectorAll("input");
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) return;
 
   if (editingWorkoutId) {
     // UPDATE
@@ -175,7 +176,8 @@ form.addEventListener("submit", async (e) => {
         reps: Number(inputs[1].value),
         weight: Number(inputs[2].value)
       })
-      .eq("id", editingWorkoutId);
+      .eq("id", editingWorkoutId)
+      .eq("user_id", user.id);
 
     if (error) {
       alert("Error al actualizar");
@@ -192,7 +194,8 @@ form.addEventListener("submit", async (e) => {
       .insert([{
         exercise: inputs[0].value,
         reps: Number(inputs[1].value),
-        weight: Number(inputs[2].value)
+        weight: Number(inputs[2].value),
+        user_id: user.id
       }]);
 
     if (error) {
@@ -201,14 +204,6 @@ form.addEventListener("submit", async (e) => {
       return;
     }
   }
-  const user = (await supabaseClient.auth.getUser()).data.user;
-
-  await supabaseClient.from("workouts").insert([{
-    exercise: inputs[0].value,
-    reps: Number(inputs[1].value),
-    weight: Number(inputs[2].value),
-    user_id: user.id
-  }])
 
   form.reset();
   loadWorkouts();
@@ -231,6 +226,7 @@ supabaseClient.auth.onAuthStateChange((_event, session) => {
     signupBtn.style.display = "block";
     logoutBtn.style.display = "none";
     workoutList.innerHTML = "";
+    emptyMessage.style.display = "block";
   }
 });
 
