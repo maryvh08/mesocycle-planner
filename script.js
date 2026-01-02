@@ -344,4 +344,5 @@ document.addEventListener("DOMContentLoaded", () => {
     form.reset();
     loadWorkouts();
   });
+  console.log("Templates data:", data, "error:", error);
 });
