@@ -228,6 +228,8 @@ document.addEventListener("DOMContentLoaded", () => {
       option.textContent = ex.name;
       exerciseSelect.appendChild(option);
     });
+    exerciseSelect.disabled = false;
+    form.querySelector("button[type='submit']").disabled = false;
   }
 
   // =======================
@@ -259,4 +261,88 @@ document.addEventListener("DOMContentLoaded", () => {
       workoutList.appendChild(li);
     });
   }
+  document
+    .getElementById("create-mesocycle-btn")
+    .addEventListener("click", async () => {
+  
+      const templateId = document.getElementById("template-select").value;
+      const startDate = document.getElementById("mesocycle-start").value;
+      const endDate = document.getElementById("mesocycle-end").value;
+  
+      if (!templateId || !startDate || !endDate) {
+        alert("Completa todos los campos");
+        return;
+      }
+  
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (!user) return;
+  
+      // Desactivar mesociclo activo
+      await supabaseClient
+        .from("mesocycles")
+        .update({ is_active: false })
+        .eq("user_id", user.id);
+  
+      // Crear nuevo
+      const { data, error } = await supabaseClient
+        .from("mesocycles")
+        .insert({
+          user_id: user.id,
+          template_id: templateId,
+          start_date: startDate,
+          end_date: endDate,
+          is_active: true
+        })
+        .select("id, mesocycle_templates(name)")
+        .single();
+  
+      if (error) {
+        console.error(error);
+        alert("Error creando mesociclo");
+        return;
+      }
+  
+      activeMesocycle = data;
+  
+      await loadMesocycles();
+      await loadExercisesForMesocycle();
+      loadWorkouts();
+  
+      alert("Mesociclo creado y activado ✅");
+    });
+  
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+  
+    const reps = Number(document.getElementById("reps").value);
+    const weight = Number(document.getElementById("weight").value);
+    const exerciseId = exerciseSelect.value;
+  
+    if (!exerciseId || !activeMesocycle) {
+      alert("Selecciona mesociclo y ejercicio");
+      return;
+    }
+  
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) return;
+  
+    const { error } = await supabaseClient
+      .from("workouts")
+      .insert({
+        user_id: user.id,
+        exercise_id: exerciseId,
+        reps,
+        weight,
+        mesocycle_id: activeMesocycle.id
+      });
+  
+    if (error) {
+      console.error(error);
+      alert("Error al guardar");
+      return;
+    }
+  
+    form.reset();
+    loadWorkouts();
+  });
 });
