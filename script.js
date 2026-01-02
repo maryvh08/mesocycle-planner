@@ -16,8 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const userEmail = document.getElementById("user-email");
 
   const mesocycleSelect = document.getElementById("mesocycle-select");
-  const exerciseSelect = document.getElementById("exercise");
-
+  const exerciseSelect = document.getElementById("exercise-select");
   let editingWorkoutId = null;
   let activeMesocycle = null;
 
