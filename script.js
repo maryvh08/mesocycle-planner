@@ -160,24 +160,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  mesocycleSelect.addEventListener("change", async (e) => {
-    const mesocycleId = e.target.value;
-  
-    const { error } = await supabaseClient.rpc("set_active_mesocycle", {
-      p_mesocycle_id: mesocycleId
-    });
-  
-    if (error) {
-      alert("Error al cambiar mesociclo");
-      console.error(error);
-      return;
-    }
-  
-    await loadActiveMesocycle();
-    await loadExercisesForMesocycle();
-    loadWorkouts();
-  });
-
   // =======================
   // EXERCISES (RPC)
   // =======================
