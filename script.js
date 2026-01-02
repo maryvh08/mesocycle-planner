@@ -114,24 +114,30 @@ document.addEventListener("DOMContentLoaded", () => {
   async function loadMesocycles() {
     const { data: { user } } = await supabaseClient.auth.getUser();
     if (!user) return;
-
+  
     const { data, error } = await supabaseClient
       .from("mesocycles")
       .select(`
         id,
         is_active,
-        mesocycle_templates ( name )
+        mesocycle_templates(name)
       `)
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
-
+  
     if (error) {
-      console.error(error);
+      console.error("Mesocycles error:", error);
       return;
     }
-
+  
     mesocycleSelect.innerHTML = "";
-
+  
+    if (data.length === 0) {
+      mesocycleSelect.innerHTML =
+        `<option value="">Sin mesociclos</option>`;
+      return;
+    }
+  
     data.forEach(m => {
       const option = document.createElement("option");
       option.value = m.id;
@@ -190,10 +196,23 @@ document.addEventListener("DOMContentLoaded", () => {
       data.mesocycle_templates.name;
   }
 
-  mesocycleSelect?.addEventListener("change", async () => {
-    activeMesocycle = { id: mesocycleSelect.value };
+  mesocycleSelect.addEventListener("change", async (e) => {
+    const id = e.target.value;
+    if (!id) return;
+  
+    await supabaseClient
+      .from("mesocycles")
+      .update({ is_active: false })
+      .eq("user_id", (await supabaseClient.auth.getUser()).data.user.id);
+  
+    await supabaseClient
+      .from("mesocycles")
+      .update({ is_active: true })
+      .eq("id", id);
+  
+    await loadActiveMesocycle();
     await loadExercisesForMesocycle();
-    await loadWorkouts();
+    loadWorkouts();
   });
 
   // =======================
