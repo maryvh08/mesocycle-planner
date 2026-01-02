@@ -261,7 +261,11 @@ async function loadVolumeChart() {
   const labels = Object.keys(volumeByExercise);
   const values = Object.values(volumeByExercise);
 
-  const ctx = document.getElementById("volumeChart").getContext("2d");
+  const canvas = document.getElementById("volumeChart");
+  if (!canvas) return;
+  
+  const ctx = canvas.getContext("2d");
+
 
   if (volumeChart) {
     volumeChart.destroy();
