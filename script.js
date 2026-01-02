@@ -269,4 +269,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   console.log("script.js cargado correctamente ✅");
 
+  async function loadMesocycleTemplates() {
+    const { data, error } = await supabaseClient
+      .from("mesocycle_templates")
+      .select("id, name, emphasis")
+      .order("name");
+  
+    if (error) {
+      console.error("Error cargando plantillas:", error);
+      return;
+    }
+  
+    const select = document.getElementById("template-select");
+    select.innerHTML = "";
+  
+    data.forEach(t => {
+      const option = document.createElement("option");
+      option.value = t.id;
+      option.textContent = `${t.name} (${t.emphasis})`;
+      select.appendChild(option);
+    });
+  }
 });
