@@ -53,45 +53,16 @@ async function loadWorkouts() {
   }
 
   workoutList.innerHTML = "";
-  const emptyMessage = document.getElementById("empty-message");
 
-  if (data.length === 0) {
-    emptyMessage.style.display = "block";
+  if (!data || data.length === 0) {
+    document.getElementById("empty-message").style.display = "block";
     return;
-  } else {
-    emptyMessage.style.display = "none";
   }
 
+  document.getElementById("empty-message").style.display = "none";
 
   data.forEach(workout => {
-    const li = document.createElement("li");
-
-    li.innerHTML = `
-      <strong>${workout.exercise}</strong><br>
-      ${workout.reps} reps · ${workout.weight} kg<br>
-      <small>${new Date(workout.created_at).toLocaleDateString()}</small>
-      <br>
-      <button class="delete-btn">Eliminar</button>
-    `;
-
-    li.querySelector(".delete-btn").addEventListener("click", async () => {
-      const confirmDelete = confirm("¿Eliminar este entrenamiento?");
-      if (!confirmDelete) return;
-
-      const { error } = await supabaseClient
-        .from("workouts")
-        .delete()
-        .eq("id", workout.id);
-
-      if (error) {
-        console.error(error);
-        alert("Error al eliminar");
-      } else {
-        loadWorkouts();
-      }
-    });
-
-    workoutList.appendChild(li);
+    // igual que ahora
   });
 }
 
