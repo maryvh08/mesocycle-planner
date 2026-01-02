@@ -57,7 +57,6 @@ async function loadWorkouts() {
   const { data, error } = await supabaseClient
     .from("workouts")
     .select("*")
-    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -98,14 +97,12 @@ async function loadWorkouts() {
 
     // ELIMINAR
     li.querySelector(".delete-btn").addEventListener("click", async () => {
-      const confirmDelete = confirm("¿Eliminar este entrenamiento?");
-      if (!confirmDelete) return;
+      if (!confirm("¿Eliminar este entrenamiento?")) return;
 
       const { error } = await supabaseClient
         .from("workouts")
         .delete()
-        .eq("id", workout.id)
-        .eq("user_id", user.id);
+        .eq("id", workout.id);
 
       if (error) {
         alert("Error al eliminar");
@@ -125,13 +122,9 @@ async function loadWorkouts() {
 // =======================
 
 async function loadStats() {
-  const { data: { user } } = await supabaseClient.auth.getUser();
-  if (!user) return;
-
   const { data, error } = await supabaseClient
     .from("workouts")
-    .select("exercise, reps, weight")
-    .eq("user_id", user.id);
+    .select("exercise, reps, weight");
 
   if (error) {
     console.error(error);
@@ -177,8 +170,7 @@ form.addEventListener("submit", async (e) => {
         reps: Number(inputs[1].value),
         weight: Number(inputs[2].value)
       })
-      .eq("id", editingWorkoutId)
-      .eq("user_id", user.id);
+      .eq("id", editingWorkoutId);
 
     if (error) {
       alert("Error al actualizar");
@@ -205,17 +197,6 @@ form.addEventListener("submit", async (e) => {
       return;
     }
   }
-
-  const user = (await supabaseClient.auth.getUser()).data.user;
-
-const { error } = await supabaseClient
-  .from("workouts")
-  .insert([{
-    exercise: inputs[0].value,
-    reps: Number(inputs[1].value),
-    weight: Number(inputs[2].value),
-    user_id: user.id
-  }]);
 
   form.reset();
   loadWorkouts();
@@ -247,6 +228,7 @@ supabaseClient.auth.onAuthStateChange((_event, session) => {
 
     userInfo.style.display = "none";
     workoutList.innerHTML = "";
+    emptyMessage.style.display = "block";
   }
 });
 
