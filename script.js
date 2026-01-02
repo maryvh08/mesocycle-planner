@@ -64,8 +64,12 @@ document.addEventListener("DOMContentLoaded", () => {
     logoutBtn.style.display = "inline-block";
     userInfo.style.display = "block";
 
-    await loadMesocycleTemplates();
+    async function initApp() {
     await loadMesocycles();
+    await loadActiveMesocycle();
+  }
+  
+  initApp();
 
     const m = await loadActiveMesocycle();
     if (!m) return;
