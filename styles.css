@@ -93,3 +93,25 @@ li {
   background: #e74c3c;
 }
 
+.stats-section {
+  margin: 20px 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.stat {
+  background: #f4f4f4;
+  padding: 14px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat span {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
