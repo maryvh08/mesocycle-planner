@@ -1,178 +1,105 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Workout Tracker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css">
 
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="script.js"></script>
-
 </head>
-
 <body>
 
-<header>
-  <h1>🏋️ Workout Tracker</h1>
-</header>
+  <header>
+    <h1>Workout Tracker</h1>
+  </header>
 
-<main>
+  <main>
 
-  <!-- =======================
-       AUTH
-  ======================== -->
-  <section class="auth-section">
-    <div id="auth-inputs">
-      <input type="email" id="email" placeholder="Email" />
-      <input type="password" id="password" placeholder="Contraseña" />
-      <button id="signup-btn">Registrarse</button>
-      <button id="login-btn">Entrar</button>
-    </div>
+    <!-- ================= AUTH ================= -->
+    <section class="auth-section">
 
-    <button id="logout-btn" style="display:none;">Salir</button>
-
-    <div id="user-info" style="display:none;">
-      Usuario: <strong id="user-email"></strong>
-    </div>
-  </section>
-
-  <!-- =======================
-       MESOCYCLE
-  ======================== -->
-  <section class="mesocycle-active">
-    <h2>Mesociclo activo</h2>
-  
-    <p class="mesocycle-name" id="active-mesocycle-name">—</p>
-    <p class="mesocycle-dates" id="active-mesocycle-dates">—</p>
-  </section>
-
-
-    <p>
-      <strong id="active-mesocycle-name">—</strong>
-    </p>
-
-  <section class="mesocycle-selector">
-    <label for="mesocycle-select">Cambiar mesociclo</label>
-    <select id="mesocycle-select"></select>
-  </section>
-
-  <section class="mesocycle-create">
-    <h3>Nuevo mesociclo</h3>
-  
-    <label>Plantilla</label>
-    <select id="template-select"></select>
-  
-    <label>Fecha inicio</label>
-    <input type="date" id="mesocycle-start">
-  
-    <label>Fecha fin</label>
-    <input type="date" id="mesocycle-end">
-  
-    <button id="create-mesocycle-btn">Crear mesociclo</button>
-    
-  </section>
-
-  <p class="warning">
-    Debes tener un mesociclo activo para registrar entrenamientos
-  </p>
-
-
-  <!-- =======================
-       NEW WORKOUT
-  ======================== -->
-  <section class="form-section">
-    <h2>Nuevo entrenamiento</h2>
-
-    <form id="workout-form">
-
-      <label for="exercise">Ejercicio</label>
-      <select id="exercise" required></select>
-
-      <label for="reps">Repeticiones</label>
-      <input id="reps" type="number" placeholder="Repeticiones" required>
-
-      <label for="weight">Peso (kg)</label>
-      <input id="weight" type="number" placeholder="Peso (kg)" required>
-
-      <button type="submit">Guardar</button>
-    </form>
-  </section>
-
-  <!-- =======================
-       STATS (placeholder)
-  ======================== -->
-  <section class="stats-section">
-    <h2>Estadísticas</h2>
-
-    <div class="stats-grid">
-      <div class="stat">
-        <span id="stat-volume">0</span>
-        <small>Volumen total</small>
+      <div id="auth-inputs">
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button id="signup-btn">Registrarse</button>
+        <button id="login-btn">Entrar</button>
       </div>
 
-      <div class="stat">
-        <span id="stat-count">0</span>
-        <small>Entrenamientos</small>
+      <button id="logout-btn" style="display:none;">Salir</button>
+
+      <div id="user-info" style="display:none;">
+        Usuario: <strong id="user-email"></strong>
       </div>
 
-      <div class="stat">
-        <span id="stat-max">0</span>
-        <small>PR (kg)</small>
-      </div>
+    </section>
 
-      <div class="stat">
-        <span id="stat-top">—</span>
-        <small>Ejercicio top</small>
-      </div>
-    </div>
-  </section>
+    <!-- ================= MESOCICLO ACTIVO ================= -->
+    <section class="mesocycle-active">
+      <h3 id="active-mesocycle-name">—</h3>
+      <p id="active-mesocycle-dates"></p>
+    </section>
 
-  <!-- =======================
-       CHARTS
-  ======================== -->
-  <section class="chart-section">
-    <h2>Progreso</h2>
+    <!-- ================= SELECTOR MESOCICLO ================= -->
+    <section class="mesocycle-section">
+      <label for="mesocycle-select">Mesociclo activo</label>
+      <select id="mesocycle-select"></select>
+    </section>
 
-    <label for="exercise-select">Ejercicio</label>
-    <select id="exercise-select">
-      <option value="">Selecciona un ejercicio</option>
-    </select>
+    <!-- ================= CREAR MESOCICLO (NO ROMPE SI NO SE USA) ================= -->
+    <section class="mesocycle-create">
+      <h3>Crear mesociclo</h3>
 
-    <canvas id="progressChart"></canvas>
-    <canvas id="volumeChart"></canvas>
-  </section>
+      <select id="template-select">
+        <option value="">Selecciona plantilla</option>
+      </select>
 
-  <!-- =======================
-       HISTORY
-  ======================== -->
-  <section class="history-section">
-    <h2>Historial</h2>
+      <input type="date" id="mesocycle-start">
+      <input type="date" id="mesocycle-end">
 
-    <p id="empty-message">Aún no hay entrenamientos</p>
-    <ul id="workout-list"></ul>
-  </section>
+      <button id="create-mesocycle-btn">Crear mesociclo</button>
+    </section>
 
-</main>
+    <!-- ================= FORMULARIO WORKOUT ================= -->
+    <section class="form-section">
+      <h2>Nuevo entrenamiento</h2>
 
-<!-- =======================
-     SUPABASE INIT
-======================== -->
-<script>
-  const supabaseUrl = "https://daypzhinhmxbewfwfqcd.supabase.co";
-  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRheXB6aGluaG14YmV3ZndmcWNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyODg0OTMsImV4cCI6MjA4Mjg2NDQ5M30.e20dCMDcl9_k7DEv3Lk-ieGGkHCSbqCL6N5hyjsi-Lk";
-  const supabaseClient = supabase.createClient(
-    supabaseUrl,
-    supabaseKey
-  );
-</script>
+      <form id="workout-form">
 
-<!-- =======================
-     APP SCRIPT
-======================== -->
-<script src="script.js"></script>
+        <select id="exercise-select" required>
+          <option value="">Selecciona ejercicio</option>
+        </select>
+
+        <input id="reps" type="number" placeholder="Repeticiones" required>
+        <input id="weight" type="number" placeholder="Peso (kg)" required>
+
+        <button type="submit">Guardar</button>
+      </form>
+    </section>
+
+    <!-- ================= HISTORIAL ================= -->
+    <section class="history-section">
+      <h2>Historial</h2>
+      <p id="empty-message">Aún no hay entrenamientos</p>
+      <ul id="workout-list"></ul>
+    </section>
+
+  </main>
+
+  <!-- ================= SUPABASE CLIENT ================= -->
+  <script>
+    const supabaseUrl = "https://daypzhinhmxbewfwfqcd.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRheXB6aGluaG14YmV3ZndmcWNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyODg0OTMsImV4cCI6MjA4Mjg2NDQ5M30.e20dCMDcl9_k7DEv3Lk-ieGGkHCSbqCL6N5hyjsi-Lk";
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+  </script>
+
+  <!-- ================= APP ================= -->
+  <script src="script.js"></script>
 
 </body>
 </html>
