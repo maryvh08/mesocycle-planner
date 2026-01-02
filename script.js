@@ -431,4 +431,25 @@ async function loadMesocycles() {
   });
 }
 
+document
+  .getElementById("mesocycle-select")
+  .addEventListener("change", async e => {
+
+    const newId = e.target.value;
+
+    // 1. Desactivar actual
+    await supabaseClient
+      .from("mesocycles")
+      .update({ is_active: false })
+      .eq("is_active", true);
+
+    // 2. Activar nuevo
+    await supabaseClient
+      .from("mesocycles")
+      .update({ is_active: true })
+      .eq("id", newId);
+
+    loadWorkouts(); // refresca UI
+  });
+
 console.log("SCRIPT CARGADO COMPLETO");
