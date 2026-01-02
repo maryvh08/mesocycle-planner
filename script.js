@@ -580,4 +580,44 @@ if (error) {
   console.log("Ejercicios permitidos:", data);
 }
 
+async function loadMesocycles() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) return;
+
+  const { data, error } = await supabaseClient
+    .from("mesocycles")
+    .select(`
+      id,
+      start_date,
+      end_date,
+      is_active,
+      mesocycle_templates ( name )
+    `)
+    .eq("user_id", user.id)
+    .order("start_date", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const select = document.getElementById("mesocycle-select");
+  const info = document.getElementById("mesocycle-info");
+
+  select.innerHTML = "";
+
+  data.forEach(m => {
+    const option = document.createElement("option");
+    option.value = m.id;
+    option.textContent = `${m.mesocycle_templates.name} (${m.start_date} → ${m.end_date})`;
+    if (m.is_active) option.selected = true;
+    select.appendChild(option);
+  });
+
+  const active = data.find(m => m.is_active);
+  if (active) {
+    info.textContent = `Enfoque: ${active.mesocycle_templates.name}`;
+  }
+}
+
 console.log("SCRIPT CARGADO COMPLETO");
