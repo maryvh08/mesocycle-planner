@@ -98,10 +98,17 @@ async function loadWorkouts() {
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const inputs = form.querySelectorAll("input");
   const {
-    data: { user }
+    data: { user },
+    error: userError
   } = await supabaseClient.auth.getUser();
+
+  if (userError || !user) {
+    alert("Debes iniciar sesión");
+    return;
+  }
+
+  const inputs = form.querySelectorAll("input");
 
   const { error } = await supabaseClient
     .from("workouts")
@@ -116,7 +123,7 @@ form.addEventListener("submit", async (e) => {
 
   if (error) {
     console.error(error);
-    alert("Error al guardar");
+    alert(error.message);
   } else {
     form.reset();
     loadWorkouts();
