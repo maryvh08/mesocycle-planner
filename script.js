@@ -241,8 +241,10 @@ async function loadVolumeChart() {
   const { data, error } = await supabaseClient
     .from("workouts")
     .select("exercise, reps, weight")
-    console.log("Datos workouts para gráfica:", data);
     .eq("user_id", user.id);
+  
+  console.log("Datos workouts para gráfica:", data);
+
 
   if (error) {
     console.error(error);
