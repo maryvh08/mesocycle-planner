@@ -1,8 +1,13 @@
 const form = document.getElementById("workout-form");
 const workoutList = document.getElementById("workout-list");
+
 const signupBtn = document.getElementById("signup-btn");
 const loginBtn = document.getElementById("login-btn");
 const logoutBtn = document.getElementById("logout-btn");
+
+// =======================
+// AUTH
+// =======================
 
 signupBtn.addEventListener("click", async () => {
   const email = document.getElementById("email").value;
@@ -16,7 +21,7 @@ signupBtn.addEventListener("click", async () => {
   if (error) {
     alert(error.message);
   } else {
-    alert("Usuario registrado. Ahora puedes entrar.");
+    alert("Usuario registrado. Revisa tu correo y luego entra.");
   }
 });
 
@@ -31,8 +36,6 @@ loginBtn.addEventListener("click", async () => {
 
   if (error) {
     alert(error.message);
-  } else {
-    loadWorkouts();
   }
 });
 
@@ -40,6 +43,10 @@ logoutBtn.addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
   workoutList.innerHTML = "";
 });
+
+// =======================
+// WORKOUTS
+// =======================
 
 async function loadWorkouts() {
   const { data, error } = await supabaseClient
@@ -53,67 +60,47 @@ async function loadWorkouts() {
   }
 
   workoutList.innerHTML = "";
+  const emptyMessage = document.getElementById("empty-message");
 
-  if (!data || data.length === 0) {
-    document.getElementById("empty-message").style.display = "block";
+  if (data.length === 0) {
+    emptyMessage.style.display = "block";
     return;
+  } else {
+    emptyMessage.style.display = "none";
   }
 
-  document.getElementById("empty-message").style.display = "none";
-
   data.forEach(workout => {
-    // igual que ahora
+    const li = document.createElement("li");
+
+    li.innerHTML = `
+      <strong>${workout.exercise}</strong><br>
+      ${workout.reps} reps · ${workout.weight} kg<br>
+      <small>${new Date(workout.created_at).toLocaleDateString()}</small>
+      <br>
+      <button class="delete-btn">Eliminar</button>
+    `;
+
+    li.querySelector(".delete-btn").addEventListener("click", async () => {
+      if (!confirm("¿Eliminar este entrenamiento?")) return;
+
+      const { error } = await supabaseClient
+        .from("workouts")
+        .delete()
+        .eq("id", workout.id);
+
+      if (!error) {
+        loadWorkouts();
+        loadStats();
+      }
+    });
+
+    workoutList.appendChild(li);
   });
 }
 
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const {
-    data: { user },
-    error: userError
-  } = await supabaseClient.auth.getUser();
-
-  if (userError || !user) {
-    alert("Debes iniciar sesión");
-    return;
-  }
-
-  const inputs = form.querySelectorAll("input");
-
-  const { error } = await supabaseClient
-    .from("workouts")
-    .insert([
-      {
-        exercise: inputs[0].value,
-        reps: Number(inputs[1].value),
-        weight: Number(inputs[2].value),
-        user_id: user.id
-      }
-    ]);
-
-  if (error) {
-    console.error(error);
-    alert(error.message);
-  } else {
-    form.reset();
-    loadWorkouts();
-  }
-});
-
-supabaseClient.auth.onAuthStateChange((_event, session) => {
-  if (session) {
-    loginBtn.style.display = "none";
-    logoutBtn.style.display = "block";
-    signupBtn.style.display = "none";
-    loadWorkouts();
-  } else {
-    loginBtn.style.display = "block";
-    signupBtn.style.display = "block";
-    logoutBtn.style.display = "none";
-    workoutList.innerHTML = "";
-  }
-});
+// =======================
+// STATS (E)
+// =======================
 
 async function loadStats() {
   const { data, error } = await supabaseClient
@@ -132,12 +119,11 @@ async function loadStats() {
   data.forEach(w => {
     totalVolume += w.reps * w.weight;
     maxWeight = Math.max(maxWeight, w.weight);
-
     exerciseCount[w.exercise] = (exerciseCount[w.exercise] || 0) + 1;
   });
 
-  const topExercise = Object.entries(exerciseCount)
-    .sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
+  const topExercise =
+    Object.entries(exerciseCount).sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
 
   document.getElementById("stat-volume").textContent = totalVolume;
   document.getElementById("stat-count").textContent = data.length;
@@ -145,5 +131,50 @@ async function loadStats() {
   document.getElementById("stat-top").textContent = topExercise;
 }
 
-console.log("SCRIPT CARGADO COMPLETO");
+// =======================
+// INSERT
+// =======================
 
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const inputs = form.querySelectorAll("input");
+
+  const { error } = await supabaseClient
+    .from("workouts")
+    .insert([{
+      exercise: inputs[0].value,
+      reps: Number(inputs[1].value),
+      weight: Number(inputs[2].value)
+    }]);
+
+  if (error) {
+    alert("Error al guardar");
+    console.error(error);
+  } else {
+    form.reset();
+    loadWorkouts();
+    loadStats();
+  }
+});
+
+// =======================
+// SESSION STATE
+// =======================
+
+supabaseClient.auth.onAuthStateChange((_event, session) => {
+  if (session) {
+    loginBtn.style.display = "none";
+    signupBtn.style.display = "none";
+    logoutBtn.style.display = "block";
+    loadWorkouts();
+    loadStats();
+  } else {
+    loginBtn.style.display = "block";
+    signupBtn.style.display = "block";
+    logoutBtn.style.display = "none";
+    workoutList.innerHTML = "";
+  }
+});
+
+console.log("SCRIPT CARGADO COMPLETO");
