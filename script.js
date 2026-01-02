@@ -1,9 +1,9 @@
 const form = document.getElementById("workout-form");
 const workoutList = document.getElementById("workout-list");
-
 const signupBtn = document.getElementById("signup-btn");
 const loginBtn = document.getElementById("login-btn");
 const logoutBtn = document.getElementById("logout-btn");
+let editingWorkoutId = null;
 
 // =======================
 // AUTH
@@ -77,22 +77,21 @@ async function loadWorkouts() {
       ${workout.reps} reps · ${workout.weight} kg<br>
       <small>${new Date(workout.created_at).toLocaleDateString()}</small>
       <br>
+      <button class="edit-btn">Editar</button>
       <button class="delete-btn">Eliminar</button>
     `;
 
-    li.querySelector(".delete-btn").addEventListener("click", async () => {
-      if (!confirm("¿Eliminar este entrenamiento?")) return;
-
-      const { error } = await supabaseClient
-        .from("workouts")
-        .delete()
-        .eq("id", workout.id);
-
-      if (!error) {
-        loadWorkouts();
-        loadStats();
-      }
+    li.querySelector(".edit-btn").addEventListener("click", () => {
+      const inputs = form.querySelectorAll("input");
+    
+      inputs[0].value = workout.exercise;
+      inputs[1].value = workout.reps;
+      inputs[2].value = workout.weight;
+    
+      editingWorkoutId = workout.id;
+      form.querySelector("button").textContent = "Actualizar ✏️";
     });
+
 
     workoutList.appendChild(li);
   });
@@ -140,22 +139,45 @@ form.addEventListener("submit", async (e) => {
 
   const inputs = form.querySelectorAll("input");
 
-  const { error } = await supabaseClient
-    .from("workouts")
-    .insert([{
-      exercise: inputs[0].value,
-      reps: Number(inputs[1].value),
-      weight: Number(inputs[2].value)
-    }]);
+  if (editingWorkoutId) {
+    // UPDATE
+    const { error } = await supabaseClient
+      .from("workouts")
+      .update({
+        exercise: inputs[0].value,
+        reps: Number(inputs[1].value),
+        weight: Number(inputs[2].value)
+      })
+      .eq("id", editingWorkoutId);
 
-  if (error) {
-    alert("Error al guardar");
-    console.error(error);
+    if (error) {
+      alert("Error al actualizar");
+      console.error(error);
+      return;
+    }
+
+    editingWorkoutId = null;
+    form.querySelector("button").textContent = "Guardar";
   } else {
-    form.reset();
-    loadWorkouts();
-    loadStats();
+    // INSERT
+    const { error } = await supabaseClient
+      .from("workouts")
+      .insert([{
+        exercise: inputs[0].value,
+        reps: Number(inputs[1].value),
+        weight: Number(inputs[2].value)
+      }]);
+
+    if (error) {
+      alert("Error al guardar");
+      console.error(error);
+      return;
+    }
   }
+
+  form.reset();
+  loadWorkouts();
+  loadStats();
 });
 
 // =======================
