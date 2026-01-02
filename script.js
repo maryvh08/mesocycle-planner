@@ -206,6 +206,17 @@ form.addEventListener("submit", async (e) => {
     }
   }
 
+  const user = (await supabaseClient.auth.getUser()).data.user;
+
+const { error } = await supabaseClient
+  .from("workouts")
+  .insert([{
+    exercise: inputs[0].value,
+    reps: Number(inputs[1].value),
+    weight: Number(inputs[2].value),
+    user_id: user.id
+  }]);
+
   form.reset();
   loadWorkouts();
   loadStats();
