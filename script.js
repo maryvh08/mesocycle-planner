@@ -184,23 +184,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function loadExercisesForMesocycle() {
     if (!activeMesocycle) return;
-
+  
     const { data, error } = await supabaseClient
       .rpc("get_exercises_for_mesocycle", {
-        mesocycle_id: activeMesocycle.id
+        p_mesocycle_id: activeMesocycle.id
       });
-
+  
     if (error) {
-      console.error(error);
+      console.error("RPC error:", error);
       return;
     }
-
-    exerciseSelect.innerHTML = `<option value="">Selecciona ejercicio</option>`;
-
-    data.forEach(e => {
+  
+    exerciseSelect.innerHTML = "";
+  
+    data.forEach(ex => {
       const option = document.createElement("option");
-      option.value = e.id;
-      option.textContent = e.name;
+      option.value = ex.id;
+      option.textContent = ex.name;
       exerciseSelect.appendChild(option);
     });
   }
