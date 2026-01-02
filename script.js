@@ -220,30 +220,53 @@ form.addEventListener("submit", async (e) => {
 // SESSION STATE
 // =======================
 
-supabaseClient.auth.onAuthStateChange((_event, session) => {
+supabaseClient.auth.onAuthStateChange(async (_event, session) => {
   const authInputs = document.getElementById("auth-inputs");
   const userInfo = document.getElementById("user-info");
   const userEmail = document.getElementById("user-email");
 
   if (session) {
+    // UI auth
     authInputs.style.display = "none";
     logoutBtn.style.display = "inline-block";
-  
+
     userInfo.style.display = "block";
     userEmail.textContent = session.user.email;
-  
+
+    // 1️⃣ Cargar mesociclo activo
+    await loadActiveMesocycle();
+
+    if (!activeMesocycle) {
+      alert("No tienes un mesociclo activo. Crea uno para comenzar.");
+      
+      // Limpieza visual
+      workoutList.innerHTML = "";
+      emptyMessage.style.display = "block";
+
+      // Aquí luego conectamos el modal / vista de creación
+      return;
+    }
+
+    // 2️⃣ Cargar datos dependientes del mesociclo
+    await loadExercisesForMesocycle();
+
     loadWorkouts();
     loadStats();
     loadVolumeChart();
-    loadExerciseSelector();
     loadPRs();
+
   } else {
+    // UI auth
     authInputs.style.display = "block";
     logoutBtn.style.display = "none";
 
     userInfo.style.display = "none";
     workoutList.innerHTML = "";
     emptyMessage.style.display = "block";
+
+    // Reset estado global
+    activeMesocycle = null;
+    allowedExercises = [];
   }
 });
 
