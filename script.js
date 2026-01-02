@@ -37,21 +37,21 @@ document.addEventListener("DOMContentLoaded", () => {
     else alert("Usuario registrado. Revisa tu correo.");
   });
 
-  loginBtn?.addEventListener("click", async () => {
+  loginBtn.addEventListener("click", async (e) => {
+    e.preventDefault(); // ⬅️ CLAVE
+  
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
-
-    const { error } = await supabaseClient.auth.signInWithPassword({
-      email,
-      password,
-    });
-
+  
+    const { error } =
+      await supabaseClient.auth.signInWithPassword({ email, password });
+  
     if (error) alert(error.message);
   });
-
-  logoutBtn?.addEventListener("click", async () => {
-    await supabaseClient.auth.signOut();
-  });
+  
+    logoutBtn?.addEventListener("click", async () => {
+      await supabaseClient.auth.signOut();
+    });
 
   // =======================
   // SESSION STATE
