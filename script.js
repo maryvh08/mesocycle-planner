@@ -569,4 +569,15 @@ async function loadPRs() {
   // mostrar PR histórico
 }
 
+const { data, error } = await supabaseClient
+  .rpc("get_mesocycle_exercises", {
+    p_mesocycle_id: activeMesocycle.id
+  });
+
+if (error) {
+  console.error("Error RPC:", error);
+} else {
+  console.log("Ejercicios permitidos:", data);
+}
+
 console.log("SCRIPT CARGADO COMPLETO");
