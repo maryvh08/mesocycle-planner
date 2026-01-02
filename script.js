@@ -152,6 +152,42 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // =======================
+  // MESOCYCLES TEMPLATES
+  // =======================
+
+  async function loadMesocycleTemplates() {
+    const select = document.getElementById("template-select");
+    if (!select) return;
+  
+    select.innerHTML = `<option value="">Cargando plantillas...</option>`;
+  
+    const { data, error } = await supabaseClient
+      .from("mesocycle_templates")
+      .select("id, name, emphasis")
+      .order("name");
+  
+    if (error) {
+      console.error("Error cargando plantillas:", error);
+      select.innerHTML = `<option value="">Error al cargar</option>`;
+      return;
+    }
+  
+    if (!data || data.length === 0) {
+      select.innerHTML = `<option value="">No hay plantillas</option>`;
+      return;
+    }
+  
+    select.innerHTML = `<option value="">Selecciona plantilla</option>`;
+  
+    data.forEach(t => {
+      const option = document.createElement("option");
+      option.value = t.id;
+      option.textContent = `${t.name} — ${t.emphasis}`;
+      select.appendChild(option);
+    });
+  }
+
+  // =======================
   // EXERCISES
   // =======================
 
