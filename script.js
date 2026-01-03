@@ -266,12 +266,13 @@ document.addEventListener("DOMContentLoaded", () => {
   
       const startDate = document.getElementById("mesocycle-start").value;
       const endDate = document.getElementById("mesocycle-end").value;
-  
+      const templateId = document.getElementById("template-select").value;
+      
       if (!templateId || !startDate || !endDate) {
         alert("Completa todos los campos");
         return;
       }
-  
+
       const { data: { user } } = await supabaseClient.auth.getUser();
       if (!user) return;
   
