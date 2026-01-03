@@ -1,13 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("script.js iniciado ✅");
+  console.log("JS cargado");
 
-  // =======================
-  // ELEMENTOS
-  // =======================
-
-  const form = document.getElementById("workout-form");
-  const workoutList = document.getElementById("workout-list");
-  const emptyMessage = document.getElementById("empty-message");
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
 
   const signupBtn = document.getElementById("signup-btn");
   const loginBtn = document.getElementById("login-btn");
@@ -17,36 +12,45 @@ document.addEventListener("DOMContentLoaded", () => {
   const userInfo = document.getElementById("user-info");
   const userEmail = document.getElementById("user-email");
 
-  const mesocycleSelect = document.getElementById("mesocycle-select");
-  const exerciseSelect = document.getElementById("exercise-select");
-
-  let activeMesocycle = null;
-
-  // =======================
-  // AUTH
-  // =======================
-
-  signupBtn.addEventListener("click", async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-  
-    const { error } = await supabaseClient.auth.signUp({ email, password });
+  // ---------- BOTONES ----------
+  signupBtn.onclick = async () => {
+    const { error } = await supabaseClient.auth.signUp({
+      email: emailInput.value,
+      password: passwordInput.value
+    });
     if (error) alert(error.message);
-  });
-  
+  };
 
-  signupBtn.addEventListener("click", async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-  
-    const { error } = await supabaseClient.auth.signUp({ email, password });
+  loginBtn.onclick = async () => {
+    const { error } = await supabaseClient.auth.signInWithPassword({
+      email: emailInput.value,
+      password: passwordInput.value
+    });
     if (error) alert(error.message);
-  });
+  };
 
-  logoutBtn.addEventListener("click", async () => {
+  logoutBtn.onclick = async () => {
     const { error } = await supabaseClient.auth.signOut();
     if (error) alert(error.message);
+  };
+
+  // ---------- ESTADO ----------
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    console.log("Auth state:", _event);
+
+    if (!session) {
+      authInputs.style.display = "block";
+      userInfo.style.display = "none";
+      logoutBtn.style.display = "none";
+      return;
+    }
+
+    authInputs.style.display = "none";
+    userInfo.style.display = "block";
+    logoutBtn.style.display = "inline-block";
+    userEmail.textContent = session.user.email;
   });
+});
 
   // =======================
   // SESSION STATE
