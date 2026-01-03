@@ -50,9 +50,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (error) alert(error.message);
   };
 
-  logoutBtn.onclick = async () => {
+  logoutBtn.addEventListener("click", async (e) => {
+    e.preventDefault(); // 🔒 bloquea submit
     await supabaseClient.auth.signOut();
-  };
+  });
+
 
   // =======================
   // AUTH STATE (ÚNICO)
