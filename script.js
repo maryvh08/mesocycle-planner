@@ -343,5 +343,5 @@ document.addEventListener("DOMContentLoaded", () => {
     form.reset();
     loadWorkouts();
   });
-  console.log("Templates data:", data, "error:", error);
+  console.log("Mesocycle templates:", data);
 });
