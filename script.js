@@ -146,37 +146,33 @@ document.addEventListener("DOMContentLoaded", () => {
   // MESOCYCLE TEMPLATES
   // =======================
   async function loadMesocycleTemplates() {
-    const select = document.getElementById("template-select");
-    if (!select) return;
+    console.log("🚀 loadMesocycleTemplates() llamada");
   
-    select.innerHTML = `<option value="">Cargando plantillas...</option>`;
+    const select = document.getElementById("template-select");
+    console.log("🎯 select encontrado:", select);
+  
+    if (!select) return;
   
     const { data, error } = await supabaseClient
       .from("mesocycle_templates")
-      .select("id, name")
-      .order("name");
+      .select("*");
   
-    if (error) {
-      console.error("Error cargando plantillas:", error);
-      select.innerHTML = `<option value="">Error al cargar</option>`;
-      return;
-    }
+    console.log("📦 data:", data);
+    console.log("❌ error:", error);
+  
+    select.innerHTML = "";
   
     if (!data || data.length === 0) {
       select.innerHTML = `<option value="">No hay plantillas</option>`;
       return;
     }
   
-    select.innerHTML = `<option value="">Selecciona plantilla</option>`;
-  
     data.forEach(t => {
-      const option = document.createElement("option");
-      option.value = t.id;
-      option.textContent = t.name;
-      select.appendChild(option);
+      const opt = document.createElement("option");
+      opt.value = t.id;
+      opt.textContent = t.name;
+      select.appendChild(opt);
     });
-  
-    console.log("✅ Plantillas cargadas:", data);
   }
 
   // =======================
@@ -339,5 +335,7 @@ document.addEventListener("DOMContentLoaded", () => {
     form.reset();
     loadWorkouts();
   });
+  
+  document.querySelectorAll("#template-select").length
 
 });
