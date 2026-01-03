@@ -52,35 +52,24 @@ document.addEventListener("DOMContentLoaded", () => {
   // =======================
   // SESSION STATE
   // =======================
-  supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    console.log("AUTH EVENT:", event);
+  
     if (!session) {
-      // 🔒 LOGOUT
-      activeMesocycle = null;
-      authInputs.style.display = "block";
-      logoutBtn.style.display = "none";
-      userInfo.style.display = "none";
-      mesocycleSelect.innerHTML = "";
-      exerciseSelect.innerHTML = "";
-      workoutList.innerHTML = "";
-      emptyMessage.style.display = "block";
-      templateSelect.innerHTML = "<option value=''>Selecciona plantilla</option>";
+      console.log("No session → no templates");
       return;
     }
-
-    // ✅ LOGIN
-    authInputs.style.display = "none";
-    logoutBtn.style.display = "inline-block";
-    userInfo.style.display = "block";
-    userEmail.textContent = session.user.email;
-
+  
+    console.log("Session ready → loading templates");
+  
     await loadMesocycleTemplates();
     await loadMesocycles();
-
-    const m = await loadActiveMesocycle();
-    if (!m) return;
-
-    await loadExercisesForMesocycle();
-    loadWorkouts();
+  
+    const active = await loadActiveMesocycle();
+    if (active) {
+      await loadExercisesForMesocycle();
+      loadWorkouts();
+    }
   });
 
   // =======================
@@ -148,33 +137,45 @@ document.addEventListener("DOMContentLoaded", () => {
   // MESOCYCLE TEMPLATES
   // =======================
   async function loadMesocycleTemplates() {
-    console.log("🚀 loadMesocycleTemplates() llamada");
-  
     const select = document.getElementById("template-select");
-    console.log("🎯 select encontrado:", select);
-  
     if (!select) return;
+  
+    select.innerHTML = `<option>Cargando plantillas...</option>`;
+  
+    const { data: { user } } = await supabaseClient.auth.getUser();
+  
+    if (!user) {
+      console.warn("Intento de cargar plantillas sin sesión");
+      select.innerHTML = `<option>Inicia sesión</option>`;
+      return;
+    }
   
     const { data, error } = await supabaseClient
       .from("mesocycle_templates")
-      .select("*");
+      .select("id, name, emphasis")
+      .order("name");
   
-    console.log("📦 data:", data);
-    console.log("❌ error:", error);
-  
-    select.innerHTML = "";
-  
-    if (!data || data.length === 0) {
-      select.innerHTML = `<option value="">No hay plantillas</option>`;
+    if (error) {
+      console.error("Error cargando plantillas:", error);
+      select.innerHTML = `<option>Error al cargar</option>`;
       return;
     }
+  
+    if (!data || data.length === 0) {
+      select.innerHTML = `<option>No hay plantillas</option>`;
+      return;
+    }
+  
+    select.innerHTML = `<option value="">Selecciona plantilla</option>`;
   
     data.forEach(t => {
       const opt = document.createElement("option");
       opt.value = t.id;
-      opt.textContent = t.name;
+      opt.textContent = `${t.name} — ${t.emphasis}`;
       select.appendChild(opt);
     });
+  
+    console.log("Plantillas cargadas:", data.length);
   }
 
   // =======================
