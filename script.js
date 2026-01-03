@@ -54,15 +54,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // =======================
   // AUTH STATE (UNO SOLO)
   // =======================
-  supabaseClient.auth.onAuthStateChange((event, session) => {
-    console.log("Auth event:", event);
-
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    currentSession = session;
+  
     if (!session) {
       renderLoggedOut();
-    } else {
-      renderLoggedIn(session);
-      loadMesocycleTemplates();
+      return;
     }
+  
+    renderLoggedIn(session);
+    loadMesocycleTemplates();
+    loadMesocycles().then(loadActiveMesocycle);
   });
 
   // =======================
