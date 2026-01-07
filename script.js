@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // FUNCTIONS (ANTES DE USARSE)
   // =======================
 
-   async function loadMesocycleTemplates() {
+  async function loadMesocycleTemplates() {
     templateSelect.innerHTML = `<option>Cargando…</option>`;
 
     const { data, error } = await supabaseClient
