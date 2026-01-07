@@ -2,99 +2,58 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>🏋️ Planeación de Mesociclos</title>
+  <title>Planeación de Mesociclos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- SUPABASE -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script>
-    const SUPABASE_URL = "https://daypzhinhmxbewfwfqcd.supabase.co";
-    const SUPABASE_ANON_KEY = "TU_ANON_KEY_AQUI";
-
-    const supabaseClient = supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_ANON_KEY
-    );
-  </script>
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f6f7fb;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 { text-align: center; }
-    section {
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    input, select, button {
-      width: 100%;
-      padding: 8px;
-      margin-top: 8px;
-    }
-    button {
-      cursor: pointer;
-      font-weight: bold;
-    }
-    #user-info {
-      text-align: center;
-      font-weight: bold;
-    }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    section { margin-bottom: 20px; }
+    button { margin-top: 5px; }
   </style>
 </head>
-
 <body>
 
-<h1>🏋️ Planeación de Mesociclos</h1>
+  <h1>🏋️ Planeación de Mesociclos</h1>
 
-<!-- ===================== -->
-<!-- AUTH -->
-<!-- ===================== -->
-<section>
-  <div id="auth-inputs">
-    <input id="email" type="email" placeholder="Email" />
-    <input id="password" type="password" placeholder="Contraseña" />
-    <button id="login-btn" type="button">Entrar</button>
-    <button id="signup-btn" type="button">Registrar</button>
-  </div>
+  <!-- AUTH -->
+  <section id="auth-inputs">
+    <input id="email" type="email" placeholder="Email" /><br />
+    <input id="password" type="password" placeholder="Password" /><br />
+    <button id="signup-btn">Registrarse</button>
+    <button id="login-btn">Ingresar</button>
+  </section>
 
-  <div id="user-info" style="display:none;">
-    Usuario: <span id="user-email"></span><br><br>
-    <button id="logout-btn" type="button">Salir</button>
-  </div>
-</section>
+  <section id="user-info" style="display:none;">
+    Usuario: <strong id="user-email"></strong><br />
+    <button id="logout-btn">Cerrar sesión</button>
+  </section>
 
-<!-- ===================== -->
-<!-- CREAR MESOCICLO -->
-<!-- ===================== -->
-<section>
-  <h3>Crear mesociclo</h3>
+  <hr />
 
-  <label>Plantilla</label>
-  <select id="template-select">
-    <option value="">Inicia sesión</option>
-  </select>
+  <!-- MESOCICLOS -->
+  <section>
+    <h3>Mesociclos existentes</h3>
+    <select id="mesocycle-select"></select>
+  </section>
 
-  <label>Fecha inicio</label>
-  <input type="date" id="mesocycle-start">
+  <section>
+    <h3>Crear nuevo mesociclo</h3>
 
-  <label>Fecha fin</label>
-  <input type="date" id="mesocycle-end">
+    <label>Plantilla</label><br />
+    <select id="template-select"></select><br /><br />
 
-  <button id="create-mesocycle-btn" type="button">
-    Crear mesociclo
-  </button>
-</section>
+    <label>Inicio</label><br />
+    <input type="date" id="mesocycle-start" /><br /><br />
 
-<!-- ===================== -->
-<!-- SCRIPT -->
-<!-- ===================== -->
-<script src="script.js"></script>
+    <label>Fin</label><br />
+    <input type="date" id="mesocycle-end" /><br /><br />
 
+    <button id="create-mesocycle-btn">Crear mesociclo</button>
+  </section>
+
+  <script src="script.js"></script>
 </body>
 </html>
