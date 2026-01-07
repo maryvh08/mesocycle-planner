@@ -5,8 +5,19 @@
   <title>Planeación de Mesociclos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Supabase -->
+  <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Supabase CONFIG -->
+  <script>
+    const SUPABASE_URL = "https://TU_PROYECTO.supabase.co";
+    const SUPABASE_ANON_KEY = "TU_PUBLIC_ANON_KEY";
+
+    window.supabaseClient = supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+  </script>
 
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
@@ -54,6 +65,7 @@
     <button id="create-mesocycle-btn">Crear mesociclo</button>
   </section>
 
+  <!-- APP LOGIC -->
   <script src="script.js"></script>
 </body>
 </html>
