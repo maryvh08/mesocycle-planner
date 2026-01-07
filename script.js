@@ -9,7 +9,7 @@ let activeMesocycle = null;
 // =======================
 // DOM READY
 // =======================
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
 
   // ELEMENTOS
   const emailInput = document.getElementById("email");
@@ -68,12 +68,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // =======================
   supabaseClient.auth.onAuthStateChange(async (_event, session) => {
     currentSession = session;
-
+  
     if (!session) {
       renderLoggedOut();
       return;
     }
-
+  
     renderLoggedIn(session);
     await loadMesocycleTemplates();
     await loadMesocycles();
@@ -214,5 +214,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     alert("Mesociclo creado y activado ✅");
   });
+  await initAuth();
 
 });
