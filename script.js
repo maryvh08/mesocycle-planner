@@ -155,13 +155,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const { data, error } = await supabaseClient
         .from("mesocycles")
         .insert({
-          user_id: userId,
+          user_id: user.id,
           template_id: templateId,
           start_date: startDate,
           end_date: endDate,
           is_active: true
         })
-        .select("id, mesocycle_templates(name)")
+        .select()
         .single();
   
       if (error) {
