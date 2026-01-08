@@ -152,16 +152,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function loadMesocycles() {
     const userId = currentSession.user.id;
 
-    const { data, error } = await supabaseClient
+    const { error } = await supabaseClient
       .from("mesocycles")
-      .select("id, name, is_active")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
+      .insert({
+        user_id: userId,
+        template_id: templateId,   // FK válido
+        name: mesocycleName,       // NOT NULL
+        goal: null,                // o string si quieres
+        start_date: startDate,
+        end_date: endDate,
+        is_date: true              // 👈 ESTA ES LA COLUMNA REAL
+      });
 
-    if (error) {
-      console.error("Error cargando mesociclos:", error);
-      return;
-    }
 
     mesocycleSelect.innerHTML = "";
 
