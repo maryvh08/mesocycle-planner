@@ -4,7 +4,9 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
    SUPABASE
 ====================== */
 const SUPABASE_URL = "https://vhwfenefevzzksxrslkx.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZod2ZlbmVmZXZ6emtzeHJzbGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MTE3ODAsImV4cCI6MjA4MzQ4Nzc4MH0.CG1KzxpxGHifXsgBvH-4E4WvXbj6d-8WsagqaHAtVwo";
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZod2ZlbmVmZXZ6emtzeHJzbGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MTE3ODAsImV4cCI6MjA4MzQ4Nzc4MH0.CG1KzxpxGHifXsgBvH-4E4WvXbj6d-8WsagqaHAtVwo";
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /* ======================
@@ -69,7 +71,7 @@ function showApp() {
 }
 
 /* ======================
-   LOAD TEMPLATES
+   TEMPLATES
 ====================== */
 async function loadTemplates() {
   const { data, error } = await supabase.from("templates").select("*").order("name");
@@ -143,7 +145,7 @@ async function loadMesocycles() {
 
   mesocycleList.innerHTML = "";
   if (!data.length) {
-    mesocycleList.innerHTML = "<li>No hay mesociclos</li>";
+    mesocycleList.innerHTML = "<p>No hay mesociclos creados</p>";
     return;
   }
 
@@ -163,7 +165,7 @@ async function loadMesocycles() {
         <select class="exercise-select" multiple></select>
         <button class="save-day-btn">Guardar día</button>
         <p class="day-hint"></p>
-        <h4>Ejercicios del día</h4>
+        <h4>Resumen del mesociclo</h4>
         <ul class="day-exercise-list"></ul>
       </section>
     `;
@@ -277,7 +279,7 @@ async function renderDayExercises(list, mesocycleId, day) {
   list.innerHTML = "";
   const { data } = await supabase
     .from("mesocycle_exercises")
-    .select("exercises(name)")
+    .select("day_number, exercises(name)")
     .eq("mesocycle_id", mesocycleId)
     .eq("day_number", day);
 
