@@ -264,7 +264,7 @@ async function renderExercisesForDay(editor, mesocycle, day, template) {
   select.innerHTML = "";
   list.innerHTML = "";
 
-  // Cargar ejercicios de la plantilla
+  // Cargar ejercicios
   let query = supabase.from("exercises").select("id,name,subgroup").order("name");
   if (template.emphasis !== "Todos") {
     query = query.in("subgroup", template.emphasis.split(","));
@@ -283,7 +283,7 @@ async function renderExercisesForDay(editor, mesocycle, day, template) {
     select.appendChild(opt);
   });
 
-  // Seleccionar los ya guardados
+  // Seleccionar ya guardados
   const { data: saved } = await supabase
     .from("mesocycle_exercises")
     .select("exercise_id")
@@ -293,13 +293,32 @@ async function renderExercisesForDay(editor, mesocycle, day, template) {
   const savedIds = saved.map(r => r.exercise_id);
   [...select.options].forEach(o => o.selected = savedIds.includes(o.value));
 
-  // Mostrar lista
+  // Mostrar chips
   saved.forEach(r => {
     const ex = exercises.find(e => e.id === r.exercise_id);
     if (ex) {
-      const li = document.createElement("li");
-      li.textContent = `${ex.name} (${ex.subgroup})`;
-      list.appendChild(li);
+      const chip = document.createElement("div");
+      chip.className = "exercise-chip";
+      chip.textContent = `${ex.name} (${ex.subgroup})`;
+
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "×";
+      delBtn.onclick = async () => {
+        await supabase
+          .from("mesocycle_exercises")
+          .delete()
+          .eq("mesocycle_id", mesocycle.id)
+          .eq("day_number", day)
+          .eq("exercise_id", ex.id);
+
+        chip.remove();
+        // Desmarcar en select
+        const option = [...select.options].find(o => o.value == ex.id);
+        if (option) option.selected = false;
+      };
+
+      chip.appendChild(delBtn);
+      list.appendChild(chip);
     }
   });
 }
