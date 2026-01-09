@@ -22,15 +22,13 @@ const mesocycleList = document.getElementById("mesocycle-list");
 document.getElementById("login-btn").onclick = async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
-
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) message.textContent = error.message;
+  message.textContent = error ? error.message : "";
 };
 
 document.getElementById("signup-btn").onclick = async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
-
   const { error } = await supabase.auth.signUp({ email, password });
   message.textContent = error ? error.message : "Usuario creado. Inicia sesión.";
 };
@@ -60,7 +58,7 @@ function showApp() {
   appView.style.display = "block";
   loadTemplates();
   loadMesocycles();
-  setupTabs(); // Configura las pestañas
+  setupTabs();
 }
 
 function showLogin() {
@@ -158,7 +156,6 @@ async function loadMesocycles() {
     .from("mesocycles")
     .select("*")
     .order("created_at", { ascending: false });
-
   if (error) return console.error(error);
 
   mesocycleList.innerHTML = "";
@@ -190,9 +187,7 @@ function setupMesocycleCard(card, mesocycle) {
 
   editBtn.onclick = async () => {
     editor.classList.toggle("hidden");
-    if (!editor.innerHTML.trim()) {
-      await renderCardEditor(editor, mesocycle);
-    }
+    if (!editor.innerHTML.trim()) await renderCardEditor(editor, mesocycle);
   };
 }
 
@@ -201,7 +196,6 @@ async function renderCardEditor(editor, mesocycle) {
 
   // Selector de semana
   const weekSelect = document.createElement("select");
-  weekSelect.id = "week-select";
   for (let w = 1; w <= mesocycle.weeks; w++) {
     const opt = document.createElement("option");
     opt.value = w;
@@ -271,12 +265,10 @@ async function renderExercisesForDay(editor, mesocycle, day, week, template) {
   select.innerHTML = "";
   list.innerHTML = "";
 
-  // Cargar ejercicios según plantilla
   let query = supabase.from("exercises").select("id,name,subgroup").order("name");
   if (template.emphasis !== "Todos") query = query.in("subgroup", template.emphasis.split(","));
   const { data: exercises } = await query;
 
-  // Obtener ejercicios ya guardados para día+semana
   const { data: saved } = await supabase
     .from("mesocycle_exercises")
     .select("exercise_id")
@@ -302,6 +294,7 @@ async function renderExercisesForDay(editor, mesocycle, day, week, template) {
           .delete()
           .eq("mesocycle_id", mesocycle.id)
           .eq("day_number", day)
+          .eq("week_number", week)
           .eq("exercise_id", ex.id);
 
         chip.remove();
@@ -333,9 +326,7 @@ async function saveDayExercises(select, mesocycleId, day, week) {
     .eq("day_number", day)
     .eq("week_number", week);
 
-  if (values.length) {
-    await supabase.from("mesocycle_exercises").insert(values);
-  }
+  if (values.length) await supabase.from("mesocycle_exercises").insert(values);
 }
 
 /* ======================
