@@ -232,25 +232,31 @@ const configView = document.getElementById("config-view");
 const configTitle = document.getElementById("config-title");
 
 async function loadExercisesForTemplate(templateId) {
-  const { data: template } = await supabase
+  const { data: template, error } = await supabase
     .from("templates")
     .select("emphasis")
     .eq("id", templateId)
     .single();
 
-  if (template.emphasis === "Todos") {
+  if (error || !template?.emphasis || template.emphasis === "Todos") {
     return supabase.from("exercises").select("*");
   }
+
+  const groups = template.emphasis.split(",").map(e => e.trim());
 
   return supabase
     .from("exercises")
     .select("*")
-    .in("subgroup", template.emphasis.split(","));
+    .in("subgroup", groups);
 }
 
 async function renderExerciseSelect(mesocycle) {
-  const { data: exercises } =
+  console.log("Renderizando ejercicios para plantilla:", mesocycle.template_id);
+
+  const { data: exercises, error } =
     await loadExercisesForTemplate(mesocycle.template_id);
+
+  console.log("Ejercicios recibidos:", exercises);
 
   exerciseSelect.innerHTML = "";
 
