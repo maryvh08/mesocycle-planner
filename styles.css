@@ -44,3 +44,35 @@ button {
   cursor: pointer;
   margin-bottom: 0.25rem;
 }
+
+.mesocycle-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.mesocycle-card {
+  border: 1px solid #ddd;
+  padding: 1rem;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.mesocycle-card header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.editor {
+  margin-top: 1rem;
+  border-top: 1px dashed #ccc;
+  padding-top: 1rem;
+}
+
+.hidden {
+  display: none;
+}
+
+.edit-btn {
+  margin-top: 0.5rem;
+}
