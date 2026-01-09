@@ -1,7 +1,8 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 const SUPABASE_URL = "https://vhwfenefevzzksxrslkx.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZod2ZlbmVmZXZ6emtzeHJzbGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MTE3ODAsImV4cCI6MjA4MzQ4Nzc4MH0.CG1KzxpxGHifXsgBvH-4E4WvXbj6d-8WsagqaHAtVwo";
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZod2ZlbmVmZXZ6emtzeHJzbGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MTE3ODAsImV4cCI6MjA4MzQ4Nzc4MH0.CG1KzxpxGHifXsgBvH-4E4WvXbj6d-8WsagqaHAtVwo";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -16,17 +17,12 @@ const templateSelect = document.getElementById("template-select");
 const mesocycleNameInput = document.getElementById("mesocycle-name");
 const mesocycleWeeksInput = document.getElementById("mesocycle-weeks");
 const dayButtons = document.querySelectorAll(".day-btn");
-const createMesocycleBtn = document.getElementById("create-mesocycle-btn");
+let selectedDays = 0;
+let editingMesocycleId = null;
 
 const historyList = document.getElementById("history-list");
 const registroSelect = document.getElementById("registro-select");
 const registroEditor = document.getElementById("registro-editor");
-
-/* ======================
-   STATE
-====================== */
-let selectedDays = null;
-let editingMesocycleId = null;
 
 /* ======================
    AUTH
@@ -97,7 +93,7 @@ function setupTabs() {
 }
 
 /* ======================
-   TEMPLATE LOAD
+   LOAD TEMPLATES
 ====================== */
 async function loadTemplates() {
   const { data, error } = await supabase.from("templates").select("*").order("name");
@@ -118,58 +114,6 @@ async function getTemplateById(id) {
 }
 
 /* ======================
-   DAY BUTTONS
-====================== */
-dayButtons.forEach(btn => {
-  btn.onclick = () => {
-    dayButtons.forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    selectedDays = parseInt(btn.dataset.days);
-  };
-});
-
-/* ======================
-   CREATE/UPDATE MESOCYCLE
-====================== */
-createMesocycleBtn.onclick = async () => {
-  const name = mesocycleNameInput.value;
-  const weeks = parseInt(mesocycleWeeksInput.value);
-  const templateId = templateSelect.value;
-
-  if (!name || !weeks || !templateId || !selectedDays) return alert("Completa todos los campos");
-
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (editingMesocycleId) {
-    // Actualizar mesociclo existente
-    const { error } = await supabase.from("mesocycles").update({
-      name, weeks, days_per_week: selectedDays, template_id: templateId
-    }).eq("id", editingMesocycleId);
-
-    if (error) return alert(error.message);
-    editingMesocycleId = null;
-    alert("Mesociclo actualizado ✅");
-  } else {
-    // Crear mesociclo nuevo
-    const { error } = await supabase.from("mesocycles").insert({
-      name, weeks, days_per_week: selectedDays, template_id: templateId, user_id: user.id
-    });
-
-    if (error) return alert(error.message);
-    alert("Mesociclo creado ✅");
-  }
-
-  // Limpiar formulario
-  mesocycleNameInput.value = "";
-  mesocycleWeeksInput.value = "";
-  templateSelect.value = "";
-  dayButtons.forEach(b => b.classList.remove("active"));
-  selectedDays = null;
-
-  loadMesocycles();
-};
-
-/* ======================
    LOAD MESOCYCLES
 ====================== */
 async function loadMesocycles() {
@@ -184,38 +128,37 @@ async function loadMesocycles() {
   for (const m of data) {
     const template = await getTemplateById(m.template_id);
 
+    // Historial
     const li = document.createElement("li");
     li.className = "history-card";
     li.innerHTML = `
       <p class="template-name">Plantilla: ${template.name}</p>
       <h4>${m.name} · ${m.weeks} semanas · ${m.days_per_week} días</h4>
-      <button class="edit-btn">Editar mesociclo</button>
+      <button class="edit-btn">Editar</button>
       <button class="register-btn">Registrar ejercicios</button>
     `;
 
-    // Botón editar → lleva a la pestaña Crear y rellena el formulario
-   li.querySelector(".edit-btn").onclick = () => {
-     // 1️⃣ Cambiar a pestaña Crear Mesociclo
-     document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-     document.querySelectorAll(".tab-content").forEach(c => c.classList.add("hidden"));
-     document.querySelector('.tab-btn[data-tab="crear-tab"]').classList.add("active");
-     document.getElementById("crear-tab").classList.remove("hidden");
-   
-     // 2️⃣ Rellenar formulario con datos del mesociclo
-     mesocycleNameInput.value = m.name;
-     mesocycleWeeksInput.value = m.weeks;
-     templateSelect.value = m.template_id;
-   
-     dayButtons.forEach(btn => btn.classList.remove("active"));
-     const btnDias = document.querySelector(`.day-btn[data-days="${m.days_per_week}"]`);
-     if (btnDias) btnDias.classList.add("active");
-     selectedDays = m.days_per_week;
-   
-     // 3️⃣ Guardar el ID del mesociclo para editar en lugar de crear uno nuevo
-     editingMesocycleId = m.id;
-   };
+    // Editar → pestaña Crear Mesociclo
+    li.querySelector(".edit-btn").onclick = () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(c => c.classList.add("hidden"));
+      document.querySelector('.tab-btn[data-tab="crear-tab"]').classList.add("active");
+      document.getElementById("crear-tab").classList.remove("hidden");
 
-    // Botón registrar → pestaña Registro
+      // Rellenar formulario
+      mesocycleNameInput.value = m.name;
+      mesocycleWeeksInput.value = m.weeks;
+      templateSelect.value = m.template_id;
+
+      dayButtons.forEach(btn => btn.classList.remove("active"));
+      const btnDias = document.querySelector(`.day-btn[data-days="${m.days_per_week}"]`);
+      if (btnDias) btnDias.classList.add("active");
+      selectedDays = m.days_per_week;
+
+      editingMesocycleId = m.id;
+    };
+
+    // Registrar → pestaña Registro
     li.querySelector(".register-btn").onclick = () => openRegistroEditor(m.id);
 
     historyList.appendChild(li);
@@ -229,7 +172,7 @@ async function loadMesocycles() {
 }
 
 /* ======================
-   REGISTRO
+   REGISTRO TAB
 ====================== */
 registroSelect.onchange = async () => {
   const id = registroSelect.value;
@@ -241,9 +184,7 @@ async function openRegistroEditor(id) {
   // Cambiar a tab Registro
   document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
   document.querySelectorAll(".tab-content").forEach(c => c.classList.add("hidden"));
-
-  const registroTabBtn = document.querySelector('.tab-btn[data-tab="registro-tab"]');
-  registroTabBtn.classList.add("active");
+  document.querySelector('.tab-btn[data-tab="registro-tab"]').classList.add("active");
   document.getElementById("registro-tab").classList.remove("hidden");
 
   registroSelect.value = id;
@@ -251,7 +192,7 @@ async function openRegistroEditor(id) {
 }
 
 /* ======================
-   REGISTRO EDITOR
+   REGISTRO TAB MEJORADO
 ====================== */
 async function renderRegistroEditor(mesocycleId) {
   registroEditor.innerHTML = "";
@@ -261,7 +202,6 @@ async function renderRegistroEditor(mesocycleId) {
   const container = document.createElement("div");
   container.className = "registro-container";
 
-  // Semana
   const weekSelect = document.createElement("select");
   weekSelect.className = "week-select";
   for (let w = 1; w <= mesocycle.weeks; w++) {
@@ -272,7 +212,6 @@ async function renderRegistroEditor(mesocycleId) {
   }
   container.appendChild(weekSelect);
 
-  // Días
   const dayDiv = document.createElement("div");
   dayDiv.className = "day-buttons";
   for (let i = 1; i <= mesocycle.days_per_week; i++) {
@@ -288,11 +227,9 @@ async function renderRegistroEditor(mesocycleId) {
   }
   container.appendChild(dayDiv);
 
-  // Activar primer día automáticamente
   const firstDay = dayDiv.querySelector(".day-mini-btn");
   if (firstDay) firstDay.click();
 
-  // Cambio semana
   weekSelect.onchange = async () => {
     const activeDay = dayDiv.querySelector(".day-mini-btn.active");
     if (activeDay) {
@@ -301,7 +238,6 @@ async function renderRegistroEditor(mesocycleId) {
     }
   };
 
-  // Select y lista
   const select = document.createElement("select");
   select.multiple = true;
   select.size = 10;
