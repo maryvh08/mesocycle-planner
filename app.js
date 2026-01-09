@@ -285,9 +285,12 @@ function loadDays(mesocycle) {
   }
 }
 
+const dayHint = document.getElementById("day-hint");
+
 daySelect.onchange = async () => {
   if (!daySelect.value || !activeMesocycle) return;
 
+  dayHint.textContent = `Configurando Día ${daySelect.value}`;
   exerciseConfig.style.display = "block";
 
   await renderExerciseSelect(activeMesocycle);
@@ -333,13 +336,16 @@ document.getElementById("save-day-btn").onclick = async () => {
 
   const day = parseInt(daySelect.value);
 
-  const selectedExercises = [...exerciseSelect.selectedOptions].map(
-    opt => ({
-      mesocycle_id: activeMesocycle.id,
-      exercise_id: opt.value,
-      day_number: day
-    })
-  );
+  const selectedExercises = [...exerciseSelect.selectedOptions].map(opt => ({
+    mesocycle_id: activeMesocycle.id,
+    exercise_id: opt.value,
+    day_number: day
+  }));
+
+  if (selectedExercises.length === 0) {
+    alert("Selecciona al menos un ejercicio");
+    return;
+  }
 
   await supabase
     .from("mesocycle_exercises")
@@ -353,9 +359,6 @@ document.getElementById("save-day-btn").onclick = async () => {
 
   if (!error) alert(`Día ${day} guardado ✅`);
 };
-
-document.getElementById("day-hint").textContent =
-  `Configurando Día ${daySelect.value}`;
 
 /* ======================
    INIT
