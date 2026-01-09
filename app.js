@@ -8,17 +8,6 @@ const SUPABASE_ANON_KEY =
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-if (!activeMesocycle) {
-  alert("Selecciona un mesociclo primero");
-  return;
-}
-
-daySelect.onchange = () => {
-  exerciseConfig
-    .querySelectorAll("input")
-    .forEach(cb => cb.checked = false);
-};
-
 /* ======================
    AUTH UI REFERENCES
 ====================== */
@@ -120,6 +109,7 @@ async function loadMesocycles() {
   data.forEach((m) => {
     const li = document.createElement("li");
     li.textContent = `${m.name} – ${m.weeks} semanas – ${m.days_per_week} días`;
+    li.onclick = () => openMesocycleConfig(m);
     mesocycleList.appendChild(li);
   });
 }
@@ -155,6 +145,11 @@ async function createMesocycle() {
   if (error) {
     alert(error.message);
     return;
+  }
+
+  if (!activeMesocycle) {
+  alert("Selecciona un mesociclo primero");
+  return;
   }
 
   alert("Mesociclo creado ✅");
@@ -263,6 +258,11 @@ function loadDays(mesocycle) {
     opt.textContent = `Día ${i}`;
     daySelect.appendChild(opt);
   }
+  daySelect.onchange = () => {
+    exerciseConfig
+      .querySelectorAll("input")
+      .forEach(cb => cb.checked = false);
+  };
 }
 
 async function openMesocycleConfig(mesocycle) {
@@ -297,13 +297,6 @@ document.getElementById("save-day-btn").onclick = async () => {
 
   if (!error) alert(`Día ${day} guardado ✅`);
 };
-
-data.forEach((m) => {
-  const li = document.createElement("li");
-  li.textContent = `${m.name} – ${m.weeks} semanas – ${m.days_per_week} días`;
-  li.onclick = () => openMesocycleConfig(m);
-  mesocycleList.appendChild(li);
-});
 
 /* ======================
    INIT
