@@ -204,6 +204,206 @@ document.querySelectorAll(".day-btn").forEach((btn) => {
   };
 });
 
+const configView = document.getElementById("config-view");
+const configTitle = document.getElementById("config-title");
+const muscleConfig = document.getElementById("muscle-config");
+
+let activeMesocycle = null;
+
+async function openMesocycleConfig(mesocycle) {
+  activeMesocycle = mesocycle;
+  configTitle.textContent = `Configurar: ${mesocycle.name}`;
+  configView.style.display = "block";
+
+  const daySelect = document.getElementById("day-select");
+  const exerciseConfig = document.getElementById("exercise-config");
+  
+  function loadDays(mesocycle) {
+    daySelect.innerHTML = "";
+    for (let i = 1; i <= mesocycle.days_per_week; i++) {
+      const opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = `Día ${i}`;
+      daySelect.appendChild(opt);
+    }
+  }
+
+  const { data: template } = await supabase
+    .from("templates")
+    .select("emphasis")
+    .eq("id", mesocycle.template_id)
+    .single();
+
+  let muscles =
+    template.emphasis === "Todos"
+      ? await getAllMuscles()
+      : template.emphasis.split(",");
+
+  renderMuscleSelectors(muscles);
+}
+
+async function getAllMuscles() {
+  const { data } = await supabase
+    .from("exercises")
+    .select("subgroup");
+
+  return [...new Set(data.map((e) => e.subgroup))];
+}
+
+async function renderMuscleSelectors(muscles) {
+  muscleConfig.innerHTML = "";
+
+  for (const muscle of muscles) {
+    const { data: exercises } = await supabase
+      .from("exercises")
+      .select("id, name")
+      .eq("subgroup", muscle);
+
+    const div = document.createElement("div");
+    const label = document.createElement("label");
+    const select = document.createElement("select");
+
+    label.textContent = muscle;
+
+    exercises.forEach((e) => {
+      const opt = document.createElement("option");
+      opt.value = e.id;
+      opt.textContent = e.name;
+      select.appendChild(opt);
+    });
+
+    div.appendChild(label);
+    div.appendChild(select);
+    muscleConfig.appendChild(div);
+  }
+}
+
+async function getAllMuscles() {
+  const { data } = await supabase
+    .from("exercises")
+    .select("subgroup");
+
+  return [...new Set(data.map((e) => e.subgroup))];
+}
+
+async function renderMuscleSelectors(muscles) {
+  muscleConfig.innerHTML = "";
+
+  for (const muscle of muscles) {
+    const { data: exercises } = await supabase
+      .from("exercises")
+      .select("id, name")
+      .eq("subgroup", muscle);
+
+    const div = document.createElement("div");
+    const label = document.createElement("label");
+    const select = document.createElement("select");
+
+    label.textContent = muscle;
+
+    exercises.forEach((e) => {
+      const opt = document.createElement("option");
+      opt.value = e.id;
+      opt.textContent = e.name;
+      select.appendChild(opt);
+    });
+
+    div.appendChild(label);
+    div.appendChild(select);
+    muscleConfig.appendChild(div);
+  }
+}
+
+document.getElementById("save-config-btn").onclick = async () => {
+  const rows = [];
+
+  muscleConfig.querySelectorAll("div").forEach((div) => {
+    const muscle = div.querySelector("label").textContent;
+    const exerciseId = div.querySelector("select").value;
+
+    rows.push({
+      mesocycle_id: activeMesocycle.id,
+      muscle,
+      exercise_id: exerciseId
+    });
+  });
+
+  await supabase
+    .from("mesocycle_exercises")
+    .delete()
+    .eq("mesocycle_id", activeMesocycle.id);
+
+  const { error } = await supabase
+    .from("mesocycle_exercises")
+    .insert(rows);
+
+  if (!error) alert("Configuración guardada ✅");
+};
+
+async function loadExercisesForTemplate(templateId) {
+  const { data: template } = await supabase
+    .from("templates")
+    .select("enfasis")
+    .eq("id", templateId)
+    .single();
+
+  if (template.enfasis === "Todos") {
+    return supabase.from("exercises").select("*");
+  }
+
+  const groups = template.enfasis.split(",");
+
+  return supabase
+    .from("exercises")
+    .select("*")
+    .in("subgroup", groups);
+}
+
+async function renderExerciseChecklist(mesocycle) {
+  const { data: exercises } =
+    await loadExercisesForTemplate(mesocycle.template_id);
+
+  exerciseConfig.innerHTML = "";
+
+  exercises.forEach((e) => {
+    const label = document.createElement("label");
+    const checkbox = document.createElement("input");
+
+    checkbox.type = "checkbox";
+    checkbox.value = e.id;
+
+    label.appendChild(checkbox);
+    label.append(` ${e.name}`);
+    exerciseConfig.appendChild(label);
+    exerciseConfig.appendChild(document.createElement("br"));
+  });
+}
+
+document.getElementById("save-day-btn").onclick = async () => {
+  const day = parseInt(daySelect.value);
+
+  const selected = [
+    ...exerciseConfig.querySelectorAll("input:checked")
+  ].map((cb) => ({
+    mesocycle_id: activeMesocycle.id,
+    exercise_id: cb.value,
+    day_number: day
+  }));
+
+  await supabase
+    .from("mesocycle_exercises")
+    .delete()
+    .eq("mesocycle_id", activeMesocycle.id)
+    .eq("day_number", day);
+
+  const { error } = await supabase
+    .from("mesocycle_exercises")
+    .insert(selected);
+
+  if (!error) alert(`Día ${day} guardado ✅`);
+};
+
+
 /* ======================
    INIT
 ====================== */
