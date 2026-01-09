@@ -295,11 +295,14 @@ daySelect.onchange = async () => {
 
 async function openMesocycleConfig(mesocycle) {
   activeMesocycle = mesocycle;
-  configTitle.textContent = `Configurar: ${mesocycle.name}`;
+
+  configTitle.textContent = `Configurando: ${mesocycle.name}`;
   configView.style.display = "block";
 
   loadDays(mesocycle);
-  await renderExerciseSelect(mesocycle);
+
+  exerciseSelect.innerHTML = "";
+  daySelect.value = "";
 }
 
 async function loadDayExercises(mesocycleId, day) {
@@ -349,6 +352,9 @@ document.getElementById("save-day-btn").onclick = async () => {
 
   if (!error) alert(`Día ${day} guardado ✅`);
 };
+
+document.getElementById("day-hint").textContent =
+  `Configurando Día ${daySelect.value}`;
 
 /* ======================
    INIT
