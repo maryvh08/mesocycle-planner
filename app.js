@@ -357,7 +357,7 @@ async function getTemplateById(templateId) {
     .single();
 
   if (error) {
-    console.error("Error cargando template", error);
+    console.error("Error cargando template:", error);
     return null;
   }
 
@@ -395,16 +395,16 @@ async function renderDayExercises(mesocycleId, day) {
 daySelect.onchange = async () => {
   if (!daySelect.value || !activeMesocycle) return;
 
-  const day = parseInt(daySelect.value);
-
   exerciseConfig.style.display = "block";
 
   const template = await getTemplateById(activeMesocycle.template_id);
   if (!template) return;
 
   await renderExerciseSelector(template);
-  await loadDayExercises(activeMesocycle.id, day);
-  await renderDayExercises(activeMesocycle.id, day); // 👈 CLAVE
+  await loadDayExercises(
+    activeMesocycle.id,
+    parseInt(daySelect.value)
+  );
 };
 
 async function loadDayExercises(mesocycleId, day) {
