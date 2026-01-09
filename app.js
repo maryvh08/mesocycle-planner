@@ -141,6 +141,48 @@ async function loadMesocycles() {
 const templateSelect = document.getElementById("template-select");
 let selectedDays = null;
 
+async function createMesocycle() {
+  const name = document.getElementById("mesocycle-name").value;
+  const weeks = parseInt(document.getElementById("mesocycle-weeks").value);
+  const templateId = templateSelect.value;
+
+  if (!name || !weeks || !selectedDays || !templateId) {
+    alert("Completa todos los campos");
+    return;
+  }
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  const { error } = await supabase.from("mesocycles").insert({
+    name,
+    weeks,
+    days_per_week: selectedDays,
+    template_id: templateId,
+    user_id: user.id
+  });
+
+  if (error) {
+    alert("Error creando mesociclo");
+    console.error(error);
+    return;
+  }
+
+  alert("Mesociclo creado ✅");
+
+  // Reset visual
+  document.getElementById("mesocycle-name").value = "";
+  document.getElementById("mesocycle-weeks").value = "";
+  templateSelect.value = "";
+  selectedDays = null;
+  document
+    .querySelectorAll(".day-btn")
+    .forEach((b) => b.classList.remove("active"));
+
+  loadMesocycles();
+}
+
 async function loadTemplates() {
   const { data, error } = await supabase
     .from("templates")
