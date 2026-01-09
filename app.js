@@ -240,12 +240,12 @@ async function loadExercisesForTemplate(templateId) {
     .single();
 
   if (error || !template?.emphasis || template.emphasis === "Todos") {
-    return supabase.from("exercises").select("*");
+    return await supabase.from("exercises").select("*");
   }
 
   const groups = template.emphasis.split(",").map(e => e.trim());
 
-  return supabase
+  return await supabase
     .from("exercises")
     .select("*")
     .in("subgroup", groups);
@@ -291,7 +291,8 @@ daySelect.onchange = async () => {
   if (!daySelect.value || !activeMesocycle) return;
 
   dayHint.textContent = `Configurando Día ${daySelect.value}`;
-  exerciseConfig.style.display = "block";
+  exerciseConfig.style.display = "none";
+  dayHint.textContent = "Selecciona un día para configurar ejercicios";
 
   await renderExerciseSelect(activeMesocycle);
   await loadDayExercises(activeMesocycle.id, parseInt(daySelect.value));
@@ -357,7 +358,7 @@ document.getElementById("save-day-btn").onclick = async () => {
     .from("mesocycle_exercises")
     .insert(selectedExercises);
 
-  if (!error) alert(`Día ${day} guardado ✅`);
+  if (!error) dayHint.textContent = `Día ${day} guardado correctamente ✅`;
 };
 
 /* ======================
