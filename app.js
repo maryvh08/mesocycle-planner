@@ -17,6 +17,8 @@ const mesocycleWeeksInput = document.getElementById("mesocycle-weeks");
 let selectedDays = 0;
 let editingMesocycleId = null;
 
+const dayButtons = document.querySelectorAll(".day-btn");
+
 const historyList = document.getElementById("history-list");
 const registroSelect = document.getElementById("registro-select");
 const registroEditor = document.getElementById("registro-editor");
@@ -64,6 +66,7 @@ function showApp() {
   loadTemplates();
   loadMesocycles();
   setupTabs();
+  setupDayButtons();
 }
 
 function showLogin() {
@@ -90,10 +93,9 @@ function setupTabs() {
 }
 
 /* ======================
-   DAYS SELECT
+   DAYS SELECT (Crear Mesociclo)
 ====================== */
 function setupDayButtons() {
-  const dayButtons = document.querySelectorAll(".day-btn");
   dayButtons.forEach(btn => {
     btn.onclick = () => {
       dayButtons.forEach(b => b.classList.remove("active"));
@@ -117,7 +119,6 @@ createBtn.onclick = async () => {
     return alert("Completa todos los campos");
 
   if (editingMesocycleId) {
-    // Actualizar mesociclo
     await supabase.from("mesocycles")
       .update({ name, template_id, weeks, days_per_week })
       .eq("id", editingMesocycleId);
@@ -131,7 +132,6 @@ createBtn.onclick = async () => {
   mesocycleNameInput.value = "";
   mesocycleWeeksInput.value = "";
   templateSelect.value = "";
-  setupDayButtons(); // limpiar botones
   document.querySelectorAll(".day-btn").forEach(b => b.classList.remove("active"));
   selectedDays = 0;
 
@@ -266,13 +266,18 @@ async function renderRegistroEditor(mesocycleId) {
   }
   container.appendChild(weekSelect);
 
+  // Label días
+  const labelDias = document.createElement("label");
+  labelDias.textContent = "Días de entrenamiento:";
+  container.appendChild(labelDias);
+
   // Botones días
   const dayDiv = document.createElement("div");
   dayDiv.className = "day-buttons";
   for (let i = 1; i <= mesocycle.days_per_week; i++) {
     const btn = document.createElement("button");
     btn.className = "day-mini-btn";
-    btn.textContent = `${i}`; // solo número
+    btn.textContent = `${i}`;
     btn.onclick = async () => {
       dayDiv.querySelectorAll(".day-mini-btn").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
