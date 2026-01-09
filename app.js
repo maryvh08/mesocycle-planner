@@ -202,10 +202,15 @@ function setupMesocycleCard(card, mesocycle) {
 }
 
 async function renderCardEditor(editor, mesocycle) {
+  // Limpiar editor
+  editor.innerHTML = "";
+
   const template = await getTemplateById(mesocycle.template_id);
 
-  // Selector de semana
+  // SELECTOR DE SEMANA
   const weekSelect = document.createElement("select");
+  weekSelect.id = "week-select";
+  weekSelect.style.marginBottom = "1rem";
   for (let w = 1; w <= mesocycle.weeks; w++) {
     const opt = document.createElement("option");
     opt.value = w;
@@ -214,16 +219,17 @@ async function renderCardEditor(editor, mesocycle) {
   }
   editor.appendChild(weekSelect);
 
-  // Botones de días
+  // CONTENEDOR DE BOTONES DE DÍA
   const dayButtonsDiv = document.createElement("div");
+  dayButtonsDiv.style.marginBottom = "1rem";
   for (let i = 1; i <= mesocycle.days_per_week; i++) {
     const btn = document.createElement("button");
     btn.textContent = `Día ${i}`;
     btn.className = "day-mini-btn";
+    btn.style.marginRight = "0.5rem";
     btn.onclick = async () => {
-      dayButtonsDiv.querySelectorAll(".day-mini-btn").forEach(b => b.classList.remove("active"));
+      editor.querySelectorAll(".day-mini-btn").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-
       const selectedWeek = parseInt(weekSelect.value);
       await renderExercisesForDay(editor, mesocycle, i, selectedWeek, template);
     };
@@ -231,38 +237,45 @@ async function renderCardEditor(editor, mesocycle) {
   }
   editor.appendChild(dayButtonsDiv);
 
-  // Select de ejercicios
+  // SELECT DE EJERCICIOS
   const exerciseSelect = document.createElement("select");
   exerciseSelect.multiple = true;
   exerciseSelect.size = 10;
   exerciseSelect.style.width = "100%";
   exerciseSelect.className = "exercise-select";
+  editor.appendChild(exerciseSelect);
 
-  const hint = document.createElement("p");
-  hint.className = "day-hint";
-  hint.textContent = "Selecciona un día y una semana";
-
-  const list = document.createElement("div");
-  list.className = "day-exercise-list";
-
-  // Botón guardar
+  // BOTÓN GUARDAR DÍA
   const saveBtn = document.createElement("button");
   saveBtn.textContent = "Guardar día";
+  saveBtn.style.marginTop = "0.5rem";
   saveBtn.onclick = async () => {
-    const activeDayBtn = dayButtonsDiv.querySelector(".day-mini-btn.active");
+    const activeDayBtn = editor.querySelector(".day-mini-btn.active");
     if (!activeDayBtn) return alert("Selecciona un día");
 
     const day = parseInt(activeDayBtn.textContent.replace("Día ", ""));
     const week = parseInt(weekSelect.value);
+
     await saveDayExercises(exerciseSelect, mesocycle.id, day, week);
 
-    hint.textContent = `Día ${day}, semana ${week} guardado ✅`;
+    const hint = editor.querySelector(".day-hint");
+    hint.textContent = `Día ${day}, Semana ${week} guardado ✅`;
+
     await renderExercisesForDay(editor, mesocycle, day, week, template);
   };
-
-  editor.appendChild(exerciseSelect);
   editor.appendChild(saveBtn);
+
+  // HINT
+  const hint = document.createElement("p");
+  hint.className = "day-hint";
+  hint.style.marginTop = "0.5rem";
+  hint.textContent = "Selecciona un día y semana para configurar ejercicios";
   editor.appendChild(hint);
+
+  // LISTA DE CHIPS DE EJERCICIOS
+  const list = document.createElement("div");
+  list.className = "day-exercise-list";
+  list.style.marginTop = "0.5rem";
   editor.appendChild(list);
 }
 
