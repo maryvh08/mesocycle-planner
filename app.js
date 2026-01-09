@@ -152,6 +152,15 @@ registroSelect.onchange = async () => {
 };
 
 async function openRegistroEditor(id) {
+  // Cambiar al tab de Registro
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".tab-content").forEach(c => c.classList.add("hidden"));
+
+  const registroTabBtn = document.querySelector('.tab-btn[data-tab="registro-tab"]');
+  registroTabBtn.classList.add("active");
+  document.getElementById("registro-tab").classList.remove("hidden");
+
+  // Seleccionar el mesociclo en el select y renderizar editor
   registroSelect.value = id;
   await renderRegistroEditor(id);
 }
