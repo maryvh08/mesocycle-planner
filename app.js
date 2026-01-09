@@ -1,8 +1,7 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 const SUPABASE_URL = "https://vhwfenefevzzksxrslkx.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZod2ZlbmVmZXZ6emtzeHJzbGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MTE3ODAsImV4cCI6MjA4MzQ4Nzc4MH0.CG1KzxpxGHifXsgBvH-4E4WvXbj6d-8WsagqaHAtVwo";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZod2VmZXZ6emtzeHJzbGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MTE3ODAsImV4cCI6MjA4MzQ4Nzc4MH0.CG1KzxpxGHifXsgBvH-4E4WvXbj6d-8WsagqaHAtVwo";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -170,6 +169,7 @@ async function loadMesocycles() {
         <span>${m.weeks} semanas · ${m.days_per_week} días</span>
       </header>
       <button class="edit-btn">Editar</button>
+      <button class="delete-btn">Eliminar</button>
       <div class="editor hidden"></div>
     `;
 
@@ -183,11 +183,21 @@ async function loadMesocycles() {
 ====================== */
 function setupMesocycleCard(card, mesocycle) {
   const editBtn = card.querySelector(".edit-btn");
+  const deleteBtn = card.querySelector(".delete-btn");
   const editor = card.querySelector(".editor");
 
+  // Editar
   editBtn.onclick = async () => {
     editor.classList.toggle("hidden");
     if (!editor.innerHTML.trim()) await renderCardEditor(editor, mesocycle);
+  };
+
+  // Eliminar
+  deleteBtn.onclick = async () => {
+    if (!confirm("¿Eliminar mesociclo?")) return;
+    const { error } = await supabase.from("mesocycles").delete().eq("id", mesocycle.id);
+    if (error) return alert(error.message);
+    loadMesocycles();
   };
 }
 
