@@ -306,6 +306,21 @@ async function openMesocycleConfig(mesocycle) {
   exerciseConfig.style.display = "none"; // 👈 correcto
 }
 
+async function getTemplateById(templateId) {
+  const { data, error } = await supabase
+    .from("templates")
+    .select("*")
+    .eq("id", templateId)
+    .single();
+
+  if (error) {
+    console.error("Error cargando template", error);
+    return null;
+  }
+
+  return data;
+}
+
 async function renderDayExercises(mesocycleId, day) {
   const list = document.getElementById("day-exercise-list");
   list.innerHTML = "";
@@ -333,7 +348,10 @@ daySelect.onchange = async () => {
 
   exerciseConfig.style.display = "block";
 
-  await renderExerciseSelect(activeMesocycle);
+  const template = await getTemplateById(activeMesocycle.template_id);
+  if (!template) return;
+
+  await renderExerciseSelector(template);
   await loadDayExercises(activeMesocycle.id, parseInt(daySelect.value));
 };
 
