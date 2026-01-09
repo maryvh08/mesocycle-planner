@@ -162,7 +162,14 @@ async function createMesocycle() {
     .forEach((b) => b.classList.remove("active"));
 
   loadMesocycles();
-  openMesocycleConfig(data);
+  const { data: fullMesocycle } = await supabase
+    .from("mesocycles")
+    .select("*")
+    .eq("id", data.id)
+    .single();
+  
+  openMesocycleConfig(fullMesocycle);
+
 }
 
 document
@@ -250,6 +257,11 @@ async function renderExerciseChecklist(mesocycle) {
 }
 
 function loadDays(mesocycle) {
+  if (!mesocycle.days_per_week) {
+    console.warn("Mesocycle sin days_per_week", mesocycle);
+    return;
+  }
+
   daySelect.innerHTML = `<option value="">Selecciona un día</option>`;
 
   for (let i = 1; i <= mesocycle.days_per_week; i++) {
