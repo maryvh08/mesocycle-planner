@@ -33,10 +33,6 @@ document.getElementById("login-btn").onclick = async () => {
     message.textContent = error.message;
     return;
   }
-
-  if (data.session) {
-    showApp();
-  }
 };
 
 /* ======================
@@ -211,34 +207,6 @@ document.querySelectorAll(".day-btn").forEach((btn) => {
 const configView = document.getElementById("config-view");
 const configTitle = document.getElementById("config-title");
 
-async function renderMuscleSelectors(muscles) {
-  muscleConfig.innerHTML = "";
-
-  for (const muscle of muscles) {
-    const { data: exercises } = await supabase
-      .from("exercises")
-      .select("id, name")
-      .eq("subgroup", muscle);
-
-    const div = document.createElement("div");
-    const label = document.createElement("label");
-    const select = document.createElement("select");
-
-    label.textContent = muscle;
-
-    exercises.forEach((e) => {
-      const opt = document.createElement("option");
-      opt.value = e.id;
-      opt.textContent = e.name;
-      select.appendChild(opt);
-    });
-
-    div.appendChild(label);
-    div.appendChild(select);
-    muscleConfig.appendChild(div);
-  }
-}
-
 async function loadExercisesForTemplate(templateId) {
   const { data: template } = await supabase
     .from("templates")
@@ -320,6 +288,13 @@ document.getElementById("save-day-btn").onclick = async () => {
 
   if (!error) alert(`Día ${day} guardado ✅`);
 };
+
+data.forEach((m) => {
+  const li = document.createElement("li");
+  li.textContent = `${m.name} – ${m.weeks} semanas – ${m.days_per_week} días`;
+  li.onclick = () => openMesocycleConfig(m);
+  mesocycleList.appendChild(li);
+});
 
 /* ======================
    INIT
