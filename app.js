@@ -1,7 +1,6 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 let activeMesocycle = null;
 const daySelect = document.getElementById("day-select");
-const exerciseConfig = document.getElementById("exercise-config");
 const exerciseSelect = document.getElementById("exercise-select");
 const SUPABASE_URL = "https://vhwfenefevzzksxrslkx.supabase.co";
 const SUPABASE_ANON_KEY =
@@ -250,13 +249,8 @@ async function loadExercisesForTemplate(templateId) {
 }
 
 async function renderExerciseSelect(mesocycle) {
-  const { data: exercises, error } =
+  const { data: exercises } =
     await loadExercisesForTemplate(mesocycle.template_id);
-
-  if (error) {
-    console.error(error);
-    return;
-  }
 
   exerciseSelect.innerHTML = "";
 
@@ -285,9 +279,8 @@ function loadDays(mesocycle) {
 }
 
 daySelect.onchange = async () => {
-  if (!activeMesocycle || !daySelect.value) return;
+  if (!daySelect.value || !activeMesocycle) return;
 
-  await renderExerciseSelect(activeMesocycle);
   await loadDayExercises(
     activeMesocycle.id,
     parseInt(daySelect.value)
@@ -296,13 +289,11 @@ daySelect.onchange = async () => {
 
 async function openMesocycleConfig(mesocycle) {
   activeMesocycle = mesocycle;
-
   configTitle.textContent = `Configurar: ${mesocycle.name}`;
   configView.style.display = "block";
 
   loadDays(mesocycle);
-
-  exerciseSelect.innerHTML = "";
+  await renderExerciseSelect(mesocycle);
 }
 
 async function loadDayExercises(mesocycleId, day) {
@@ -332,11 +323,13 @@ document.getElementById("save-day-btn").onclick = async () => {
 
   const day = parseInt(daySelect.value);
 
-  const rows = [...exerciseSelect.selectedOptions].map(opt => ({
-    mesocycle_id: activeMesocycle.id,
-    exercise_id: opt.value,
-    day_number: day
-  }));
+  const selectedExercises = [...exerciseSelect.selectedOptions].map(
+    opt => ({
+      mesocycle_id: activeMesocycle.id,
+      exercise_id: opt.value,
+      day_number: day
+    })
+  );
 
   await supabase
     .from("mesocycle_exercises")
@@ -346,7 +339,7 @@ document.getElementById("save-day-btn").onclick = async () => {
 
   const { error } = await supabase
     .from("mesocycle_exercises")
-    .insert(rows);
+    .insert(selectedExercises);
 
   if (!error) alert(`Día ${day} guardado ✅`);
 };
