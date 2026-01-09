@@ -59,11 +59,28 @@ function showApp() {
   appView.style.display = "block";
   loadTemplates();
   loadMesocycles();
+  setupTabs(); // ← aquí
 }
 
 function showLogin() {
   loginView.style.display = "block";
   appView.style.display = "none";
+}
+
+function setupTabs() {
+  const tabButtons = document.querySelectorAll(".tab-btn");
+  const tabContents = document.querySelectorAll(".tab-content");
+
+  tabButtons.forEach(btn => {
+    btn.onclick = () => {
+      tabButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const target = btn.dataset.tab;
+      tabContents.forEach(tab => tab.classList.add("hidden"));
+      document.getElementById(target).classList.remove("hidden");
+    };
+  });
 }
 
 /* ======================
