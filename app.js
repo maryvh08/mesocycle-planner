@@ -1,14 +1,22 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
 const SUPABASE_URL = "https://vhwfenefevzzksxrslkx.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZod2ZlbmVmZXZ6emtzeHJzbGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MTE3ODAsImV4cCI6MjA4MzQ4Nzc4MH0.CG1KzxpxGHifXsgBvH-4E4WvXbj6d-8WsagqaHAtVwo";
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZod2ZlbmVmZXZ6emtzeHJzbGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MTE3ODAsImV4cCI6MjA4MzQ4Nzc4MH0.CG1KzxpxGHifXsgBvH-4E4WvXbj6d-8WsagqaHAtVwo";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+/* ======================
+   AUTH UI REFERENCES
+====================== */
 const loginView = document.getElementById("login-view");
 const appView = document.getElementById("app-view");
 const message = document.getElementById("auth-message");
 
-document.getElementById("login-btn")= async () => {
+/* ======================
+   LOGIN
+====================== */
+document.getElementById("login-btn").onclick = async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
@@ -17,20 +25,20 @@ document.getElementById("login-btn")= async () => {
     password
   });
 
-  console.log("LOGIN DATA:", data);
-  console.log("LOGIN ERROR:", error);
-
   if (error) {
     message.textContent = error.message;
     return;
   }
 
-  if (data?.session) {
+  if (data.session) {
     showApp();
   }
 };
 
-document.getElementById("signup-btn") = async () => {
+/* ======================
+   SIGNUP
+====================== */
+document.getElementById("signup-btn").onclick = async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
@@ -39,60 +47,53 @@ document.getElementById("signup-btn") = async () => {
     password
   });
 
-  if (error) {
-    message.textContent = error.message;
-  } else {
-    message.textContent = "Usuario creado. Ahora inicia sesión.";
-  }
+  message.textContent = error
+    ? error.message
+    : "Usuario creado. Ahora inicia sesión.";
 };
 
-document.getElementById("logout-btn") = async () => {
+/* ======================
+   LOGOUT
+====================== */
+document.getElementById("logout-btn").onclick = async () => {
   await supabase.auth.signOut();
+  showLogin();
 };
 
+/* ======================
+   SESSION CHECK
+====================== */
 async function checkSession() {
   const {
     data: { session }
   } = await supabase.auth.getSession();
 
-  if (session) {
-    showApp();
-  } else {
-    showLogin();
-  }
+  session ? showApp() : showLogin();
 }
 
+supabase.auth.onAuthStateChange((_event, session) => {
+  session ? showApp() : showLogin();
+});
+
+/* ======================
+   VIEW HELPERS
+====================== */
 function showApp() {
   loginView.style.display = "none";
   appView.style.display = "block";
   loadTemplates();
   loadMesocycles();
 }
+
 function showLogin() {
   loginView.style.display = "block";
   appView.style.display = "none";
 }
 
-supabase.auth.onAuthStateChange((event, session) => {
-  if (session) {
-    loginView.style.display = "none";
-    appView.style.display = "block";
-  } else {
-    loginView.style.display = "block";
-    appView.style.display = "none";
-  }
-});
-
-// Verifica sesión al cargar la app
-checkSession();
-
+/* ======================
+   MESOCYCLES
+====================== */
 const mesocycleList = document.getElementById("mesocycle-list");
-
-  document.getElementById("mesocycle-name").value = "";
-  document.getElementById("mesocycle-weeks").value = "";
-
-  loadMesocycles();
-};
 
 async function loadMesocycles() {
   const { data, error } = await supabase
@@ -114,6 +115,9 @@ async function loadMesocycles() {
   });
 }
 
+/* ======================
+   CREATE MESOCYCLE
+====================== */
 const templateSelect = document.getElementById("template-select");
 let selectedDays = null;
 
@@ -140,14 +144,12 @@ async function createMesocycle() {
   });
 
   if (error) {
-    alert("Error creando mesociclo");
-    console.error(error);
+    alert(error.message);
     return;
   }
 
   alert("Mesociclo creado ✅");
 
-  // Reset visual
   document.getElementById("mesocycle-name").value = "";
   document.getElementById("mesocycle-weeks").value = "";
   templateSelect.value = "";
@@ -163,7 +165,9 @@ document
   .getElementById("create-mesocycle-btn")
   .addEventListener("click", createMesocycle);
 
-
+/* ======================
+   TEMPLATES
+====================== */
 async function loadTemplates() {
   const { data, error } = await supabase
     .from("templates")
@@ -186,6 +190,9 @@ async function loadTemplates() {
   });
 }
 
+/* ======================
+   DAYS SELECTOR
+====================== */
 document.querySelectorAll(".day-btn").forEach((btn) => {
   btn.onclick = () => {
     document
@@ -196,3 +203,8 @@ document.querySelectorAll(".day-btn").forEach((btn) => {
     selectedDays = parseInt(btn.dataset.days);
   };
 });
+
+/* ======================
+   INIT
+====================== */
+checkSession();
