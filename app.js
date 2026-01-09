@@ -92,18 +92,18 @@ document.getElementById("create-mesocycle-btn").onclick = async () => {
   const name = document.getElementById("mesocycle-name").value;
   const weeks = parseInt(document.getElementById("mesocycle-weeks").value);
 
-  if (!name || !weeks) {
-    alert("Completa todos los campos");
+  const templateId = templateSelect.value;
+
+  if (!selectedDays || !templateId) {
+    alert("Selecciona días y plantilla");
     return;
   }
-
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
+  
   const { error } = await supabase.from("mesocycles").insert({
     name,
     weeks,
+    days_per_week: selectedDays,
+    template_id: templateId,
     user_id: user.id
   });
 
@@ -163,3 +163,13 @@ async function loadTemplates() {
   });
 }
 
+document.querySelectorAll(".day-btn").forEach((btn) => {
+  btn.onclick = () => {
+    document
+      .querySelectorAll(".day-btn")
+      .forEach((b) => b.classList.remove("active"));
+
+    btn.classList.add("active");
+    selectedDays = parseInt(btn.dataset.days);
+  };
+});
