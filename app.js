@@ -12,13 +12,13 @@ document.getElementById("login-btn").onclick = async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const { data, error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password
   });
-
-  console.log("LOGIN DATA:", data);
-  console.log("LOGIN ERROR:", error);
+  
+  console.log("SIGNUP DATA:", data);
+  console.log("SIGNUP ERROR:", error);
 
   if (error) {
     message.textContent = error.message;
