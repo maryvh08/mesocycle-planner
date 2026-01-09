@@ -64,6 +64,7 @@ async function checkSession() {
 function showApp() {
   loginView.style.display = "none";
   appView.style.display = "block";
+  loadMesocycles();
 }
 
 function showLogin() {
@@ -116,6 +117,25 @@ document.getElementById("create-mesocycle-btn").onclick = async () => {
   loadMesocycles();
 };
 
+async function loadMesocycles() {
+  const { data, error } = await supabase
+    .from("mesocycles")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  mesocycleList.innerHTML = "";
+
+  data.forEach((m) => {
+    const li = document.createElement("li");
+    li.textContent = `${m.name} – ${m.weeks} semanas`;
+    mesocycleList.appendChild(li);
+  });
+}
 
 
 
