@@ -8,7 +8,7 @@ const loginView = document.getElementById("login-view");
 const appView = document.getElementById("app-view");
 const message = document.getElementById("auth-message");
 
-document.getElementById("login-btn").onclick = async () => {
+document.getElementById("login-btn")= async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
@@ -30,7 +30,7 @@ document.getElementById("login-btn").onclick = async () => {
   }
 };
 
-document.getElementById("signup-btn").onclick = async () => {
+document.getElementById("signup-btn") = async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
@@ -46,7 +46,7 @@ document.getElementById("signup-btn").onclick = async () => {
   }
 };
 
-document.getElementById("logout-btn").onclick = async () => {
+document.getElementById("logout-btn") = async () => {
   await supabase.auth.signOut();
 };
 
