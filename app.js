@@ -177,9 +177,14 @@ function setupMesocycleCard(card, mesocycle) {
 
 async function renderCardEditor(editor, mesocycle) {
   const template = await getTemplateById(mesocycle.template_id);
-  const exercises = template.emphasis !== "Todos"
-    ? template.emphasis.split(",")
-    : [];
+
+  // Obtener los días ya guardados para este mesociclo
+  const { data: savedDays } = await supabase
+    .from("mesocycle_exercises")
+    .select("day_number")
+    .eq("mesocycle_id", mesocycle.id);
+
+  const savedDayNumbers = savedDays.map(d => d.day_number);
 
   // Crear mini-botones de días
   const dayButtonsDiv = document.createElement("div");
@@ -187,11 +192,19 @@ async function renderCardEditor(editor, mesocycle) {
     const btn = document.createElement("button");
     btn.textContent = `Día ${i}`;
     btn.className = "day-mini-btn";
+
+    // Marcar días ya guardados
+    if (savedDayNumbers.includes(i)) {
+      btn.style.background = "#7c8cff";   // color destacado
+      btn.style.color = "#fff";
+    }
+
     btn.onclick = async () => {
       editor.querySelectorAll(".day-mini-btn").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       await renderExercisesForDay(editor, mesocycle, i, template);
     };
+
     dayButtonsDiv.appendChild(btn);
   }
 
@@ -212,6 +225,10 @@ async function renderCardEditor(editor, mesocycle) {
 
     const day = parseInt(activeDayBtn.textContent.replace("Día ", ""));
     await saveDayExercises(exerciseSelect, mesocycle.id, day);
+
+    // Actualizar color del día guardado
+    activeDayBtn.style.background = "#7c8cff";
+    activeDayBtn.style.color = "#fff";
 
     const hint = editor.querySelector(".day-hint");
     hint.textContent = `Día ${day} guardado ✅`;
