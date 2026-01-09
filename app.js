@@ -233,14 +233,23 @@ const configView = document.getElementById("config-view");
 const configTitle = document.getElementById("config-title");
 
 async function loadExercisesForTemplate(templateId) {
-  const { data: template, error } = await supabase
+  const { data: template, error: templateError } = await supabase
     .from("templates")
     .select("emphasis")
     .eq("id", templateId)
     .single();
 
-  if (error || !template?.emphasis || template.emphasis === "Todos") {
-    return await supabase.from("exercises").select("*");
+  if (templateError) {
+    console.error("Error cargando plantilla", templateError);
+    return { data: [], error: templateError };
+  }
+
+  // Caso: todos los ejercicios
+  if (!template.emphasis || template.emphasis === "Todos") {
+    return await supabase
+      .from("exercises")
+      .select("*")
+      .order("name");
   }
 
   const groups = template.emphasis.split(",").map(e => e.trim());
@@ -248,7 +257,8 @@ async function loadExercisesForTemplate(templateId) {
   return await supabase
     .from("exercises")
     .select("*")
-    .in("subgroup", groups);
+    .in("subgroup", groups)
+    .order("name");
 }
 
 async function renderExerciseSelect(mesocycle) {
