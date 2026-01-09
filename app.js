@@ -16,13 +16,16 @@ document.getElementById("login-btn").onclick = async () => {
     email,
     password
   });
-  
-  if (data?.session) {
-    showApp();
-  }
+
+  console.log("LOGIN DATA:", data);
+  console.log("LOGIN ERROR:", error);
 
   if (error) {
     message.textContent = error.message;
+  }
+
+  if (data?.session) {
+    showApp();
   }
 };
 
