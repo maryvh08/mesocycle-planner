@@ -2,8 +2,7 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const SUPABASE_URL = "https://vhwfenefevzzksxrslkx.supabase.co";
 const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZod2ZlbmVmZXZ6emtzeHJzbGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MTE3ODAsImV4cCI6MjA4MzQ4Nzc4MH0.CG1KzxpxGHifXsgBvH-4E4WvXbj6d-8WsagqaHAtVwo";
-
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZod2V...
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /* ======================
@@ -23,39 +22,48 @@ let editingMesocycleId = null;
 const historyList = document.getElementById("history-list");
 const registroSelect = document.getElementById("registro-select");
 const registroEditor = document.getElementById("registro-editor");
+const registroNameDisplay = document.querySelector("#registro-mesocycle-name span");
 
-// ======================
-// CREAR MESOCICLO FORM
-// ======================
-const createBtn = document.getElementById("create-mesocycle-btn"); // Botón Guardar en Crear
-createBtn.onclick = async () => {
-  const name = mesocycleNameInput.value;
+/* ======================
+   CREAR MESOCICLO
+====================== */
+document.getElementById("create-mesocycle-btn").onclick = async () => {
+  const name = mesocycleNameInput.value.trim();
   const template_id = templateSelect.value;
   const weeks = parseInt(mesocycleWeeksInput.value);
-  const days_per_week = selectedDays;
 
-  if (!name || !template_id || !weeks || !days_per_week) return alert("Completa todos los campos");
+  if (!name || !template_id || !weeks || !selectedDays) return alert("Completa todos los campos");
 
   if (editingMesocycleId) {
-    // Actualizar mesociclo existente
     await supabase.from("mesocycles")
-      .update({ name, template_id, weeks, days_per_week })
+      .update({ name, template_id, weeks, days_per_week: selectedDays })
       .eq("id", editingMesocycleId);
     editingMesocycleId = null;
   } else {
-    // Crear nuevo mesociclo
-    await supabase.from("mesocycles").insert({ name, template_id, weeks, days_per_week });
+    await supabase.from("mesocycles")
+      .insert({ name, template_id, weeks, days_per_week: selectedDays });
   }
 
   // Limpiar formulario
   mesocycleNameInput.value = "";
+  mesocycleWeeksInput.value = "";
   templateSelect.value = "";
   dayButtons.forEach(btn => btn.classList.remove("active"));
   selectedDays = 0;
 
-  // Recargar historial y registro
   await loadMesocycles();
 };
+
+/* ======================
+   DAYS SELECT
+====================== */
+dayButtons.forEach(btn => {
+  btn.onclick = () => {
+    dayButtons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    selectedDays = parseInt(btn.dataset.days);
+  };
+});
 
 /* ======================
    AUTH
@@ -173,25 +181,23 @@ async function loadMesocycles() {
 
     // Editar → pestaña Crear Mesociclo
     li.querySelector(".edit-btn").onclick = () => {
-      // Cambiar a tab Crear Mesociclo
       document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
       document.querySelectorAll(".tab-content").forEach(c => c.classList.add("hidden"));
       document.querySelector('.tab-btn[data-tab="crear-tab"]').classList.add("active");
       document.getElementById("crear-tab").classList.remove("hidden");
-    
-      // Rellenar formulario
+
       mesocycleNameInput.value = m.name;
       mesocycleWeeksInput.value = m.weeks;
       templateSelect.value = m.template_id;
-    
+
       dayButtons.forEach(btn => btn.classList.remove("active"));
       const btnDias = document.querySelector(`.day-btn[data-days="${m.days_per_week}"]`);
       if (btnDias) btnDias.classList.add("active");
       selectedDays = m.days_per_week;
-    
-      // Guardar ID para actualizar
+
       editingMesocycleId = m.id;
     };
+
     // Registrar → pestaña Registro
     li.querySelector(".register-btn").onclick = () => openRegistroEditor(m.id);
 
@@ -211,17 +217,20 @@ async function loadMesocycles() {
 registroSelect.onchange = async () => {
   const id = registroSelect.value;
   if (!id) return registroEditor.innerHTML = "";
-  await renderRegistroEditor(id);
+  openRegistroEditor(id);
 };
 
 async function openRegistroEditor(id) {
-  // Cambiar a tab Registro
   document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
   document.querySelectorAll(".tab-content").forEach(c => c.classList.add("hidden"));
   document.querySelector('.tab-btn[data-tab="registro-tab"]').classList.add("active");
   document.getElementById("registro-tab").classList.remove("hidden");
 
   registroSelect.value = id;
+
+  const { data: mesocycle } = await supabase.from("mesocycles").select("name").eq("id", id).single();
+  registroNameDisplay.textContent = mesocycle.name;
+
   await renderRegistroEditor(id);
 }
 
