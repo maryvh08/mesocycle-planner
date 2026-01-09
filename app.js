@@ -84,5 +84,38 @@ supabase.auth.onAuthStateChange((event, session) => {
 // Verifica sesión al cargar la app
 checkSession();
 
+const mesocycleList = document.getElementById("mesocycle-list");
+
+document.getElementById("create-mesocycle-btn").onclick = async () => {
+  const name = document.getElementById("mesocycle-name").value;
+  const weeks = parseInt(document.getElementById("mesocycle-weeks").value);
+
+  if (!name || !weeks) {
+    alert("Completa todos los campos");
+    return;
+  }
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  const { error } = await supabase.from("mesocycles").insert({
+    name,
+    weeks,
+    user_id: user.id
+  });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  document.getElementById("mesocycle-name").value = "";
+  document.getElementById("mesocycle-weeks").value = "";
+
+  loadMesocycles();
+};
+
+
 
 
