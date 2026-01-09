@@ -140,3 +140,34 @@ button:hover {
 .exercise-chip button:hover {
   background: #f44336;
 }
+
+#tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.tab-btn {
+  padding: 0.5rem 1rem;
+  background: #333;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px 6px 0 0;
+}
+
+.tab-btn.active {
+  background: #e53935;
+}
+
+.tab-content {
+  background: #111;
+  color: #fff;
+  padding: 1rem;
+  border-radius: 0 6px 6px 6px;
+}
+
+.hidden {
+  display: none;
+}
+
