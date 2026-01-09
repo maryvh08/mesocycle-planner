@@ -3,69 +3,94 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mesociclo App</title>
+  <title>Planeación de Mesociclos</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    body { font-family: sans-serif; background: #0b0b0d; color: #eaeaea; margin:0; padding:2rem; }
+    .hidden { display: none; }
+    .tab-btn { padding: 0.5rem 1rem; margin-right: 0.5rem; cursor: pointer; background:#141418; border:none; border-radius:5px; color:#eaeaea; }
+    .tab-btn.active { background:#7c8cff; }
+    .tab-content { margin-top:1rem; }
+    .day-btn, .day-mini-btn { padding:0.5rem 1rem; margin:0.2rem; cursor:pointer; background:#141418; border:none; border-radius:5px; color:#eaeaea; }
+    .day-btn.active, .day-mini-btn.active { background:#7c8cff; }
+    .history-card { background:#141418; padding:1rem; margin-bottom:1rem; border-radius:10px; }
+    .exercise-chip { display:inline-block; padding:0.2rem 0.5rem; margin:0.2rem; background:#7c8cff; border-radius:5px; }
+    .register-btn { margin-top:0.5rem; padding:0.5rem 1rem; background:#7c8cff; border:none; border-radius:5px; cursor:pointer; color:white; }
+    select { padding:0.3rem; margin-top:0.5rem; }
+    input { padding:0.3rem; margin-top:0.5rem; width:100%; }
+    label { display:block; margin-top:1rem; margin-bottom:0.3rem; }
+  </style>
 </head>
 <body>
-  <!-- LOGIN VIEW -->
-  <div id="login-view">
-    <h1>Iniciar Sesión</h1>
-    <input type="email" id="email" placeholder="Correo">
-    <input type="password" id="password" placeholder="Contraseña">
-    <button id="login-btn">Login</button>
-    <button id="signup-btn">Sign Up</button>
-    <p id="auth-message"></p>
+
+<h1>🏋️ Planeación de Mesociclos</h1>
+
+<div id="login-view">
+  <h2>Iniciar sesión / Crear cuenta</h2>
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Contraseña">
+  <button id="login-btn">Iniciar sesión</button>
+  <button id="signup-btn">Crear cuenta</button>
+  <p id="auth-message" style="color:red;"></p>
+</div>
+
+<div id="app-view" class="hidden">
+  <button id="logout-btn">Cerrar sesión</button>
+
+  <div style="margin-top:1rem;">
+    <button class="tab-btn active" data-tab="crear-tab">Crear Mesociclo</button>
+    <button class="tab-btn" data-tab="historial-tab">Historial</button>
+    <button class="tab-btn" data-tab="registro-tab">Registro</button>
   </div>
 
-  <!-- APP VIEW -->
-  <div id="app-view" style="display:none;">
-    <button id="logout-btn">Cerrar sesión</button>
+  <!-- =======================
+       CREAR MESOCICLO TAB
+  ======================= -->
+  <div id="crear-tab" class="tab-content">
+    <h2>Crear / Editar Mesociclo</h2>
 
-    <!-- TABS -->
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="crear-tab">Crear Mesociclo</button>
-      <button class="tab-btn" data-tab="historial-tab">Historial</button>
-      <button class="tab-btn" data-tab="registro-tab">Registro</button>
+    <label>Nombre del mesociclo</label>
+    <input id="mesocycle-name" type="text" placeholder="Nombre del mesociclo">
+
+    <label>Selecciona plantilla</label>
+    <select id="template-select"></select>
+
+    <label>Semanas</label>
+    <input id="mesocycle-weeks" type="number" min="1" max="12" placeholder="Número de semanas">
+
+    <label>Días de entrenamiento a la semana</label>
+    <div id="days-container">
+      <button class="day-btn" data-days="1">1</button>
+      <button class="day-btn" data-days="2">2</button>
+      <button class="day-btn" data-days="3">3</button>
+      <button class="day-btn" data-days="4">4</button>
+      <button class="day-btn" data-days="5">5</button>
+      <button class="day-btn" data-days="6">6</button>
+      <button class="day-btn" data-days="7">7</button>
     </div>
 
-    <!-- TAB CONTENIDO -->
-    <div class="tab-content" id="crear-tab">
-      <h2>Crear / Editar Mesociclo</h2>
-      <input type="text" id="mesocycle-name" placeholder="Nombre del mesociclo">
-      
-      <label for="template-select">Selecciona plantilla</label>
-      <select id="template-select"></select>
-
-      <label for="mesocycle-weeks">Semanas</label>
-      <input type="number" id="mesocycle-weeks" min="1" max="12">
-
-      <p>Días de entrenamiento a la semana</p>
-      <div id="day-buttons-container">
-        <button class="day-btn" data-days="1">1</button>
-        <button class="day-btn" data-days="2">2</button>
-        <button class="day-btn" data-days="3">3</button>
-        <button class="day-btn" data-days="4">4</button>
-        <button class="day-btn" data-days="5">5</button>
-        <button class="day-btn" data-days="6">6</button>
-        <button class="day-btn" data-days="7">7</button>
-      </div>
-
-      <button id="create-mesocycle-btn">Guardar Mesociclo</button>
-    </div>
-
-    <div class="tab-content hidden" id="historial-tab">
-      <h2>Historial de Mesociclos</h2>
-      <ul id="history-list"></ul>
-    </div>
-
-    <div class="tab-content hidden" id="registro-tab">
-      <h2>Registro de Mesociclo</h2>
-      <p id="registro-mesocycle-name"><strong>Mesociclo:</strong> <span></span></p>
-      <select id="registro-select"></select>
-      <div id="registro-editor"></div>
-    </div>
+    <button id="create-mesocycle-btn" class="register-btn">Guardar Mesociclo</button>
   </div>
 
-  <script src="app.js" type="module"></script>
+  <!-- =======================
+       HISTORIAL TAB
+  ======================= -->
+  <div id="historial-tab" class="tab-content hidden">
+    <h2>Historial de Mesociclos</h2>
+    <ul id="history-list"></ul>
+  </div>
+
+  <!-- =======================
+       REGISTRO TAB
+  ======================= -->
+  <div id="registro-tab" class="tab-content hidden">
+    <h2>Registro de Ejercicios</h2>
+    <label>Selecciona mesociclo</label>
+    <select id="registro-select"></select>
+    <div id="registro-editor"></div>
+  </div>
+</div>
+
+<script type="module" src="app.js"></script>
 </body>
 </html>
