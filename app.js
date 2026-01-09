@@ -300,12 +300,13 @@ const dayHint = document.getElementById("day-hint");
 daySelect.onchange = async () => {
   if (!daySelect.value || !activeMesocycle) return;
 
-  dayHint.textContent = `Configurando Día ${daySelect.value}`;
-  exerciseConfig.style.display = "none";
-  dayHint.textContent = "Selecciona un día para configurar ejercicios";
+  exerciseConfig.style.display = "block"; // 👈 ESTO ES CLAVE
 
   await renderExerciseSelect(activeMesocycle);
-  await loadDayExercises(activeMesocycle.id, parseInt(daySelect.value));
+  await loadDayExercises(
+    activeMesocycle.id,
+    parseInt(daySelect.value)
+  );
 };
 
 async function openMesocycleConfig(mesocycle) {
@@ -316,8 +317,10 @@ async function openMesocycleConfig(mesocycle) {
 
   loadDays(mesocycle);
 
-  exerciseSelect.innerHTML = "";
+  // reset visual
   daySelect.value = "";
+  exerciseSelect.innerHTML = "";
+  exerciseConfig.style.display = "none"; // 👈 correcto
 }
 
 async function loadDayExercises(mesocycleId, day) {
