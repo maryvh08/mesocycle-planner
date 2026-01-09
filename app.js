@@ -187,20 +187,6 @@ async function createMesocycle() {
 
 }
 
-templateSelect.onchange = async (e) => {
-  const templateId = e.target.value;
-
-  if (!templateId) return;
-
-  const { data: template } = await supabase
-    .from("templates")
-    .select("*")
-    .eq("id", templateId)
-    .single();
-
-  renderExerciseSelector(template);
-};
-
 document
   .getElementById("create-mesocycle-btn")
   .addEventListener("click", createMesocycle);
@@ -305,18 +291,6 @@ function loadDays(mesocycle) {
 }
 
 const dayHint = document.getElementById("day-hint");
-
-daySelect.onchange = async () => {
-  if (!daySelect.value || !activeMesocycle) return;
-
-  exerciseConfig.style.display = "block"; // 👈 ESTO ES CLAVE
-
-  await renderExerciseSelect(activeMesocycle);
-  await loadDayExercises(
-    activeMesocycle.id,
-    parseInt(daySelect.value)
-  );
-};
 
 async function openMesocycleConfig(mesocycle) {
   activeMesocycle = mesocycle;
