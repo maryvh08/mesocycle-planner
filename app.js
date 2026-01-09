@@ -138,5 +138,28 @@ async function loadMesocycles() {
   });
 }
 
+const templateSelect = document.getElementById("template-select");
+let selectedDays = null;
 
+async function loadTemplates() {
+  const { data, error } = await supabase
+    .from("templates")
+    .select("*")
+    .order("name");
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  templateSelect.innerHTML =
+    '<option value="">Selecciona una plantilla</option>';
+
+  data.forEach((t) => {
+    const option = document.createElement("option");
+    option.value = t.id;
+    option.textContent = t.name;
+    templateSelect.appendChild(option);
+  });
+}
 
