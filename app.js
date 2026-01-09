@@ -134,13 +134,18 @@ async function createMesocycle() {
     data: { user }
   } = await supabase.auth.getUser();
 
-  const { error } = await supabase.from("mesocycles").insert({
-    name,
-    weeks,
-    days_per_week: selectedDays,
-    template_id: templateId,
-    user_id: user.id
-  });
+  const { data, error } = await supabase
+    .from("mesocycles")
+    .insert({
+      name,
+      weeks,
+      days_per_week: selectedDays,
+      template_id: templateId,
+      user_id: user.id
+    })
+    .select()
+    .single();
+
 
   if (error) {
     alert(error.message);
@@ -245,7 +250,7 @@ async function renderExerciseChecklist(mesocycle) {
 }
 
 function loadDays(mesocycle) {
-  daySelect.innerHTML = "";
+  daySelect.innerHTML = `<option value="">Selecciona un día</option>`;
 
   for (let i = 1; i <= mesocycle.days_per_week; i++) {
     const opt = document.createElement("option");
@@ -253,11 +258,6 @@ function loadDays(mesocycle) {
     opt.textContent = `Día ${i}`;
     daySelect.appendChild(opt);
   }
-  daySelect.onchange = () => {
-    exerciseConfig
-      .querySelectorAll("input")
-      .forEach(cb => cb.checked = false);
-  };
 }
 
 async function openMesocycleConfig(mesocycle) {
