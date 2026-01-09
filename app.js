@@ -362,6 +362,8 @@ async function getTemplateById(templateId) {
   }
 
   return data;
+  exerciseConfig.style.display = "block";
+  await renderAllExercisesForDebug();
 }
 
 async function renderDayExercises(mesocycleId, day) {
