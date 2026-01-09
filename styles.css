@@ -1,8 +1,16 @@
+/* ======================
+   BASE
+====================== */
 body {
   font-family: 'Arial', sans-serif;
   background: #0b0b0d;
   color: #eaeaea;
   padding: 2rem;
+}
+
+h1, h2, h3, h4 {
+  color: #eaeaea;
+  margin-bottom: 0.5rem;
 }
 
 section {
@@ -14,10 +22,9 @@ section {
   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
 }
 
-h1, h2, h3, h4 {
-  color: #eaeaea;
-}
-
+/* ======================
+   INPUTS & BUTTONS
+====================== */
 input, select {
   width: 100%;
   margin-bottom: 1rem;
@@ -52,6 +59,9 @@ button:hover {
   text-align: center;
 }
 
+/* ======================
+   DAY BUTTONS
+====================== */
 .day-btn, .day-mini-btn {
   width: 50px;
   margin-right: 0.5rem;
@@ -68,6 +78,9 @@ button:hover {
   color: white;
 }
 
+/* ======================
+   MESOCYCLE CARD
+====================== */
 .mesocycle-card {
   border: 1px solid #333;
   padding: 1rem;
@@ -90,6 +103,9 @@ button:hover {
   padding-top: 1rem;
 }
 
+/* ======================
+   EXERCISES LIST / CHIPS
+====================== */
 .day-exercise-list {
   display: flex;
   flex-wrap: wrap;
@@ -103,11 +119,6 @@ button:hover {
   border-radius: 20px;
   color: white;
   font-size: 0.9rem;
-}
-
-.delete-day-btn {
-  background: #f44336;
-  margin-top: 0.5rem;
 }
 
 .exercise-chip {
@@ -141,6 +152,9 @@ button:hover {
   background: #f44336;
 }
 
+/* ======================
+   TABS
+====================== */
 #tabs {
   display: flex;
   gap: 1rem;
@@ -171,3 +185,10 @@ button:hover {
   display: none;
 }
 
+/* ======================
+   DELETE BUTTON
+====================== */
+.delete-day-btn {
+  background: #f44336;
+  margin-top: 0.5rem;
+}
