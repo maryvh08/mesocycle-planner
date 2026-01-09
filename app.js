@@ -87,6 +87,32 @@ async function getTemplateById(id) {
   return data;
 }
 
+// Dentro de renderCardEditor, después del saveBtn
+const deleteBtn = document.createElement("button");
+deleteBtn.textContent = "Borrar día";
+deleteBtn.className = "delete-day-btn";
+deleteBtn.onclick = async () => {
+  const activeDayBtn = editor.querySelector(".day-mini-btn.active");
+  if (!activeDayBtn) return alert("Selecciona un día");
+
+  const day = parseInt(activeDayBtn.textContent.replace("Día ", ""));
+  await supabase
+    .from("mesocycle_exercises")
+    .delete()
+    .eq("mesocycle_id", mesocycle.id)
+    .eq("day_number", day);
+
+  // Limpiar UI
+  const select = editor.querySelector(".exercise-select");
+  const list = editor.querySelector(".day-exercise-list");
+  select.selectedIndex = -1;
+  list.innerHTML = "";
+  const hint = editor.querySelector(".day-hint");
+  hint.textContent = `Día ${day} borrado ✅`;
+};
+
+editor.appendChild(deleteBtn);
+
 /* ======================
    CREATE MESOCYCLE
 ====================== */
