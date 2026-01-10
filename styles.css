@@ -246,3 +246,25 @@ input {
   margin-top: 5px;
   cursor: pointer;
 }
+
+.exercise-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #141418;
+  color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  width: 320px;
+  z-index: 1000;
+}
+
+.history-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-bottom: 4px;
+}
+
