@@ -85,8 +85,8 @@ async function showApp() {
   if (!session) return;
 
   setupTabs();
-   setupExerciseModal();
   renderDayButtons();
+   setupExerciseModal();
 
   await loadTemplates();
   await loadMesocycles();
@@ -414,11 +414,6 @@ function openExerciseModal({ mesocycleId, exerciseId, exerciseName, week, day })
   exerciseModal.classList.remove("hidden");
 }
 
-closeModalBtn.onclick = () => {
-  exerciseModal.classList.add("hidden");
-  modalContext = null;
-};
-
 async function renderRegisteredExercises(
   container,
   mesocycleId,
@@ -462,53 +457,18 @@ async function renderRegisteredExercises(
 
     // click → abrir modal (historial + registrar peso)
     chip.onclick = () => {
-      openExerciseModal(
-        mesocycleId,
-        row.exercise_id,
-        day,
-        week,
-        row.exercises.name
-      );
-    };
+     openExerciseModal({
+       mesocycleId,
+       exerciseId: row.exercise_id,
+       exerciseName: row.exercises.name,
+       week,
+       day
+     });
+   };
 
     list.appendChild(chip);
   });
 }
-
-saveExerciseLogBtn.onclick = async () => {
-  if (!modalContext) return;
-
-  const weight = Number(modalWeight.value);
-  const reps = Number(modalReps.value);
-
-  if (!weight || !reps) {
-    alert("Completa peso y repeticiones");
-    return;
-  }
-
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return alert("Usuario no autenticado");
-
-  const { error } = await supabase.from("exercise_records").insert({
-    user_id: session.user.id,
-    mesocycle_id: modalContext.mesocycleId,
-    exercise_id: modalContext.exerciseId,
-    week_number: modalContext.week,
-    day_number: modalContext.day,
-    weight_kg: weight,
-    reps: reps
-  });
-
-  if (error) {
-    alert("Error al guardar");
-    console.error(error);
-    return;
-  }
-
-  exerciseModal.classList.add("hidden");
-  modalContext = null;
-  alert("Registro guardado 💪");
-};
 
 /* ======================
    INIT
@@ -550,7 +510,7 @@ function setupExerciseModal() {
       week_number: modalContext.week,
       day_number: modalContext.day,
       weight_kg: weight,
-      reps: reps
+      reps
     });
 
     if (error) {
