@@ -136,40 +136,43 @@ async function loadExercisesForSelect(select, template) {
 ====================== */
 createBtn.onclick = async () => {
   const name = mesocycleNameInput.value.trim();
-  const weeks = parseInt(mesocycleWeeksInput.value);
   const template_id = templateSelect.value;
+  const weeks = parseInt(mesocycleWeeksInput.value);
 
-  if (!name || !weeks || !template_id || !selectedDays) {
-    return alert("Completa todos los campos");
+  if (!name || !template_id || !weeks || !selectedDays) return alert("Completa todos los campos");
+
+  // Obtener ID de usuario correctamente
+  const { data: { session } } = await supabase.auth.getSession();
+  const user_id = session?.user?.id;
+  if (!user_id) return alert("No hay usuario autenticado");
+
+  try {
+    if (editingMesocycleId) {
+      const { error } = await supabase
+        .from("mesocycles")
+        .update({ name, template_id, weeks, days_per_week: selectedDays, user_id })
+        .eq("id", editingMesocycleId);
+      if (error) throw error;
+      editingMesocycleId = null;
+    } else {
+      const { error } = await supabase
+        .from("mesocycles")
+        .insert({ name, template_id, weeks, days_per_week: selectedDays, user_id });
+      if (error) throw error;
+    }
+
+    mesocycleNameInput.value = "";
+    templateSelect.value = "";
+    mesocycleWeeksInput.value = "";
+    selectedDays = 0;
+    renderDayButtons();
+
+    await loadMesocycles();
+    alert("Mesociclo guardado correctamente!");
+  } catch (err) {
+    console.error(err);
+    alert("Error al guardar el mesociclo: " + err.message);
   }
-
-  const { data: session } = await supabase.auth.getSession();
-  if (!session?.user) return alert("Usuario no autenticado");
-
-  const payload = {
-    name,
-    weeks,
-    template_id,
-    days_per_week: selectedDays,
-    user_id: session.user.id
-  };
-
-  const query = editingMesocycleId
-    ? supabase.from("mesocycles").update(payload).eq("id", editingMesocycleId)
-    : supabase.from("mesocycles").insert(payload);
-
-  const { error } = await query;
-  if (error) return alert(error.message);
-
-  editingMesocycleId = null;
-  mesocycleNameInput.value = "";
-  mesocycleWeeksInput.value = "";
-  templateSelect.value = "";
-  selectedDays = 0;
-  document.querySelectorAll(".day-btn").forEach(b => b.classList.remove("active"));
-
-  await loadMesocycles();
-  alert("Mesociclo guardado");
 };
 
 /* ======================
