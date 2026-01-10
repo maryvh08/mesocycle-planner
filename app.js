@@ -14,14 +14,6 @@ let selectedDaysPerWeek = null;
 let editingMesocycleId = null;
 
 /* ======================
-   DOM READY
-====================== */
-document.addEventListener("DOMContentLoaded", () => {
-  initAuth();
-  checkSession();
-});
-
-/* ======================
    UI ELEMENTS
 ====================== */
 const loginView = document.getElementById("login-view");
