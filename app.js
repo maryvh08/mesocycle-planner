@@ -105,16 +105,29 @@ function setupTabs() {
    DAY BUTTONS (CREAR)
 ====================== */
 function renderDayButtons() {
+  if (!dayButtonsContainer) {
+    console.warn("day-buttons-container no existe en el DOM");
+    return;
+  }
+
   dayButtonsContainer.innerHTML = "";
+  selectedDays = 0;
+
   for (let i = 1; i <= 7; i++) {
     const btn = document.createElement("button");
     btn.textContent = i;
+    btn.dataset.days = i;
     btn.className = "day-btn";
+
     btn.onclick = () => {
-      [...dayButtonsContainer.children].forEach(b => b.classList.remove("active"));
+      dayButtonsContainer
+        .querySelectorAll("button")
+        .forEach(b => b.classList.remove("active"));
+
       btn.classList.add("active");
       selectedDays = i;
     };
+
     dayButtonsContainer.appendChild(btn);
   }
 }
