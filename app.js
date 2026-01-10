@@ -220,6 +220,94 @@ async function loadMesocycles() {
   }
 }
 
+async function openExerciseModal(
+  mesocycleId,
+  exerciseId,
+  day,
+  week,
+  exerciseName
+) {
+  const { data: session } = await supabase.auth.getSession();
+  const userId = session.user.id;
+
+  const modal = document.createElement("div");
+  modal.className = "exercise-modal";
+
+  /* =====================
+     CARGAR HISTORIAL
+  ===================== */
+  const { data: history } = await supabase
+    .from("exercise_records")
+    .select("week_number, day_number, weight_kg, reps, created_at")
+    .eq("user_id", userId)
+    .eq("exercise_id", exerciseId)
+    .order("created_at", { ascending: false });
+
+  modal.innerHTML = `
+    <h3>${exerciseName}</h3>
+
+    <div class="last-entry">
+      <label>Peso (kg)</label>
+      <input id="modal-weight" type="number" step="0.5" />
+      
+      <label>Reps</label>
+      <input id="modal-reps" type="number" />
+    </div>
+
+    <button id="save-record-btn">Guardar registro</button>
+
+    <hr />
+
+    <h4>Historial</h4>
+    <div class="history-table">
+      ${
+        history.length
+          ? history
+              .map(
+                r => `
+                <div class="history-row">
+                  <span>Sem ${r.week_number} · Día ${r.day_number}</span>
+                  <strong>${r.weight_kg} kg x ${r.reps}</strong>
+                </div>`
+              )
+              .join("")
+          : "<p>No hay registros previos</p>"
+      }
+    </div>
+
+    <button id="close-modal">Cerrar</button>
+  `;
+
+  document.body.appendChild(modal);
+
+  /* =====================
+     GUARDAR
+  ===================== */
+  modal.querySelector("#save-record-btn").onclick = async () => {
+    const weight = Number(modal.querySelector("#modal-weight").value);
+    const reps = Number(modal.querySelector("#modal-reps").value);
+
+    if (!weight || !reps) {
+      return alert("Completa peso y repeticiones");
+    }
+
+    await supabase.from("exercise_records").insert({
+      user_id: userId,
+      mesocycle_id: mesocycleId,
+      exercise_id: exerciseId,
+      week_number: week,
+      day_number: day,
+      weight_kg: weight,
+      reps: reps
+    });
+
+    modal.remove();
+    alert("Registro guardado");
+  };
+
+  modal.querySelector("#close-modal").onclick = () => modal.remove();
+}
+
 /* ======================
    REGISTRO
 ====================== */
