@@ -16,6 +16,7 @@ const templateSelect = document.getElementById("template-select");
 const mesocycleNameInput = document.getElementById("mesocycle-name");
 const mesocycleWeeksInput = document.getElementById("mesocycle-weeks");
 const createBtn = document.getElementById("create-mesocycle-btn");
+const dayButtonsContainer = document.getElementById("day-buttons-container");
 
 const historyList = document.getElementById("history-list");
 const registroSelect = document.getElementById("registro-select");
@@ -133,6 +134,24 @@ async function loadExercisesForSelect(select, template) {
 
 /* ======================
    CREATE / EDIT MESOCYCLE
+====================== */
+function renderDayButtons() {
+  dayButtonsContainer.innerHTML = "";
+  for (let i = 1; i <= 7; i++) {
+    const btn = document.createElement("button");
+    btn.textContent = i;
+    btn.dataset.days = i;
+    btn.onclick = () => {
+      dayButtonsContainer.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      selectedDays = i;
+    };
+    dayButtonsContainer.appendChild(btn);
+  }
+}
+
+/* ======================
+   DÍAS DE ENTRENAMIENTO
 ====================== */
 function renderDayButtons() {
   dayButtonsContainer.innerHTML = "";
