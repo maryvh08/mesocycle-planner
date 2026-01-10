@@ -88,6 +88,19 @@ function setupTabs() {
   });
 }
 
+function setupDayButtons() {
+  const buttons = document.querySelectorAll(".day-btn");
+
+  buttons.forEach(btn => {
+    btn.onclick = () => {
+      buttons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      selectedDays = Number(btn.dataset.days);
+      console.log("Días seleccionados:", selectedDays);
+    };
+  });
+}
+
 /* ======================
    DÍAS (CREAR MESOCICLO)
 ====================== */
