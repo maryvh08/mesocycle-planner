@@ -369,44 +369,40 @@ async function renderRegistroEditor(mesocycleId) {
   saveBtn.textContent = "Guardar registro";
 
   saveBtn.onclick = async () => {
-    if (!selectedDay) return alert("Selecciona un día");
-    if (!exerciseSelect.value) return alert("Selecciona ejercicio");
-
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return alert("No autenticado");
-
-    const payload = {
-     mesocycle_id: mesocycleId,
-     exercise_id: exerciseSelect.value,
-     week_number: Number(weekSelect.value),
-     day_number: selectedDay,
-     weight: Number(weightInput.value),
-     reps: Number(repsInput.value),
-     updated_at: new Date().toISOString()
+     if (!selectedDay) return alert("Selecciona un día");
+     if (!exerciseSelect.value) return alert("Selecciona ejercicio");
+     if (!weightInput.value || !repsInput.value) {
+       return alert("Completa peso y repeticiones");
+     }
+   
+     const payload = {
+       mesocycle_id: mesocycleId,
+       exercise_id: exerciseSelect.value,
+       week_number: Number(weekSelect.value),
+       day_number: selectedDay,
+       weight: Number(weightInput.value),
+       reps: Number(repsInput.value),
+       updated_at: new Date().toISOString()
+     };
+   
+     const { error } = await supabase
+       .from("exercise_records")
+       .upsert(payload, {
+         onConflict: "mesocycle_id,exercise_id,week_number,day_number"
+       });
+   
+     if (error) {
+       console.error(error);
+       alert("Error al guardar");
+       return;
+     }
+   
+     weightInput.value = "";
+     repsInput.value = "";
+     alert("Registro guardado");
    };
 
-    const { error } = await supabase
-      .from("exercise_records")
-      .insert(payload);
-
-    if (error) {
-      console.error(error);
-      alert("Error al guardar");
-      return;
-    }
-
-    weightInput.value = "";
-    repsInput.value = "";
-    alert("Registro guardado");
-  };
-
   registroEditor.appendChild(saveBtn);
-
-   await supabase
-     .from("exercise_records")
-     .upsert(payload, {
-       onConflict: "mesocycle_id,exercise_id,week_number,day_number"
-     });
 }
 
 async function loadExercisesForDay(mesocycleId, day) {
