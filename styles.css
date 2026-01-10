@@ -236,30 +236,6 @@ input {
   background-color: #5f6fe0; /* versión más oscura del accent */
 }
 
-.exercise-modal input {
-  width: 60px;
-  padding: 2px 4px;
-  margin-bottom: 5px;
-}
-.exercise-modal button {
-  padding: 4px 8px;
-  margin-top: 5px;
-  cursor: pointer;
-}
-
-.exercise-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #141418;
-  color: #fff;
-  padding: 20px;
-  border-radius: 12px;
-  width: 320px;
-  z-index: 1000;
-}
-
 .history-row {
   display: flex;
   justify-content: space-between;
@@ -268,56 +244,33 @@ input {
   margin-bottom: 4px;
 }
 
-#exercise-modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-content {
-  background: #141418;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  width: 280px;
-}
+/* ======================
+   MODAL EJERCICIOS (ÚNICO)
+====================== */
 
 #exercise-modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
+  z-index: 1000;
 }
 
-.modal-content {
-  background: #141418;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  width: 280px;
+#exercise-modal.hidden {
+  display: none;
 }
 
-.modal-overlay {
-  position: fixed;
+.modal-backdrop {
+  position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
+  background: rgba(0, 0, 0, 0.6);
 }
 
 .modal-content {
+  position: relative;
+  z-index: 2;
   background: #141418;
   padding: 1.5rem;
   border-radius: 0.75rem;
-  min-width: 280px;
+  width: 280px;
+  margin: 10vh auto;
 }
 
-.hidden {
-  display: none;
-}
