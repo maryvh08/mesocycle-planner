@@ -5,13 +5,20 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /* ======================
-   UI ELEMENTS
+   GLOBAL STATE
+====================== */
+let selectedDays = null;
+let editingMesocycleId = null;
+
+/* ======================
+   ELEMENTS
 ====================== */
 const loginView = document.getElementById("login-view");
 const appView = document.getElementById("app-view");
-const message = document.getElementById("auth-message");
+
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
+
 const templateSelect = document.getElementById("template-select");
 const mesocycleNameInput = document.getElementById("mesocycle-name");
 const mesocycleWeeksInput = document.getElementById("mesocycle-weeks");
@@ -22,42 +29,31 @@ const historyList = document.getElementById("history-list");
 const registroSelect = document.getElementById("registro-select");
 const registroEditor = document.getElementById("registro-editor");
 
-let selectedDays = 0;
-let editingMesocycleId = null;
-
 /* ======================
    AUTH
 ====================== */
 document.getElementById("login-btn").onclick = async () => {
-  const email = emailInput.value;
-  const password = passwordInput.value;
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  message.textContent = error?.message || "";
-};
-
-document.getElementById("signup-btn").onclick = async () => {
-  const email = emailInput.value;
-  const password = passwordInput.value;
-  const { error } = await supabase.auth.signUp({ email, password });
-  message.textContent = error ? error.message : "Usuario creado";
+  await supabase.auth.signInWithPassword({
+    email: emailInput.value,
+    password: passwordInput.value
+  });
 };
 
 document.getElementById("logout-btn").onclick = async () => {
   await supabase.auth.signOut();
-  showLogin();
 };
 
 /* ======================
    SESSION
 ====================== */
+supabase.auth.onAuthStateChange((_e, session) => {
+  session ? showApp() : showLogin();
+});
+
 async function checkSession() {
   const { data } = await supabase.auth.getSession();
   data.session ? showApp() : showLogin();
 }
-
-supabase.auth.onAuthStateChange((_e, session) => {
-  session ? showApp() : showLogin();
-});
 
 /* ======================
    VIEW
@@ -90,47 +86,17 @@ function setupTabs() {
   });
 }
 
-async function loadExercisesForSelect(select, template) {
-  select.innerHTML = "";
-
-  let query = supabase
-    .from("exercises")
-    .select("id, name, subgroup")
-    .order("name");
-
-  if (template?.emphasis && template.emphasis !== "Todos") {
-    query = query.in("subgroup", template.emphasis.split(","));
-  }
-
-  const { data, error } = await query;
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  data.forEach(ex => {
-    const opt = document.createElement("option");
-    opt.value = ex.id;
-    opt.textContent = `${ex.name} (${ex.subgroup})`;
-    select.appendChild(opt);
-  });
-}
-
 /* ======================
-   DÍAS DE ENTRENAMIENTO
+   DAYS SELECTOR (FIXED)
 ====================== */
-function renderDayButtons(activeDays = null) {
+function renderDayButtons() {
   dayButtonsContainer.innerHTML = "";
-  selectedDays = activeDays || 0;
+  selectedDays = null;
 
   for (let i = 1; i <= 7; i++) {
     const btn = document.createElement("button");
     btn.textContent = i;
-    btn.dataset.days = i;
-
-    if (i === activeDays) {
-      btn.classList.add("active");
-    }
+    btn.className = "day-btn";
 
     btn.onclick = () => {
       [...dayButtonsContainer.children].forEach(b => b.classList.remove("active"));
@@ -156,13 +122,8 @@ async function loadTemplates() {
   });
 }
 
-async function getTemplateById(id) {
-  const { data } = await supabase.from("templates").select("*").eq("id", id).single();
-  return data;
-}
-
 /* ======================
-   LOAD MESOCYCLES
+   MESOCYCLES
 ====================== */
 async function loadMesocycles() {
   const { data } = await supabase.from("mesocycles").select("*").order("created_at", { ascending: false });
@@ -170,166 +131,82 @@ async function loadMesocycles() {
   historyList.innerHTML = "";
   registroSelect.innerHTML = `<option value="">Selecciona mesociclo</option>`;
 
-  for (const m of data) {
-    const template = await getTemplateById(m.template_id);
-
-    const card = document.createElement("li");
-    card.className = "history-card";
-    card.innerHTML = `
-      <p>Plantilla: ${template.name}</p>
-      <h4>${m.name} · ${m.weeks} semanas · ${m.days_per_week} días</h4>
+  data.forEach(m => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <strong>${m.name}</strong><br>
+      ${m.weeks} semanas · ${m.days_per_week} días<br>
       <button class="edit-btn">Editar</button>
       <button class="register-btn">Registrar</button>
     `;
 
-    card.querySelector(".edit-btn").onclick = () => {
-      editingMesocycleId = m.id;
-      mesocycleNameInput.value = m.name;
-      mesocycleWeeksInput.value = m.weeks;
-      templateSelect.value = m.template_id;
-      renderDayButtons(m.days_per_week);
+    li.querySelector(".edit-btn").onclick = () => editMesocycle(m);
+    li.querySelector(".register-btn").onclick = () => openRegistro(m.id);
 
-      document.querySelector('[data-tab="crear-tab"]').click();
-    };
-
-    card.querySelector(".register-btn").onclick = () => openRegistro(m.id);
-
-    historyList.appendChild(card);
+    historyList.appendChild(li);
 
     const opt = document.createElement("option");
     opt.value = m.id;
     opt.textContent = m.name;
     registroSelect.appendChild(opt);
-  }
+  });
 }
 
-async function openExerciseModal(
-  mesocycleId,
-  exerciseId,
-  day,
-  week,
-  exerciseName
-) {
-  const { data: session } = await supabase.auth.getSession();
-  const userId = session.user.id;
+/* ======================
+   EDIT MESOCYCLE
+====================== */
+function editMesocycle(m) {
+  editingMesocycleId = m.id;
+  mesocycleNameInput.value = m.name;
+  mesocycleWeeksInput.value = m.weeks;
+  templateSelect.value = m.template_id;
 
-  const modal = document.createElement("div");
-  modal.className = "exercise-modal";
-
-  /* =====================
-     CARGAR HISTORIAL
-  ===================== */
-  const { data: history } = await supabase
-    .from("exercise_records")
-    .select("week_number, day_number, weight_kg, reps, created_at")
-    .eq("user_id", userId)
-    .eq("exercise_id", exerciseId)
-    .order("created_at", { ascending: false });
-
-  modal.innerHTML = `
-    <h3>${exerciseName}</h3>
-
-    <div class="last-entry">
-      <label>Peso (kg)</label>
-      <input id="modal-weight" type="number" step="0.5" />
-      
-      <label>Reps</label>
-      <input id="modal-reps" type="number" />
-    </div>
-
-    <button id="save-record-btn">Guardar registro</button>
-
-    <hr />
-
-    <h4>Historial</h4>
-    <div class="history-table">
-      ${
-        history.length
-          ? history
-              .map(
-                r => `
-                <div class="history-row">
-                  <span>Sem ${r.week_number} · Día ${r.day_number}</span>
-                  <strong>${r.weight_kg} kg x ${r.reps}</strong>
-                </div>`
-              )
-              .join("")
-          : "<p>No hay registros previos</p>"
-      }
-    </div>
-
-    <button id="close-modal">Cerrar</button>
-  `;
-
-  document.body.appendChild(modal);
-
-  /* =====================
-     GUARDAR
-  ===================== */
-  modal.querySelector("#save-record-btn").onclick = async () => {
-    const weight = Number(modal.querySelector("#modal-weight").value);
-    const reps = Number(modal.querySelector("#modal-reps").value);
-
-    if (!weight || !reps) {
-      return alert("Completa peso y repeticiones");
+  renderDayButtons();
+  [...dayButtonsContainer.children].forEach(btn => {
+    if (Number(btn.textContent) === m.days_per_week) {
+      btn.classList.add("active");
+      selectedDays = m.days_per_week;
     }
+  });
 
-    await supabase.from("exercise_records").insert({
-      user_id: userId,
-      mesocycle_id: mesocycleId,
-      exercise_id: exerciseId,
-      week_number: week,
-      day_number: day,
-      weight_kg: weight,
-      reps: reps
-    });
+  document.querySelector('[data-tab="crear-tab"]').click();
+}
 
-    modal.remove();
-    alert("Registro guardado");
+/* ======================
+   CREATE / UPDATE
+====================== */
+createBtn.onclick = async () => {
+  if (!selectedDays) return alert("Selecciona días");
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return alert("No autenticado");
+
+  const payload = {
+    name: mesocycleNameInput.value,
+    weeks: Number(mesocycleWeeksInput.value),
+    days_per_week: selectedDays,
+    template_id: templateSelect.value,
+    user_id: session.user.id
   };
 
-  modal.querySelector("#close-modal").onclick = () => modal.remove();
-}
-
-createBtn.onclick = async () => {
-  const name = mesocycleNameInput.value.trim();
-  const template_id = templateSelect.value;
-  const weeks = parseInt(mesocycleWeeksInput.value);
-
-  if (!name || !template_id || !weeks || !selectedDays) return alert("Completa todos los campos");
-
-  // Obtener ID de usuario correctamente
-  const { data: { session } } = await supabase.auth.getSession();
-  const user_id = session?.user?.id;
-  if (!user_id) return alert("No hay usuario autenticado");
-
-  try {
-    if (editingMesocycleId) {
-      const { error } = await supabase
-        .from("mesocycles")
-        .update({ name, template_id, weeks, days_per_week: selectedDays, user_id })
-        .eq("id", editingMesocycleId);
-      if (error) throw error;
-      editingMesocycleId = null;
-    } else {
-      const { error } = await supabase
-        .from("mesocycles")
-        .insert({ name, template_id, weeks, days_per_week: selectedDays, user_id });
-      if (error) throw error;
-    }
-
-    mesocycleNameInput.value = "";
-    templateSelect.value = "";
-    mesocycleWeeksInput.value = "";
-    selectedDays = 0;
-    renderDayButtons();
-
-    await loadMesocycles();
-    alert("Mesociclo guardado correctamente!");
-  } catch (err) {
-    console.error(err);
-    alert("Error al guardar el mesociclo: " + err.message);
+  if (!payload.name || !payload.weeks || !payload.template_id) {
+    return alert("Campos incompletos");
   }
+
+  if (editingMesocycleId) {
+    await supabase.from("mesocycles").update(payload).eq("id", editingMesocycleId);
+    editingMesocycleId = null;
+  } else {
+    await supabase.from("mesocycles").insert(payload);
+  }
+
+  mesocycleNameInput.value = "";
+  mesocycleWeeksInput.value = "";
+  templateSelect.value = "";
+  renderDayButtons();
+
+  await loadMesocycles();
+  alert("Mesociclo guardado");
 };
 
 /* ======================
@@ -341,122 +218,38 @@ registroSelect.onchange = () => {
 
 async function openRegistro(id) {
   document.querySelector('[data-tab="registro-tab"]').click();
-  await renderRegistroEditor(id);
+  renderRegistroEditor(id);
 }
 
 async function renderRegistroEditor(mesocycleId) {
   registroEditor.innerHTML = "";
 
-  const { data: mesocycle } = await supabase
-    .from("mesocycles")
-    .select("*")
-    .eq("id", mesocycleId)
-    .single();
+  const { data: m } = await supabase.from("mesocycles").select("*").eq("id", mesocycleId).single();
+  const { data: exercises } = await supabase.from("exercises").select("*").order("name");
 
-  const template = await getTemplateById(mesocycle.template_id);
+  registroEditor.innerHTML = `
+    <h3>Mesociclo: ${m.name}</h3>
 
-  const container = document.createElement("div");
-  container.className = "registro-container";
+    <label>Días de entrenamiento</label>
+    <select id="registro-day">
+      ${[...Array(m.days_per_week)].map((_, i) => `<option value="${i+1}">Día ${i+1}</option>`).join("")}
+    </select>
 
-  /* =====================
-     TÍTULO
-  ===================== */
-  const title = document.createElement("h3");
-  title.textContent = `Mesociclo: ${mesocycle.name}`;
-  container.appendChild(title);
+    <label>Ejercicios</label>
+    <select id="exercise-select" multiple size="8">
+      ${exercises.map(e => `<option value="${e.id}">${e.name}</option>`).join("")}
+    </select>
 
-  /* =====================
-     SEMANA
-  ===================== */
-  const weekSelect = document.createElement("select");
-  weekSelect.className = "week-select";
+    <button id="save-exercises">Guardar</button>
+  `;
 
-  for (let i = 1; i <= mesocycle.weeks; i++) {
-    const opt = document.createElement("option");
-    opt.value = i;
-    opt.textContent = `Semana ${i}`;
-    weekSelect.appendChild(opt);
-  }
-  container.appendChild(weekSelect);
-
-  /* =====================
-     LABEL DÍAS
-  ===================== */
-  const dayLabel = document.createElement("label");
-  dayLabel.textContent = "Días de entrenamiento";
-  container.appendChild(dayLabel);
-
-  /* =====================
-     BOTONES DE DÍA
-  ===================== */
-  const dayDiv = document.createElement("div");
-  dayDiv.className = "day-mini-buttons";
-
-  let selectedDay = null;
-
-  for (let i = 1; i <= mesocycle.days_per_week; i++) {
-    const btn = document.createElement("button");
-    btn.textContent = `Día ${i}`;
-    btn.onclick = () => {
-      [...dayDiv.children].forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      selectedDay = i;
-    };
-    dayDiv.appendChild(btn);
-  }
-  container.appendChild(dayDiv);
-
-  /* =====================
-     SELECTOR DE EJERCICIOS ✅
-  ===================== */
-  const exerciseSelect = document.createElement("select");
-  exerciseSelect.multiple = true;
-  exerciseSelect.size = 8;
-  exerciseSelect.className = "exercise-select";
-  container.appendChild(exerciseSelect);
-
-  await loadExercisesForSelect(exerciseSelect, template);
-
-  /* =====================
-     BOTÓN GUARDAR
-  ===================== */
-  const saveBtn = document.createElement("button");
-  saveBtn.textContent = "Registrar ejercicios";
-  saveBtn.className = "register-btn";
-
-  saveBtn.onclick = async () => {
-    if (!selectedDay) return alert("Selecciona un día");
-
-    const week = Number(weekSelect.value);
-
-    const selectedExercises = [...exerciseSelect.selectedOptions].map(o => ({
-      mesocycle_id: mesocycleId,
-      exercise_id: o.value,
-      day_number: selectedDay,
-      week_number: week
-    }));
-
-    await supabase
-      .from("mesocycle_exercises")
-      .delete()
-      .eq("mesocycle_id", mesocycleId)
-      .eq("day_number", selectedDay)
-      .eq("week_number", week);
-
-    if (selectedExercises.length) {
-      await supabase
-        .from("mesocycle_exercises")
-        .insert(selectedExercises);
-    }
-
-    alert("Ejercicios registrados");
+  document.getElementById("save-exercises").onclick = async () => {
+    alert("Ejercicios listos para registrar por día (siguiente paso)");
   };
-
-  container.appendChild(saveBtn);
-  registroEditor.appendChild(container);
 }
 
 /* ======================
    INIT
 ====================== */
 checkSession();
+
