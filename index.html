@@ -20,6 +20,23 @@
     label { display: block; margin-top: 0.5rem; }
   </style>
 </head>
+
+<!-- MODAL REGISTRO -->
+<div id="exercise-modal" class="hidden">
+  <div class="modal-content">
+    <h3 id="modal-exercise-name"></h3>
+
+    <label>Peso (kg)</label>
+    <input type="number" id="modal-weight" step="0.5">
+
+    <label>Repeticiones</label>
+    <input type="number" id="modal-reps">
+
+    <button id="save-exercise-log">Guardar</button>
+    <button id="close-modal">Cancelar</button>
+  </div>
+</div>
+  
 <body>
 
 <h1>🏋️‍♂️ Workout Tracker</h1>
