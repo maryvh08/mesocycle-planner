@@ -224,6 +224,56 @@ function editMesocycle(m) {
   document.querySelector('[data-tab="crear-tab"]').click();
 }
 
+function setupExerciseModal() {
+  const saveBtn = document.getElementById("save-exercise-log");
+  const closeBtn = document.getElementById("close-modal");
+
+  if (!saveBtn || !closeBtn) {
+    console.error("Modal buttons no encontrados");
+    return;
+  }
+
+  closeBtn.addEventListener("click", () => {
+    exerciseModal.classList.add("hidden");
+    modalContext = null;
+  });
+
+  saveBtn.addEventListener("click", async () => {
+    if (!modalContext) return;
+
+    const weight = Number(modalWeight.value);
+    const reps = Number(modalReps.value);
+
+    if (!weight || !reps) {
+      alert("Completa peso y repeticiones");
+      return;
+    }
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return alert("Usuario no autenticado");
+
+    const { error } = await supabase.from("exercise_records").insert({
+      user_id: session.user.id,
+      mesocycle_id: modalContext.mesocycleId,
+      exercise_id: modalContext.exerciseId,
+      week_number: modalContext.week,
+      day_number: modalContext.day,
+      weight_kg: weight,
+      reps: reps
+    });
+
+    if (error) {
+      console.error(error);
+      alert("Error al guardar");
+      return;
+    }
+
+    exerciseModal.classList.add("hidden");
+    modalContext = null;
+    alert("Registro guardado 💪");
+  });
+}
+
 /* ======================
    CREATE / UPDATE
 ====================== */
