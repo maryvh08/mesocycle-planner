@@ -184,7 +184,9 @@ async function renderRegisteredExercises(mesocycleId, week, day) {
     chip.className = "exercise-chip";
     chip.textContent = row.exercises.name;
 
-    chip.onclick = () => {
+    chip.onclick = (e) => {
+      e.stopPropagation();
+    
       openExerciseModal({
         mesocycleId,
         exerciseId: row.exercise_id,
@@ -201,10 +203,12 @@ async function renderRegisteredExercises(mesocycleId, week, day) {
 // =======================
 // MODAL
 // =======================
-function openExerciseModal({ mesocycleId, exerciseId, exerciseName, week, day }) {
-  modalContext = { mesocycleId, exerciseId, week, day };
+function openExerciseModal(context) {
+  if (exerciseModal.classList.contains("hidden") === false) return;
 
-  modalExerciseName.textContent = exerciseName;
+  modalContext = context;
+
+  modalExerciseName.textContent = context.exerciseName;
   modalWeight.value = "";
   modalReps.value = "";
 
@@ -218,41 +222,6 @@ function setupExerciseModal() {
   closeBtn.onclick = () => {
     exerciseModal.classList.add("hidden");
     modalContext = null;
-  };
-
-  saveBtn.onclick = async () => {
-    if (!modalContext) return;
-
-    const weight = Number(modalWeight.value);
-    const reps = Number(modalReps.value);
-
-    if (!weight || !reps) {
-      alert("Completa peso y repeticiones");
-      return;
-    }
-
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
-
-    const { error } = await supabase.from("exercise_records").insert({
-      user_id: session.user.id,
-      mesocycle_id: modalContext.mesocycleId,
-      exercise_id: modalContext.exerciseId,
-      week_number: modalContext.week,
-      day_number: modalContext.day,
-      weight_kg: weight,
-      reps
-    });
-
-    if (error) {
-      console.error(error);
-      alert("Error al guardar");
-      return;
-    }
-
-    exerciseModal.classList.add("hidden");
-    modalContext = null;
-    alert("Registro guardado 💪");
-  };
+  };  
 }
 
