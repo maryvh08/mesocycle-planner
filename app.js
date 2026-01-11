@@ -255,6 +255,85 @@ async function openRegistro(mesocycleId) {
   await renderRegistroEditor(mesocycleId);
 }
 
+function openEditExerciseModal({ recordId, name, weight, reps }) {
+  const newWeight = prompt(`Editar peso (${name})`, weight);
+  const newReps = prompt(`Editar reps (${name})`, reps);
+
+  if (newWeight === null || newReps === null) return;
+
+  supabase
+    .from("exercise_records")
+    .update({
+      weight: Number(newWeight),
+      reps: Number(newReps),
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", recordId)
+    .then(() => {
+      alert("Registro actualizado");
+    });
+}
+
+
+async function renderExercisesForDay({
+  mesocycleId,
+  week,
+  day,
+  container
+}) {
+  container.innerHTML = "";
+
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select(`
+      id,
+      weight,
+      reps,
+      exercises (
+        id,
+        name,
+        subgroup
+      )
+    `)
+    .eq("mesocycle_id", mesocycleId)
+    .eq("week_number", week)
+    .eq("day_number", day)
+    .order("updated_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    container.innerHTML = "<p>Error cargando ejercicios</p>";
+    return;
+  }
+
+  if (!data.length) {
+    container.innerHTML = "<p>No hay ejercicios registrados este día</p>";
+    return;
+  }
+
+  data.forEach(row => {
+    const card = document.createElement("div");
+    card.className = "exercise-chip";
+
+    card.innerHTML = `
+      <strong>${row.exercises.name}</strong>
+      <div>${row.exercises.subgroup ?? ""}</div>
+      <div>${row.weight} kg · ${row.reps} reps</div>
+    `;
+
+    card.onclick = () => {
+      openEditExerciseModal({
+        recordId: row.id,
+        name: row.exercises.name,
+        weight: row.weight,
+        reps: row.reps
+      });
+    };
+
+    container.appendChild(card);
+  });
+}
+
 /* ======================
    REGISTRO EDITOR
 ====================== */
