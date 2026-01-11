@@ -371,19 +371,16 @@ async function renderRegistroEditor(mesocycleId) {
   saveBtn.onclick = async () => {
      if (!selectedDay) return alert("Selecciona un día");
      if (!exerciseSelect.value) return alert("Selecciona ejercicio");
-     if (!weightInput.value || !repsInput.value) {
-       return alert("Completa peso y repeticiones");
-     }
    
      const payload = {
-        mesocycle_id: mesocycleId,
-        exercise_id: exerciseSelect.value,
-        week_number: Number(weekSelect.value),
-        day_number: selectedDay,
-        weight: Number(weightInput.value),
-        reps: Number(repsInput.value)
-      };
-
+       mesocycle_id: mesocycleId,
+       exercise_id: exerciseSelect.value,
+       week_number: Number(weekSelect.value),
+       day_number: selectedDay,
+       weight: Number(weightInput.value),
+       reps: Number(repsInput.value)
+     };
+   
      const { error } = await supabase
        .from("exercise_records")
        .upsert(payload, {
@@ -391,16 +388,16 @@ async function renderRegistroEditor(mesocycleId) {
        });
    
      if (error) {
-       console.error(error);
+       console.error("UPSERT ERROR:", error);
        alert("Error al guardar");
        return;
      }
    
      weightInput.value = "";
      repsInput.value = "";
-     alert("Registro guardado");
+   
+     alert("Registro guardado correctamente");
    };
-
   registroEditor.appendChild(saveBtn);
 }
 
