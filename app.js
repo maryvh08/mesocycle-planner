@@ -376,15 +376,14 @@ async function renderRegistroEditor(mesocycleId) {
      }
    
      const payload = {
-       mesocycle_id: mesocycleId,
-       exercise_id: exerciseSelect.value,
-       week_number: Number(weekSelect.value),
-       day_number: selectedDay,
-       weight: Number(weightInput.value),
-       reps: Number(repsInput.value),
-       updated_at: new Date().toISOString()
-     };
-   
+        mesocycle_id: mesocycleId,
+        exercise_id: exerciseSelect.value,
+        week_number: Number(weekSelect.value),
+        day_number: selectedDay,
+        weight: Number(weightInput.value),
+        reps: Number(repsInput.value)
+      };
+
      const { error } = await supabase
        .from("exercise_records")
        .upsert(payload, {
