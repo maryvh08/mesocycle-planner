@@ -401,14 +401,18 @@ async function renderRegistroEditor(mesocycleId) {
     btn.textContent = `Día ${i}`;
     btn.className = "day-btn";
 
-    btn.onclick = () => {
-      [...dayContainer.children].forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      selectedDay = i;
-    };
-
-    dayContainer.appendChild(btn);
-  }
+    btn.onclick = async () => {
+     [...dayContainer.children].forEach(b => b.classList.remove("active"));
+     btn.classList.add("active");
+     selectedDay = i;
+   
+     await renderExercisesForDay({
+       mesocycleId,
+       week: Number(weekSelect.value),
+       day: selectedDay,
+       container: registeredExercisesContainer
+     });
+   };
 
   registroEditor.appendChild(dayContainer);
 
