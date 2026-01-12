@@ -402,19 +402,29 @@ async function renderRegistroEditor(mesocycleId) {
     btn.className = "day-btn";
 
     btn.onclick = async () => {
-     [...dayContainer.children].forEach(b => b.classList.remove("active"));
-     btn.classList.add("active");
-     selectedDay = i;
-   
-     await renderExercisesForDay({
-       mesocycleId,
-       week: Number(weekSelect.value),
-       day: selectedDay,
-       container: registeredExercisesContainer
-     });
-   };
+      [...dayContainer.children].forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      selectedDay = i;
+
+      await renderExercisesForDay({
+        mesocycleId,
+        week: Number(weekSelect.value),
+        day: selectedDay,
+        container: registeredExercisesContainer
+      });
+    };
+
+    dayContainer.appendChild(btn); // ✅ FALTABA
+  }
 
   registroEditor.appendChild(dayContainer);
+
+  /* ======================
+     CONTENEDOR EJERCICIOS REGISTRADOS
+  ====================== */
+  const registeredExercisesContainer = document.createElement("div");
+  registeredExercisesContainer.id = "registered-exercises";
+  registroEditor.appendChild(registeredExercisesContainer);
 
   /* ======================
      SELECT EJERCICIO
@@ -432,7 +442,7 @@ async function renderRegistroEditor(mesocycleId) {
   registroEditor.appendChild(exerciseSelect);
 
   /* ======================
-     INPUTS PESO / REPS
+     INPUTS
   ====================== */
   const weightInput = document.createElement("input");
   weightInput.type = "number";
@@ -446,41 +456,50 @@ async function renderRegistroEditor(mesocycleId) {
   registroEditor.appendChild(repsInput);
 
   /* ======================
-     BOTÓN GUARDAR
+     GUARDAR
   ====================== */
   const saveBtn = document.createElement("button");
   saveBtn.textContent = "Guardar registro";
 
   saveBtn.onclick = async () => {
-     if (!selectedDay) return alert("Selecciona un día");
-     if (!exerciseSelect.value) return alert("Selecciona ejercicio");
-   
-     const payload = {
-       mesocycle_id: mesocycleId,
-       exercise_id: exerciseSelect.value,
-       week_number: Number(weekSelect.value),
-       day_number: selectedDay,
-       weight: Number(weightInput.value),
-       reps: Number(repsInput.value)
-     };
-   
-     const { error } = await supabase
-       .from("exercise_records")
-       .upsert(payload, {
-         onConflict: "mesocycle_id,exercise_id,week_number,day_number"
-       });
-   
-     if (error) {
-       console.error("UPSERT ERROR:", error);
-       alert("Error al guardar");
-       return;
-     }
-   
-     weightInput.value = "";
-     repsInput.value = "";
-   
-     alert("Registro guardado correctamente");
-   };
+    if (!selectedDay) return alert("Selecciona un día");
+    if (!exerciseSelect.value) return alert("Selecciona ejercicio");
+
+    const payload = {
+      mesocycle_id: mesocycleId,
+      exercise_id: exerciseSelect.value,
+      week_number: Number(weekSelect.value),
+      day_number: selectedDay,
+      weight: Number(weightInput.value),
+      reps: Number(repsInput.value),
+      updated_at: new Date().toISOString()
+    };
+
+    const { error } = await supabase
+      .from("exercise_records")
+      .upsert(payload, {
+        onConflict: "mesocycle_id,exercise_id,week_number,day_number"
+      });
+
+    if (error) {
+      console.error(error);
+      alert("Error al guardar");
+      return;
+    }
+
+    weightInput.value = "";
+    repsInput.value = "";
+
+    await renderExercisesForDay({
+      mesocycleId,
+      week: Number(weekSelect.value),
+      day: selectedDay,
+      container: registeredExercisesContainer
+    });
+
+    alert("Registro guardado");
+  };
+
   registroEditor.appendChild(saveBtn);
 }
 
