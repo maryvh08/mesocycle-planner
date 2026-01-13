@@ -198,3 +198,23 @@ input {
     flex-direction: column;
   }
 }
+
+/* ======================
+  SUBGRUPOS
+====================== */
+.subgroup-section {
+  margin-top: 1rem;
+}
+
+.subgroup-section h4 {
+  margin-bottom: .5rem;
+  color: var(--accent);
+}
+
+.exercise-chip {
+  padding: .5rem;
+  border-radius: 8px;
+  background: #1b1b1b;
+  margin-bottom: .5rem;
+  cursor: pointer;
+}
