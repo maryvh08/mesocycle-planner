@@ -575,13 +575,5 @@ async function renderRegistroEditor(mesocycleId) {
   registroEditor.appendChild(saveBtn);
 }
 
-
-/* ======================
-   PLACEHOLDER MODAL
-====================== */
-function openExerciseModal() {
-  alert("Modal pendiente");
-}
-
 initAuth();
 checkSession();
