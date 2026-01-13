@@ -572,15 +572,6 @@ async function renderRegistroEditor(mesocycleId) {
   registroEditor.appendChild(saveBtn);
 }
 
-async function loadExercisesForDay(mesocycleId, day) {
-  const container = document.getElementById("registro-exercises");
-
-  container.innerHTML = `
-    <h4>Día ${day}</h4>
-    <button onclick="openExerciseModal()">+ Agregar ejercicio</button>
-    <p>(Aquí se cargarán los ejercicios)</p>
-  `;
-}
 
 /* ======================
    PLACEHOLDER MODAL
