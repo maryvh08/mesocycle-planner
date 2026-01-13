@@ -496,6 +496,11 @@ async function renderRegistroEditor(mesocycleId) {
     dayContainer.appendChild(btn); // ✅ FALTABA
   }
 
+   weekSelect.onchange = () => {
+     registeredExercisesContainer.innerHTML = "<p>Selecciona un día</p>";
+     selectedDay = null;
+   };
+
   registroEditor.appendChild(dayContainer);
 
   /* ======================
