@@ -32,9 +32,6 @@ const historyList = document.getElementById("history-list");
 const registroSelect = document.getElementById("registro-select");
 const registroEditor = document.getElementById("registro-editor");
 
-const templateEnfasis = mesocycle.templates?.enfasis ?? "Todos";
-const allowedSubgroups = getAllowedSubgroups(templateEnfasis);
-
 /* ======================
    AUTH
 ====================== */
