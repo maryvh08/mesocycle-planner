@@ -275,7 +275,7 @@ function openEditExerciseModal({ recordId, name, weight, reps }) {
 }
 
 
-async function renderExercisesForDay({
+aasync function renderExercisesForDay({
   mesocycleId,
   week,
   day,
@@ -283,6 +283,27 @@ async function renderExercisesForDay({
 }) {
   container.innerHTML = "";
 
+  /* ======================
+     CARGAR MESOCICLO + TEMPLATE
+  ====================== */
+  const { data: mesocycle } = await supabase
+    .from("mesocycles")
+    .select(`
+      id,
+      templates (
+        enfasis
+      )
+    `)
+    .eq("id", mesocycleId)
+    .single();
+
+  const allowedSubgroups = getAllowedSubgroups(
+    mesocycle.templates?.enfasis
+  );
+
+  /* ======================
+     CARGAR REGISTROS
+  ====================== */
   const { data, error } = await supabase
     .from("exercise_records")
     .select(`
@@ -311,27 +332,83 @@ async function renderExercisesForDay({
     return;
   }
 
-  data.forEach(row => {
-    const card = document.createElement("div");
-    card.className = "exercise-chip";
+  /* ======================
+     FILTRAR POR PLANTILLA
+  ====================== */
+  const filtered = allowedSubgroups
+    ? data.filter(r =>
+        allowedSubgroups.includes(r.exercises.subgroup)
+      )
+    : data;
 
-    card.innerHTML = `
-      <strong>${row.exercises.name}</strong>
-      <div>${row.exercises.subgroup ?? ""}</div>
-      <div>${row.weight} kg · ${row.reps} reps</div>
-    `;
+  /* ======================
+     AGRUPAR POR SUBGRUPO
+  ====================== */
+  const grouped = filtered.reduce((acc, row) => {
+    const key = row.exercises.subgroup;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(row);
+    return acc;
+  }, {});
 
-    card.onclick = () => {
-      openEditExerciseModal({
-        recordId: row.id,
-        name: row.exercises.name,
-        weight: row.weight,
-        reps: row.reps
-      });
-    };
+  /* ======================
+     RENDER
+  ====================== */
+  Object.entries(grouped).forEach(([subgroup, rows]) => {
+    const section = document.createElement("section");
+    section.className = "subgroup-section";
 
-    container.appendChild(card);
+    const title = document.createElement("h4");
+    title.textContent = subgroup;
+    section.appendChild(title);
+
+    rows.forEach(row => {
+      const card = document.createElement("div");
+      card.className = "exercise-chip";
+
+      card.innerHTML = `
+        <strong>${row.exercises.name}</strong>
+        <div>${row.weight} kg · ${row.reps} reps</div>
+      `;
+
+      card.onclick = () => {
+        openEditExerciseModal({
+          recordId: row.id,
+          name: row.exercises.name,
+          weight: row.weight,
+          reps: row.reps
+        });
+      };
+
+      section.appendChild(card);
+    });
+
+    container.appendChild(section);
   });
+}
+
+/* ======================
+   SUBGRUPOS
+====================== */
+
+function getAllowedSubgroups(templateEnfasis) {
+  if (!templateEnfasis || templateEnfasis === "Todos") {
+    return null; // sin filtro
+  }
+
+  return templateEnfasis
+    .split(",")
+    .map(s => s.trim());
+}
+
+function getAllowedSubgroups(templateEnfasis) {
+  if (!templateEnfasis || templateEnfasis === "Todos") {
+    return null; // sin filtro
+  }
+
+  return templateEnfasis
+    .split(",")
+    .map(s => s.trim());
 }
 
 /* ======================
