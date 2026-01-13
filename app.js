@@ -335,10 +335,11 @@ async function renderExercisesForDay({
      FILTRAR POR PLANTILLA
   ====================== */
   const filtered = allowedSubgroups
-    ? data.filter(r =>
-        allowedSubgroups.includes(r.exercises.subgroup)
-      )
-    : data;
+     ? data.filter(r =>
+         r.exercises &&
+         allowedSubgroups.includes(r.exercises.subgroup)
+       )
+     : data;
 
   /* ======================
      AGRUPAR POR SUBGRUPO
@@ -427,6 +428,12 @@ async function renderRegistroEditor(mesocycleId) {
     .from("exercises")
     .select("*")
     .order("name");
+
+   const allowed = getAllowedSubgroups(mesocycle.templates?.enfasis);
+
+   const filteredExercises = allowed
+     ? exercises.filter(e => allowed.includes(e.subgroup))
+     : exercises;
 
   if (eError) {
     console.error(eError);
