@@ -4,9 +4,15 @@
 :root {
   --bg-main: #0f0f15;
   --bg-card: #1a1a27;
+  --bg-chip: #2b2b3a;
+  --bg-chip-hover: #3a3a55;
+
   --text-main: #eaeaea;
   --text-muted: #b3b3b3;
+
   --accent: #7c8cff;
+  --accent-hover: #5f6fe8;
+
   --shadow: rgba(0,0,0,0.5);
   --radius: 12px;
   --spacing: 1rem;
@@ -42,11 +48,15 @@ button {
   padding: 0.5rem 1rem;
   background-color: var(--accent);
   color: #fff;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, transform 0.1s;
 }
 
 button:hover {
-  background-color: #5f6fe8;
+  background-color: var(--accent-hover);
+}
+
+button:active {
+  transform: scale(0.97);
 }
 
 select,
@@ -58,6 +68,12 @@ input {
   background-color: var(--bg-card);
   color: var(--text-main);
   border: 1px solid var(--text-muted);
+  outline: none;
+}
+
+select:focus,
+input:focus {
+  border-color: var(--accent);
 }
 
 /* ======================
@@ -132,34 +148,55 @@ input {
   flex-wrap: wrap;
 }
 
-.day-mini-btn {
+.day-btn {
   background-color: var(--bg-card);
   color: var(--text-main);
 }
 
-.day-mini-btn.active {
+.day-btn.active {
   background-color: var(--accent);
   color: #fff;
+}
+
+/* ======================
+   SUBGRUPOS
+====================== */
+.subgroup-section {
+  margin-top: 1.25rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.subgroup-section h4 {
+  margin-bottom: 0.5rem;
+  color: var(--accent);
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* ======================
    CHIPS DE EJERCICIOS
 ====================== */
 .exercise-chip {
-  display: inline-block;
-  background-color: #2b2b3a;
-  padding: 0.4rem 0.8rem;
-  border-radius: var(--radius);
+  background-color: var(--bg-chip);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
   cursor: pointer;
-  margin: 0.25rem;
+  margin-bottom: 0.5rem;
+  transition: background-color 0.2s, transform 0.1s;
 }
 
 .exercise-chip:hover {
-  background-color: #3a3a55;
+  background-color: var(--bg-chip-hover);
+}
+
+.exercise-chip:active {
+  transform: scale(0.98);
 }
 
 /* ======================
-   MODAL EJERCICIOS (ÚNICO)
+   MODAL EJERCICIOS
 ====================== */
 #exercise-modal {
   position: fixed;
@@ -197,24 +234,4 @@ input {
   .day-buttons {
     flex-direction: column;
   }
-}
-
-/* ======================
-  SUBGRUPOS
-====================== */
-.subgroup-section {
-  margin-top: 1rem;
-}
-
-.subgroup-section h4 {
-  margin-bottom: .5rem;
-  color: var(--accent);
-}
-
-.exercise-chip {
-  padding: .5rem;
-  border-radius: 8px;
-  background: #1b1b1b;
-  margin-bottom: .5rem;
-  cursor: pointer;
 }
