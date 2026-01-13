@@ -105,19 +105,6 @@ function setupTabs() {
 }
 
 /* ======================
-   DAY SELECTOR
-====================== */
-function initDaySelector() {
-  document.querySelectorAll(".day-btn").forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll(".day-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      selectedDaysPerWeek = Number(btn.dataset.days);
-    };
-  });
-}
-
-/* ======================
    SAVE MESOCYCLE
 ====================== */
 createBtn.onclick = saveMesocycle;
