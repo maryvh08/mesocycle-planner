@@ -12,6 +12,9 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 ====================== */
 let selectedDaysPerWeek = null;
 let editingMesocycleId = null;
+let currentMesocycleId = null;
+let currentWeek = 1;
+let currentDay = null;
 
 /* ======================
    UI ELEMENTS
@@ -35,6 +38,9 @@ const registroEditor = document.getElementById("registro-editor");
 /* ======================
    AUTH
 ====================== */
+initAuth();
+checkSession();
+
 function initAuth() {
   document.getElementById("login-btn").onclick = login;
   document.getElementById("signup-btn").onclick = signup;
@@ -63,6 +69,11 @@ async function signup() {
 
 async function logout() {
   await supabase.auth.signOut();
+}
+
+async function checkSession() {
+  const { data } = await supabase.auth.getSession();
+  data.session ? showApp() : showLogin();
 }
 
 /* ======================
@@ -98,7 +109,7 @@ function setupTabs() {
 }
 
 /* ======================
-   DAY SELECTOR
+   DAY SELECTOR (CREAR MESOCICLO)
 ====================== */
 function initDaySelector() {
   document.querySelectorAll(".day-btn").forEach(btn => {
@@ -111,7 +122,7 @@ function initDaySelector() {
 }
 
 /* ======================
-   TEMPLATES
+   LOAD TEMPLATES
 ====================== */
 async function loadTemplates() {
   const { data, error } = await supabase
@@ -131,7 +142,60 @@ async function loadTemplates() {
 }
 
 /* ======================
-   MESOCYCLES
+   SAVE MESOCYCLE
+====================== */
+createBtn.onclick = saveMesocycle;
+
+async function saveMesocycle() {
+  const name = mesocycleNameInput.value.trim();
+  const weeks = Number(mesocycleWeeksInput.value);
+  const templateId = templateSelect.value;
+
+  if (!name || !weeks || !templateId || !selectedDaysPerWeek) {
+    alert("Completa todos los campos");
+    return;
+  }
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return alert("No autenticado");
+
+  const payload = {
+    user_id: session.user.id,
+    name,
+    weeks,
+    days_per_week: selectedDaysPerWeek,
+    template_id: templateId
+  };
+
+  const { error } = editingMesocycleId
+    ? await supabase.from("mesocycles").update(payload).eq("id", editingMesocycleId)
+    : await supabase.from("mesocycles").insert(payload);
+
+  if (error) {
+    console.error(error);
+    alert("Error al guardar mesociclo");
+    return;
+  }
+
+  resetMesocycleForm();
+  loadMesocycles();
+}
+
+/* ======================
+   RESET FORM
+====================== */
+function resetMesocycleForm() {
+  mesocycleNameInput.value = "";
+  mesocycleWeeksInput.value = "";
+  templateSelect.value = "";
+  selectedDaysPerWeek = null;
+  editingMesocycleId = null;
+
+  document.querySelectorAll(".day-btn").forEach(b => b.classList.remove("active"));
+}
+
+/* ======================
+   LOAD MESOCYCLES
 ====================== */
 async function loadMesocycles() {
   const { data: { session } } = await supabase.auth.getSession();
@@ -170,15 +234,37 @@ async function loadMesocycles() {
 }
 
 /* ======================
+   EDIT MESOCYCLE
+====================== */
+function editMesocycle(m) {
+  editingMesocycleId = m.id;
+  mesocycleNameInput.value = m.name;
+  mesocycleWeeksInput.value = m.weeks;
+  templateSelect.value = m.template_id;
+  selectedDaysPerWeek = m.days_per_week;
+
+  document.querySelectorAll(".day-btn").forEach(b =>
+    b.classList.toggle("active", Number(b.dataset.days) === selectedDaysPerWeek)
+  );
+
+  document.querySelector('[data-tab="crear-tab"]').click();
+}
+
+/* ======================
    REGISTRO
 ====================== */
+registroSelect.onchange = () => {
+  if (registroSelect.value) openRegistro(registroSelect.value);
+};
+
 async function openRegistro(mesocycleId) {
+  currentMesocycleId = mesocycleId;
   document.querySelector('[data-tab="registro-tab"]').click();
   await renderRegistroEditor(mesocycleId);
 }
 
 /* ======================
-   SUBGRUPOS
+   SUBGROUP FILTER
 ====================== */
 function getAllowedSubgroups(enfasis) {
   if (!enfasis || enfasis === "Todos") return null;
@@ -186,18 +272,66 @@ function getAllowedSubgroups(enfasis) {
 }
 
 /* ======================
-   RENDER EJERCICIOS DÍA
+   RENDER REGISTRO EDITOR
 ====================== */
-async function renderExercisesForDay({ mesocycleId, week, day, container }) {
-  container.innerHTML = "";
+async function renderRegistroEditor(mesocycleId) {
+  registroEditor.innerHTML = "";
 
   const { data: mesocycle } = await supabase
     .from("mesocycles")
-    .select(`templates ( Enfasis )`)
+    .select(`
+      *,
+      templates (
+        Enfasis
+      )
+    `)
     .eq("id", mesocycleId)
     .single();
 
-  const allowed = getAllowedSubgroups(mesocycle.templates?.Enfasis);
+  const title = document.createElement("h3");
+  title.textContent = mesocycle.name;
+  registroEditor.appendChild(title);
+
+  /* SEMANAS */
+  const weekSelect = document.createElement("select");
+  for (let i = 1; i <= mesocycle.weeks; i++) {
+    weekSelect.innerHTML += `<option value="${i}">Semana ${i}</option>`;
+  }
+  weekSelect.onchange = () => {
+    currentWeek = Number(weekSelect.value);
+    if (currentDay) loadExercisesForDay();
+  };
+  registroEditor.appendChild(weekSelect);
+
+  /* DÍAS */
+  const dayContainer = document.createElement("div");
+  dayContainer.className = "day-buttons";
+
+  for (let i = 1; i <= mesocycle.days_per_week; i++) {
+    const btn = document.createElement("button");
+    btn.textContent = `Día ${i}`;
+    btn.onclick = () => {
+      [...dayContainer.children].forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentDay = i;
+      loadExercisesForDay();
+    };
+    dayContainer.appendChild(btn);
+  }
+  registroEditor.appendChild(dayContainer);
+
+  /* CONTENEDOR */
+  const container = document.createElement("div");
+  container.id = "registered-exercises";
+  registroEditor.appendChild(container);
+}
+
+/* ======================
+   LOAD EXERCISES PER DAY
+====================== */
+async function loadExercisesForDay() {
+  const container = document.getElementById("registered-exercises");
+  container.innerHTML = "";
 
   const { data, error } = await supabase
     .from("exercise_records")
@@ -210,9 +344,9 @@ async function renderExercisesForDay({ mesocycleId, week, day, container }) {
         Subgrupo
       )
     `)
-    .eq("mesocycle_id", mesocycleId)
-    .eq("week_number", week)
-    .eq("day_number", day)
+    .eq("mesocycle_id", currentMesocycleId)
+    .eq("week_number", currentWeek)
+    .eq("day_number", currentDay)
     .order("updated_at", { ascending: false });
 
   if (error || !data.length) {
@@ -220,12 +354,8 @@ async function renderExercisesForDay({ mesocycleId, week, day, container }) {
     return;
   }
 
-  const filtered = allowed
-    ? data.filter(r => allowed.includes(r.exercises.Subgrupo))
-    : data;
-
   const grouped = {};
-  filtered.forEach(r => {
+  data.forEach(r => {
     grouped[r.exercises.Subgrupo] ??= [];
     grouped[r.exercises.Subgrupo].push(r);
   });
@@ -233,7 +363,6 @@ async function renderExercisesForDay({ mesocycleId, week, day, container }) {
   Object.entries(grouped).forEach(([subgroup, rows]) => {
     const section = document.createElement("section");
     section.className = "subgroup-section";
-
     section.innerHTML = `<h4>${subgroup}</h4>`;
 
     rows.forEach(r => {
@@ -250,55 +379,4 @@ async function renderExercisesForDay({ mesocycleId, week, day, container }) {
   });
 }
 
-/* ======================
-   REGISTRO EDITOR
-====================== */
-async function renderRegistroEditor(mesocycleId) {
-  registroEditor.innerHTML = "";
-
-  const { data: mesocycle } = await supabase
-    .from("mesocycles")
-    .select("*")
-    .eq("id", mesocycleId)
-    .single();
-
-  const title = document.createElement("h3");
-  title.textContent = mesocycle.name;
-  registroEditor.appendChild(title);
-
-  const registeredExercisesContainer = document.createElement("div");
-  registroEditor.appendChild(registeredExercisesContainer);
-
-  const dayContainer = document.createElement("div");
-  dayContainer.className = "day-buttons";
-
-  let selectedDay = null;
-
-  for (let i = 1; i <= mesocycle.days_per_week; i++) {
-    const btn = document.createElement("button");
-    btn.textContent = `Día ${i}`;
-    btn.className = "day-btn";
-
-    btn.onclick = async () => {
-      [...dayContainer.children].forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      selectedDay = i;
-
-      await renderExercisesForDay({
-        mesocycleId,
-        week: 1,
-        day: selectedDay,
-        container: registeredExercisesContainer
-      });
-    };
-
-    dayContainer.appendChild(btn);
-  }
-
-  registroEditor.appendChild(dayContainer);
-}
-
-/* ======================
-   INIT
-====================== */
-initAuth();
+ 
