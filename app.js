@@ -86,7 +86,6 @@ async function showApp() {
   appView.classList.remove("hidden");
 
   setupTabs();
-  initDaySelector();
   await loadTemplates();
   await loadMesocycles();
 }
@@ -455,6 +454,13 @@ async function renderRegistroEditor(mesocycleId) {
   registroEditor.appendChild(weekSelect);
 
   /* ======================
+     CONTENEDOR EJERCICIOS REGISTRADOS
+  ====================== */
+  const registeredExercisesContainer = document.createElement("div");
+  registeredExercisesContainer.id = "registered-exercises";
+  registroEditor.appendChild(registeredExercisesContainer);
+
+   /* ======================
      BOTONES DE DÍA
   ====================== */
   const dayContainer = document.createElement("div");
@@ -484,13 +490,6 @@ async function renderRegistroEditor(mesocycleId) {
   }
 
   registroEditor.appendChild(dayContainer);
-
-  /* ======================
-     CONTENEDOR EJERCICIOS REGISTRADOS
-  ====================== */
-  const registeredExercisesContainer = document.createElement("div");
-  registeredExercisesContainer.id = "registered-exercises";
-  registroEditor.appendChild(registeredExercisesContainer);
 
   /* ======================
      SELECT EJERCICIO
