@@ -86,15 +86,27 @@ async function showApp() {
 /* ======================
    TABS
 ====================== */
-function setupTabs() {
-  document.querySelectorAll(".tab-btn").forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-      document.querySelectorAll(".tab-content").forEach(c => c.classList.add("hidden"));
-      btn.classList.add("active");
-      document.getElementById(btn.dataset.tab).classList.remove("hidden");
-    };
-  });
+function setupTabs(tab) {
+  // Ocultar todas las vistas
+  document.querySelectorAll(".tab-content").forEach(v =>
+    v.classList.add("hidden")
+  );
+
+  // Desactivar botones
+  document.querySelectorAll(".tab-btn").forEach(b =>
+    b.classList.remove("active")
+  );
+
+  // Activar vista actual
+  document.getElementById(`${tab}-view`).classList.remove("hidden");
+  document
+    .querySelector(`.tab-btn[data-tab="${tab}"]`)
+    .classList.add("active");
+
+  // Estadisticas visuales
+  if (tab === "stats") {
+    renderStatsView();
+  }
 }
 
 /* ======================
