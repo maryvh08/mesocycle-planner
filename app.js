@@ -325,9 +325,9 @@ async function openRegistro(mesocycleId) {
 /* ======================
    HELPERS
 ====================== */
-function getAllowedSubgroups(enfasis) {
-  if (!enfasis || enfasis === "Todos") return null;
-  return enfasis.split(",").map(s => s.trim());
+function getAllowedSubgroups(emphasis) {
+  if (!emphasis || emphasis === "Todos") return null;
+  return emphasis.split(",").map(s => s.trim());
 }
 
 /* ======================
@@ -359,11 +359,11 @@ async function renderRegistroEditor(mesocycleId) {
    if (mesocycle.template_id) {
      const { data: template } = await supabase
        .from("templates")
-       .select("enfasis")
+       .select("emphasis")
        .eq("id", mesocycle.template_id)
        .single();
    
-     allowedSubgroups = getAllowedSubgroups(template?.enfasis);
+     allowedSubgroups = getAllowedSubgroups(template?.emphasis);
    }
 
   /* ======================
