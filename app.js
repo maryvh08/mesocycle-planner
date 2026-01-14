@@ -113,20 +113,24 @@ function setupTabs() {
 }
 
 function renderStatsView() {
-  const statsView = document.getElementById("stats");
+  console.log("📊 Render stats view");
 
-  statsView.innerHTML = `
-    <h3>📊 Estadísticas</h3>
+  const exerciseSelect = document.getElementById("stats-exercise-select");
+  const metrics = document.getElementById("stats-metrics");
 
-    <select id="stats-exercise-select">
-      <option value="">Selecciona un ejercicio</option>
-    </select>
+  if (!exerciseSelect) {
+    console.error("❌ stats-exercise-select no existe");
+    return;
+  }
 
-    <canvas id="progressChart" height="120"></canvas>
-  `;
+  exerciseSelect.innerHTML =
+    `<option value="">Selecciona un ejercicio</option>`;
+
+  metrics.querySelector("#metric-last").textContent = "–";
+  metrics.querySelector("#metric-max").textContent = "–";
+  metrics.querySelector("#metric-avg").textContent = "–";
 
   loadStatsExerciseSelector();
-
 }
 
 /* ======================
@@ -800,34 +804,88 @@ async function loadExercisesForStats(select) {
   });
 }
 
-async function loadExerciseStats(exerciseId, container) {
-  container.innerHTML = "<p>Cargando estadísticas...</p>";
+async function loadStatsExerciseSelector() {
+  const exerciseSelect = document.getElementById("stats-exercise-select");
+
+  if (!exerciseSelect) return;
+
+  const { data, error } = await supabase
+    .from("exercises")
+    .select("id, name")
+    .order("name");
+
+  if (error) {
+    console.error("❌ Error cargando ejercicios stats", error);
+    return;
+  }
+
+  data.forEach(ex => {
+    const opt = document.createElement("option");
+    opt.value = ex.id;
+    opt.textContent = ex.name;
+    exerciseSelect.appendChild(opt);
+  });
+
+  exerciseSelect.onchange = () => {
+    if (!exerciseSelect.value) return;
+    loadExerciseStats(exerciseSelect.value);
+  };
+}
+
+let statsChart = null;
+
+async function loadExerciseStats(exerciseId) {
+  console.log("📈 Cargando stats de", exerciseId);
 
   const { data, error } = await supabase
     .from("exercise_records")
-    .select("weight, reps, week_number, day_number, updated_at")
+    .select("weight, reps, created_at")
     .eq("exercise_id", exerciseId)
-    .order("updated_at", { ascending: true });
+    .order("created_at", { ascending: true });
 
   if (error) {
-    console.error("❌ Error cargando stats", error);
-    container.innerHTML = "<p>Error cargando estadísticas</p>";
+    console.error("❌ Error stats", error);
     return;
   }
 
-  if (!data || !data.length) {
-    container.innerHTML = "<p>No hay datos para este ejercicio</p>";
+  if (!data.length) {
+    alert("No hay registros para este ejercicio");
     return;
   }
 
-  container.innerHTML = "";
+  // 📊 métricas
+  const weights = data.map(r => r.weight);
+  const last = weights.at(-1);
+  const max = Math.max(...weights);
+  const avg = (weights.reduce((a, b) => a + b, 0) / weights.length).toFixed(1);
 
-  data.forEach(r => {
-    const row = document.createElement("div");
-    row.className = "stat-row";
-    row.textContent =
-      `Semana ${r.week_number} · Día ${r.day_number} — ${r.weight} kg x ${r.reps}`;
-    container.appendChild(row);
+  document.getElementById("metric-last").textContent = `${last} kg`;
+  document.getElementById("metric-max").textContent = `${max} kg`;
+  document.getElementById("metric-avg").textContent = `${avg} kg`;
+
+  // 📈 gráfica
+  const ctx = document.getElementById("progressChart").getContext("2d");
+
+  if (statsChart) statsChart.destroy();
+
+  statsChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: data.map((_, i) => `Sesión ${i + 1}`),
+      datasets: [{
+        label: "Peso (kg)",
+        data: weights,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: false
+        }
+      }
+    }
   });
 }
 
