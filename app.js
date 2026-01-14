@@ -320,19 +320,30 @@ async function loadExerciseHistory(mesocycleId, container) {
       dayDiv.innerHTML = `<strong>${day}</strong>`;
 
       rows.forEach(r => {
-        const item = document.createElement("div");
-         item.className = "exercise-history-row";
-         item.innerHTML = `
-           • <strong>${r.exercises.name}</strong>
-           (${r.exercises.subgroup})
-           — ${r.weight}kg x ${r.reps}
-           <button class="mini-btn">✏️</button>
-         `;
-         
-         item.querySelector("button").onclick = () => {
-           editExerciseRecord(r);
-         };
-        dayDiv.appendChild(item);
+        const chip = document.createElement("div");
+        chip.className = "exercise-chip";
+      
+        const label = document.createElement("span");
+        label.textContent =
+          `${r.exercises.name} — ${r.weight}kg × ${r.reps}`;
+      
+        // ✏️ click para editar
+        label.onclick = () => editExerciseRecord(r);
+      
+        // ❌ botón borrar
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "chip-delete";
+        deleteBtn.textContent = "✕";
+      
+        deleteBtn.onclick = async (e) => {
+          e.stopPropagation();
+          await deleteExerciseRecord(r.id);
+          await loadExerciseHistory(mesocycleId, container);
+        };
+      
+        chip.appendChild(label);
+        chip.appendChild(deleteBtn);
+        dayDiv.appendChild(chip);
       });
 
       weekDiv.appendChild(dayDiv);
@@ -663,6 +674,23 @@ async function renderExercisesForDay(mesocycleId, week, day, container) {
     div.textContent = `${r.exercises.name} — ${r.weight}kg x ${r.reps}`;
     container.appendChild(div);
   });
+}
+
+async function deleteExerciseRecord(recordId) {
+  if (!confirm("¿Eliminar este ejercicio?")) return;
+
+  const { error } = await supabase
+    .from("exercise_records")
+    .delete()
+    .eq("id", recordId);
+
+  if (error) {
+    console.error(error);
+    alert("Error eliminando ejercicio");
+    return;
+  }
+
+  console.log("🗑️ Registro eliminado", recordId);
 }
 
 /* ======================
