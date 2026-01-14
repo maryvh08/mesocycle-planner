@@ -189,7 +189,7 @@ async function loadMesocycles() {
        days_per_week,
        templates (
          name,
-         enfasis
+         emphasis
        )
      `)
      .eq("user_id", session.user.id)
