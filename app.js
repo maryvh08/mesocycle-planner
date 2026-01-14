@@ -712,12 +712,20 @@ async function deleteExerciseRecord(recordId) {
 ====================== */
 
 async function renderStatsExerciseSelector(statsView) {
+  console.log("📊 Render stats selector");
+
   statsView.innerHTML = "<p>Cargando ejercicios...</p>";
 
   const { data, error } = await supabase
-    .from("exercises")
-    .select("id, name")
-    .order("name");
+    .from("exercise_records")
+    .select(`
+      exercise_id,
+      exercises (
+        id,
+        name
+      )
+    `)
+    .order("exercise_id");
 
   if (error) {
     console.error("❌ Error cargando ejercicios stats", error);
@@ -725,23 +733,39 @@ async function renderStatsExerciseSelector(statsView) {
     return;
   }
 
-  if (!Array.isArray(data) || data.length === 0) {
-    statsView.innerHTML = "<p>No hay ejercicios disponibles</p>";
+  if (!data || data.length === 0) {
+    statsView.innerHTML = "<p>No hay ejercicios registrados</p>";
+    return;
+  }
+
+  // 🔹 eliminar duplicados
+  const uniqueExercises = {};
+  data.forEach(r => {
+    if (r.exercises && !uniqueExercises[r.exercise_id]) {
+      uniqueExercises[r.exercise_id] = r.exercises;
+    }
+  });
+
+  const exercises = Object.values(uniqueExercises);
+
+  if (!exercises.length) {
+    statsView.innerHTML = "<p>No hay ejercicios con registros</p>";
     return;
   }
 
   statsView.innerHTML = "";
 
+  /* ======================
+     UI
+  ====================== */
   const title = document.createElement("h3");
   title.textContent = "Estadísticas por ejercicio";
   statsView.appendChild(title);
 
   const exerciseSelect = document.createElement("select");
-  exerciseSelect.id = "stats-exercise-select";
-  exerciseSelect.innerHTML =
-    `<option value="">Selecciona ejercicio</option>`;
+  exerciseSelect.innerHTML = `<option value="">Selecciona ejercicio</option>`;
 
-  data.forEach(ex => {
+  exercises.forEach(ex => {
     const opt = document.createElement("option");
     opt.value = ex.id;
     opt.textContent = ex.name;
