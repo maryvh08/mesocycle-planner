@@ -728,7 +728,25 @@ async function deleteExerciseRecord(recordId) {
    ESTADISTICAS
 ====================== */
 
-function renderStatsExerciseSelector(statsView, exercises) {
+async function renderStatsExerciseSelector(statsView) {
+  statsView.innerHTML = "<p>Cargando ejercicios...</p>";
+
+  const { data, error } = await supabase
+    .from("exercises")
+    .select("id, name")
+    .order("name");
+
+  if (error) {
+    console.error("❌ Error cargando ejercicios stats", error);
+    statsView.innerHTML = "<p>Error cargando ejercicios</p>";
+    return;
+  }
+
+  if (!Array.isArray(data) || data.length === 0) {
+    statsView.innerHTML = "<p>No hay ejercicios disponibles</p>";
+    return;
+  }
+
   statsView.innerHTML = "";
 
   const title = document.createElement("h3");
@@ -736,9 +754,11 @@ function renderStatsExerciseSelector(statsView, exercises) {
   statsView.appendChild(title);
 
   const exerciseSelect = document.createElement("select");
-  exerciseSelect.innerHTML = `<option value="">Selecciona ejercicio</option>`;
+  exerciseSelect.id = "stats-exercise-select";
+  exerciseSelect.innerHTML =
+    `<option value="">Selecciona ejercicio</option>`;
 
-  exercises.forEach(ex => {
+  data.forEach(ex => {
     const opt = document.createElement("option");
     opt.value = ex.id;
     opt.textContent = ex.name;
@@ -749,8 +769,11 @@ function renderStatsExerciseSelector(statsView, exercises) {
   statsContainer.id = "exercise-stats-container";
 
   exerciseSelect.onchange = () => {
-    if (!exerciseSelect.value) return;
-    loadExerciseStats(exerciseSelect.value, statsContainer);
+    if (!exerciseSelect.value) {
+      statsContainer.innerHTML = "";
+      return;
+    }
+    loadExerciseStats(exerciseSelect.value);
   };
 
   statsView.appendChild(exerciseSelect);
