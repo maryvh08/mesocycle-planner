@@ -209,7 +209,7 @@ async function loadMesocycles() {
       )
     `)
     .eq("user_id", session.user.id)
-    .order("updated_at", { ascending: false });
+    .order("created_at", { ascending: false });
 
   if (error) {
     console.error(error);
