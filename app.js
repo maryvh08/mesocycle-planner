@@ -959,9 +959,9 @@ async function loadExerciseProgressChart(exerciseId) {
 
   const { data, error } = await supabase
     .from("exercise_records")
-    .select("weight, created_at")
+    .select("weight, updated_at")
     .eq("exercise_id", exerciseId)
-    .order("created_at", { ascending: true });
+    .order("updated_at", { ascending: true });
 
   if (error || !data.length) {
     console.error(error);
@@ -969,7 +969,7 @@ async function loadExerciseProgressChart(exerciseId) {
   }
 
   const labels = data.map(r =>
-    new Date(r.created_at).toLocaleDateString()
+    new Date(r.updated_at).toLocaleDateString()
   );
 
   const values = data.map(r => r.weight);
