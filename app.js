@@ -86,32 +86,7 @@ async function showApp() {
 /* ======================
    TABS
 ====================== */
-function setupTabs() {
-  document.querySelectorAll(".tab-btn").forEach(btn => {
-    btn.onclick = () => {
-      const tabId = btn.dataset.tab;
-
-      document.querySelectorAll(".tab-btn")
-        .forEach(b => b.classList.remove("active"));
-      document.querySelectorAll(".tab-content")
-        .forEach(c => c.classList.add("hidden"));
-
-      btn.classList.add("active");
-
-      const tab = document.getElementById(tabId);
-      if (!tab) return;
-
-      tab.classList.remove("hidden");
-
-      if (tabId === "stats") {
-        renderStatsExerciseSelector(tab);
-         renderStatsView();
-         loadExerciseProgressChart(id);
-      }
-    };
-  });
-}
-
+loadStatsExerciseSelector()
 function renderStatsView() {
   console.log("📊 Render stats view");
 
