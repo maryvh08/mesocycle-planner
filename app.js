@@ -717,6 +717,10 @@ async function renderStatsView() {
   const exerciseSelect = document.getElementById("stats-exercise-select");
   const summary = document.getElementById("stats-summary");
   const charts = document.getElementById("stats-charts");
+   const statsContainer = document.createElement("div");
+   statsContainer.id = "exercise-stats-container";
+   statsView.appendChild(statsContainer);
+
 
   exerciseSelect.innerHTML =
     `<option value="">Selecciona un ejercicio</option>`;
