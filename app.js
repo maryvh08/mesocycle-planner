@@ -1000,6 +1000,21 @@ async function testStatsQuery() {
   console.log("🧪 exercise_records test", data, error);
 }
 
+async function testStatsJoin() {
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select(`
+      exercise_id,
+      exercises (
+        id,
+        name
+      )
+    `)
+    .limit(5);
+
+  console.log("🧪 join test", data, error);
+}
+
 /* ======================
    INIT
 ====================== */
