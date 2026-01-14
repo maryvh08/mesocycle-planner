@@ -129,8 +129,6 @@ function renderStatsView() {
   metrics.querySelector("#metric-last").textContent = "–";
   metrics.querySelector("#metric-max").textContent = "–";
   metrics.querySelector("#metric-avg").textContent = "–";
-
-  loadStatsExerciseSelector();
 }
 
 /* ======================
