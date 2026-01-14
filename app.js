@@ -203,21 +203,35 @@ async function loadMesocycles() {
   registroSelect.innerHTML = `<option value="">Selecciona mesociclo</option>`;
 
   data.forEach(m => {
-    const li = document.createElement("li");
-    li.innerHTML = `
-      <strong>${m.name}</strong>
-      <div>${m.weeks} semanas · ${m.days_per_week} días</div>
-      <button class="register-btn">Registrar</button>
-    `;
-
-    li.querySelector(".register-btn").onclick = () => openRegistro(m.id);
-    historyList.appendChild(li);
-
-    const opt = document.createElement("option");
-    opt.value = m.id;
-    opt.textContent = m.name;
-    registroSelect.appendChild(opt);
-  });
+     const li = document.createElement("li");
+     li.className = "mesocycle-history-card";
+   
+     li.innerHTML = `
+       <h4>${m.name}</h4>
+       <div class="muted">
+         Plantilla: <strong>${m.templates?.name ?? "Sin plantilla"}</strong>
+       </div>
+       <div class="muted">
+         ${m.weeks} semanas · ${m.days_per_week} días
+       </div>
+   
+       <button class="toggle-history-btn">Ver historial</button>
+       <div class="exercise-history hidden"></div>
+     `;
+   
+     const historyContainer = li.querySelector(".exercise-history");
+     const toggleBtn = li.querySelector(".toggle-history-btn");
+   
+     toggleBtn.onclick = async () => {
+       if (!historyContainer.dataset.loaded) {
+         await loadExerciseHistory(m.id, historyContainer);
+         historyContainer.dataset.loaded = "true";
+       }
+       historyContainer.classList.toggle("hidden");
+     };
+   
+     historyList.appendChild(li);
+   });
 }
 
 /* ======================
