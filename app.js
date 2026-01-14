@@ -771,16 +771,10 @@ async function loadExerciseStats(exerciseId) {
   charts.innerHTML = "";
 
   const { data, error } = await supabase
-    .from("exercise_records")
-    .select(`
-      weight,
-      reps,
-      week_number,
-      day_number,
-      created_at
-    `)
-    .eq("exercise_id", exerciseId)
-    .order("created_at");
+     .from("exercise_records")
+     .select("weight, reps, week_number, day_number, created_at")
+     .eq("exercise_id", exerciseId)
+     .order("created_at", { ascending: true });
 
   if (error) {
     console.error(error);
