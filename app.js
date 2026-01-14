@@ -694,6 +694,143 @@ async function deleteExerciseRecord(recordId) {
 }
 
 /* ======================
+   ESTADISTICAS
+====================== */
+
+async function renderStatsView() {
+  const statsView = document.getElementById("stats-view");
+  statsView.innerHTML = "";
+
+  const title = document.createElement("h3");
+  title.textContent = "📊 Estadísticas";
+  statsView.appendChild(title);
+
+  // Select ejercicio
+  const exerciseSelect = document.createElement("select");
+  exerciseSelect.innerHTML = `<option value="">Selecciona ejercicio</option>`;
+  statsView.appendChild(exerciseSelect);
+
+  // Contenedores
+  const summary = document.createElement("div");
+  summary.id = "stats-summary";
+
+  const chartContainer = document.createElement("div");
+  chartContainer.id = "stats-charts";
+
+  statsView.appendChild(summary);
+  statsView.appendChild(chartContainer);
+
+  await loadExercisesForStats(exerciseSelect);
+
+  exerciseSelect.onchange = () => {
+    if (!exerciseSelect.value) return;
+    loadExerciseStats(exerciseSelect.value);
+  };
+}
+
+async function loadExercisesForStats(select) {
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select(`
+      exercise_id,
+      exercises (
+        name
+      )
+    `)
+    .order("exercise_id");
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const unique = {};
+  data.forEach(r => {
+    if (!unique[r.exercise_id]) {
+      unique[r.exercise_id] = r.exercises.name;
+    }
+  });
+
+  Object.entries(unique).forEach(([id, name]) => {
+    const opt = document.createElement("option");
+    opt.value = id;
+    opt.textContent = name;
+    select.appendChild(opt);
+  });
+}
+
+async function loadExerciseStats(exerciseId) {
+  const summary = document.getElementById("stats-summary");
+  const charts = document.getElementById("stats-charts");
+
+  summary.innerHTML = "Cargando...";
+  charts.innerHTML = "";
+
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select(`
+      weight,
+      reps,
+      week_number,
+      day_number,
+      created_at
+    `)
+    .eq("exercise_id", exerciseId)
+    .order("created_at");
+
+  if (error) {
+    console.error(error);
+    summary.innerHTML = "Error cargando datos";
+    return;
+  }
+
+  if (!data.length) {
+    summary.innerHTML = "Sin registros";
+    return;
+  }
+
+  // Mejor marca
+  const bestSet = data.reduce((best, r) => {
+    const volume = r.weight * r.reps;
+    return volume > best.volume ? { ...r, volume } : best;
+  }, { volume: 0 });
+
+  summary.innerHTML = `
+    <div class="stat-card">🏆 Mejor set: ${bestSet.weight}kg × ${bestSet.reps}</div>
+    <div class="stat-card">📦 Total sets: ${data.length}</div>
+  `;
+
+  renderProgressTable(data, charts);
+}
+
+function renderProgressTable(data, container) {
+  const table = document.createElement("table");
+  table.className = "stats-table";
+
+  table.innerHTML = `
+    <tr>
+      <th>Fecha</th>
+      <th>Peso</th>
+      <th>Reps</th>
+      <th>Volumen</th>
+    </tr>
+  `;
+
+  data.forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${new Date(r.created_at).toLocaleDateString()}</td>
+      <td>${r.weight}</td>
+      <td>${r.reps}</td>
+      <td>${r.weight * r.reps}</td>
+    `;
+    table.appendChild(tr);
+  });
+
+  container.appendChild(table);
+}
+
+/* ======================
    INIT
 ====================== */
 initAuth();
