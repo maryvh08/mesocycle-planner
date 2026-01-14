@@ -255,9 +255,14 @@ function openEditExerciseModal({ recordId, name, weight, reps }) {
       updated_at: new Date().toISOString()
     })
     .eq("id", recordId)
-    .then(() => {
-      alert("Registro actualizado");
-    });
+    .then(async () => {
+     await renderExercisesForDay({
+       mesocycleId,
+       week: Number(document.querySelector("select").value),
+       day: selectedDay,
+       container: document.getElementById("registered-exercises")
+     });
+   });
 }
 
 
@@ -397,10 +402,18 @@ async function renderRegistroEditor(mesocycleId) {
      CARGAR MESOCICLO
   ====================== */
   const { data: mesocycle, error: mError } = await supabase
-    .from("mesocycles")
-    .select("*")
-    .eq("id", mesocycleId)
-    .single();
+     .from("mesocycles")
+     .select(`
+       id,
+       name,
+       weeks,
+       days_per_week,
+       templates (
+         enfasis
+       )
+     `)
+     .eq("id", mesocycleId)
+     .single();
 
   if (mError) {
     console.error(mError);
@@ -483,10 +496,13 @@ async function renderRegistroEditor(mesocycleId) {
     dayContainer.appendChild(btn); // ✅ FALTABA
   }
 
-   weekSelect.onchange = () => {
-     registeredExercisesContainer.innerHTML = "<p>Selecciona un día</p>";
+   weekSelect.onchange = async () => {
      selectedDay = null;
+     registeredExercisesContainer.innerHTML = "<p>Selecciona un día</p>";
+   
+     [...dayContainer.children].forEach(b => b.classList.remove("active"));
    };
+
 
   registroEditor.appendChild(dayContainer);
 
@@ -536,7 +552,6 @@ async function renderRegistroEditor(mesocycleId) {
       day_number: selectedDay,
       weight: Number(weightInput.value),
       reps: Number(repsInput.value),
-      updated_at: new Date().toISOString()
     };
 
     const { error } = await supabase
