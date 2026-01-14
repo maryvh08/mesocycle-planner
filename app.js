@@ -248,25 +248,31 @@ async function renderRegistroEditor(mesocycleId) {
   /* ======================
      CARGAR MESOCICLO + TEMPLATE
   ====================== */
-  const { data: mesocycle, error: mError } = await supabase
-    .from("mesocycles")
-    .select(`
-      id,
-      name,
-      weeks,
-      days_per_week,
-      templates (
-        enfasis
-      )
-    `)
-    .eq("id", mesocycleId)
-    .single();
-
-  if (mError || !mesocycle) {
-    console.error(mError);
-    registroEditor.textContent = "Error cargando mesociclo";
-    return;
-  }
+  // 1️⃣ cargar mesociclo
+   const { data: mesocycle, error: mError } = await supabase
+     .from("mesocycles")
+     .select("id, name, weeks, days_per_week, template_id")
+     .eq("id", mesocycleId)
+     .single();
+   
+   if (mError || !mesocycle) {
+     console.error(mError);
+     registroEditor.textContent = "Error cargando mesociclo";
+     return;
+   }
+   
+   // 2️⃣ cargar template
+   let allowedSubgroups = null;
+   
+   if (mesocycle.template_id) {
+     const { data: template } = await supabase
+       .from("templates")
+       .select("enfasis")
+       .eq("id", mesocycle.template_id)
+       .single();
+   
+     allowedSubgroups = getAllowedSubgroups(template?.enfasis);
+   }
 
   /* ======================
      CARGAR EJERCICIOS
@@ -284,8 +290,8 @@ async function renderRegistroEditor(mesocycleId) {
 
   const allowedSubgroups = getAllowedSubgroups(mesocycle.templates?.enfasis);
   const filteredExercises = allowedSubgroups
-    ? exercises.filter(e => allowedSubgroups.includes(e.subgroup))
-    : exercises;
+     ? exercises.filter(e => allowedSubgroups.includes(e.subgroup))
+     : exercises;
 
   /* ======================
      TÍTULO
