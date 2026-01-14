@@ -310,6 +310,24 @@ async function renderRegistroEditor(mesocycleId) {
     weekSelect.appendChild(opt);
   }
   registroEditor.appendChild(weekSelect);
+   
+   /* ======================
+     CONTENEDOR REGISTROS
+  ====================== */
+  const registeredExercisesContainer = document.createElement("div");
+  registeredExercisesContainer.id = "registered-exercises";
+  registroEditor.appendChild(registeredExercisesContainer);
+
+  registeredExercisesContainer.innerHTML =
+    "<p>Selecciona una semana y un día</p>";
+
+  weekSelect.onchange = () => {
+    selectedDay = null;
+    registeredExercisesContainer.innerHTML =
+      "<p>Selecciona un día</p>";
+    [...dayContainer.children].forEach(b => b.classList.remove("active"));
+  };
+
 
   /* ======================
      BOTONES DE DÍA
@@ -340,23 +358,6 @@ async function renderRegistroEditor(mesocycleId) {
 
     dayContainer.appendChild(btn);
   }
-
-  /* ======================
-     CONTENEDOR REGISTROS
-  ====================== */
-  const registeredExercisesContainer = document.createElement("div");
-  registeredExercisesContainer.id = "registered-exercises";
-  registroEditor.appendChild(registeredExercisesContainer);
-
-  registeredExercisesContainer.innerHTML =
-    "<p>Selecciona una semana y un día</p>";
-
-  weekSelect.onchange = () => {
-    selectedDay = null;
-    registeredExercisesContainer.innerHTML =
-      "<p>Selecciona un día</p>";
-    [...dayContainer.children].forEach(b => b.classList.remove("active"));
-  };
 
   /* ======================
      SELECT EJERCICIO
