@@ -269,15 +269,16 @@ async function loadExerciseHistory(mesocycleId, container) {
   const { data, error } = await supabase
     .from("exercise_records")
     .select(`
-      week_number,
-      day_number,
-      weight,
-      reps,
-      exercises (
-        name,
-        subgroup
-      )
-    `)
+     id,
+     week_number,
+     day_number,
+     weight,
+     reps,
+     exercises (
+       name,
+       subgroup
+     )
+   `)
     .eq("mesocycle_id", mesocycleId)
     .order("week_number")
     .order("day_number");
