@@ -246,10 +246,6 @@ input:focus {
   padding-left: 1rem;
 }
 
-.hidden {
-  display: none;
-}
-
 .muted {
   color: #666;
   font-size: 0.9rem;
