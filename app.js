@@ -234,6 +234,75 @@ async function loadMesocycles() {
    });
 }
 
+async function loadExerciseHistory(mesocycleId, container) {
+  container.innerHTML = "<p>Cargando historial...</p>";
+
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select(`
+      week_number,
+      day_number,
+      weight,
+      reps,
+      exercises (
+        name,
+        subgroup
+      )
+    `)
+    .eq("mesocycle_id", mesocycleId)
+    .order("week_number")
+    .order("day_number");
+
+  if (error) {
+    console.error(error);
+    container.innerHTML = "<p>Error cargando historial</p>";
+    return;
+  }
+
+  if (!data.length) {
+    container.innerHTML = "<p>No hay ejercicios registrados</p>";
+    return;
+  }
+
+  // Agrupar por semana → día
+  const grouped = {};
+
+  data.forEach(r => {
+    const w = `Semana ${r.week_number}`;
+    const d = `Día ${r.day_number}`;
+
+    if (!grouped[w]) grouped[w] = {};
+    if (!grouped[w][d]) grouped[w][d] = [];
+
+    grouped[w][d].push(r);
+  });
+
+  container.innerHTML = "";
+
+  Object.entries(grouped).forEach(([week, days]) => {
+    const weekDiv = document.createElement("div");
+    weekDiv.className = "week-block";
+    weekDiv.innerHTML = `<h5>${week}</h5>`;
+
+    Object.entries(days).forEach(([day, rows]) => {
+      const dayDiv = document.createElement("div");
+      dayDiv.className = "day-block";
+      dayDiv.innerHTML = `<strong>${day}</strong>`;
+
+      rows.forEach(r => {
+        const item = document.createElement("div");
+        item.className = "exercise-history-row";
+        item.textContent = `• ${r.exercises.name} (${r.exercises.subgroup}) — ${r.weight}kg x ${r.reps}`;
+        dayDiv.appendChild(item);
+      });
+
+      weekDiv.appendChild(dayDiv);
+    });
+
+    container.appendChild(weekDiv);
+  });
+}
+
 /* ======================
    REGISTRO
 ====================== */
