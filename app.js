@@ -89,36 +89,30 @@ async function showApp() {
 function setupTabs() {
   document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.onclick = () => {
-      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-      document.querySelectorAll(".tab-content").forEach(c => c.classList.add("hidden"));
+      const tabId = btn.dataset.tab;
+      const tabContent = document.getElementById(tabId);
+
+      if (!tabContent) {
+        console.error(`❌ No existe el tab con id="${tabId}"`);
+        return;
+      }
+
+      document.querySelectorAll(".tab-btn")
+        .forEach(b => b.classList.remove("active"));
+
+      document.querySelectorAll(".tab-content")
+        .forEach(c => c.classList.add("hidden"));
+
       btn.classList.add("active");
-      document.getElementById(btn.dataset.tab).classList.remove("hidden");
+      tabContent.classList.remove("hidden");
+
+      if (tabId === "stats") {
+        renderStatsView();
+      }
     };
   });
 }
 
-function switchTab(tab) {
-  // Ocultar todas las vistas
-  document.querySelectorAll(".tab-content").forEach(v =>
-    v.classList.add("hidden")
-  );
-
-  // Desactivar botones
-  document.querySelectorAll(".tab-btn").forEach(b =>
-    b.classList.remove("active")
-  );
-
-  // Activar vista actual
-  document.getElementById(`${tab}-view`).classList.remove("hidden");
-  document
-    .querySelector(`.tab-btn[data-tab="${tab}"]`)
-    .classList.add("active");
-
-  // Estadisticas visuales
-  if (tab === "stats") {
-    renderStatsView();
-  }
-}
 /* ======================
    DAY SELECTOR (CREAR)
 ====================== */
