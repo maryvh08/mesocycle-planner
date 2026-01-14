@@ -710,6 +710,31 @@ async function deleteExerciseRecord(recordId) {
 /* ======================
    ESTADISTICAS
 ====================== */
+async function renderStatsView() {
+  const statsView = document.getElementById("stats-view");
+  if (!statsView) {
+    console.error("❌ stats-view no existe");
+    return;
+  }
+
+  statsView.innerHTML = `
+    <h2>📊 Estadísticas</h2>
+
+    <select id="stats-exercise-select">
+      <option value="">Selecciona ejercicio</option>
+    </select>
+
+    <div class="stats-metrics">
+      <div>Último peso: <strong id="metric-last">-</strong></div>
+      <div>Máximo peso: <strong id="metric-max">-</strong></div>
+      <div>Promedio: <strong id="metric-avg">-</strong></div>
+    </div>
+
+    <canvas id="progressChart" height="120"></canvas>
+  `;
+
+  await loadStatsExerciseSelector();
+}
 
 async function renderStatsExerciseSelector(statsView) {
   statsView.innerHTML = "<p>Cargando ejercicios...</p>";
@@ -795,31 +820,46 @@ async function loadExercisesForStats(select) {
   });
 }
 
-async function loadStatsExerciseSelector() {
-  const exerciseSelect = document.getElementById("stats-exercise-select");
-
-  if (!exerciseSelect) return;
-
-  const { data, error } = await supabase
-    .from("exercises")
-    .select("id, name")
-    .order("name");
-
-  if (error) {
-    console.error("❌ Error cargando ejercicios stats", error);
+aasync function loadStatsExerciseSelector() {
+  const select = document.getElementById("stats-exercise-select");
+  if (!select) {
+    console.error("❌ stats-exercise-select no existe");
     return;
   }
 
-  data.forEach(ex => {
-    const opt = document.createElement("option");
-    opt.value = ex.id;
-    opt.textContent = ex.name;
-    exerciseSelect.appendChild(opt);
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select(`
+      exercise_id,
+      exercises (
+        name
+      )
+    `)
+    .order("exercise_id");
+
+  if (error) {
+    console.error("❌ Error cargando selector stats", error);
+    return;
+  }
+
+  // eliminar duplicados
+  const unique = {};
+  data.forEach(r => {
+    if (r.exercises && !unique[r.exercise_id]) {
+      unique[r.exercise_id] = r.exercises.name;
+    }
   });
 
-  exerciseSelect.onchange = () => {
-    if (!exerciseSelect.value) return;
-    loadExerciseStats(exerciseSelect.value);
+  Object.entries(unique).forEach(([id, name]) => {
+    const opt = document.createElement("option");
+    opt.value = id;
+    opt.textContent = name;
+    select.appendChild(opt);
+  });
+
+  select.onchange = () => {
+    if (!select.value) return;
+    loadExerciseStats(select.value);
   };
 }
 
