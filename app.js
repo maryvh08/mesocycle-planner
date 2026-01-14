@@ -209,7 +209,7 @@ async function loadMesocycles() {
       )
     `)
     .eq("user_id", session.user.id)
-    .order("created_at", { ascending: false });
+    .order("updated_at", { ascending: false });
 
   if (error) {
     console.error(error);
@@ -763,42 +763,35 @@ async function loadExercisesForStats(select) {
   });
 }
 
-async function loadExerciseStats(exerciseId) {
-  const summary = document.getElementById("stats-summary");
-  const charts = document.getElementById("stats-charts");
-
-  summary.innerHTML = "Cargando...";
-  charts.innerHTML = "";
+async function loadExerciseStats(exerciseId, container) {
+  container.innerHTML = "<p>Cargando estadísticas...</p>";
 
   const { data, error } = await supabase
-     .from("exercise_records")
-     .select("weight, reps, week_number, day_number, created_at")
-     .eq("exercise_id", exerciseId)
-     .order("created_at", { ascending: true });
+    .from("exercise_records")
+    .select("weight, reps, week_number, day_number, updated_at")
+    .eq("exercise_id", exerciseId)
+    .order("updated_at", { ascending: true });
 
   if (error) {
-    console.error(error);
-    summary.innerHTML = "Error cargando datos";
+    console.error("❌ Error cargando stats", error);
+    container.innerHTML = "<p>Error cargando estadísticas</p>";
     return;
   }
 
-  if (!data.length) {
-    summary.innerHTML = "Sin registros";
+  if (!data || !data.length) {
+    container.innerHTML = "<p>No hay datos para este ejercicio</p>";
     return;
   }
 
-  // Mejor marca
-  const bestSet = data.reduce((best, r) => {
-    const volume = r.weight * r.reps;
-    return volume > best.volume ? { ...r, volume } : best;
-  }, { volume: 0 });
+  container.innerHTML = "";
 
-  summary.innerHTML = `
-    <div class="stat-card">🏆 Mejor set: ${bestSet.weight}kg × ${bestSet.reps}</div>
-    <div class="stat-card">📦 Total sets: ${data.length}</div>
-  `;
-
-  renderProgressTable(data, charts);
+  data.forEach(r => {
+    const row = document.createElement("div");
+    row.className = "stat-row";
+    row.textContent =
+      `Semana ${r.week_number} · Día ${r.day_number} — ${r.weight} kg x ${r.reps}`;
+    container.appendChild(row);
+  });
 }
 
 function renderProgressTable(data, container) {
@@ -817,7 +810,7 @@ function renderProgressTable(data, container) {
   data.forEach(r => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${new Date(r.created_at).toLocaleDateString()}</td>
+      <td>${new Date(r.updated_at).toLocaleDateString()}</td>
       <td>${r.weight}</td>
       <td>${r.reps}</td>
       <td>${r.weight * r.reps}</td>
