@@ -728,20 +728,7 @@ async function deleteExerciseRecord(recordId) {
    ESTADISTICAS
 ====================== */
 
-async function renderStatsExerciseSelector(statsView) {
-  statsView.innerHTML = "<p>Cargando ejercicios...</p>";
-
-  const { data: exercises, error } = await supabase
-    .from("exercises")
-    .select("id, name")
-    .order("name");
-
-  if (error || !exercises?.length) {
-    console.error(error);
-    statsView.innerHTML = "<p>No hay ejercicios disponibles</p>";
-    return;
-  }
-
+function renderStatsExerciseSelector(statsView, exercises) {
   statsView.innerHTML = "";
 
   const title = document.createElement("h3");
@@ -762,10 +749,7 @@ async function renderStatsExerciseSelector(statsView) {
   statsContainer.id = "exercise-stats-container";
 
   exerciseSelect.onchange = () => {
-    if (!exerciseSelect.value) {
-      statsContainer.innerHTML = "";
-      return;
-    }
+    if (!exerciseSelect.value) return;
     loadExerciseStats(exerciseSelect.value, statsContainer);
   };
 
