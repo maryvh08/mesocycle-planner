@@ -179,20 +179,32 @@ input:focus {
    CHIPS DE EJERCICIOS
 ====================== */
 .exercise-chip {
-  background-color: var(--bg-chip);
-  padding: 0.5rem 0.75rem;
-  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .35rem .6rem;
+  margin: .25rem 0;
+  border-radius: 999px;
+  background: #1f1f24;
+  color: #eaeaea;
+  font-size: .85rem;
   cursor: pointer;
-  margin-bottom: 0.5rem;
-  transition: background-color 0.2s, transform 0.1s;
 }
 
 .exercise-chip:hover {
-  background-color: var(--bg-chip-hover);
+  background: #2a2a32;
 }
 
-.exercise-chip:active {
-  transform: scale(0.98);
+.chip-delete {
+  border: none;
+  background: transparent;
+  color: #ff6b6b;
+  font-size: .9rem;
+  cursor: pointer;
+}
+
+.chip-delete:hover {
+  color: #ff3b3b;
 }
 
 /* ======================
