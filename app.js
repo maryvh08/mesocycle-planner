@@ -242,7 +242,16 @@ function getAllowedSubgroups(enfasis) {
    REGISTRO EDITOR
 ====================== */
 async function renderRegistroEditor(mesocycleId) {
-  registroEditor.innerHTML = "<p>Selecciona semana y día para comenzar</p>";
+  try {
+    console.log("🟢 renderRegistroEditor", mesocycleId);
+
+    const registroEditor = document.getElementById("registro-editor");
+    if (!registroEditor) {
+      console.error("❌ registro-editor no existe");
+      return;
+    }
+
+    registroEditor.innerHTML = "<p>Cargando registro...</p>";
 
   const { data: mesocycle } = await supabase
     .from("mesocycles")
