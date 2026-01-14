@@ -720,27 +720,15 @@ async function deleteExerciseRecord(recordId) {
 ====================== */
 
 async function renderStatsView() {
-  const statsView = document.getElementById("stats-view");
-  statsView.innerHTML = "";
+  const exerciseSelect = document.getElementById("stats-exercise-select");
+  const summary = document.getElementById("stats-summary");
+  const charts = document.getElementById("stats-charts");
 
-  const title = document.createElement("h3");
-  title.textContent = "📊 Estadísticas";
-  statsView.appendChild(title);
-
-  // Select ejercicio
-  const exerciseSelect = document.createElement("select");
-  exerciseSelect.innerHTML = `<option value="">Selecciona ejercicio</option>`;
-  statsView.appendChild(exerciseSelect);
-
-  // Contenedores
-  const summary = document.createElement("div");
-  summary.id = "stats-summary";
-
-  const chartContainer = document.createElement("div");
-  chartContainer.id = "stats-charts";
-
-  statsView.appendChild(summary);
-  statsView.appendChild(chartContainer);
+  exerciseSelect.innerHTML =
+    `<option value="">Selecciona un ejercicio</option>`;
+  summary.innerHTML =
+    `<p class="muted">Selecciona un ejercicio para ver estadísticas</p>`;
+  charts.innerHTML = "";
 
   await loadExercisesForStats(exerciseSelect);
 
