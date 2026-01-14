@@ -226,6 +226,7 @@ async function loadMesocycles() {
       <div class="history-actions">
         <button class="register-btn">Registrar</button>
         <button class="toggle-history-btn">Ver historial</button>
+        <button class="delete-btn">Eliminar</button>
       </div>
 
       <div class="exercise-history hidden"></div>
@@ -244,7 +245,11 @@ async function loadMesocycles() {
     li.querySelector(".register-btn").onclick = () => {
       registroSelect.value = m.id;
       openRegistro(m.id);
-    };
+   };
+
+   li.querySelector(".delete-btn").onclick = () => {
+     deleteMesocycle(m.id);
+   };
 
     historyList.appendChild(li);
 
@@ -315,8 +320,17 @@ async function loadExerciseHistory(mesocycleId, container) {
 
       rows.forEach(r => {
         const item = document.createElement("div");
-        item.className = "exercise-history-row";
-        item.textContent = `• ${r.exercises.name} (${r.exercises.subgroup}) — ${r.weight}kg x ${r.reps}`;
+         item.className = "exercise-history-row";
+         item.innerHTML = `
+           • <strong>${r.exercises.name}</strong>
+           (${r.exercises.subgroup})
+           — ${r.weight}kg x ${r.reps}
+           <button class="mini-btn">✏️</button>
+         `;
+         
+         item.querySelector("button").onclick = () => {
+           editExerciseRecord(r);
+         };
         dayDiv.appendChild(item);
       });
 
@@ -325,6 +339,74 @@ async function loadExerciseHistory(mesocycleId, container) {
 
     container.appendChild(weekDiv);
   });
+}
+
+async function editExerciseRecord(record) {
+  const newWeight = prompt(
+    `Editar peso (${record.exercises.name})`,
+    record.weight
+  );
+  if (newWeight === null) return;
+
+  const newReps = prompt(
+    `Editar reps (${record.exercises.name})`,
+    record.reps
+  );
+  if (newReps === null) return;
+
+  const { error } = await supabase
+    .from("exercise_records")
+    .update({
+      weight: Number(newWeight),
+      reps: Number(newReps),
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", record.id);
+
+  if (error) {
+    console.error(error);
+    alert("Error actualizando registro");
+    return;
+  }
+
+  alert("Registro actualizado");
+}
+
+async function deleteMesocycle(mesocycleId) {
+  const confirmDelete = confirm(
+    "⚠️ Esto eliminará el mesociclo y TODOS sus registros. ¿Continuar?"
+  );
+
+  if (!confirmDelete) return;
+
+  // 1️⃣ borrar registros
+  const { error: recError } = await supabase
+    .from("exercise_records")
+    .delete()
+    .eq("mesocycle_id", mesocycleId);
+
+  if (recError) {
+    console.error(recError);
+    alert("Error eliminando registros");
+    return;
+  }
+
+  // 2️⃣ borrar mesociclo
+  const { error: mError } = await supabase
+    .from("mesocycles")
+    .delete()
+    .eq("id", mesocycleId);
+
+  if (mError) {
+    console.error(mError);
+    alert("Error eliminando mesociclo");
+    return;
+  }
+
+  alert("Mesociclo eliminado");
+
+  loadMesocycles();
+  registroEditor.innerHTML = "";
 }
 
 /* ======================
