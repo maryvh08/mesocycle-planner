@@ -820,7 +820,7 @@ async function loadExercisesForStats(select) {
   });
 }
 
-aasync function loadStatsExerciseSelector() {
+async function loadStatsExerciseSelector() {
   const select = document.getElementById("stats-exercise-select");
   if (!select) {
     console.error("❌ stats-exercise-select no existe");
