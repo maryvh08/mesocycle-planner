@@ -86,7 +86,18 @@ async function showApp() {
 /* ======================
    TABS
 ====================== */
-function setupTabs(tab) {
+function setupTabs() {
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(c => c.classList.add("hidden"));
+      btn.classList.add("active");
+      document.getElementById(btn.dataset.tab).classList.remove("hidden");
+    };
+  });
+}
+
+function switchTab(tab) {
   // Ocultar todas las vistas
   document.querySelectorAll(".tab-content").forEach(v =>
     v.classList.add("hidden")
@@ -108,7 +119,6 @@ function setupTabs(tab) {
     renderStatsView();
   }
 }
-
 /* ======================
    DAY SELECTOR (CREAR)
 ====================== */
