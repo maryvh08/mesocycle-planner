@@ -263,7 +263,7 @@ async function renderRegistroEditor(mesocycleId) {
    
    // 2️⃣ cargar template
    let allowedSubgroups = null;
-   
+
    if (mesocycle.template_id) {
      const { data: template } = await supabase
        .from("templates")
@@ -288,7 +288,6 @@ async function renderRegistroEditor(mesocycleId) {
     return;
   }
 
-  const allowedSubgroups = getAllowedSubgroups(mesocycle.templates?.enfasis);
   const filteredExercises = allowedSubgroups
      ? exercises.filter(e => allowedSubgroups.includes(e.subgroup))
      : exercises;
