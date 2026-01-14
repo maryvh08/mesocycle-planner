@@ -991,6 +991,15 @@ async function loadExerciseProgressChart(exerciseId) {
   });
 }
 
+async function testStatsQuery() {
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select("id, exercise_id")
+    .limit(5);
+
+  console.log("🧪 exercise_records test", data, error);
+}
+
 /* ======================
    INIT
 ====================== */
