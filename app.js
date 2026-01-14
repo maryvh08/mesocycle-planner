@@ -86,24 +86,34 @@ async function showApp() {
 /* ======================
    TABS
 ====================== */
-loadStatsExerciseSelector()
-function renderStatsView() {
-  console.log("📊 Render stats view");
+function setupTabs() {
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.onclick = () => {
+      document
+        .querySelectorAll(".tab-btn")
+        .forEach(b => b.classList.remove("active"));
 
-  const exerciseSelect = document.getElementById("stats-exercise-select");
-  const metrics = document.getElementById("stats-metrics");
+      document
+        .querySelectorAll(".tab-content")
+        .forEach(c => c.classList.add("hidden"));
 
-  if (!exerciseSelect) {
-    console.error("❌ stats-exercise-select no existe");
-    return;
-  }
+      btn.classList.add("active");
 
-  exerciseSelect.innerHTML =
-    `<option value="">Selecciona un ejercicio</option>`;
+      const tabId = btn.dataset.tab;
+      const tabEl = document.getElementById(tabId);
 
-  metrics.querySelector("#metric-last").textContent = "–";
-  metrics.querySelector("#metric-max").textContent = "–";
-  metrics.querySelector("#metric-avg").textContent = "–";
+      if (!tabEl) {
+        console.error("❌ Tab no existe:", tabId);
+        return;
+      }
+
+      tabEl.classList.remove("hidden");
+
+      if (tabId === "stats-tab") {
+        renderStatsView();
+      }
+    };
+  });
 }
 
 /* ======================
