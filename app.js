@@ -182,54 +182,80 @@ async function loadMesocycles() {
 
   const { data, error } = await supabase
     .from("mesocycles")
-     .select(`
-       id,
-       name,
-       weeks,
-       days_per_week,
-       templates (
-         name,
-         emphasis
-       )
-     `)
-     .eq("user_id", session.user.id)
-     .order("created_at", { ascending: false });
+    .select(`
+      id,
+      name,
+      weeks,
+      days_per_week,
+      templates (
+        name,
+        emphasis
+      )
+    `)
+    .eq("user_id", session.user.id)
+    .order("created_at", { ascending: false });
 
-  if (error) return console.error(error);
+  if (error) {
+    console.error(error);
+    return;
+  }
 
   historyList.innerHTML = "";
   registroSelect.innerHTML = `<option value="">Selecciona mesociclo</option>`;
 
   data.forEach(m => {
-     const li = document.createElement("li");
-     li.className = "mesocycle-history-card";
-   
-     li.innerHTML = `
-       <h4>${m.name}</h4>
-       <div class="muted">
-         Plantilla: <strong>${m.templates?.name ?? "Sin plantilla"}</strong>
-       </div>
-       <div class="muted">
-         ${m.weeks} semanas · ${m.days_per_week} días
-       </div>
-   
-       <button class="toggle-history-btn">Ver historial</button>
-       <div class="exercise-history hidden"></div>
-     `;
-   
-     const historyContainer = li.querySelector(".exercise-history");
-     const toggleBtn = li.querySelector(".toggle-history-btn");
-   
-     toggleBtn.onclick = async () => {
-       if (!historyContainer.dataset.loaded) {
-         await loadExerciseHistory(m.id, historyContainer);
-         historyContainer.dataset.loaded = "true";
-       }
-       historyContainer.classList.toggle("hidden");
-     };
-   
-     historyList.appendChild(li);
-   });
+    const template = Array.isArray(m.templates)
+      ? m.templates[0]
+      : m.templates;
+
+    /* ======================
+       HISTORIAL
+    ====================== */
+    const li = document.createElement("li");
+    li.className = "mesocycle-history-card";
+
+    li.innerHTML = `
+      <h4>${m.name}</h4>
+      <div class="muted">
+        Plantilla: <strong>${template?.name ?? "Sin plantilla"}</strong>
+      </div>
+      <div class="muted">
+        ${m.weeks} semanas · ${m.days_per_week} días
+      </div>
+
+      <div class="history-actions">
+        <button class="register-btn">Registrar</button>
+        <button class="toggle-history-btn">Ver historial</button>
+      </div>
+
+      <div class="exercise-history hidden"></div>
+    `;
+
+    const historyContainer = li.querySelector(".exercise-history");
+
+    li.querySelector(".toggle-history-btn").onclick = async () => {
+      if (!historyContainer.dataset.loaded) {
+        await loadExerciseHistory(m.id, historyContainer);
+        historyContainer.dataset.loaded = "true";
+      }
+      historyContainer.classList.toggle("hidden");
+    };
+
+    li.querySelector(".register-btn").onclick = () => {
+      registroSelect.value = m.id;
+      openRegistro(m.id);
+    };
+
+    historyList.appendChild(li);
+
+    /* ======================
+       SELECT REGISTRO  ✅
+    ====================== */
+    const opt = document.createElement("option");
+    opt.value = m.id;
+    opt.textContent = m.name;
+    registroSelect.appendChild(opt);
+  });
 }
 
 async function loadExerciseHistory(mesocycleId, container) {
