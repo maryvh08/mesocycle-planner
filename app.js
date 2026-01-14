@@ -712,79 +712,56 @@ async function deleteExerciseRecord(recordId) {
 ====================== */
 
 async function renderStatsExerciseSelector(statsView) {
-  console.log("📊 Render stats selector");
-
   statsView.innerHTML = "<p>Cargando ejercicios...</p>";
 
   const { data, error } = await supabase
     .from("exercise_records")
     .select(`
       exercise_id,
-      exercises (
+      exercises!inner (
         id,
         name
       )
-    `)
-    .order("exercise_id");
+    `);
 
   if (error) {
-    console.error("❌ Error cargando ejercicios stats", error);
+    console.error("❌ Stats selector error", error);
     statsView.innerHTML = "<p>Error cargando ejercicios</p>";
     return;
   }
 
-  if (!data || data.length === 0) {
-    statsView.innerHTML = "<p>No hay ejercicios registrados</p>";
+  if (!data.length) {
+    statsView.innerHTML = "<p>No hay registros todavía</p>";
     return;
   }
 
-  // 🔹 eliminar duplicados
-  const uniqueExercises = {};
+  const unique = {};
   data.forEach(r => {
-    if (r.exercises && !uniqueExercises[r.exercise_id]) {
-      uniqueExercises[r.exercise_id] = r.exercises;
-    }
+    unique[r.exercise_id] = r.exercises;
   });
-
-  const exercises = Object.values(uniqueExercises);
-
-  if (!exercises.length) {
-    statsView.innerHTML = "<p>No hay ejercicios con registros</p>";
-    return;
-  }
 
   statsView.innerHTML = "";
 
-  /* ======================
-     UI
-  ====================== */
-  const title = document.createElement("h3");
-  title.textContent = "Estadísticas por ejercicio";
-  statsView.appendChild(title);
+  const select = document.createElement("select");
+  select.innerHTML = `<option value="">Selecciona ejercicio</option>`;
 
-  const exerciseSelect = document.createElement("select");
-  exerciseSelect.innerHTML = `<option value="">Selecciona ejercicio</option>`;
-
-  exercises.forEach(ex => {
+  Object.values(unique).forEach(ex => {
     const opt = document.createElement("option");
     opt.value = ex.id;
     opt.textContent = ex.name;
-    exerciseSelect.appendChild(opt);
+    select.appendChild(opt);
   });
 
-  const statsContainer = document.createElement("div");
-  statsContainer.id = "exercise-stats-container";
+  const container = document.createElement("div");
+  container.id = "exercise-stats-container";
 
-  exerciseSelect.onchange = () => {
-    if (!exerciseSelect.value) {
-      statsContainer.innerHTML = "";
-      return;
-    }
-    loadExerciseStats(exerciseSelect.value);
+  select.onchange = () => {
+    if (!select.value) return;
+    loadExerciseStats(select.value);
   };
 
-  statsView.appendChild(exerciseSelect);
-  statsView.appendChild(statsContainer);
+  statsView.appendChild(select);
+  statsView.appendChild(container);
 }
 
 async function loadExercisesForStats(select) {
