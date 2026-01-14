@@ -182,7 +182,18 @@ async function loadMesocycles() {
 
   const { data, error } = await supabase
     .from("mesocycles")
-    .select("*")
+     .select(`
+       id,
+       name,
+       weeks,
+       days_per_week,
+       templates (
+         name,
+         enfasis
+       )
+     `)
+     .eq("user_id", session.user.id)
+     .order("created_at", { ascending: false });
     .eq("user_id", session.user.id)
     .order("created_at", { ascending: false });
 
