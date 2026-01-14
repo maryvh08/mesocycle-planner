@@ -328,8 +328,8 @@ async function renderRegistroEditor(mesocycleId) {
           id,
           exercise_id,
           exercises (
-            ejercicio,
-            subgrupo
+            name,
+            subgroup
           )
         `)
         .eq("mesocycle_id", mesocycleId)
