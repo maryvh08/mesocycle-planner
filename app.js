@@ -78,7 +78,6 @@ async function showApp() {
   appView.classList.remove("hidden");
 
   setupTabs();
-   switchTab();
   initDaySelector();
   await loadTemplates();
   await loadMesocycles();
