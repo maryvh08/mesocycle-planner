@@ -217,7 +217,16 @@ registroSelect.onchange = () => {
 };
 
 async function openRegistro(mesocycleId) {
-  document.querySelector('[data-tab="registro-tab"]').click();
+  // activar tab manualmente (seguro)
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".tab-content").forEach(c => c.classList.add("hidden"));
+
+  const registroBtn = document.querySelector('[data-tab="registro-tab"]');
+  const registroTab = document.getElementById("registro-tab");
+
+  registroBtn?.classList.add("active");
+  registroTab?.classList.remove("hidden");
+
   await renderRegistroEditor(mesocycleId);
 }
 
@@ -233,7 +242,7 @@ function getAllowedSubgroups(enfasis) {
    REGISTRO EDITOR
 ====================== */
 async function renderRegistroEditor(mesocycleId) {
-  registroEditor.innerHTML = "";
+  registroEditor.innerHTML = "<p>Selecciona semana y día para comenzar</p>";
 
   const { data: mesocycle } = await supabase
     .from("mesocycles")
