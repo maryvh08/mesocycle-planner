@@ -91,26 +91,51 @@
     </div>
   
   </section>
-   <!-- ======================
-       ESTADÍSTICAS
-    ====================== -->
+   <!-- =========================
+     BOTÓN TAB ESTADÍSTICAS
+  ========================= -->
+  <button class="tab-btn" data-tab="stats">
+    📊 Estadísticas
+  </button>
+  
+  <!-- =========================
+       CONTENIDO TAB ESTADÍSTICAS
+  ========================= -->
   <section id="stats" class="tab-content hidden">
-    <h2>Estadísticas</h2>
+  
+    <h2>📊 Estadísticas</h2>
+  
     <!-- Selector de ejercicio -->
-    <div class="stats-section">
+    <div class="stats-control">
       <label for="stats-exercise-select">Ejercicio</label>
       <select id="stats-exercise-select">
         <option value="">Selecciona un ejercicio</option>
       </select>
     </div>
   
-    <!-- Resumen -->
-    <div id="stats-summary" class="stats-section">
-      <p class="muted">Selecciona un ejercicio para ver estadísticas</p>
+    <!-- Métricas rápidas -->
+    <div id="stats-metrics" class="stats-metrics">
+      <div class="metric-card">
+        <span class="metric-label">Último peso</span>
+        <span id="metric-last" class="metric-value">–</span>
+      </div>
+  
+      <div class="metric-card">
+        <span class="metric-label">Máximo histórico</span>
+        <span id="metric-max" class="metric-value">–</span>
+      </div>
+  
+      <div class="metric-card">
+        <span class="metric-label">Promedio</span>
+        <span id="metric-avg" class="metric-value">–</span>
+      </div>
     </div>
   
-    <!-- Progresión / tabla / gráficas -->
-    <div id="stats-charts" class="stats-section"></div>
+    <!-- Gráfica -->
+    <div class="chart-wrapper">
+      <canvas id="progressChart"></canvas>
+    </div>
+  
   </section>
 </section>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
