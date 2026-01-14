@@ -708,27 +708,33 @@ async function deleteExerciseRecord(recordId) {
    ESTADISTICAS
 ====================== */
 
-async function renderStatsView() {
-  const exerciseSelect = document.getElementById("stats-exercise-select");
-  const summary = document.getElementById("stats-summary");
-  const charts = document.getElementById("stats-charts");
-   const statsContainer = document.createElement("div");
-   statsContainer.id = "exercise-stats-container";
-   statsView.appendChild(statsContainer);
+function renderStatsExerciseSelector(statsView, exercises) {
+  statsView.innerHTML = "";
 
+  const title = document.createElement("h3");
+  title.textContent = "Estadísticas por ejercicio";
+  statsView.appendChild(title);
 
-  exerciseSelect.innerHTML =
-    `<option value="">Selecciona un ejercicio</option>`;
-  summary.innerHTML =
-    `<p class="muted">Selecciona un ejercicio para ver estadísticas</p>`;
-  charts.innerHTML = "";
+  const exerciseSelect = document.createElement("select");
+  exerciseSelect.innerHTML = `<option value="">Selecciona ejercicio</option>`;
 
-  await loadExercisesForStats(exerciseSelect);
+  exercises.forEach(ex => {
+    const opt = document.createElement("option");
+    opt.value = ex.id;
+    opt.textContent = ex.name;
+    exerciseSelect.appendChild(opt);
+  });
+
+  const statsContainer = document.createElement("div");
+  statsContainer.id = "exercise-stats-container";
 
   exerciseSelect.onchange = () => {
     if (!exerciseSelect.value) return;
-    loadExerciseStats(exerciseSelect.value);
+    loadExerciseStats(exerciseSelect.value, statsContainer);
   };
+
+  statsView.appendChild(exerciseSelect);
+  statsView.appendChild(statsContainer);
 }
 
 async function loadExercisesForStats(select) {
