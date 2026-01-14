@@ -738,6 +738,18 @@ async function renderStatsExerciseSelector(statsView) {
     return;
   }
 
+   const { data, error } = await supabase
+     .from("exercise_records")
+     .select(`
+       exercise_id,
+       exercises (
+         id,
+         name
+       )
+     `);
+   
+   console.log("📦 stats raw data", data);
+
   // 🔹 eliminar duplicados
   const uniqueExercises = {};
   data.forEach(r => {
