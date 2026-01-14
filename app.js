@@ -105,9 +105,28 @@ function setupTabs() {
 
       if (tabId === "stats") {
         renderStatsExerciseSelector(tab);
+         renderStatsView();
+         loadExerciseProgressChart(id);
       }
     };
   });
+}
+
+function renderStatsView() {
+  const statsView = document.getElementById("stats");
+
+  statsView.innerHTML = `
+    <h3>📊 Estadísticas</h3>
+
+    <select id="stats-exercise-select">
+      <option value="">Selecciona un ejercicio</option>
+    </select>
+
+    <canvas id="progressChart" height="120"></canvas>
+  `;
+
+  loadStatsExerciseSelector();
+
 }
 
 /* ======================
