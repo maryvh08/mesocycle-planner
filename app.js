@@ -839,6 +839,67 @@ function renderProgressTable(data, container) {
   container.appendChild(table);
 }
 
+let progressChart = null;
+
+async function loadExerciseProgressChart(exerciseId) {
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select("weight, created_at")
+    .eq("exercise_id", exerciseId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  if (!data.length) {
+    alert("Este ejercicio no tiene registros");
+    return;
+  }
+
+  const labels = data.map(r =>
+    new Date(r.created_at).toLocaleDateString()
+  );
+
+  const weights = data.map(r => r.weight);
+
+  const ctx = document
+    .getElementById("progressChart")
+    .getContext("2d");
+
+  if (progressChart) {
+    progressChart.destroy();
+  }
+
+  progressChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Peso (kg)",
+          data: weights,
+          tension: 0.3,
+          fill: false,
+          borderWidth: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: true }
+      },
+      scales: {
+        y: {
+          beginAtZero: false
+        }
+      }
+    }
+  });
+}
+
 /* ======================
    INIT
 ====================== */
