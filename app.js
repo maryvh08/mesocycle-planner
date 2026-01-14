@@ -591,17 +591,25 @@ async function renderRegistroEditor(mesocycleId) {
      SELECT EJERCICIO
   ====================== */
   const exerciseSelect = document.createElement("select");
-  exerciseSelect.innerHTML =
-    `<option value="">Selecciona ejercicio</option>`;
-
-  filteredExercises.forEach(ex => {
-    const opt = document.createElement("option");
-    opt.value = ex.id;
-    opt.textContent = `${ex.name} (${ex.subgroup})`;
-    exerciseSelect.appendChild(opt);
-  });
-
-  registroEditor.appendChild(exerciseSelect);
+   exerciseSelect.innerHTML = `<option value="">Selecciona ejercicio</option>`;
+   
+   exercises.forEach(ex => {
+     const opt = document.createElement("option");
+     opt.value = ex.id;
+     opt.textContent = ex.name;
+     exerciseSelect.appendChild(opt);
+   });
+   
+   const statsContainer = document.createElement("div");
+   statsContainer.id = "exercise-stats-container";
+   
+   exerciseSelect.onchange = () => {
+     if (!exerciseSelect.value) return;
+     loadExerciseStats(exerciseSelect.value, statsContainer);
+   };
+   
+   statsView.appendChild(exerciseSelect);
+   statsView.appendChild(statsContainer);
 
   /* ======================
      INPUTS
