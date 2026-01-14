@@ -817,19 +817,28 @@ let statsChart = null;
 async function loadExerciseStats(exerciseId) {
   console.log("📈 Cargando stats de", exerciseId);
 
-  const { data, error } = await supabase
-    .from("exercise_records")
-    .select("weight, reps, created_at")
-    .eq("exercise_id", exerciseId)
-    .order("created_at", { ascending: true });
-
-  if (error) {
-    console.error("❌ Error stats", error);
+  const statsContainer = document.getElementById("exercise-stats-container");
+  if (!statsContainer) {
+    console.error("❌ stats container no existe");
     return;
   }
 
-  if (!data.length) {
-    alert("No hay registros para este ejercicio");
+  statsContainer.innerHTML = "<p>Cargando estadísticas...</p>";
+
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select("weight, reps, updated_at")
+    .eq("exercise_id", exerciseId)
+    .order("updated_at", { ascending: true });
+
+  if (error) {
+    console.error("❌ Error stats", error);
+    statsContainer.innerHTML = "<p>Error cargando estadísticas</p>";
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    statsContainer.innerHTML = "<p>No hay registros para este ejercicio</p>";
     return;
   }
 
@@ -839,19 +848,26 @@ async function loadExerciseStats(exerciseId) {
   const max = Math.max(...weights);
   const avg = (weights.reduce((a, b) => a + b, 0) / weights.length).toFixed(1);
 
-  document.getElementById("metric-last").textContent = `${last} kg`;
-  document.getElementById("metric-max").textContent = `${max} kg`;
-  document.getElementById("metric-avg").textContent = `${avg} kg`;
+  statsContainer.innerHTML = `
+    <div class="stats-metrics">
+      <div><strong>Último:</strong> ${last} kg</div>
+      <div><strong>Máximo:</strong> ${max} kg</div>
+      <div><strong>Promedio:</strong> ${avg} kg</div>
+      <canvas id="progressChart"></canvas>
+    </div>
+  `;
 
   // 📈 gráfica
   const ctx = document.getElementById("progressChart").getContext("2d");
 
-  if (statsChart) statsChart.destroy();
+  if (window.statsChart) window.statsChart.destroy();
 
-  statsChart = new Chart(ctx, {
+  window.statsChart = new Chart(ctx, {
     type: "line",
     data: {
-      labels: data.map((_, i) => `Sesión ${i + 1}`),
+      labels: data.map(r =>
+        new Date(r.updated_at).toLocaleDateString()
+      ),
       datasets: [{
         label: "Peso (kg)",
         data: weights,
@@ -859,12 +875,7 @@ async function loadExerciseStats(exerciseId) {
       }]
     },
     options: {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: false
-        }
-      }
+      responsive: true
     }
   });
 }
