@@ -868,14 +868,6 @@ let statsChart = null;
 async function loadExerciseStats(exerciseId) {
   console.log("📈 Cargando stats de", exerciseId);
 
-  const statsContainer = document.getElementById("exercise-stats-container");
-  if (!statsContainer) {
-    console.error("❌ stats container no existe");
-    return;
-  }
-
-  statsContainer.innerHTML = "<p>Cargando estadísticas...</p>";
-
   const { data, error } = await supabase
     .from("exercise_records")
     .select("weight, reps, updated_at")
@@ -884,36 +876,30 @@ async function loadExerciseStats(exerciseId) {
 
   if (error) {
     console.error("❌ Error stats", error);
-    statsContainer.innerHTML = "<p>Error cargando estadísticas</p>";
     return;
   }
 
-  if (!data || data.length === 0) {
-    statsContainer.innerHTML = "<p>No hay registros para este ejercicio</p>";
+  if (!data.length) {
+    alert("No hay registros para este ejercicio");
     return;
   }
 
-  // 📊 métricas
+  // métricas
   const weights = data.map(r => r.weight);
   const last = weights.at(-1);
   const max = Math.max(...weights);
   const avg = (weights.reduce((a, b) => a + b, 0) / weights.length).toFixed(1);
 
-  statsContainer.innerHTML = `
-    <div class="stats-metrics">
-      <div><strong>Último:</strong> ${last} kg</div>
-      <div><strong>Máximo:</strong> ${max} kg</div>
-      <div><strong>Promedio:</strong> ${avg} kg</div>
-      <canvas id="progressChart"></canvas>
-    </div>
-  `;
+  document.getElementById("metric-last").textContent = `${last} kg`;
+  document.getElementById("metric-max").textContent = `${max} kg`;
+  document.getElementById("metric-avg").textContent = `${avg} kg`;
 
-  // 📈 gráfica
+  // gráfica
   const ctx = document.getElementById("progressChart").getContext("2d");
 
-  if (window.statsChart) window.statsChart.destroy();
+  if (statsChart) statsChart.destroy();
 
-  window.statsChart = new Chart(ctx, {
+  statsChart = new Chart(ctx, {
     type: "line",
     data: {
       labels: data.map(r =>
@@ -922,11 +908,15 @@ async function loadExerciseStats(exerciseId) {
       datasets: [{
         label: "Peso (kg)",
         data: weights,
-        tension: 0.3
+        tension: 0.3,
+        borderWidth: 2
       }]
     },
     options: {
-      responsive: true
+      responsive: true,
+      scales: {
+        y: { beginAtZero: false }
+      }
     }
   });
 }
