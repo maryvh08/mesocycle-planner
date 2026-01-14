@@ -861,19 +861,20 @@ function renderProgressTable(data, container) {
 let progressChart = null;
 
 async function loadExerciseProgressChart(exerciseId) {
+  const canvas = document.getElementById("progressChart");
+  if (!canvas) {
+    console.error("❌ Canvas no existe");
+    return;
+  }
+
   const { data, error } = await supabase
     .from("exercise_records")
     .select("weight, created_at")
     .eq("exercise_id", exerciseId)
     .order("created_at", { ascending: true });
 
-  if (error) {
+  if (error || !data.length) {
     console.error(error);
-    return;
-  }
-
-  if (!data.length) {
-    alert("Este ejercicio no tiene registros");
     return;
   }
 
@@ -881,39 +882,27 @@ async function loadExerciseProgressChart(exerciseId) {
     new Date(r.created_at).toLocaleDateString()
   );
 
-  const weights = data.map(r => r.weight);
+  const values = data.map(r => r.weight);
 
-  const ctx = document
-    .getElementById("progressChart")
-    .getContext("2d");
+  const ctx = canvas.getContext("2d");
 
-  if (progressChart) {
-    progressChart.destroy();
-  }
+  if (progressChart) progressChart.destroy();
 
   progressChart = new Chart(ctx, {
     type: "line",
     data: {
       labels,
-      datasets: [
-        {
-          label: "Peso (kg)",
-          data: weights,
-          tension: 0.3,
-          fill: false,
-          borderWidth: 2
-        }
-      ]
+      datasets: [{
+        label: "Peso (kg)",
+        data: values,
+        borderWidth: 2,
+        tension: 0.3
+      }]
     },
     options: {
       responsive: true,
       plugins: {
         legend: { display: true }
-      },
-      scales: {
-        y: {
-          beginAtZero: false
-        }
       }
     }
   });
