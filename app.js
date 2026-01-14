@@ -90,24 +90,21 @@ function setupTabs() {
   document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.onclick = () => {
       const tabId = btn.dataset.tab;
-      const tabContent = document.getElementById(tabId);
-
-      if (!tabContent) {
-        console.error(`❌ No existe el tab con id="${tabId}"`);
-        return;
-      }
 
       document.querySelectorAll(".tab-btn")
         .forEach(b => b.classList.remove("active"));
-
       document.querySelectorAll(".tab-content")
         .forEach(c => c.classList.add("hidden"));
 
       btn.classList.add("active");
-      tabContent.classList.remove("hidden");
+
+      const tab = document.getElementById(tabId);
+      if (!tab) return;
+
+      tab.classList.remove("hidden");
 
       if (tabId === "stats") {
-        renderStatsView();
+        renderStatsExerciseSelector(tab);
       }
     };
   });
