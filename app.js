@@ -39,7 +39,6 @@ const registroEditor = document.getElementById("registro-editor");
 const tabs = document.querySelectorAll(".tab-btn");
 const statsView = document.getElementById("stats-view");
 
-
 /* ======================
    AUTH
 ====================== */
@@ -716,10 +715,6 @@ async function deleteExerciseRecord(recordId) {
 
   console.log("🗑️ Registro eliminado", recordId);
 }
-
-/* ======================
-   ESTADISTICAS
-====================== */
 
 /* ======================
    RENDER VIEW
