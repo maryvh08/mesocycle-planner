@@ -750,7 +750,7 @@ async function renderStatsView() {
 /* ======================
    SELECTOR EJERCICIOS (CON REGISTROS)
 ====================== */
-async function loadStatsExerciseSelector(container) {
+async function loadStatsExerciseSelector() {
   container.innerHTML = `
     <h3>📊 Estadísticas</h3>
     <select id="stats-exercise-select">
