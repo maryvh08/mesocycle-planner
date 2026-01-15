@@ -1,3 +1,4 @@
+console.log("🔥 app.js cargado");
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 /* ======================
@@ -11,7 +12,10 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
    STATE
 ====================== */
 let selectedDaysPerWeek = null;
+let selectedDay = null;
 let editingMesocycleId = null;
+let allowedSubgroups = null;
+let statsChart = null;
 
 /* ======================
    UI ELEMENTS
@@ -31,6 +35,10 @@ const createBtn = document.getElementById("create-mesocycle-btn");
 const historyList = document.getElementById("history-list");
 const registroSelect = document.getElementById("registro-select");
 const registroEditor = document.getElementById("registro-editor");
+
+const tabs = document.querySelectorAll(".tab-btn");
+const statsView = document.getElementById("stats-view");
+
 
 /* ======================
    AUTH
@@ -115,6 +123,7 @@ function setupTabs() {
     };
   });
 }
+
 
 /* ======================
    DAY SELECTOR (CREAR)
@@ -441,6 +450,14 @@ async function deleteMesocycle(mesocycleId) {
 }
 
 /* ======================
+   UTILIDADES
+====================== */
+function getAllowedSubgroups(emphasis) {
+  if (!emphasis || emphasis === "Todos") return null;
+  return emphasis.split(",").map(s => s.trim());
+}
+
+/* ======================
    REGISTRO
 ====================== */
 registroSelect.onchange = () => {
@@ -459,14 +476,6 @@ async function openRegistro(mesocycleId) {
   registroTab?.classList.remove("hidden");
 
   await renderRegistroEditor(mesocycleId);
-}
-
-/* ======================
-   HELPERS
-====================== */
-function getAllowedSubgroups(emphasis) {
-  if (!emphasis || emphasis === "Todos") return null;
-  return emphasis.split(",").map(s => s.trim());
 }
 
 /* ======================
@@ -494,7 +503,6 @@ async function renderRegistroEditor(mesocycleId) {
   /* ======================
      CARGAR TEMPLATE
   ====================== */
-  let allowedSubgroups = null;
 
   if (mesocycle.template_id) {
     const { data: template } = await supabase
@@ -543,7 +551,6 @@ async function renderRegistroEditor(mesocycleId) {
   /* ======================
      ESTADO
   ====================== */
-  let selectedDay = null;
 
   /* ======================
      CONTENEDOR REGISTROS
@@ -570,7 +577,7 @@ async function renderRegistroEditor(mesocycleId) {
       btn.classList.add("active");
       selectedDay = i;
 
-      await renderExercisesForDay({
+      await ExercisesForDay({
         mesocycleId,
         week: Number(weekSelect.value),
         day: selectedDay,
@@ -650,7 +657,7 @@ async function renderRegistroEditor(mesocycleId) {
     weightInput.value = "";
     repsInput.value = "";
 
-    await renderExercisesForDay({
+    await ExercisesForDay({
       mesocycleId,
       week: Number(weekSelect.value),
       day: selectedDay,
@@ -660,7 +667,7 @@ async function renderRegistroEditor(mesocycleId) {
 
   registroEditor.appendChild(saveBtn);
 
-  console.log("✅ renderRegistroEditor completado");
+  console.log("✅ RegistroEditor completado");
 }
 
 /* ======================
@@ -710,8 +717,6 @@ async function deleteExerciseRecord(recordId) {
 /* ======================
    ESTADISTICAS
 ====================== */
-
-let statsChart = null;
 
 /* ======================
    RENDER VIEW
