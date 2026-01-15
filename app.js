@@ -882,3 +882,5 @@ async function testStatsJoin() {
    INIT
 ====================== */
 initAuth();
+
+window.renderStatsView = renderStatsView;
