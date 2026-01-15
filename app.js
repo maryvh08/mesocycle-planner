@@ -752,13 +752,21 @@ async function renderStatsView() {
 ====================== */
 async function loadStatsExerciseSelector() {
   const select = document.getElementById("stats-exercise-select");
-
   if (!select) {
     console.error("❌ stats-exercise-select no existe");
     return;
   }
 
   select.innerHTML = `<option value="">Cargando ejercicios...</option>`;
+
+  // 🔐 obtener usuario actual
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    console.error("❌ No hay sesión activa");
+    return;
+  }
+
+  const userId = session.user.id;
 
   const { data, error } = await supabase
     .from("exercise_records")
@@ -768,21 +776,21 @@ async function loadStatsExerciseSelector() {
         id,
         name
       )
-    `);
+    `)
+    .eq("user_id", userId);   // 🔥 CLAVE
 
   if (error) {
-    console.error("❌ Error cargando ejercicios stats", error);
+    console.error("❌ Error stats selector", error);
     select.innerHTML = `<option value="">Error cargando</option>`;
     return;
   }
 
   if (!data || data.length === 0) {
-    console.warn("⚠️ No hay registros");
     select.innerHTML = `<option value="">Sin registros</option>`;
     return;
   }
 
-  // 🔁 eliminar duplicados
+  // eliminar duplicados
   const unique = {};
   data.forEach(r => {
     if (r.exercises && !unique[r.exercise_id]) {
@@ -804,10 +812,8 @@ async function loadStatsExerciseSelector() {
     loadExerciseStats(select.value);
   };
 
-  console.log("✅ Selector stats cargado:", Object.keys(unique).length);
+  console.log("✅ Stats selector cargado:", Object.keys(unique).length);
 }
-
-
 
 /* ======================
    CARGA STATS + GRAFICA
