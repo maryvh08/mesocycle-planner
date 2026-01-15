@@ -748,6 +748,64 @@ function renderStatsView() {
 /* ======================
    CARGA STATS + GRAFICA
 ====================== */
+async function loadStatsExerciseSelector() {
+  const select = document.getElementById("stats-exercise-select");
+  if (!select) {
+    console.error("❌ stats-exercise-select no existe");
+    return;
+  }
+
+  // reset limpio
+  select.innerHTML = `<option value="">Selecciona ejercicio</option>`;
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select(`
+      exercise_id,
+      exercises (
+        id,
+        name
+      )
+    `)
+    .eq("user_id", session.user.id);
+
+  if (error) {
+    console.error("❌ Error cargando ejercicios stats", error);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    console.warn("⚠️ No hay registros para estadísticas");
+    return;
+  }
+
+  // eliminar duplicados
+  const unique = new Map();
+
+  data.forEach(r => {
+    if (r.exercises && !unique.has(r.exercise_id)) {
+      unique.set(r.exercise_id, r.exercises);
+    }
+  });
+
+  unique.forEach(ex => {
+    const opt = document.createElement("option");
+    opt.value = ex.id;
+    opt.textContent = ex.name;
+    select.appendChild(opt);
+  });
+
+  select.onchange = () => {
+    if (!select.value) return;
+    loadExerciseStats(select.value);
+  };
+
+  console.log("✅ Stats selector cargado:", unique.size, "ejercicios");
+}
+
 async function loadExerciseStats(exerciseId) {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return;
