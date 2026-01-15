@@ -724,7 +724,7 @@ async function deleteExerciseRecord(recordId) {
 /* ======================
    RENDER VIEW
 ====================== */
-async function renderStatsView() {
+function renderStatsView() {
   const statsView = document.getElementById("stats-view");
   if (!statsView) {
     console.error("❌ stats-view no existe");
@@ -747,7 +747,7 @@ async function renderStatsView() {
     <canvas id="progressChart" height="120"></canvas>
   `;
 
-  await loadStatsExerciseSelector();
+  loadStatsExerciseSelector();
 }
 
 /* ======================
@@ -787,6 +787,45 @@ async function loadExerciseStats(exerciseId) {
   document.getElementById("metric-avg").textContent = `${avg} kg`;
 
   renderStatsChart(data);
+}
+
+let statsChart = null;
+
+function renderStatsChart(data) {
+  const canvas = document.getElementById("progressChart");
+  if (!canvas) {
+    console.error("❌ Canvas progressChart no existe");
+    return;
+  }
+
+  const ctx = canvas.getContext("2d");
+
+  const labels = data.map(r =>
+    new Date(r.updated_at).toLocaleDateString()
+  );
+
+  const values = data.map(r => r.weight);
+
+  if (statsChart) statsChart.destroy();
+
+  statsChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Peso (kg)",
+        data: values,
+        borderWidth: 2,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: false }
+      }
+    }
+  });
 }
 
 /* ======================
@@ -873,9 +912,10 @@ async function testStatsJoin() {
   console.log("🧪 join test", data, error);
 }
 
-/* ======================
-   INIT
-====================== */
-initAuth();
+// =====================
+// INIT
+// =====================
+document.addEventListener("DOMContentLoaded", () => {
+  renderStatsView();
+});
 
-window.renderStatsView = renderStatsView;
