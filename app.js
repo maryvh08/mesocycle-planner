@@ -753,69 +753,40 @@ async function renderStatsView() {
 /* ======================
    SELECTOR EJERCICIOS (CON REGISTROS)
 ====================== */
-async function loadStatsExerciseSelector() {
-  const select = document.getElementById("stats-exercise-select");
-  if (!select) {
-    console.error("❌ stats-exercise-select no existe");
-    return;
-  }
-
-  select.innerHTML = `<option value="">Cargando ejercicios...</option>`;
-
-  // 🔐 obtener usuario actual
+async function loadExerciseStats(exerciseId) {
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
-    console.error("❌ No hay sesión activa");
-    return;
-  }
-
-  const userId = session.user.id;
+  if (!session) return;
 
   const { data, error } = await supabase
     .from("exercise_records")
-    .select(`
-      exercise_id,
-      exercises (
-        id,
-        name
-      )
-    `)
-    .eq("user_id", userId);   // 🔥 CLAVE
+    .select("weight, reps, updated_at")
+    .eq("user_id", session.user.id)
+    .eq("exercise_id", exerciseId)
+    .order("updated_at", { ascending: true });
 
   if (error) {
-    console.error("❌ Error stats selector", error);
-    select.innerHTML = `<option value="">Error cargando</option>`;
+    console.error("❌ Error stats", error);
     return;
   }
 
-  if (!data || data.length === 0) {
-    select.innerHTML = `<option value="">Sin registros</option>`;
+  if (!data.length) {
+    alert("No hay registros para este ejercicio");
     return;
   }
 
-  // eliminar duplicados
-  const unique = {};
-  data.forEach(r => {
-    if (r.exercises && !unique[r.exercise_id]) {
-      unique[r.exercise_id] = r.exercises;
-    }
-  });
+  // métricas
+  const weights = data.map(r => r.weight);
+  const last = weights.at(-1);
+  const max = Math.max(...weights);
+  const avg = (
+    weights.reduce((a, b) => a + b, 0) / weights.length
+  ).toFixed(1);
 
-  select.innerHTML = `<option value="">Selecciona ejercicio</option>`;
+  document.getElementById("metric-last").textContent = `${last} kg`;
+  document.getElementById("metric-max").textContent = `${max} kg`;
+  document.getElementById("metric-avg").textContent = `${avg} kg`;
 
-  Object.values(unique).forEach(ex => {
-    const opt = document.createElement("option");
-    opt.value = ex.id;
-    opt.textContent = ex.name;
-    select.appendChild(opt);
-  });
-
-  select.onchange = () => {
-    if (!select.value) return;
-    loadExerciseStats(select.value);
-  };
-
-  console.log("✅ Stats selector cargado:", Object.keys(unique).length);
+  renderStatsChart(data);
 }
 
 /* ======================
