@@ -751,7 +751,7 @@ function renderStatsView() {
 }
 
 /* ======================
-   SELECTOR EJERCICIOS (CON REGISTROS)
+   CARGA STATS + GRAFICA
 ====================== */
 async function loadExerciseStats(exerciseId) {
   const { data: { session } } = await supabase.auth.getSession();
@@ -787,109 +787,6 @@ async function loadExerciseStats(exerciseId) {
   document.getElementById("metric-avg").textContent = `${avg} kg`;
 
   renderStatsChart(data);
-}
-
-function renderStatsChart(data) {
-  const canvas = document.getElementById("progressChart");
-  if (!canvas) {
-    console.error("❌ Canvas progressChart no existe");
-    return;
-  }
-
-  const ctx = canvas.getContext("2d");
-
-  const labels = data.map(r =>
-    new Date(r.updated_at).toLocaleDateString()
-  );
-
-  const values = data.map(r => r.weight);
-
-  if (statsChart) statsChart.destroy();
-
-  statsChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels,
-      datasets: [{
-        label: "Peso (kg)",
-        data: values,
-        borderWidth: 2,
-        tension: 0.3
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: { beginAtZero: false }
-      }
-    }
-  });
-}
-
-/* ======================
-   CARGA STATS + GRAFICA
-====================== */
-async function loadExerciseStats(exerciseId) {
-  console.log("📈 Cargando stats de", exerciseId);
-
-  const { data, error } = await supabase
-    .from("exercise_records")
-    .select("weight, reps, updated_at")
-    .eq("exercise_id", exerciseId)
-    .order("updated_at", { ascending: true });
-
-  if (error) {
-    console.error("❌ Error stats", error);
-    return;
-  }
-
-  if (!data.length) {
-    alert("No hay registros para este ejercicio");
-    return;
-  }
-
-  // métricas
-  const weights = data.map(r => r.weight);
-  const last = weights.at(-1);
-  const max = Math.max(...weights);
-  const avg = (
-    weights.reduce((a, b) => a + b, 0) / weights.length
-  ).toFixed(1);
-
-  document.getElementById("metric-last").textContent = `${last} kg`;
-  document.getElementById("metric-max").textContent = `${max} kg`;
-  document.getElementById("metric-avg").textContent = `${avg} kg`;
-
-  // gráfica
-  const canvas = document.getElementById("progressChart");
-  if (!canvas) {
-    console.error("❌ Canvas no existe");
-    return;
-  }
-
-  const ctx = canvas.getContext("2d");
-  if (statsChart) statsChart.destroy();
-
-  statsChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: data.map(r =>
-        new Date(r.updated_at).toLocaleDateString()
-      ),
-      datasets: [{
-        label: "Peso (kg)",
-        data: weights,
-        borderWidth: 2,
-        tension: 0.3
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: { beginAtZero: false }
-      }
-    }
-  });
 }
 
 /* ======================
