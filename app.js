@@ -750,71 +750,38 @@ async function renderStatsView() {
 /* ======================
    SELECTOR EJERCICIOS (CON REGISTROS)
 ====================== */
-async function loadStatsExerciseSelector() {
-  const select = document.getElementById("stats-exercise-select");
-  if (!select) {
-    console.error("❌ stats-exercise-select no existe");
-    return;
-  }
+async function loadStatsExerciseSelector(container) {
+  container.innerHTML = `
+    <h3>📊 Estadísticas</h3>
+    <select id="stats-exercise-select">
+      <option value="">Selecciona un ejercicio</option>
+    </select>
+    <canvas id="progressChart" height="120"></canvas>
+  `;
 
-  select.innerHTML = `<option value="">Cargando...</option>`;
+  const select = container.querySelector("#stats-exercise-select");
 
-  // 1️⃣ sesión
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return;
-
-  // 2️⃣ query correcta con JOIN A MESOCYCLES
   const { data, error } = await supabase
-    .from("exercise_records")
-    .select(`
-      exercise_id,
-      exercises (
-        id,
-        name
-      ),
-      mesocycles!inner (
-        user_id
-      )
-    `)
-    .eq("mesocycles.user_id", session.user.id);
+    .from("exercises")
+    .select("id, name")
+    .order("name");
 
   if (error) {
-    console.error("❌ Error stats selector", error);
-    select.innerHTML = `<option value="">Error cargando</option>`;
+    console.error(error);
     return;
   }
 
-  if (!data.length) {
-    console.warn("⚠️ No hay registros para este usuario");
-    select.innerHTML = `<option value="">Sin registros</option>`;
-    return;
-  }
-
-  // 3️⃣ eliminar duplicados
-  const unique = {};
-  data.forEach(r => {
-    if (r.exercises && !unique[r.exercise_id]) {
-      unique[r.exercise_id] = r.exercises;
-    }
-  });
-
-  // 4️⃣ render select
-  select.innerHTML = `<option value="">Selecciona ejercicio</option>`;
-
-  Object.values(unique).forEach(ex => {
+  data.forEach(ex => {
     const opt = document.createElement("option");
     opt.value = ex.id;
     opt.textContent = ex.name;
     select.appendChild(opt);
   });
 
-  // 5️⃣ evento
   select.onchange = () => {
     if (!select.value) return;
-    loadExerciseStats(select.value);
+    loadExerciseProgressChart(select.value);
   };
-
-  console.log("✅ Selector stats cargado:", Object.values(unique).length);
 }
 
 
