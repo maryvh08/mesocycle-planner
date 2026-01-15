@@ -710,6 +710,12 @@ async function deleteExerciseRecord(recordId) {
 /* ======================
    ESTADISTICAS
 ====================== */
+
+let statsChart = null;
+
+/* ======================
+   RENDER VIEW
+====================== */
 async function renderStatsView() {
   const statsView = document.getElementById("stats-view");
   if (!statsView) {
@@ -736,90 +742,9 @@ async function renderStatsView() {
   await loadStatsExerciseSelector();
 }
 
-async function renderStatsExerciseSelector(statsView) {
-  statsView.innerHTML = "<p>Cargando ejercicios...</p>";
-
-  const { data, error } = await supabase
-    .from("exercise_records")
-    .select(`
-      exercise_id,
-      exercises!inner (
-        id,
-        name
-      )
-    `);
-
-  if (error) {
-    console.error("❌ Stats selector error", error);
-    statsView.innerHTML = "<p>Error cargando ejercicios</p>";
-    return;
-  }
-
-  if (!data.length) {
-    statsView.innerHTML = "<p>No hay registros todavía</p>";
-    return;
-  }
-
-  const unique = {};
-  data.forEach(r => {
-    unique[r.exercise_id] = r.exercises;
-  });
-
-  statsView.innerHTML = "";
-
-  const select = document.createElement("select");
-  select.innerHTML = `<option value="">Selecciona ejercicio</option>`;
-
-  Object.values(unique).forEach(ex => {
-    const opt = document.createElement("option");
-    opt.value = ex.id;
-    opt.textContent = ex.name;
-    select.appendChild(opt);
-  });
-
-  const container = document.createElement("div");
-  container.id = "exercise-stats-container";
-
-  select.onchange = () => {
-    if (!select.value) return;
-    loadExerciseStats(select.value);
-  };
-
-  statsView.appendChild(select);
-  statsView.appendChild(container);
-}
-
-async function loadExercisesForStats(select) {
-  const { data, error } = await supabase
-    .from("exercise_records")
-    .select(`
-      exercise_id,
-      exercises (
-        name
-      )
-    `)
-    .order("exercise_id");
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  const unique = {};
-  data.forEach(r => {
-    if (!unique[r.exercise_id]) {
-      unique[r.exercise_id] = r.exercises.name;
-    }
-  });
-
-  Object.entries(unique).forEach(([id, name]) => {
-    const opt = document.createElement("option");
-    opt.value = id;
-    opt.textContent = name;
-    select.appendChild(opt);
-  });
-}
-
+/* ======================
+   SELECTOR EJERCICIOS (CON REGISTROS)
+====================== */
 async function loadStatsExerciseSelector() {
   const select = document.getElementById("stats-exercise-select");
   if (!select) {
@@ -832,13 +757,18 @@ async function loadStatsExerciseSelector() {
     .select(`
       exercise_id,
       exercises (
+        id,
         name
       )
-    `)
-    .order("exercise_id");
+    `);
 
   if (error) {
     console.error("❌ Error cargando selector stats", error);
+    return;
+  }
+
+  if (!data || !data.length) {
+    console.warn("⚠️ No hay registros aún");
     return;
   }
 
@@ -846,14 +776,14 @@ async function loadStatsExerciseSelector() {
   const unique = {};
   data.forEach(r => {
     if (r.exercises && !unique[r.exercise_id]) {
-      unique[r.exercise_id] = r.exercises.name;
+      unique[r.exercise_id] = r.exercises;
     }
   });
 
-  Object.entries(unique).forEach(([id, name]) => {
+  Object.values(unique).forEach(ex => {
     const opt = document.createElement("option");
-    opt.value = id;
-    opt.textContent = name;
+    opt.value = ex.id;
+    opt.textContent = ex.name;
     select.appendChild(opt);
   });
 
@@ -863,8 +793,9 @@ async function loadStatsExerciseSelector() {
   };
 }
 
-let statsChart = null;
-
+/* ======================
+   CARGA STATS + GRAFICA
+====================== */
 async function loadExerciseStats(exerciseId) {
   console.log("📈 Cargando stats de", exerciseId);
 
@@ -888,15 +819,22 @@ async function loadExerciseStats(exerciseId) {
   const weights = data.map(r => r.weight);
   const last = weights.at(-1);
   const max = Math.max(...weights);
-  const avg = (weights.reduce((a, b) => a + b, 0) / weights.length).toFixed(1);
+  const avg = (
+    weights.reduce((a, b) => a + b, 0) / weights.length
+  ).toFixed(1);
 
   document.getElementById("metric-last").textContent = `${last} kg`;
   document.getElementById("metric-max").textContent = `${max} kg`;
   document.getElementById("metric-avg").textContent = `${avg} kg`;
 
   // gráfica
-  const ctx = document.getElementById("progressChart").getContext("2d");
+  const canvas = document.getElementById("progressChart");
+  if (!canvas) {
+    console.error("❌ Canvas no existe");
+    return;
+  }
 
+  const ctx = canvas.getContext("2d");
   if (statsChart) statsChart.destroy();
 
   statsChart = new Chart(ctx, {
@@ -908,8 +846,8 @@ async function loadExerciseStats(exerciseId) {
       datasets: [{
         label: "Peso (kg)",
         data: weights,
-        tension: 0.3,
-        borderWidth: 2
+        borderWidth: 2,
+        tension: 0.3
       }]
     },
     options: {
@@ -921,92 +859,9 @@ async function loadExerciseStats(exerciseId) {
   });
 }
 
-function renderProgressTable(data, container) {
-  const table = document.createElement("table");
-  table.className = "stats-table";
-
-  table.innerHTML = `
-    <tr>
-      <th>Fecha</th>
-      <th>Peso</th>
-      <th>Reps</th>
-      <th>Volumen</th>
-    </tr>
-  `;
-
-  data.forEach(r => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${new Date(r.updated_at).toLocaleDateString()}</td>
-      <td>${r.weight}</td>
-      <td>${r.reps}</td>
-      <td>${r.weight * r.reps}</td>
-    `;
-    table.appendChild(tr);
-  });
-
-  container.appendChild(table);
-}
-
-let progressChart = null;
-
-async function loadExerciseProgressChart(exerciseId) {
-  const canvas = document.getElementById("progressChart");
-  if (!canvas) {
-    console.error("❌ Canvas no existe");
-    return;
-  }
-
-  const { data, error } = await supabase
-    .from("exercise_records")
-    .select("weight, updated_at")
-    .eq("exercise_id", exerciseId)
-    .order("updated_at", { ascending: true });
-
-  if (error || !data.length) {
-    console.error(error);
-    return;
-  }
-
-  const labels = data.map(r =>
-    new Date(r.updated_at).toLocaleDateString()
-  );
-
-  const values = data.map(r => r.weight);
-
-  const ctx = canvas.getContext("2d");
-
-  if (progressChart) progressChart.destroy();
-
-  progressChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels,
-      datasets: [{
-        label: "Peso (kg)",
-        data: values,
-        borderWidth: 2,
-        tension: 0.3
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: true }
-      }
-    }
-  });
-}
-
-async function testStatsQuery() {
-  const { data, error } = await supabase
-    .from("exercise_records")
-    .select("id, exercise_id")
-    .limit(5);
-
-  console.log("🧪 exercise_records test", data, error);
-}
-
+/* ======================
+   TEST (opcional)
+====================== */
 async function testStatsJoin() {
   const { data, error } = await supabase
     .from("exercise_records")
@@ -1021,6 +876,7 @@ async function testStatsJoin() {
 
   console.log("🧪 join test", data, error);
 }
+
 
 /* ======================
    INIT
