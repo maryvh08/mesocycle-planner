@@ -757,6 +757,13 @@ async function loadStatsExerciseSelector() {
     return;
   }
 
+  select.innerHTML = `<option value="">Cargando...</option>`;
+
+  // 1️⃣ sesión
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  // 2️⃣ query correcta con JOIN A MESOCYCLES
   const { data, error } = await supabase
     .from("exercise_records")
     .select(`
@@ -764,26 +771,35 @@ async function loadStatsExerciseSelector() {
       exercises (
         id,
         name
+      ),
+      mesocycles!inner (
+        user_id
       )
-    `);
+    `)
+    .eq("mesocycles.user_id", session.user.id);
 
   if (error) {
-    console.error("❌ Error cargando selector stats", error);
+    console.error("❌ Error stats selector", error);
+    select.innerHTML = `<option value="">Error cargando</option>`;
     return;
   }
 
-  if (!data || !data.length) {
-    console.warn("⚠️ No hay registros aún");
+  if (!data.length) {
+    console.warn("⚠️ No hay registros para este usuario");
+    select.innerHTML = `<option value="">Sin registros</option>`;
     return;
   }
 
-  // eliminar duplicados
+  // 3️⃣ eliminar duplicados
   const unique = {};
   data.forEach(r => {
     if (r.exercises && !unique[r.exercise_id]) {
       unique[r.exercise_id] = r.exercises;
     }
   });
+
+  // 4️⃣ render select
+  select.innerHTML = `<option value="">Selecciona ejercicio</option>`;
 
   Object.values(unique).forEach(ex => {
     const opt = document.createElement("option");
@@ -792,11 +808,15 @@ async function loadStatsExerciseSelector() {
     select.appendChild(opt);
   });
 
+  // 5️⃣ evento
   select.onchange = () => {
     if (!select.value) return;
     loadExerciseStats(select.value);
   };
+
+  console.log("✅ Selector stats cargado:", Object.values(unique).length);
 }
+
 
 /* ======================
    CARGA STATS + GRAFICA
