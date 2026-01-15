@@ -633,14 +633,17 @@ async function renderRegistroEditor(mesocycleId) {
     if (!selectedDay) return alert("Selecciona un día");
     if (!exerciseSelect.value) return alert("Selecciona un ejercicio");
 
-    const payload = {
-      mesocycle_id: mesocycleId,
-      exercise_id: exerciseSelect.value,
-      week_number: Number(weekSelect.value),
-      day_number: selectedDay,
-      weight: Number(weightInput.value),
-      reps: Number(repsInput.value)
-    };
+    const { data: { session } } = await supabase.auth.getSession();
+
+   const payload = {
+     user_id: session.user.id,   // 🔥 CLAVE
+     mesocycle_id: mesocycleId,
+     exercise_id: exerciseSelect.value,
+     week_number: Number(weekSelect.value),
+     day_number: selectedDay,
+     weight: Number(weightInput.value),
+     reps: Number(repsInput.value)
+   };
 
     const { error } = await supabase
       .from("exercise_records")
