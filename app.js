@@ -864,6 +864,6 @@ async function testStatsJoin() {
 // INIT
 // =====================
 document.addEventListener("DOMContentLoaded", () => {
-  renderStatsView();
+  initAuth();        
 });
 
