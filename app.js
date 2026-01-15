@@ -751,27 +751,48 @@ async function renderStatsView() {
    SELECTOR EJERCICIOS (CON REGISTROS)
 ====================== */
 async function loadStatsExerciseSelector() {
-  container.innerHTML = `
-    <h3>📊 Estadísticas</h3>
-    <select id="stats-exercise-select">
-      <option value="">Selecciona un ejercicio</option>
-    </select>
-    <canvas id="progressChart" height="120"></canvas>
-  `;
+  const select = document.getElementById("stats-exercise-select");
 
-  const select = container.querySelector("#stats-exercise-select");
-
-  const { data, error } = await supabase
-    .from("exercises")
-    .select("id, name")
-    .order("name");
-
-  if (error) {
-    console.error(error);
+  if (!select) {
+    console.error("❌ stats-exercise-select no existe");
     return;
   }
 
-  data.forEach(ex => {
+  select.innerHTML = `<option value="">Cargando ejercicios...</option>`;
+
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select(`
+      exercise_id,
+      exercises (
+        id,
+        name
+      )
+    `);
+
+  if (error) {
+    console.error("❌ Error cargando ejercicios stats", error);
+    select.innerHTML = `<option value="">Error cargando</option>`;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    console.warn("⚠️ No hay registros");
+    select.innerHTML = `<option value="">Sin registros</option>`;
+    return;
+  }
+
+  // 🔁 eliminar duplicados
+  const unique = {};
+  data.forEach(r => {
+    if (r.exercises && !unique[r.exercise_id]) {
+      unique[r.exercise_id] = r.exercises;
+    }
+  });
+
+  select.innerHTML = `<option value="">Selecciona ejercicio</option>`;
+
+  Object.values(unique).forEach(ex => {
     const opt = document.createElement("option");
     opt.value = ex.id;
     opt.textContent = ex.name;
@@ -780,9 +801,12 @@ async function loadStatsExerciseSelector() {
 
   select.onchange = () => {
     if (!select.value) return;
-    loadExerciseProgressChart(select.value);
+    loadExerciseStats(select.value);
   };
+
+  console.log("✅ Selector stats cargado:", Object.keys(unique).length);
 }
+
 
 
 /* ======================
