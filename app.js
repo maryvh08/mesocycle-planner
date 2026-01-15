@@ -576,7 +576,7 @@ async function renderRegistroEditor(mesocycleId) {
       btn.classList.add("active");
       selectedDay = i;
 
-      await ExercisesForDay({
+      await renderExercisesForDay({
         mesocycleId,
         week: Number(weekSelect.value),
         day: selectedDay,
@@ -659,7 +659,7 @@ async function renderRegistroEditor(mesocycleId) {
     weightInput.value = "";
     repsInput.value = "";
 
-    await ExercisesForDay({
+    await renderExercisesForDay({
       mesocycleId,
       week: Number(weekSelect.value),
       day: selectedDay,
