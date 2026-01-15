@@ -789,8 +789,6 @@ async function loadExerciseStats(exerciseId) {
   renderStatsChart(data);
 }
 
-let statsChart = null;
-
 function renderStatsChart(data) {
   const canvas = document.getElementById("progressChart");
   if (!canvas) {
