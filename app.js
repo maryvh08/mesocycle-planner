@@ -763,74 +763,76 @@ function renderStatsView() {
 ====================== */
 async function loadStatsExerciseSelector() {
   const select = document.getElementById("stats-exercise-select");
-  if (!select) {
-    console.error("❌ stats-exercise-select no existe");
+  const content = document.getElementById("stats-content");
+
+  if (!select || !content) {
+    console.error("❌ stats selector o content no existen");
     return;
   }
 
-  // reset limpio
-  select.innerHTML = `<option value="">Selecciona ejercicio</option>`;
+  // Reset UI
+  select.innerHTML = `<option value="">Cargando ejercicios...</option>`;
+  content.innerHTML = `<p class="muted">Selecciona un ejercicio</p>`;
 
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return;
+  // Usuario autenticado
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    select.innerHTML = `<option value="">No autenticado</option>`;
+    content.innerHTML = `<p class="error">Debes iniciar sesión</p>`;
+    return;
+  }
 
+  // Query única: exercise_records
   const { data, error } = await supabase
-     .from("exercise_records")
-     .select("exercise_id, exercise_name")
-     .eq("user_id", session.user.id);
+    .from("exercise_records")
+    .select("exercise_id, exercise_name")
+    .eq("user_id", user.id)
+    .order("exercise_name");
 
   if (error) {
     console.error("❌ Error cargando ejercicios stats", error);
+    select.innerHTML = `<option value="">Error cargando ejercicios</option>`;
+    content.innerHTML = `<p class="error">No se pudieron cargar los datos</p>`;
     return;
   }
 
   if (!data || data.length === 0) {
-    console.warn("⚠️ No hay registros para estadísticas");
+    select.innerHTML = `<option value="">Sin ejercicios</option>`;
+    content.innerHTML = `
+      <div class="empty-state">
+        <p>📭 Aún no hay registros</p>
+        <small>Registra entrenamientos para ver estadísticas</small>
+      </div>
+    `;
     return;
   }
 
-  // eliminar duplicados
+  // Eliminar duplicados
   const unique = new Map();
-
   data.forEach(r => {
-     if (!unique.has(r.exercise_id)) {
-       unique.set(r.exercise_id, r.exercise_name);
-     }
-   });
-   
-   unique.forEach((name, id) => {
-     const opt = document.createElement("option");
-     opt.value = id;
-     opt.textContent = name;
-     select.appendChild(opt);
-   });
+    if (!unique.has(r.exercise_id)) {
+      unique.set(r.exercise_id, r.exercise_name);
+    }
+  });
 
-  unique.forEach(ex => {
+  // Render selector
+  select.innerHTML = `<option value="">Selecciona ejercicio</option>`;
+
+  unique.forEach((name, id) => {
     const opt = document.createElement("option");
-    opt.value = ex.id;
-    opt.textContent = ex.name;
+    opt.value = id;
+    opt.textContent = name;
     select.appendChild(opt);
   });
 
+  // Evento
   select.onchange = () => {
-    if (!select.value) return;
+    if (!select.value) {
+      content.innerHTML = `<p class="muted">Selecciona un ejercicio</p>`;
+      return;
+    }
     loadExerciseStats(select.value);
   };
-
-   if (!data || data.length === 0) {
-     select.innerHTML = `<option value="">No hay ejercicios registrados</option>`;
-   
-     document.getElementById("progressChart").replaceWith(
-       Object.assign(document.createElement("div"), {
-         className: "empty-state",
-         innerHTML: `
-           <p>📭 Aún no hay datos para mostrar</p>
-           <small>Registra entrenamientos para ver tu progreso</small>
-         `
-       })
-     );
-     return;
-   }
 
   console.log("✅ Stats selector cargado:", unique.size, "ejercicios");
 }
