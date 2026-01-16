@@ -803,6 +803,21 @@ async function loadStatsExerciseSelector() {
     loadExerciseStats(select.value);
   };
 
+   if (!data || data.length === 0) {
+     select.innerHTML = `<option value="">No hay ejercicios registrados</option>`;
+   
+     document.getElementById("progressChart").replaceWith(
+       Object.assign(document.createElement("div"), {
+         className: "empty-state",
+         innerHTML: `
+           <p>📭 Aún no hay datos para mostrar</p>
+           <small>Registra entrenamientos para ver tu progreso</small>
+         `
+       })
+     );
+     return;
+   }
+
   console.log("✅ Stats selector cargado:", unique.size, "ejercicios");
 }
 
