@@ -37,7 +37,6 @@
 
   <!-- ================= CREAR / EDITAR ================= -->
   <section id="crear-tab" class="tab-content">
-
     <h2>Crear / Editar Mesociclo</h2>
 
     <label>Nombre del mesociclo</label>
@@ -63,7 +62,6 @@
     </div>
 
     <button id="create-mesocycle-btn">Guardar mesociclo</button>
-
   </section>
 
   <!-- ================= HISTORIAL ================= -->
@@ -74,34 +72,24 @@
 
   <!-- ================= REGISTRO ================= -->
   <section id="registro-tab" class="tab-content hidden">
-  
     <h2>Registro de Ejercicios</h2>
-  
-    <!-- Selector de mesociclo -->
+
     <label for="registro-select">Mesociclo</label>
     <select id="registro-select">
       <option value="">Selecciona un mesociclo</option>
     </select>
-  
-    <!-- Editor dinámico -->
+
     <div id="registro-editor" class="registro-editor">
       <p class="placeholder">
         Selecciona un mesociclo para comenzar el registro
       </p>
     </div>
-  
   </section>
-  
-  <!-- =========================
-       CONTENIDO TAB ESTADÍSTICAS
-  ========================= -->
+
+  <!-- ================= ESTADÍSTICAS ================= -->
   <section id="stats" class="tab-content hidden">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="app.js"></script>
-  
     <h2>📊 Estadísticas</h2>
-  
-    <!-- Selector de ejercicio -->
+
     <div class="stats-control">
       <label for="stats-exercise-select">Ejercicio</label>
       <select id="stats-exercise-select">
@@ -109,35 +97,38 @@
       </select>
     </div>
 
-    <div>Volumen total: <strong id="metric-volume-total">-</strong></div>
-    <div>Volumen promedio: <strong id="metric-volume-avg">-</strong></div>
-  
-    <!-- Métricas rápidas -->
+    <div class="stats-summary">
+      <div>Volumen total: <strong id="metric-volume-total">–</strong></div>
+      <div>Volumen promedio: <strong id="metric-volume-avg">–</strong></div>
+    </div>
+
     <div id="stats-metrics" class="stats-metrics">
       <div class="metric-card">
         <span class="metric-label">Último peso</span>
         <span id="metric-last" class="metric-value">–</span>
       </div>
-  
+
       <div class="metric-card">
         <span class="metric-label">Máximo histórico</span>
         <span id="metric-max" class="metric-value">–</span>
       </div>
-  
+
       <div class="metric-card">
         <span class="metric-label">Promedio</span>
         <span id="metric-avg" class="metric-value">–</span>
       </div>
     </div>
-  
-    <!-- Gráfica -->
+
     <div class="chart-wrapper">
       <canvas id="progressChart"></canvas>
     </div>
-  
   </section>
+
 </section>
+
+<!-- ================= SCRIPTS ================= -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script type="module" src="app.js"></script>
+
 </body>
 </html>
