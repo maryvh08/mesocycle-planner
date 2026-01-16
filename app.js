@@ -836,51 +836,152 @@ async function loadStatsExerciseSelector() {
 }
 
 async function loadExerciseStats(exerciseId) {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return;
-   }
+  console.log("📈 Cargando stats de", exerciseId);
 
-   const volumes = data.map(r => r.weight * r.reps);
-   const totalVolume = volumes.reduce((a,b) => a + b, 0);
-   const avgVolume = Math.round(totalVolume / volumes.length);
+  const container = document.getElementById("stats-content");
+  if (!container) {
+    console.error("❌ stats-content no existe");
+    return;
+  }
+
+  container.innerHTML = `<p class="muted">Cargando estadísticas...</p>`;
+
+  const {
+    data: { user },
+    error: userError
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    container.innerHTML = `<p class="error">No autenticado</p>`;
+    return;
+  }
 
   const { data, error } = await supabase
     .from("exercise_records")
     .select("weight, reps, updated_at")
-    .eq("user_id", session.user.id)
+    .eq("user_id", user.id)
     .eq("exercise_id", exerciseId)
     .order("updated_at", { ascending: true });
 
   if (error) {
     console.error("❌ Error stats", error);
+    container.innerHTML = `<p class="error">Error cargando estadísticas</p>`;
     return;
   }
 
-  if (!data.length) {
-    alert("No hay registros para este ejercicio");
+  if (!data || data.length === 0) {
+    container.innerHTML = `<p class="muted">No hay registros para este ejercicio</p>`;
     return;
   }
 
-  // métricas
+  /* -------------------------
+     MÉTRICAS BASE
+  -------------------------- */
+
   const weights = data.map(r => r.weight);
-  const last = weights.at(-1);
-  const max = Math.max(...weights);
-  const avg = (
-    weights.reduce((a, b) => a + b, 0) / weights.length
-  ).toFixed(1);
+  const reps = data.map(r => r.reps);
+  const volumes = data.map(r => r.weight * r.reps);
 
-  document.getElementById("metric-last").textContent = `${last} kg`;
-  document.getElementById("metric-max").textContent = `${max} kg`;
-  document.getElementById("metric-avg").textContent = `${avg} kg`;
-   document.getElementById("metric-volume-total").textContent =
-     totalVolume.toLocaleString() + " kg";
-   
-   document.getElementById("metric-volume-avg").textContent =
-     avgVolume.toLocaleString() + " kg";
+  const totalVolume = volumes.reduce((a, b) => a + b, 0);
+  const avgVolume = Math.round(totalVolume / volumes.length);
 
+  const maxWeight = Math.max(...weights);
+  const maxVolume = Math.max(...volumes);
 
-  renderStatsChart(data);
+  const e1rms = data.map(r =>
+    Math.round(r.weight * (1 + r.reps / 30))
+  );
+  const maxE1RM = Math.max(...e1rms);
+
+  /* -------------------------
+     TENDENCIA
+  -------------------------- */
+
+  function calcTrend(values) {
+    if (values.length < 4) return "flat";
+
+    const mid = Math.floor(values.length / 2);
+    const firstAvg =
+      values.slice(0, mid).reduce((a, b) => a + b, 0) / mid;
+    const lastAvg =
+      values.slice(mid).reduce((a, b) => a + b, 0) / (values.length - mid);
+
+    if (lastAvg > firstAvg * 1.05) return "up";
+    if (lastAvg < firstAvg * 0.95) return "down";
+    return "flat";
+  }
+
+  const trend = calcTrend(weights);
+  const trendText = {
+    up: "📈 Progresando",
+    flat: "➖ Estancado",
+    down: "📉 Fatiga / bajada"
+  }[trend];
+
+  /* -------------------------
+     RENDER HTML
+  -------------------------- */
+
+  container.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card">Volumen total<br><strong>${totalVolume.toLocaleString()} kg</strong></div>
+      <div class="stat-card">Volumen promedio<br><strong>${avgVolume.toLocaleString()} kg</strong></div>
+      <div class="stat-card">PR peso<br><strong>${maxWeight} kg</strong></div>
+      <div class="stat-card">PR volumen<br><strong>${maxVolume.toLocaleString()}</strong></div>
+      <div class="stat-card">PR fuerza (e1RM)<br><strong>${maxE1RM} kg</strong></div>
+      <div class="stat-card">Tendencia<br><strong>${trendText}</strong></div>
+    </div>
+
+    <div class="chart-wrapper">
+      <canvas id="exerciseStatsChart"></canvas>
+    </div>
+
+    <div class="coach-insight">
+      ${getCoachInsight(trend)}
+    </div>
+  `;
+
+  /* -------------------------
+     GRÁFICA
+  -------------------------- */
+
+  const ctx = document
+    .getElementById("exerciseStatsChart")
+    .getContext("2d");
+
+  if (window.statsChart) {
+    window.statsChart.destroy();
+  }
+
+  window.statsChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: data.map((_, i) => `Sesión ${i + 1}`),
+      datasets: [
+        {
+          label: "Peso (kg)",
+          data: weights,
+          borderWidth: 2,
+          tension: 0.3
+        },
+        {
+          label: "Volumen",
+          data: volumes,
+          borderDash: [6, 4],
+          tension: 0.3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: "index", intersect: false },
+      scales: {
+        y: { beginAtZero: false }
+      }
+    }
+  });
 }
+
 
 /* ======================
    TEST (opcional)
