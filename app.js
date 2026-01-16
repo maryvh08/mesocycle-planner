@@ -735,10 +735,7 @@ async function deleteExerciseRecord(recordId) {
 ====================== */
 function renderStatsView() {
   const statsView = document.getElementById("stats-view");
-  if (!statsView) {
-    console.error("❌ stats-view no existe");
-    return;
-  }
+  if (!statsView) return;
 
   statsView.innerHTML = `
     <h2>📊 Estadísticas</h2>
@@ -750,6 +747,7 @@ function renderStatsView() {
       </select>
     </div>
 
+    <!-- 👇 ESTE ES EL CONTENEDOR QUE FALTABA -->
     <div id="stats-content">
       <p class="muted">Selecciona un ejercicio</p>
     </div>
