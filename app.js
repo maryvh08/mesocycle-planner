@@ -839,6 +839,11 @@ async function loadExerciseStats(exerciseId) {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return;
 
+   const volumes = data.map(r => r.weight * r.reps);
+   const totalVolume = volumes.reduce((a,b) => a + b, 0);
+   const avgVolume = Math.round(totalVolume / volumes.length);
+   }
+
   const { data, error } = await supabase
     .from("exercise_records")
     .select("weight, reps, updated_at")
