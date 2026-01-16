@@ -1001,6 +1001,12 @@ async function testStatsJoin() {
   console.log("🧪 join test", data, error);
 }
 
+function getCoachInsight(trend) {
+  if (trend === "up") return "💪 Excelente progresión, sigue así";
+  if (trend === "flat") return "⚠️ Considera subir carga o volumen";
+  return "🛑 Posible fatiga, revisa descanso";
+}
+
 // =====================
 // INIT
 // =====================
