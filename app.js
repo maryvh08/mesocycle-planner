@@ -415,7 +415,6 @@ async function editExerciseRecord(record) {
      reps,
      updated_at: new Date().toISOString()
    });
-    .eq("id", record.id);
 
   if (error) {
     console.error(error);
