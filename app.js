@@ -766,15 +766,15 @@ async function loadStatsExerciseSelector() {
   const content = document.getElementById("stats-content");
 
   if (!select || !content) {
-    console.error("❌ stats selector o content no existen");
+    console.error("❌ stats-exercise-select o stats-content no existen");
     return;
   }
 
-  // Reset UI
+  // UI inicial
   select.innerHTML = `<option value="">Cargando ejercicios...</option>`;
   content.innerHTML = `<p class="muted">Selecciona un ejercicio</p>`;
 
-  // Usuario autenticado
+  // Usuario
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) {
     select.innerHTML = `<option value="">No autenticado</option>`;
@@ -782,12 +782,17 @@ async function loadStatsExerciseSelector() {
     return;
   }
 
-  // Query única: exercise_records
+  // JOIN correcto
   const { data, error } = await supabase
     .from("exercise_records")
-    .select("exercise_id, exercise_name")
-    .eq("user_id", user.id)
-    .order("exercise_name");
+    .select(`
+      exercise_id,
+      exercises (
+        id,
+        name
+      )
+    `)
+    .eq("user_id", user.id);
 
   if (error) {
     console.error("❌ Error cargando ejercicios stats", error);
@@ -809,13 +814,20 @@ async function loadStatsExerciseSelector() {
 
   // Eliminar duplicados
   const unique = new Map();
+
   data.forEach(r => {
-    if (!unique.has(r.exercise_id)) {
-      unique.set(r.exercise_id, r.exercise_name);
+    if (r.exercises && !unique.has(r.exercise_id)) {
+      unique.set(r.exercise_id, r.exercises.name);
     }
   });
 
-  // Render selector
+  if (unique.size === 0) {
+    select.innerHTML = `<option value="">Sin ejercicios</option>`;
+    content.innerHTML = `<p class="muted">No hay datos válidos</p>`;
+    return;
+  }
+
+  // Render select
   select.innerHTML = `<option value="">Selecciona ejercicio</option>`;
 
   unique.forEach((name, id) => {
@@ -825,7 +837,6 @@ async function loadStatsExerciseSelector() {
     select.appendChild(opt);
   });
 
-  // Evento
   select.onchange = () => {
     if (!select.value) {
       content.innerHTML = `<p class="muted">Selecciona un ejercicio</p>`;
