@@ -76,6 +76,12 @@ input:focus {
   border-color: var(--accent);
 }
 
+.empty-state {
+  text-align: center;
+  opacity: 0.8;
+  margin-top: 2rem;
+}
+
 /* ======================
    VISTAS
 ====================== */
