@@ -407,13 +407,14 @@ async function editExerciseRecord(record) {
   );
   if (newReps === null) return;
 
-  const { error } = await supabase
-    .from("exercise_records")
-    .update({
-      weight: Number(newWeight),
-      reps: Number(newReps),
-      updated_at: new Date().toISOString()
-    })
+  await supabase.from("exercise_records").insert({
+     user_id: user.id,
+     exercise_id: exerciseId ?? null,
+     exercise_name: exerciseName, // 👈 SIEMPRE
+     weight,
+     reps,
+     updated_at: new Date().toISOString()
+   });
     .eq("id", record.id);
 
   if (error) {
@@ -781,16 +782,14 @@ async function loadStatsExerciseSelector() {
   }
 
   // JOIN correcto
-  const { data, error } = await supabase
-    .from("exercise_records")
-    .select(`
-      exercise_id,
-      exercises (
-        id,
-        name
-      )
-    `)
-    .eq("user_id", user.id);
+  await supabase.from("exercise_records").insert({
+     user_id: user.id,
+     exercise_id: exerciseId ?? null,
+     exercise_name: exerciseName, // 👈 SIEMPRE
+     weight,
+     reps,
+     updated_at: new Date().toISOString()
+   });
 
   if (error) {
     console.error("❌ Error cargando ejercicios stats", error);
@@ -867,13 +866,15 @@ async function loadExerciseStats(exerciseId) {
     return;
   }
 
-  const { data, error } = await supabase
-    .from("exercise_records")
-    .select("weight, reps, updated_at")
-    .eq("user_id", user.id)
-    .eq("exercise_id", exerciseId)
-    .order("updated_at", { ascending: true });
-
+  await supabase.from("exercise_records").insert({
+     user_id: user.id,
+     exercise_id: exerciseId ?? null,
+     exercise_name: exerciseName, // 👈 SIEMPRE
+     weight,
+     reps,
+     updated_at: new Date().toISOString()
+   });
+   
   if (error) {
     console.error("❌ Error stats", error);
     container.innerHTML = `<p class="error">Error cargando estadísticas</p>`;
@@ -991,25 +992,6 @@ async function loadExerciseStats(exerciseId) {
       }
     }
   });
-}
-
-
-/* ======================
-   TEST (opcional)
-====================== */
-async function testStatsJoin() {
-  const { data, error } = await supabase
-    .from("exercise_records")
-    .select(`
-      exercise_id,
-      exercises (
-        id,
-        name
-      )
-    `)
-    .limit(5);
-
-  console.log("🧪 join test", data, error);
 }
 
 function getCoachInsight(trend) {
