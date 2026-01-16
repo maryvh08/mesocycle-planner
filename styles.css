@@ -82,6 +82,14 @@ input:focus {
   margin-top: 2rem;
 }
 
+.error-box {
+  background: rgba(255,0,0,0.08);
+  border: 1px solid rgba(255,0,0,0.3);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
 /* ======================
    VISTAS
 ====================== */
