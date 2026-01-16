@@ -743,17 +743,16 @@ function renderStatsView() {
   statsView.innerHTML = `
     <h2>📊 Estadísticas</h2>
 
-    <select id="stats-exercise-select">
-      <option value="">Selecciona ejercicio</option>
-    </select>
-
-    <div class="stats-metrics">
-      <div>Último peso: <strong id="metric-last">-</strong></div>
-      <div>Máximo peso: <strong id="metric-max">-</strong></div>
-      <div>Promedio: <strong id="metric-avg">-</strong></div>
+    <div class="stats-control">
+      <label>Ejercicio</label>
+      <select id="stats-exercise-select">
+        <option value="">Selecciona ejercicio</option>
+      </select>
     </div>
 
-    <canvas id="progressChart" height="120"></canvas>
+    <div id="stats-content">
+      <p class="muted">Selecciona un ejercicio</p>
+    </div>
   `;
 
   loadStatsExerciseSelector();
@@ -776,15 +775,9 @@ async function loadStatsExerciseSelector() {
   if (!session) return;
 
   const { data, error } = await supabase
-    .from("exercise_records")
-    .select(`
-      exercise_id,
-      exercises (
-        id,
-        name
-      )
-    `)
-    .eq("user_id", session.user.id);
+     .from("exercise_records")
+     .select("exercise_id, exercise_name")
+     .eq("user_id", session.user.id);
 
   if (error) {
     console.error("❌ Error cargando ejercicios stats", error);
@@ -800,10 +793,17 @@ async function loadStatsExerciseSelector() {
   const unique = new Map();
 
   data.forEach(r => {
-    if (r.exercises && !unique.has(r.exercise_id)) {
-      unique.set(r.exercise_id, r.exercises);
-    }
-  });
+     if (!unique.has(r.exercise_id)) {
+       unique.set(r.exercise_id, r.exercise_name);
+     }
+   });
+   
+   unique.forEach((name, id) => {
+     const opt = document.createElement("option");
+     opt.value = id;
+     opt.textContent = name;
+     select.appendChild(opt);
+   });
 
   unique.forEach(ex => {
     const opt = document.createElement("option");
