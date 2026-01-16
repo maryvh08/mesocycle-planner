@@ -90,6 +90,15 @@ async function showApp() {
   await loadMesocycles();
 }
 
+function showError(container, message) {
+  container.innerHTML = `
+    <div class="error-box">
+      <strong>⚠️ Algo salió mal</strong>
+      <p>${message}</p>
+    </div>
+  `;
+}
+
 /* ======================
    TABS
 ====================== */
@@ -317,7 +326,12 @@ async function loadExerciseHistory(mesocycleId, container) {
   }
 
   if (!data.length) {
-    container.innerHTML = "<p>No hay ejercicios registrados</p>";
+    container.innerHTML = `
+      <div class="empty-state">
+       <p>📝 Día sin registros</p>
+       <small>Agrega ejercicios para comenzar</small>
+      </div>
+      `;
     return;
   }
 
