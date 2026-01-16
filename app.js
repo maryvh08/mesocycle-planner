@@ -837,11 +837,10 @@ async function loadStatsExerciseSelector() {
 
 async function loadExerciseStats(exerciseId) {
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return;
-
    const volumes = data.map(r => r.weight * r.reps);
    const totalVolume = volumes.reduce((a,b) => a + b, 0);
    const avgVolume = Math.round(totalVolume / volumes.length);
+  if (!session) return;
    }
 
   const { data, error } = await supabase
@@ -872,6 +871,12 @@ async function loadExerciseStats(exerciseId) {
   document.getElementById("metric-last").textContent = `${last} kg`;
   document.getElementById("metric-max").textContent = `${max} kg`;
   document.getElementById("metric-avg").textContent = `${avg} kg`;
+   document.getElementById("metric-volume-total").textContent =
+     totalVolume.toLocaleString() + " kg";
+   
+   document.getElementById("metric-volume-avg").textContent =
+     avgVolume.toLocaleString() + " kg";
+
 
   renderStatsChart(data);
 }
