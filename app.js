@@ -831,7 +831,7 @@ async function loadStatsExerciseSelector() {
   console.log("✅ Stats selector cargado:", exercises.length, "ejercicios");
 }
 
-async function loadExerciseStats(exerciseId) {
+async function loadExerciseStats(exerciseName) {
   console.log("📈 Cargando stats de", exerciseId);
 
   const container = document.getElementById("stats-content");
