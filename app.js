@@ -784,10 +784,11 @@ async function loadStatsExerciseSelector() {
   }
 
   const { data, error } = await supabase
-    .from("exercise_records")
-    .select("exercise_name")
-    .eq("user_id", user.id)
-    .not("exercise_name", "is", null);
+     .from("exercise_records")
+     .select("weight, reps, updated_at")
+     .eq("user_id", user.id)
+     .eq("exercise_name", exerciseName)
+     .order("updated_at", { ascending: true });
 
   if (error) {
     console.error("❌ Error cargando ejercicios stats", error);
