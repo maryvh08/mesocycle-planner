@@ -403,8 +403,8 @@ async function editExerciseRecord(record) {
 
   await supabase.from("exercise_records").insert({
      user_id: user.id,
-     exercise_id: exerciseId ?? null,
-     exercise_name: exerciseName, // 👈 SIEMPRE
+     exercise_id: exerciseId ?? null, // opcional
+     exercise_name: exerciseName,     // 👈 OBLIGATORIO
      weight,
      reps,
      updated_at: new Date().toISOString()
