@@ -772,28 +772,27 @@ async function loadStatsExerciseSelector() {
   select.innerHTML = `<option value="">Cargando ejercicios...</option>`;
   content.innerHTML = `<p class="muted">Selecciona un ejercicio</p>`;
 
-  // Usuario
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: userError
+  } = await supabase.auth.getUser();
+
   if (userError || !user) {
     select.innerHTML = `<option value="">No autenticado</option>`;
     content.innerHTML = `<p class="error">Debes iniciar sesión</p>`;
     return;
   }
 
-  // JOIN correcto
-  await supabase.from("exercise_records").insert({
-     user_id: user.id,
-     exercise_id: exerciseId ?? null,
-     exercise_name: exerciseName, // 👈 SIEMPRE
-     weight,
-     reps,
-     updated_at: new Date().toISOString()
-   });
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select("exercise_name")
+    .eq("user_id", user.id)
+    .not("exercise_name", "is", null);
 
   if (error) {
     console.error("❌ Error cargando ejercicios stats", error);
-    select.innerHTML = `<option value="">Error cargando ejercicios</option>`;
-    content.innerHTML = `<p class="error">No se pudieron cargar los datos</p>`;
+    select.innerHTML = `<option value="">Error</option>`;
+    content.innerHTML = `<p class="error">No se pudieron cargar los ejercicios</p>`;
     return;
   }
 
@@ -808,27 +807,14 @@ async function loadStatsExerciseSelector() {
     return;
   }
 
-  // Eliminar duplicados
-  const unique = new Map();
+  // únicos
+  const exercises = [...new Set(data.map(r => r.exercise_name))];
 
-  data.forEach(r => {
-    if (r.exercises && !unique.has(r.exercise_id)) {
-      unique.set(r.exercise_id, r.exercises.name);
-    }
-  });
-
-  if (unique.size === 0) {
-    select.innerHTML = `<option value="">Sin ejercicios</option>`;
-    content.innerHTML = `<p class="muted">No hay datos válidos</p>`;
-    return;
-  }
-
-  // Render select
   select.innerHTML = `<option value="">Selecciona ejercicio</option>`;
 
-  unique.forEach((name, id) => {
+  exercises.forEach(name => {
     const opt = document.createElement("option");
-    opt.value = id;
+    opt.value = name;
     opt.textContent = name;
     select.appendChild(opt);
   });
@@ -841,7 +827,7 @@ async function loadStatsExerciseSelector() {
     loadExerciseStats(select.value);
   };
 
-  console.log("✅ Stats selector cargado:", unique.size, "ejercicios");
+  console.log("✅ Stats selector cargado:", exercises.length, "ejercicios");
 }
 
 async function loadExerciseStats(exerciseId) {
