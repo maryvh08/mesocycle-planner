@@ -303,21 +303,15 @@ async function loadExerciseHistory(mesocycleId, container) {
   container.innerHTML = "<p>Cargando historial...</p>";
 
   const { data, error } = await supabase
-    .from("exercise_records")
-    .select(`
-     id,
-     week_number,
-     day_number,
-     weight,
-     reps,
-     exercises (
-       name,
-       subgroup
-     )
-   `)
-    .eq("mesocycle_id", mesocycleId)
-    .order("week_number")
-    .order("day_number");
+     .from("exercise_records")
+     .select("weight, reps, updated_at")
+     .eq("user_id", user.id)
+     .eq("exercise_name", exerciseName)
+     .order("updated_at", { ascending: true });
+   
+       .eq("mesocycle_id", mesocycleId)
+       .order("week_number")
+       .order("day_number");
 
   if (error) {
     console.error(error);
