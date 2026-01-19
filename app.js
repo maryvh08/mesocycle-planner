@@ -781,12 +781,11 @@ async function loadStatsExerciseSelector() {
     return;
   }
 
+  // UI inicial
   select.innerHTML = `<option value="">Cargando ejercicios...</option>`;
   content.innerHTML = `<p class="muted">Selecciona un ejercicio</p>`;
 
-  /* ======================
-     USUARIO
-  ====================== */
+  // Usuario
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) {
     select.innerHTML = `<option value="">No autenticado</option>`;
@@ -794,19 +793,16 @@ async function loadStatsExerciseSelector() {
     return;
   }
 
-  /* ======================
-     CARGAR EJERCICIOS DESDE RECORDS
-  ====================== */
+  // 🔥 AQUÍ ESTÁ LA CLAVE
   const { data, error } = await supabase
     .from("exercise_records")
-    .select("exercise_id, exercise_name")
+    .select("exercise_name")
     .eq("user_id", user.id)
     .not("exercise_name", "is", null);
 
   if (error) {
     console.error("❌ Error cargando ejercicios stats", error);
     select.innerHTML = `<option value="">Error cargando ejercicios</option>`;
-    content.innerHTML = `<p class="error">No se pudieron cargar los datos</p>`;
     return;
   }
 
@@ -821,44 +817,29 @@ async function loadStatsExerciseSelector() {
     return;
   }
 
-  /* ======================
-     DEDUPLICAR
-  ====================== */
-  const unique = new Map();
+  // 🔁 eliminar duplicados
+  const uniqueNames = [...new Set(data.map(r => r.exercise_name))];
 
-  data.forEach(r => {
-    if (r.exercise_id && r.exercise_name && !unique.has(r.exercise_id)) {
-      unique.set(r.exercise_id, r.exercise_name);
-    }
-  });
-
-  if (unique.size === 0) {
-    select.innerHTML = `<option value="">Sin ejercicios</option>`;
-    content.innerHTML = `<p class="muted">No hay datos válidos</p>`;
-    return;
-  }
-
-  /* ======================
-     RENDER SELECT
-  ====================== */
   select.innerHTML = `<option value="">Selecciona ejercicio</option>`;
 
-  unique.forEach((name, id) => {
+  uniqueNames.forEach(name => {
     const opt = document.createElement("option");
-    opt.value = id;
+    opt.value = name;
     opt.textContent = name;
     select.appendChild(opt);
   });
 
+  // cambio de ejercicio
   select.onchange = () => {
     if (!select.value) {
       content.innerHTML = `<p class="muted">Selecciona un ejercicio</p>`;
       return;
     }
+
     loadExerciseStats(select.value);
   };
 
-  console.log("✅ Stats selector cargado:", unique.size, "ejercicios");
+  console.log("✅ Selector de estadísticas cargado:", uniqueNames);
 }
 
 async function loadExerciseStats(exerciseName) {
