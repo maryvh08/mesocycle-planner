@@ -308,10 +308,10 @@ async function loadExerciseHistory(mesocycleId, container) {
      .eq("user_id", user.id)
      .eq("exercise_name", exerciseName)
      .order("updated_at", { ascending: true });
-   
-       .eq("mesocycle_id", mesocycleId)
-       .order("week_number")
-       .order("day_number");
+
+    .eq("mesocycle_id", mesocycleId)
+    .order("week_number")
+    .order("day_number");
 
   if (error) {
     console.error(error);
