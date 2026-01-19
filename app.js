@@ -232,7 +232,7 @@ async function loadMesocycles() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error(error);
+    console.error("❌ Error cargando mesociclos", error);
     return;
   }
 
@@ -244,9 +244,6 @@ async function loadMesocycles() {
       ? m.templates[0]
       : m.templates;
 
-    /* ======================
-       HISTORIAL
-    ====================== */
     const li = document.createElement("li");
     li.className = "mesocycle-history-card";
 
@@ -281,17 +278,14 @@ async function loadMesocycles() {
     li.querySelector(".register-btn").onclick = () => {
       registroSelect.value = m.id;
       openRegistro(m.id);
-   };
+    };
 
-   li.querySelector(".delete-btn").onclick = () => {
-     deleteMesocycle(m.id);
-   };
+    li.querySelector(".delete-btn").onclick = () => {
+      deleteMesocycle(m.id);
+    };
 
     historyList.appendChild(li);
 
-    /* ======================
-       SELECT REGISTRO  ✅
-    ====================== */
     const opt = document.createElement("option");
     opt.value = m.id;
     opt.textContent = m.name;
@@ -299,14 +293,11 @@ async function loadMesocycles() {
   });
 }
 
+
 async function loadExerciseHistory(mesocycleId, container) {
   container.innerHTML = "<p>Cargando historial...</p>";
 
-  const {
-    data: { user },
-    error: userError
-  } = await supabase.auth.getUser();
-
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) {
     container.innerHTML = "<p>Error de autenticación</p>";
     return;
@@ -325,29 +316,26 @@ async function loadExerciseHistory(mesocycleId, container) {
     `)
     .eq("user_id", user.id)
     .eq("mesocycle_id", mesocycleId)
-    .order("week_number", { ascending: true })
-    .order("day_number", { ascending: true })
-    .order("updated_at", { ascending: true });
+    .order("week_number")
+    .order("day_number")
+    .order("updated_at");
 
   if (error) {
-    console.error(error);
+    console.error("❌ Error cargando historial", error);
     container.innerHTML = "<p>Error cargando historial</p>";
     return;
   }
 
-  if (!data || data.length === 0) {
+  if (!data.length) {
     container.innerHTML = `
       <div class="empty-state">
-        <p>📝 Día sin registros</p>
+        <p>📝 Sin registros</p>
         <small>Agrega ejercicios para comenzar</small>
       </div>
     `;
     return;
   }
 
-  /* ======================
-     AGRUPAR Semana → Día
-  ====================== */
   const grouped = {};
 
   data.forEach(r => {
@@ -368,7 +356,7 @@ async function loadExerciseHistory(mesocycleId, container) {
     weekDiv.innerHTML = `<h5>${week}</h5>`;
 
     Object.entries(days).forEach(([day, rows]) => {
-            const dayDiv = document.createElement("div");
+      const dayDiv = document.createElement("div");
       dayDiv.className = "day-block";
       dayDiv.innerHTML = `<strong>${day}</strong>`;
 
@@ -378,23 +366,18 @@ async function loadExerciseHistory(mesocycleId, container) {
 
         const label = document.createElement("span");
         label.textContent = `${r.exercise_name} — ${r.weight}kg × ${r.reps}`;
-
-        // ✏️ click para editar
         label.onclick = () => editExerciseRecord(r);
 
-        // ❌ botón borrar
         const deleteBtn = document.createElement("button");
         deleteBtn.className = "chip-delete";
         deleteBtn.textContent = "✕";
-
-        deleteBtn.onclick = async (e) => {
+        deleteBtn.onclick = async e => {
           e.stopPropagation();
           await deleteExerciseRecord(r.id);
           await loadExerciseHistory(mesocycleId, container);
         };
 
-        chip.appendChild(label);
-        chip.appendChild(deleteBtn);
+        chip.append(label, deleteBtn);
         dayDiv.appendChild(chip);
       });
 
@@ -407,33 +390,33 @@ async function loadExerciseHistory(mesocycleId, container) {
 
 async function editExerciseRecord(record) {
   const newWeight = prompt(
-    `Editar peso (${record.exercises.name})`,
+    `Editar peso (${record.exercise_name})`,
     record.weight
   );
   if (newWeight === null) return;
 
   const newReps = prompt(
-    `Editar reps (${record.exercises.name})`,
+    `Editar reps (${record.exercise_name})`,
     record.reps
   );
   if (newReps === null) return;
 
-  await supabase.from("exercise_records").insert({
-     user_id: user.id,
-     exercise_id: exerciseId ?? null, // opcional
-     exercise_name: exerciseName,     // 👈 OBLIGATORIO
-     weight,
-     reps,
-     updated_at: new Date().toISOString()
-   });
+  const { error } = await supabase
+    .from("exercise_records")
+    .update({
+      weight: Number(newWeight),
+      reps: Number(newReps),
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", record.id);
 
   if (error) {
-    console.error(error);
+    console.error("❌ Error actualizando registro", error);
     alert("Error actualizando registro");
     return;
   }
 
-  alert("Registro actualizado");
+  alert("✅ Registro actualizado");
 }
 
 async function deleteMesocycle(mesocycleId) {
