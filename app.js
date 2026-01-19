@@ -701,44 +701,67 @@ async function renderRegistroEditor(mesocycleId) {
    RENDER EJERCICIOS DÍA
 ====================== */
 async function renderExercisesForDay(mesocycleId, week, day, container) {
-  container.innerHTML = "";
+  container.innerHTML = "<p class='muted'>Cargando ejercicios...</p>";
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("exercise_records")
-    .select(`weight, reps, exercises(name, subgroup)`)
+    .select("id, exercise_name, weight, reps")
     .eq("mesocycle_id", mesocycleId)
     .eq("week_number", week)
     .eq("day_number", day)
     .order("updated_at", { ascending: false });
 
-  if (!data.length) {
-    container.innerHTML = "<p>No hay ejercicios registrados</p>";
+  if (error) {
+    console.error(error);
+    container.innerHTML = "<p class='error'>Error cargando ejercicios</p>";
     return;
   }
+
+  if (!data || data.length === 0) {
+    container.innerHTML = "<p class='muted'>No hay ejercicios registrados</p>";
+    return;
+  }
+
+  container.innerHTML = "";
 
   data.forEach(r => {
     const div = document.createElement("div");
     div.className = "exercise-chip";
-    div.textContent = `${r.exercises.name} — ${r.weight}kg x ${r.reps}`;
+    div.textContent = `${r.exercise_name} — ${r.weight}kg × ${r.reps}`;
     container.appendChild(div);
   });
 }
 
-async function deleteExerciseRecord(recordId) {
-  if (!confirm("¿Eliminar este ejercicio?")) return;
+async function renderExercisesForDay(mesocycleId, week, day, container) {
+  container.innerHTML = "<p class='muted'>Cargando ejercicios...</p>";
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("exercise_records")
-    .delete()
-    .eq("id", recordId);
+    .select("id, exercise_name, weight, reps")
+    .eq("mesocycle_id", mesocycleId)
+    .eq("week_number", week)
+    .eq("day_number", day)
+    .order("updated_at", { ascending: false });
 
   if (error) {
     console.error(error);
-    alert("Error eliminando ejercicio");
+    container.innerHTML = "<p class='error'>Error cargando ejercicios</p>";
     return;
   }
 
-  console.log("🗑️ Registro eliminado", recordId);
+  if (!data || data.length === 0) {
+    container.innerHTML = "<p class='muted'>No hay ejercicios registrados</p>";
+    return;
+  }
+
+  container.innerHTML = "";
+
+  data.forEach(r => {
+    const div = document.createElement("div");
+    div.className = "exercise-chip";
+    div.textContent = `${r.exercise_name} — ${r.weight}kg × ${r.reps}`;
+    container.appendChild(div);
+  });
 }
 
 /* ======================
@@ -758,7 +781,6 @@ function renderStatsView() {
       </select>
     </div>
 
-    <!-- 👇 ESTE ES EL CONTENEDOR QUE FALTABA -->
     <div id="stats-content">
       <p class="muted">Selecciona un ejercicio</p>
     </div>
