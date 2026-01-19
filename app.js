@@ -732,38 +732,6 @@ async function renderExercisesForDay(mesocycleId, week, day, container) {
   });
 }
 
-async function renderExercisesForDay(mesocycleId, week, day, container) {
-  container.innerHTML = "<p class='muted'>Cargando ejercicios...</p>";
-
-  const { data, error } = await supabase
-    .from("exercise_records")
-    .select("id, exercise_name, weight, reps")
-    .eq("mesocycle_id", mesocycleId)
-    .eq("week_number", week)
-    .eq("day_number", day)
-    .order("updated_at", { ascending: false });
-
-  if (error) {
-    console.error(error);
-    container.innerHTML = "<p class='error'>Error cargando ejercicios</p>";
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    container.innerHTML = "<p class='muted'>No hay ejercicios registrados</p>";
-    return;
-  }
-
-  container.innerHTML = "";
-
-  data.forEach(r => {
-    const div = document.createElement("div");
-    div.className = "exercise-chip";
-    div.textContent = `${r.exercise_name} — ${r.weight}kg × ${r.reps}`;
-    container.appendChild(div);
-  });
-}
-
 /* ======================
    RENDER VIEW
 ====================== */
