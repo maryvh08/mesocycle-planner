@@ -843,43 +843,22 @@ async function loadStatsExerciseSelector() {
 }
 
 async function loadExerciseStats(exerciseName) {
-  console.log("📈 Cargando stats de", exerciseId);
+  console.log("📈 Stats de", exerciseName);
 
   const container = document.getElementById("stats-content");
-  if (!container) {
-    console.error("❌ stats-content no existe");
-    return;
-  }
-
   container.innerHTML = `<p class="muted">Cargando estadísticas...</p>`;
 
-  const {
-    data: { user },
-    error: userError
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (userError || !user) {
-    container.innerHTML = `<p class="error">No autenticado</p>`;
-    return;
-  }
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select("weight, reps, updated_at")
+    .eq("user_id", user.id)
+    .eq("exercise_name", exerciseName)
+    .order("updated_at", { ascending: true });
 
-  await supabase.from("exercise_records").insert({
-     user_id: user.id,
-     exercise_id: exerciseId ?? null,
-     exercise_name: exerciseName, // 👈 SIEMPRE
-     weight,
-     reps,
-     updated_at: new Date().toISOString()
-   });
-   
-  if (error) {
-    console.error("❌ Error stats", error);
-    container.innerHTML = `<p class="error">Error cargando estadísticas</p>`;
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    container.innerHTML = `<p class="muted">No hay registros para este ejercicio</p>`;
+  if (error || !data.length) {
+    container.innerHTML = `<p class="muted">No hay datos</p>`;
     return;
   }
 
