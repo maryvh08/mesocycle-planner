@@ -659,10 +659,14 @@ async function renderRegistroEditor(mesocycleId) {
 
     const { data: { session } } = await supabase.auth.getSession();
 
+   const selectedOption =
+     exerciseSelect.options[exerciseSelect.selectedIndex];
+   
    const payload = {
-     user_id: session.user.id,   // 🔥 CLAVE
+     user_id: session.user.id,
      mesocycle_id: mesocycleId,
      exercise_id: exerciseSelect.value,
+     exercise_name: selectedOption.dataset.name, // 🔥 CLAVE
      week_number: Number(weekSelect.value),
      day_number: selectedDay,
      weight: Number(weightInput.value),
@@ -700,7 +704,12 @@ async function renderRegistroEditor(mesocycleId) {
 /* ======================
    RENDER EJERCICIOS DÍA
 ====================== */
-async function renderExercisesForDay(mesocycleId, week, day, container) {
+async function renderExercisesForDay({
+  mesocycleId,
+  week,
+  day,
+  container
+}) {
   container.innerHTML = "<p class='muted'>Cargando ejercicios...</p>";
 
   const { data, error } = await supabase
