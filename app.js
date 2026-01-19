@@ -388,6 +388,23 @@ async function loadExerciseHistory(mesocycleId, container) {
   });
 }
 
+async function deleteExerciseRecord(recordId) {
+  if (!confirm("¿Eliminar este ejercicio?")) return;
+
+  const { error } = await supabase
+    .from("exercise_records")
+    .delete()
+    .eq("id", recordId);
+
+  if (error) {
+    console.error(error);
+    alert("❌ Error eliminando ejercicio");
+    return;
+  }
+
+  console.log("🗑️ Registro eliminado", recordId);
+}
+
 async function editExerciseRecord(record) {
   const newWeight = prompt(
     `Editar peso (${record.exercise_name})`,
