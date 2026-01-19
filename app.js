@@ -302,15 +302,32 @@ async function loadMesocycles() {
 async function loadExerciseHistory(mesocycleId, container) {
   container.innerHTML = "<p>Cargando historial...</p>";
 
+  const {
+    data: { user },
+    error: userError
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    container.innerHTML = "<p>Error de autenticación</p>";
+    return;
+  }
+
   const { data, error } = await supabase
-     .from("exercise_records")
-     .select("weight, reps, updated_at")
-     .eq("user_id", user.id)
-     .eq("exercise_name", exerciseName)
-     .order("updated_at", { ascending: true });
-   .eq("mesocycle_id", mesocycleId)
-   .order("week_number")
-   .order("day_number");
+    .from("exercise_records")
+    .select(`
+      id,
+      exercise_name,
+      weight,
+      reps,
+      week_number,
+      day_number,
+      updated_at
+    `)
+    .eq("user_id", user.id)
+    .eq("mesocycle_id", mesocycleId)
+    .order("week_number", { ascending: true })
+    .order("day_number", { ascending: true })
+    .order("updated_at", { ascending: true });
 
   if (error) {
     console.error(error);
@@ -318,17 +335,19 @@ async function loadExerciseHistory(mesocycleId, container) {
     return;
   }
 
-  if (!data.length) {
+  if (!data || data.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-       <p>📝 Día sin registros</p>
-       <small>Agrega ejercicios para comenzar</small>
+        <p>📝 Día sin registros</p>
+        <small>Agrega ejercicios para comenzar</small>
       </div>
-      `;
+    `;
     return;
   }
 
-  // Agrupar por semana → día
+  /* ======================
+     AGRUPAR Semana → Día
+  ====================== */
   const grouped = {};
 
   data.forEach(r => {
@@ -349,32 +368,31 @@ async function loadExerciseHistory(mesocycleId, container) {
     weekDiv.innerHTML = `<h5>${week}</h5>`;
 
     Object.entries(days).forEach(([day, rows]) => {
-      const dayDiv = document.createElement("div");
+            const dayDiv = document.createElement("div");
       dayDiv.className = "day-block";
       dayDiv.innerHTML = `<strong>${day}</strong>`;
 
       rows.forEach(r => {
         const chip = document.createElement("div");
         chip.className = "exercise-chip";
-      
+
         const label = document.createElement("span");
-        label.textContent =
-          `${r.exercises.name} — ${r.weight}kg × ${r.reps}`;
-      
+        label.textContent = `${r.exercise_name} — ${r.weight}kg × ${r.reps}`;
+
         // ✏️ click para editar
         label.onclick = () => editExerciseRecord(r);
-      
+
         // ❌ botón borrar
         const deleteBtn = document.createElement("button");
         deleteBtn.className = "chip-delete";
         deleteBtn.textContent = "✕";
-      
+
         deleteBtn.onclick = async (e) => {
           e.stopPropagation();
           await deleteExerciseRecord(r.id);
           await loadExerciseHistory(mesocycleId, container);
         };
-      
+
         chip.appendChild(label);
         chip.appendChild(deleteBtn);
         dayDiv.appendChild(chip);
