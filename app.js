@@ -781,32 +781,32 @@ async function loadStatsExerciseSelector() {
     return;
   }
 
-  // UI inicial
   select.innerHTML = `<option value="">Cargando ejercicios...</option>`;
   content.innerHTML = `<p class="muted">Selecciona un ejercicio</p>`;
 
-  const {
-    data: { user },
-    error: userError
-  } = await supabase.auth.getUser();
-
+  /* ======================
+     USUARIO
+  ====================== */
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) {
     select.innerHTML = `<option value="">No autenticado</option>`;
     content.innerHTML = `<p class="error">Debes iniciar sesión</p>`;
     return;
   }
 
+  /* ======================
+     CARGAR EJERCICIOS DESDE RECORDS
+  ====================== */
   const { data, error } = await supabase
-     .from("exercise_records")
-     .select("weight, reps, updated_at")
-     .eq("user_id", user.id)
-     .eq("exercise_name", exerciseName)
-     .order("updated_at", { ascending: true });
+    .from("exercise_records")
+    .select("exercise_id, exercise_name")
+    .eq("user_id", user.id)
+    .not("exercise_name", "is", null);
 
   if (error) {
     console.error("❌ Error cargando ejercicios stats", error);
-    select.innerHTML = `<option value="">Error</option>`;
-    content.innerHTML = `<p class="error">No se pudieron cargar los ejercicios</p>`;
+    select.innerHTML = `<option value="">Error cargando ejercicios</option>`;
+    content.innerHTML = `<p class="error">No se pudieron cargar los datos</p>`;
     return;
   }
 
@@ -821,14 +821,31 @@ async function loadStatsExerciseSelector() {
     return;
   }
 
-  // únicos
-  const exercises = [...new Set(data.map(r => r.exercise_name))];
+  /* ======================
+     DEDUPLICAR
+  ====================== */
+  const unique = new Map();
 
+  data.forEach(r => {
+    if (r.exercise_id && r.exercise_name && !unique.has(r.exercise_id)) {
+      unique.set(r.exercise_id, r.exercise_name);
+    }
+  });
+
+  if (unique.size === 0) {
+    select.innerHTML = `<option value="">Sin ejercicios</option>`;
+    content.innerHTML = `<p class="muted">No hay datos válidos</p>`;
+    return;
+  }
+
+  /* ======================
+     RENDER SELECT
+  ====================== */
   select.innerHTML = `<option value="">Selecciona ejercicio</option>`;
 
-  exercises.forEach(name => {
+  unique.forEach((name, id) => {
     const opt = document.createElement("option");
-    opt.value = name;
+    opt.value = id;
     opt.textContent = name;
     select.appendChild(opt);
   });
@@ -841,7 +858,7 @@ async function loadStatsExerciseSelector() {
     loadExerciseStats(select.value);
   };
 
-  console.log("✅ Stats selector cargado:", exercises.length, "ejercicios");
+  console.log("✅ Stats selector cargado:", unique.size, "ejercicios");
 }
 
 async function loadExerciseStats(exerciseName) {
