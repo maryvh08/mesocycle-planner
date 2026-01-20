@@ -843,13 +843,33 @@ async function loadStatsExerciseSelector() {
 }
 
 async function loadExerciseStats(exerciseName) {
-  console.log("📈 Stats de", exerciseName);
+  console.log("📈 Cargando estadísticas de:", exerciseName);
 
   const container = document.getElementById("stats-content");
+  if (!container) {
+    console.error("❌ stats-content no existe");
+    return;
+  }
+
+  // UI loading
   container.innerHTML = `<p class="muted">Cargando estadísticas...</p>`;
 
-  const { data: { user } } = await supabase.auth.getUser();
+  /* ======================
+     AUTH
+  ====================== */
+  const {
+    data: { user },
+    error: userError
+  } = await supabase.auth.getUser();
 
+  if (userError || !user) {
+    container.innerHTML = `<p class="error">Debes iniciar sesión</p>`;
+    return;
+  }
+
+  /* ======================
+     QUERY
+  ====================== */
   const { data, error } = await supabase
     .from("exercise_records")
     .select("weight, reps, updated_at")
@@ -857,34 +877,47 @@ async function loadExerciseStats(exerciseName) {
     .eq("exercise_name", exerciseName)
     .order("updated_at", { ascending: true });
 
-  if (error || !data.length) {
-    container.innerHTML = `<p class="muted">No hay datos</p>`;
+  if (error) {
+    console.error("❌ Error cargando stats", error);
+    container.innerHTML = `<p class="error">Error cargando estadísticas</p>`;
     return;
   }
 
-  /* -------------------------
-     MÉTRICAS BASE
-  -------------------------- */
+  if (!data || data.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <p>📭 Sin registros</p>
+        <small>Aún no hay datos para este ejercicio</small>
+      </div>
+    `;
+    return;
+  }
 
+  /* ======================
+     MÉTRICAS
+  ====================== */
   const weights = data.map(r => r.weight);
   const reps = data.map(r => r.reps);
   const volumes = data.map(r => r.weight * r.reps);
 
+  const lastWeight = weights.at(-1);
+  const maxWeight = Math.max(...weights);
+  const avgWeight = Math.round(
+    weights.reduce((a, b) => a + b, 0) / weights.length
+  );
+
   const totalVolume = volumes.reduce((a, b) => a + b, 0);
   const avgVolume = Math.round(totalVolume / volumes.length);
 
-  const maxWeight = Math.max(...weights);
-  const maxVolume = Math.max(...volumes);
-
+  // e1RM
   const e1rms = data.map(r =>
     Math.round(r.weight * (1 + r.reps / 30))
   );
   const maxE1RM = Math.max(...e1rms);
 
-  /* -------------------------
+  /* ======================
      TENDENCIA
-  -------------------------- */
-
+  ====================== */
   function calcTrend(values) {
     if (values.length < 4) return "flat";
 
@@ -902,22 +935,44 @@ async function loadExerciseStats(exerciseName) {
   const trend = calcTrend(weights);
   const trendText = {
     up: "📈 Progresando",
-    flat: "➖ Estancado",
-    down: "📉 Fatiga / bajada"
+    flat: "➖ Estable",
+    down: "📉 Bajando / fatiga"
   }[trend];
 
-  /* -------------------------
+  /* ======================
      RENDER HTML
-  -------------------------- */
-
+  ====================== */
   container.innerHTML = `
     <div class="stats-grid">
-      <div class="stat-card">Volumen total<br><strong>${totalVolume.toLocaleString()} kg</strong></div>
-      <div class="stat-card">Volumen promedio<br><strong>${avgVolume.toLocaleString()} kg</strong></div>
-      <div class="stat-card">PR peso<br><strong>${maxWeight} kg</strong></div>
-      <div class="stat-card">PR volumen<br><strong>${maxVolume.toLocaleString()}</strong></div>
-      <div class="stat-card">PR fuerza (e1RM)<br><strong>${maxE1RM} kg</strong></div>
-      <div class="stat-card">Tendencia<br><strong>${trendText}</strong></div>
+      <div class="stat-card">
+        Último peso
+        <strong>${lastWeight} kg</strong>
+      </div>
+
+      <div class="stat-card">
+        PR peso
+        <strong>${maxWeight} kg</strong>
+      </div>
+
+      <div class="stat-card">
+        Peso promedio
+        <strong>${avgWeight} kg</strong>
+      </div>
+
+      <div class="stat-card">
+        Volumen total
+        <strong>${totalVolume.toLocaleString()} kg</strong>
+      </div>
+
+      <div class="stat-card">
+        PR fuerza (e1RM)
+        <strong>${maxE1RM} kg</strong>
+      </div>
+
+      <div class="stat-card">
+        Tendencia
+        <strong>${trendText}</strong>
+      </div>
     </div>
 
     <div class="chart-wrapper">
@@ -929,19 +984,16 @@ async function loadExerciseStats(exerciseName) {
     </div>
   `;
 
-  /* -------------------------
-     GRÁFICA
-  -------------------------- */
-
+  /* ======================
+     CHART
+  ====================== */
   const ctx = document
     .getElementById("exerciseStatsChart")
     .getContext("2d");
 
-  if (window.statsChart) {
-    window.statsChart.destroy();
-  }
+  if (statsChart) statsChart.destroy();
 
-  window.statsChart = new Chart(ctx, {
+  statsChart = new Chart(ctx, {
     type: "line",
     data: {
       labels: data.map((_, i) => `Sesión ${i + 1}`),
@@ -968,6 +1020,8 @@ async function loadExerciseStats(exerciseName) {
       }
     }
   });
+
+  console.log("✅ Stats renderizadas correctamente");
 }
 
 function getCoachInsight(trend) {
