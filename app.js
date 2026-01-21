@@ -668,7 +668,6 @@ async function renderRegistroEditor(mesocycleId) {
     const payload = {
       user_id: session.user.id,
       mesocycle_id: mesocycleId,
-      exercise_id: exercise.id,
       exercise_name: exercise.name, // ✅ CLAVE
       week_number: Number(weekSelect.value),
       day_number: selectedDay,
@@ -679,7 +678,7 @@ async function renderRegistroEditor(mesocycleId) {
     const { error } = await supabase
       .from("exercise_records")
       .upsert(payload, {
-        onConflict: "mesocycle_id,exercise_id,week_number,day_number"
+        onConflict: "mesocycle_id,week_number,day_number"
       });
 
     if (error) {
