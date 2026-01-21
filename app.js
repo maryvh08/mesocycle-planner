@@ -775,74 +775,59 @@ async function loadStatsExerciseSelector() {
   const select = document.getElementById("stats-exercise-select");
   const content = document.getElementById("stats-content");
 
-  if (!select || !content) {
-    console.error("❌ stats-exercise-select o stats-content no existen");
-    return;
-  }
-
-  // UI inicial
   select.innerHTML = `<option value="">Cargando ejercicios...</option>`;
   content.innerHTML = `<p class="muted">Selecciona un ejercicio</p>`;
 
-  /* ======================
-     AUTH
-  ====================== */
-  const {
-    data: { user },
-    error: userError
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
     select.innerHTML = `<option value="">No autenticado</option>`;
-    content.innerHTML = `<p class="error">Debes iniciar sesión</p>`;
     return;
   }
 
-  /* ======================
-     QUERY CORRECTA ✅
-  ====================== */
   const { data, error } = await supabase
     .from("exercise_records")
     .select("exercise_name")
-    .eq("user_id", user.id)
-    .not("exercise_name", "is", null);
+    .eq("user_id", user.id);
 
   if (error) {
-    console.error("❌ Error cargando ejercicios stats", error);
-    select.innerHTML = `<option value="">Error cargando ejercicios</option>`;
+    console.error(error);
+    select.innerHTML = `<option value="">Error</option>`;
     return;
   }
 
+  console.log("📊 RAW exercise_records:", data);
+
   if (!data || data.length === 0) {
-    select.innerHTML = `<option value="">Sin ejercicios</option>`;
+    select.innerHTML = `<option value="">Sin registros</option>`;
+    return;
+  }
+
+  // Limpieza brutal de datos
+  const names = data
+    .map(r => r.exercise_name)
+    .filter(n => n && n.trim().length > 0);
+
+  const unique = [...new Set(names)];
+
+  console.log("📊 Nombres detectados:", unique);
+
+  if (unique.length === 0) {
+    select.innerHTML = `<option value="">Sin ejercicios válidos</option>`;
     content.innerHTML = `
       <div class="empty-state">
-        <p>📭 Aún no hay registros</p>
-        <small>Registra entrenamientos para ver estadísticas</small>
+        <p>⚠️ Tus registros no tienen nombre de ejercicio</p>
+        <small>Debes rellenar exercise_name</small>
       </div>
     `;
     return;
   }
 
-  /* ======================
-     UNIQUE exercise_name ✅
-  ====================== */
-  const uniqueNames = [...new Set(data.map(r => r.exercise_name))];
-
-  if (uniqueNames.length === 0) {
-    select.innerHTML = `<option value="">Sin ejercicios</option>`;
-    return;
-  }
-
-  /* ======================
-     RENDER SELECT
-  ====================== */
   select.innerHTML = `<option value="">Selecciona ejercicio</option>`;
 
-  uniqueNames.forEach(name => {
+  unique.forEach(name => {
     const opt = document.createElement("option");
-    opt.value = name;       // 🔥 CLAVE
-    opt.textContent = name; // 🔥 CLAVE
+    opt.value = name;
+    opt.textContent = name;
     select.appendChild(opt);
   });
 
@@ -852,10 +837,8 @@ async function loadStatsExerciseSelector() {
       return;
     }
 
-    loadExerciseStats(select.value); // 👈 PASA exercise_name
+    loadExerciseStats(select.value);
   };
-
-  console.log("✅ Selector de estadísticas cargado:", uniqueNames);
 }
 
 async function loadExerciseStats(exerciseName) {
