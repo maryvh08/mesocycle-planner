@@ -785,15 +785,23 @@ async function loadStatsExerciseSelector() {
   select.innerHTML = `<option value="">Cargando ejercicios...</option>`;
   content.innerHTML = `<p class="muted">Selecciona un ejercicio</p>`;
 
-  // Usuario
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  /* ======================
+     AUTH
+  ====================== */
+  const {
+    data: { user },
+    error: userError
+  } = await supabase.auth.getUser();
+
   if (userError || !user) {
     select.innerHTML = `<option value="">No autenticado</option>`;
     content.innerHTML = `<p class="error">Debes iniciar sesión</p>`;
     return;
   }
 
-  // 🔥 AQUÍ ESTÁ LA CLAVE
+  /* ======================
+     QUERY CORRECTA ✅
+  ====================== */
   const { data, error } = await supabase
     .from("exercise_records")
     .select("exercise_name")
@@ -817,26 +825,35 @@ async function loadStatsExerciseSelector() {
     return;
   }
 
-  // 🔁 eliminar duplicados
+  /* ======================
+     UNIQUE exercise_name ✅
+  ====================== */
   const uniqueNames = [...new Set(data.map(r => r.exercise_name))];
 
+  if (uniqueNames.length === 0) {
+    select.innerHTML = `<option value="">Sin ejercicios</option>`;
+    return;
+  }
+
+  /* ======================
+     RENDER SELECT
+  ====================== */
   select.innerHTML = `<option value="">Selecciona ejercicio</option>`;
 
   uniqueNames.forEach(name => {
     const opt = document.createElement("option");
-    opt.value = name;
-    opt.textContent = name;
+    opt.value = name;       // 🔥 CLAVE
+    opt.textContent = name; // 🔥 CLAVE
     select.appendChild(opt);
   });
 
-  // cambio de ejercicio
   select.onchange = () => {
     if (!select.value) {
       content.innerHTML = `<p class="muted">Selecciona un ejercicio</p>`;
       return;
     }
 
-    loadExerciseStats(select.value);
+    loadExerciseStats(select.value); // 👈 PASA exercise_name
   };
 
   console.log("✅ Selector de estadísticas cargado:", uniqueNames);
