@@ -683,31 +683,6 @@ function renderStatsView() {
   const statsView = document.getElementById("stats");
   if (!statsView) return;
 
-  statsView.innerHTML = `
-    <h2>📊 Estadísticas</h2>
-
-    <div id="stats-summary" class="stats-grid">
-      <div class="stat-card">
-        <strong id="total-sets">–</strong>
-        <span>Series totales</span>
-      </div>
-      <div class="stat-card">
-        <strong id="total-volume">–</strong>
-        <span>Volumen total (kg)</span>
-      </div>
-      <div class="stat-card">
-        <strong id="total-exercises">–</strong>
-        <span>Ejercicios únicos</span>
-      </div>
-    </div>
-
-    <h3>🏆 Mejores marcas</h3>
-    <div id="pr-table"></div>
-
-    <h3>📈 Tendencias de fuerza</h3>
-    <canvas id="strength-chart"></canvas>
-  `;
-
   loadStatsOverview();
   loadPRTable();
   loadStrengthChart();
