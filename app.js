@@ -126,7 +126,7 @@ function setupTabs() {
 
       tabEl.classList.remove("hidden");
 
-      if (tabId === "stats-tab") {
+      if (tabId === "stats") {
         renderStatsView();
       }
     };
