@@ -817,54 +817,24 @@ async function loadStatsOverview() {
     });
 }
 
-async function loadExerciseStats() {
+async function loadExerciseStatsByName(name) {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
 
-  // 1️⃣ Cargar ejercicios únicos desde exercise_records
-  const { data: exercises, error } = await supabase
+  const { data, error } = await supabase
     .from("exercise_records")
-    .select("exercise_name")
+    .select("weight, reps, updated_at")
     .eq("user_id", user.id)
-    .order("exercise_name", { ascending: true });
+    .eq("exercise_name", name)
+    .order("updated_at", { ascending: true });
 
-  if (error) {
-    console.error(error);
-    return;
-  }
+  if (!data.length) return;
 
-  // eliminar duplicados
-  const unique = [...new Set(exercises.map(e => e.exercise_name))];
+  const weights = data.map(r => r.weight);
+  const volume = data.map(r => r.weight * r.reps);
 
-  const select = document.getElementById("statsExerciseSelect");
-  select.innerHTML = `<option value="">Selecciona un ejercicio</option>`;
-
-  unique.forEach(name => {
-    const opt = document.createElement("option");
-    opt.value = name;
-    opt.textContent = name;
-    select.appendChild(opt);
-  });
-
-  // 2️⃣ Cuando cambie el ejercicio → cargar stats
-  select.onchange = async () => {
-    if (!select.value) return;
-
-    const { data, error } = await supabase
-      .from("exercise_records")
-      .select("weight, reps, updated_at")
-      .eq("user_id", user.id)
-      .eq("exercise_name", select.value)
-      .order("updated_at", { ascending: true });
-
-    if (error) {
-      console.error(error);
-      return;
-    }
-
-    renderExerciseChart(data);
-  };
+  renderChart(name, weights, volume);
 }
+
 
 function renderExerciseChart(rows) {
   const list = document.getElementById("statsList");
