@@ -718,55 +718,102 @@ function renderStatsView() {
    CARGA STATS + GRAFICA
 ====================== */
 async function loadStatsOverview() {
-  const container = document.getElementById("stats-overview");
-  container.innerHTML = "<p class='muted'>Cargando estadísticas...</p>";
-
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
 
   const { data, error } = await supabase
     .from("exercise_records")
-    .select("exercise_name, weight, reps")
+    .select("weight,reps,exercise_name")
     .eq("user_id", user.id);
 
-  if (error || !data || !data.length) {
-    container.innerHTML = "<p class='muted'>No hay datos todavía</p>";
+  if (error) {
+    console.error(error);
     return;
   }
 
-  const grouped = {};
+  let totalSets = data.length;
+  let totalVolume = 0;
+  const exercises = new Set();
 
   data.forEach(r => {
-    if (!grouped[r.exercise_name]) {
-      grouped[r.exercise_name] = {
-        sets: 0,
-        max: 0,
-        volume: 0
-      };
-    }
-
-    grouped[r.exercise_name].sets++;
-    grouped[r.exercise_name].max = Math.max(grouped[r.exercise_name].max, r.weight);
-    grouped[r.exercise_name].volume += r.weight * r.reps;
+    totalVolume += r.weight * r.reps;
+    exercises.add(r.exercise_name);
   });
 
+  document.getElementById("total-sets").textContent = totalSets;
+  document.getElementById("total-volume").textContent = Math.round(totalVolume);
+  document.getElementById("total-exercises").textContent = exercises.size;
+}
+
+async function loadPRTable() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data, error } = await supabase.rpc("exercise_prs", {
+    uid: user.id
+  });
+
+  if (error) {
+    console.error("PR error", error);
+    return;
+  }
+
+  const container = document.getElementById("pr-table");
   container.innerHTML = "";
 
-  Object.entries(grouped).forEach(([name, stats]) => {
-    const card = document.createElement("div");
-    card.className = "exercise-card";
-
-    card.innerHTML = `
-      <div class="exercise-title">${name}</div>
-      <div class="exercise-metrics">
-        ${stats.sets} sets<br>
-        PR: ${stats.max} kg<br>
-        Volumen: ${Math.round(stats.volume)}
-      </div>
+  data.forEach(r => {
+    const row = document.createElement("div");
+    row.className = "pr-row";
+    row.innerHTML = `
+      <strong>${r.exercise_name}</strong>
+      <span>${r.max_weight} kg</span>
+      <small>${r.sets} sets</small>
     `;
+    container.appendChild(row);
+  });
+}
 
-    card.onclick = () => loadExerciseStats(name);
+async function loadStrengthChart() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
 
-    container.appendChild(card);
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select("updated_at,weight,reps")
+    .eq("user_id", user.id)
+    .order("updated_at");
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const daily = {};
+
+  data.forEach(r => {
+    const day = r.updated_at.slice(0, 10);
+    const volume = r.weight * r.reps;
+    daily[day] = (daily[day] || 0) + volume;
+  });
+
+  const labels = Object.keys(daily);
+  const values = Object.values(daily);
+
+  const ctx = document.getElementById("strength-chart");
+
+  if (window.statsChart) window.statsChart.destroy();
+
+  window.statsChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Volumen total",
+        data: values,
+        fill: true,
+        tension: 0.3
+      }]
+    }
   });
 }
 
