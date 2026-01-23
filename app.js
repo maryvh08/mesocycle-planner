@@ -824,24 +824,39 @@ async function loadStatsOverview() {
   });
 }
 
-async function loadExerciseStatsByName(name) {
+async function loadExerciseStats(exerciseName) {
   const { data: { user } } = await supabase.auth.getUser();
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("exercise_records")
     .select("weight, reps, updated_at")
     .eq("user_id", user.id)
-    .eq("exercise_name", name)
+    .eq("exercise_name", exerciseName)
     .order("updated_at", { ascending: true });
 
-  if (!data.length) return;
+  const labels = data.map(r => new Date(r.updated_at).toLocaleDateString());
+  const values = data.map(r => r.weight);
 
-  const weights = data.map(r => r.weight);
-  const volume = data.map(r => r.weight * r.reps);
+  document.getElementById("stats-chart-wrapper").classList.remove("hidden");
+  document.getElementById("stats-chart-title").textContent = exerciseName;
 
-  renderChart(name, weights, volume);
+  if (progressChart) progressChart.destroy();
+
+  const ctx = document.getElementById("progressChart");
+
+  progressChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Peso (kg)",
+        data: values,
+        fill: false,
+        tension: 0.3
+      }]
+    }
+  });
 }
-
 
 function renderExerciseChart(rows) {
   const list = document.getElementById("statsList");
