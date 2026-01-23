@@ -749,37 +749,63 @@ async function loadPRTable() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  const { data, error } = await supabase.rpc("exercise_prs", {
-    uid: user.id
-  });
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select("exercise_name, weight")
+    .eq("user_id", user.id);
 
   if (error) {
     console.error("PR error", error);
     return;
   }
 
+  // agrupar
+  const map = {};
+
+  data.forEach(r => {
+    if (!r.exercise_name) return;
+
+    if (!map[r.exercise_name]) {
+      map[r.exercise_name] = {
+        sets: 0,
+        max_weight: 0
+      };
+    }
+
+    map[r.exercise_name].sets++;
+    map[r.exercise_name].max_weight = Math.max(
+      map[r.exercise_name].max_weight,
+      r.weight || 0
+    );
+  });
+
   const container = document.getElementById("pr-table");
   container.innerHTML = "";
 
-  data.forEach(r => {
+  Object.entries(map).forEach(([name, info]) => {
     const row = document.createElement("div");
     row.className = "pr-row";
     row.innerHTML = `
-      <strong>${r.exercise_name}</strong>
-      <span>${r.max_weight} kg</span>
-      <small>${r.sets} sets</small>
+      <strong>${name}</strong>
+      <span>${info.max_weight} kg</span>
+      <small>${info.sets} sets</small>
     `;
     container.appendChild(row);
   });
 }
 
 async function loadStrengthChart() {
+  if (typeof Chart === "undefined") {
+    console.warn("Chart.js no cargado — gráfica omitida");
+    return;
+  }
+
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
   const { data, error } = await supabase
     .from("exercise_records")
-    .select("updated_at,weight,reps")
+    .select("updated_at, weight, reps")
     .eq("user_id", user.id)
     .order("updated_at");
 
@@ -792,7 +818,7 @@ async function loadStrengthChart() {
 
   data.forEach(r => {
     const day = r.updated_at.slice(0, 10);
-    const volume = r.weight * r.reps;
+    const volume = (r.weight || 0) * (r.reps || 0);
     daily[day] = (daily[day] || 0) + volume;
   });
 
@@ -800,6 +826,7 @@ async function loadStrengthChart() {
   const values = Object.values(daily);
 
   const ctx = document.getElementById("strength-chart");
+  if (!ctx) return;
 
   if (window.statsChart) window.statsChart.destroy();
 
