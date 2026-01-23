@@ -301,22 +301,32 @@ input:focus {
 /* ======================
    ESTADISTICA
 ====================== */
-.stat-card {
-  background: #1a1a27;
-  padding: 1rem;
-  margin: .5rem 0;
-  border-radius: 12px;
-}
-
-.stats-table {
-  width: 100%;
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+  gap: 1rem;
   margin-top: 1rem;
-  border-collapse: collapse;
 }
 
-.stats-table th,
-.stats-table td {
-  padding: .5rem;
-  border-bottom: 1px solid #333;
-  text-align: center;
+.exercise-card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.exercise-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.exercise-title {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.exercise-metrics {
+  font-size: 0.9rem;
+  color: var(--text-muted);
 }
