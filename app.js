@@ -13,6 +13,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 ====================== */
 let selectedDaysPerWeek = null;
 let selectedDay = null;
+let progressChart = null;
 let editingMesocycleId = null;
 let allowedSubgroups = null;
 let statsChart = null;
@@ -563,8 +564,6 @@ async function renderRegistroEditor(mesocycleId) {
   const dayContainer = document.createElement("div");
   dayContainer.className = "day-buttons";
   registroEditor.appendChild(dayContainer);
-
-  let selectedDay = null;
 
   for (let i = 1; i <= mesocycle.days_per_week; i++) {
     const btn = document.createElement("button");
