@@ -890,6 +890,17 @@ async function loadExerciseStats() {
   };
 }
 
+function renderExerciseChart(rows) {
+  const list = document.getElementById("statsList");
+  list.innerHTML = "";
+
+  rows.forEach(r => {
+    const li = document.createElement("li");
+    li.textContent = `${r.weight} kg × ${r.reps} reps`;
+    list.appendChild(li);
+  });
+}
+
 function getCoachInsight(trend) {
   if (trend === "up") return "💪 Excelente progresión, sigue así";
   if (trend === "flat") return "⚠️ Considera subir carga o volumen";
