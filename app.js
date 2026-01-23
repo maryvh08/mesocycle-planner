@@ -841,186 +841,53 @@ async function loadStatsExerciseSelector() {
   };
 }
 
-async function loadExerciseStats(exerciseName) {
-  console.log("📈 Cargando estadísticas de:", exerciseName);
+async function loadExerciseStats() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
 
-  const container = document.getElementById("stats-content");
-  if (!container) {
-    console.error("❌ stats-content no existe");
-    return;
-  }
-
-  // UI loading
-  container.innerHTML = `<p class="muted">Cargando estadísticas...</p>`;
-
-  /* ======================
-     AUTH
-  ====================== */
-  const {
-    data: { user },
-    error: userError
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    container.innerHTML = `<p class="error">Debes iniciar sesión</p>`;
-    return;
-  }
-
-  /* ======================
-     QUERY
-  ====================== */
-  const { data, error } = await supabase
+  // 1️⃣ Cargar ejercicios únicos desde exercise_records
+  const { data: exercises, error } = await supabase
     .from("exercise_records")
-    .select("weight, reps, updated_at")
+    .select("exercise_name")
     .eq("user_id", user.id)
-    .eq("exercise_name", exerciseName)
-    .order("updated_at", { ascending: true });
+    .order("exercise_name", { ascending: true });
 
   if (error) {
-    console.error("❌ Error cargando stats", error);
-    container.innerHTML = `<p class="error">Error cargando estadísticas</p>`;
+    console.error(error);
     return;
   }
 
-  if (!data || data.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <p>📭 Sin registros</p>
-        <small>Aún no hay datos para este ejercicio</small>
-      </div>
-    `;
-    return;
-  }
+  // eliminar duplicados
+  const unique = [...new Set(exercises.map(e => e.exercise_name))];
 
-  /* ======================
-     MÉTRICAS
-  ====================== */
-  const weights = data.map(r => r.weight);
-  const reps = data.map(r => r.reps);
-  const volumes = data.map(r => r.weight * r.reps);
+  const select = document.getElementById("statsExerciseSelect");
+  select.innerHTML = `<option value="">Selecciona un ejercicio</option>`;
 
-  const lastWeight = weights.at(-1);
-  const maxWeight = Math.max(...weights);
-  const avgWeight = Math.round(
-    weights.reduce((a, b) => a + b, 0) / weights.length
-  );
-
-  const totalVolume = volumes.reduce((a, b) => a + b, 0);
-  const avgVolume = Math.round(totalVolume / volumes.length);
-
-  // e1RM
-  const e1rms = data.map(r =>
-    Math.round(r.weight * (1 + r.reps / 30))
-  );
-  const maxE1RM = Math.max(...e1rms);
-
-  /* ======================
-     TENDENCIA
-  ====================== */
-  function calcTrend(values) {
-    if (values.length < 4) return "flat";
-
-    const mid = Math.floor(values.length / 2);
-    const firstAvg =
-      values.slice(0, mid).reduce((a, b) => a + b, 0) / mid;
-    const lastAvg =
-      values.slice(mid).reduce((a, b) => a + b, 0) / (values.length - mid);
-
-    if (lastAvg > firstAvg * 1.05) return "up";
-    if (lastAvg < firstAvg * 0.95) return "down";
-    return "flat";
-  }
-
-  const trend = calcTrend(weights);
-  const trendText = {
-    up: "📈 Progresando",
-    flat: "➖ Estable",
-    down: "📉 Bajando / fatiga"
-  }[trend];
-
-  /* ======================
-     RENDER HTML
-  ====================== */
-  container.innerHTML = `
-    <div class="stats-grid">
-      <div class="stat-card">
-        Último peso
-        <strong>${lastWeight} kg</strong>
-      </div>
-
-      <div class="stat-card">
-        PR peso
-        <strong>${maxWeight} kg</strong>
-      </div>
-
-      <div class="stat-card">
-        Peso promedio
-        <strong>${avgWeight} kg</strong>
-      </div>
-
-      <div class="stat-card">
-        Volumen total
-        <strong>${totalVolume.toLocaleString()} kg</strong>
-      </div>
-
-      <div class="stat-card">
-        PR fuerza (e1RM)
-        <strong>${maxE1RM} kg</strong>
-      </div>
-
-      <div class="stat-card">
-        Tendencia
-        <strong>${trendText}</strong>
-      </div>
-    </div>
-
-    <div class="chart-wrapper">
-      <canvas id="exerciseStatsChart"></canvas>
-    </div>
-
-    <div class="coach-insight">
-      ${getCoachInsight(trend)}
-    </div>
-  `;
-
-  /* ======================
-     CHART
-  ====================== */
-  const ctx = document
-    .getElementById("exerciseStatsChart")
-    .getContext("2d");
-
-  if (statsChart) statsChart.destroy();
-
-  statsChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: data.map((_, i) => `Sesión ${i + 1}`),
-      datasets: [
-        {
-          label: "Peso (kg)",
-          data: weights,
-          borderWidth: 2,
-          tension: 0.3
-        },
-        {
-          label: "Volumen",
-          data: volumes,
-          borderDash: [6, 4],
-          tension: 0.3
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      interaction: { mode: "index", intersect: false },
-      scales: {
-        y: { beginAtZero: false }
-      }
-    }
+  unique.forEach(name => {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    select.appendChild(opt);
   });
 
-  console.log("✅ Stats renderizadas correctamente");
+  // 2️⃣ Cuando cambie el ejercicio → cargar stats
+  select.onchange = async () => {
+    if (!select.value) return;
+
+    const { data, error } = await supabase
+      .from("exercise_records")
+      .select("weight, reps, updated_at")
+      .eq("user_id", user.id)
+      .eq("exercise_name", select.value)
+      .order("updated_at", { ascending: true });
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    renderExerciseChart(data);
+  };
 }
 
 function getCoachInsight(trend) {
