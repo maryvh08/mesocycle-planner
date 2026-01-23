@@ -681,8 +681,30 @@ async function renderExercisesForDay(mesocycleId, week, day) {
 ====================== */
 function renderStatsView() {
   const statsView = document.getElementById("stats");
-  if (!statsView) return;
+  if (!statsView) {
+    console.error("❌ No existe #stats en el DOM");
+    return;
+  }
 
+  console.log("📊 Cargando estadísticas...");
+
+  // Estados visuales de carga
+  const overview = document.getElementById("stats-overview");
+  if (overview) {
+    overview.innerHTML = `
+      <div class="stat-card"><strong>–</strong><span>Series totales</span></div>
+      <div class="stat-card"><strong>–</strong><span>Volumen total</span></div>
+      <div class="stat-card"><strong>–</strong><span>Ejercicios únicos</span></div>
+    `;
+  }
+
+  const prTable = document.getElementById("pr-table");
+  if (prTable) prTable.innerHTML = "<p class='muted'>Cargando PRs...</p>";
+
+  const chartWrapper = document.getElementById("stats-chart-wrapper");
+  if (chartWrapper) chartWrapper.classList.add("hidden");
+
+  // 🚀 Cargar datos reales
   loadStatsOverview();
   loadPRTable();
   loadStrengthChart();
