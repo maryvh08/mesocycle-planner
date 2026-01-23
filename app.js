@@ -772,49 +772,56 @@ function renderStatsView() {
    CARGA STATS + GRAFICA
 ====================== */
 async function loadStatsOverview() {
-  const list = document.getElementById("stats-list");
-  list.innerHTML = "Cargando...";
+  const container = document.getElementById("stats-overview");
+  container.innerHTML = "<p class='muted'>Cargando estadísticas...</p>";
 
   const { data: { user } } = await supabase.auth.getUser();
 
   const { data, error } = await supabase
     .from("exercise_records")
-    .select("exercise_name, weight")
-    .eq("user_id", user.id)
-    .not("exercise_name", "is", null);
+    .select("exercise_name, weight, reps")
+    .eq("user_id", user.id);
 
-  if (error) {
-    list.innerHTML = "Error cargando datos";
+  if (error || !data || !data.length) {
+    container.innerHTML = "<p class='muted'>No hay datos todavía</p>";
     return;
   }
 
-  // Agrupar en JS
-  const map = {};
+  const grouped = {};
 
   data.forEach(r => {
-    if (!map[r.exercise_name]) {
-      map[r.exercise_name] = { sets: 0, max: 0 };
+    if (!grouped[r.exercise_name]) {
+      grouped[r.exercise_name] = {
+        sets: 0,
+        max: 0,
+        volume: 0
+      };
     }
-    map[r.exercise_name].sets++;
-    map[r.exercise_name].max = Math.max(map[r.exercise_name].max, r.weight);
+
+    grouped[r.exercise_name].sets++;
+    grouped[r.exercise_name].max = Math.max(grouped[r.exercise_name].max, r.weight);
+    grouped[r.exercise_name].volume += r.weight * r.reps;
   });
 
-  list.innerHTML = "";
+  container.innerHTML = "";
 
-  Object.entries(map)
-    .sort((a, b) => b[1].sets - a[1].sets)
-    .forEach(([name, info]) => {
-      const card = document.createElement("div");
-      card.className = "stats-card";
-      card.innerHTML = `
-        <strong>${name}</strong><br>
-        ${info.sets} sets · PR ${info.max} kg
-      `;
+  Object.entries(grouped).forEach(([name, stats]) => {
+    const card = document.createElement("div");
+    card.className = "exercise-card";
 
-      card.onclick = () => loadExerciseStatsByName(name);
+    card.innerHTML = `
+      <div class="exercise-title">${name}</div>
+      <div class="exercise-metrics">
+        ${stats.sets} sets<br>
+        PR: ${stats.max} kg<br>
+        Volumen: ${Math.round(stats.volume)}
+      </div>
+    `;
 
-      list.appendChild(card);
-    });
+    card.onclick = () => loadExerciseStats(name);
+
+    container.appendChild(card);
+  });
 }
 
 async function loadExerciseStatsByName(name) {
