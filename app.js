@@ -818,7 +818,7 @@ async function loadStatsOverview() {
       </div>
     `;
 
-    card.onclick = () => loadExerciseStats(exercisename);
+    card.onclick = () => loadExerciseStats(name);
 
     container.appendChild(card);
   });
