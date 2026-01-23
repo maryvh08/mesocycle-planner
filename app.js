@@ -38,7 +38,7 @@ const registroSelect = document.getElementById("registro-select");
 const registroEditor = document.getElementById("registro-editor");
 
 const tabs = document.querySelectorAll(".tab-btn");
-const statsView = document.getElementById("stats-view");
+const statsView = document.getElementById("stats-tab");
 
 /* ======================
    AUTH
