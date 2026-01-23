@@ -765,7 +765,7 @@ function renderStatsView() {
     </div>
   `;
 
-  loadStatsExerciseSelector();
+  loadStatsOverview();
 }
 
 /* ======================
