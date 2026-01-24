@@ -735,11 +735,6 @@ async function loadStatsOverview(mesocycleId) {
 
   if (!user) return;
 
-  const { data, error } = await supabase
-    .from("exercise_records")
-    .select("reps, weight, exercise_name")
-    .eq("user_id", user.id);
-
   if (error) {
     console.error("Stats overview error", error);
     return;
