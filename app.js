@@ -714,77 +714,76 @@ function renderStatsView() {
    CARGA STATS + GRAFICA
 ====================== */
 async function loadStatsOverview() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+  const totalSetsEl = document.getElementById("total-sets");
+  const totalVolumeEl = document.getElementById("total-volume");
+  const totalExercisesEl = document.getElementById("total-exercises");
 
-  const { data, error } = await supabase
-    .from("exercise_records")
-    .select("weight,reps,exercise_name")
-    .eq("user_id", user.id);
-
-  if (error) {
-    console.error(error);
+  if (!totalSetsEl || !totalVolumeEl || !totalExercisesEl) {
+    console.warn("⏳ Stats DOM no listo aún");
     return;
   }
 
-  let totalSets = data.length;
-  let totalVolume = 0;
-  const exercises = new Set();
-
-  data.forEach(r => {
-    totalVolume += r.weight * r.reps;
-    exercises.add(r.exercise_name);
-  });
-
-  document.getElementById("total-sets").textContent = totalSets;
-  document.getElementById("total-volume").textContent = Math.round(totalVolume);
-  document.getElementById("total-exercises").textContent = exercises.size;
-}
-
-async function loadPRTable() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
   const { data, error } = await supabase
     .from("exercise_records")
-    .select("exercise_name, weight")
+    .select("reps, weight, exercise_name")
     .eq("user_id", user.id);
+
+  if (error) {
+    console.error("Stats overview error", error);
+    return;
+  }
+
+  let sets = data.length;
+  let volume = 0;
+  const exercises = new Set();
+
+  data.forEach(r => {
+    volume += (r.reps || 0) * (r.weight || 0);
+    if (r.exercise_name) exercises.add(r.exercise_name);
+  });
+
+  totalSetsEl.textContent = sets;
+  totalVolumeEl.textContent = Math.round(volume);
+  totalExercisesEl.textContent = exercises.size;
+}
+
+async function loadPRTable() {
+  const container = document.getElementById("pr-table");
+
+  if (!container) {
+    console.warn("⏳ PR table no está en el DOM aún");
+    return;
+  }
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data, error } = await supabase.rpc("exercise_prs", {
+    uid: user.id
+  });
 
   if (error) {
     console.error("PR error", error);
     return;
   }
 
-  // agrupar
-  const map = {};
-
-  data.forEach(r => {
-    if (!r.exercise_name) return;
-
-    if (!map[r.exercise_name]) {
-      map[r.exercise_name] = {
-        sets: 0,
-        max_weight: 0
-      };
-    }
-
-    map[r.exercise_name].sets++;
-    map[r.exercise_name].max_weight = Math.max(
-      map[r.exercise_name].max_weight,
-      r.weight || 0
-    );
-  });
-
-  const container = document.getElementById("pr-table");
   container.innerHTML = "";
 
-  Object.entries(map).forEach(([name, info]) => {
+  if (!data || data.length === 0) {
+    container.innerHTML = "<p class='muted'>No hay marcas aún</p>";
+    return;
+  }
+
+  data.forEach(r => {
     const row = document.createElement("div");
     row.className = "pr-row";
     row.innerHTML = `
-      <strong>${name}</strong>
-      <span>${info.max_weight} kg</span>
-      <small>${info.sets} sets</small>
+      <strong>${r.exercise_name}</strong>
+      <span>${r.max_weight} kg</span>
+      <small>${r.sets} sets</small>
     `;
     container.appendChild(row);
   });
