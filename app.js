@@ -786,10 +786,6 @@ async function loadStatsOverview(mesocycleId) {
     return;
   }
 
-  let sets = data.length;
-  let volume = 0;
-  const exercises = new Set();
-
   data.forEach(r => {
     volume += (r.reps || 0) * (r.weight || 0);
     if (r.exercise_name) exercises.add(r.exercise_name);
