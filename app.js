@@ -1073,7 +1073,7 @@ async function loadExerciseStats(exerciseName) {
 
 function renderExerciseChart(rows) {
   const list = document.getElementById("statsList");
-  list. = "";
+  list.value = "";
 
   rows.forEach(r => {
     const li = document.createElement("li");
@@ -1094,4 +1094,3 @@ function getCoachInsight(trend) {
 document.addEventListener("DOMContentLoaded", () => {
   initAuth();        
 });
-
