@@ -733,7 +733,6 @@ async function loadStatsOverview(mesocycleId) {
     return;
   }
 
-  const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
   const { data, error } = await supabase
