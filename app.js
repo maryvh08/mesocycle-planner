@@ -820,11 +820,6 @@ async function loadPRTable(mesocycleId) {
     return;
   }
 
-  if (error) {
-    console.error("PR error", error);
-    return;
-  }
-
   if (!data || data.length === 0) {
     container.innerHTML = "<p class='muted'>No hay marcas aún</p>";
     return;
@@ -854,11 +849,6 @@ async function loadStrengthChart(mesocycleId) {
 
   if (typeof Chart === "undefined") {
     console.warn("Chart.js no cargado — gráfica omitida");
-    return;
-  }
-
-  if (error) {
-    console.error(error);
     return;
   }
 
