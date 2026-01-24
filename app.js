@@ -716,11 +716,18 @@ function renderStatsView() {
 /* ======================
    CARGA STATS + GRAFICA
 ====================== */
-async function loadStatsOverview() {
-  const totalSetsEl = document.getElementById("total-sets");
-  const totalVolumeEl = document.getElementById("total-volume");
-  const totalExercisesEl = document.getElementById("total-exercises");
+async function loadStatsOverview(mesocycleId) {
+   const totalSetsEl = document.getElementById("total-sets");
+   const totalVolumeEl = document.getElementById("total-volume");
+   const totalExercisesEl = document.getElementById("total-exercises");
+   const { data: { user } } = await supabase.auth.getUser();
 
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select("weight,reps,exercise_name")
+    .eq("user_id", user.id)
+    .eq("mesocycle_id", mesocycleId);
+  
   if (!totalSetsEl || !totalVolumeEl || !totalExercisesEl) {
     console.warn("⏳ Stats DOM no listo aún");
     return;
@@ -753,8 +760,15 @@ async function loadStatsOverview() {
   totalExercisesEl.textContent = exercises.size;
 }
 
-async function loadPRTable() {
-  const container = document.getElementById("pr-table");
+async function loadPRTable(mesocycleId) {
+   const container = document.getElementById("pr-table");
+   const { data: { user } } = await supabase.auth.getUser();
+
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select("exercise_name, weight")
+    .eq("user_id", user.id)
+    .eq("mesocycle_id", mesocycleId);
 
   if (!container) {
     console.warn("⏳ PR table no está en el DOM aún");
@@ -792,7 +806,16 @@ async function loadPRTable() {
   });
 }
 
-async function loadStrengthChart() {
+async function loadStrengthChart(mesocycleId) {
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select("updated_at, weight, reps")
+    .eq("user_id", user.id)
+    .eq("mesocycle_id", mesocycleId)
+    .order("updated_at");
+
   if (typeof Chart === "undefined") {
     console.warn("Chart.js no cargado — gráfica omitida");
     return;
