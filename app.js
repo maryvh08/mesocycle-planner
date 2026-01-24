@@ -869,9 +869,10 @@ async function loadExerciseVolumeList() {
   const container = document.getElementById("stats-overview");
   container.innerHTML = "";
 
-  rows.forEach(([name, stats]) => {
+  rows.forEach(async ([name, stats]) => {
     const div = document.createElement("div");
-    div.className = "stat-card stat-exercise";
+      const status = await getExerciseStatus(name);
+    div.className = "stat-card stat-exercise " + status;
     div.innerHTML = `
       <strong>${name}</strong>
       <span>Volumen: ${stats.volume.toFixed(0)} kg</span>
@@ -945,6 +946,42 @@ async function loadExerciseProgress(exerciseName) {
       ]
     }
   });
+}
+
+async function getExerciseStatus(exerciseName) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return "unknown";
+
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select("updated_at, weight, reps")
+    .eq("user_id", user.id)
+    .eq("exercise_name", exerciseName)
+    .order("updated_at", { ascending: false })
+    .limit(30);
+
+  if (error || !data || data.length < 6) return "new";
+
+  // Agrupar por día
+  const days = {};
+
+  data.forEach(r => {
+    const d = r.updated_at.slice(0, 10);
+    if (!days[d]) days[d] = { volume: 0, max: 0 };
+    days[d].volume += r.weight * r.reps;
+    days[d].max = Math.max(days[d].max, r.weight);
+  });
+
+  const sessions = Object.values(days).slice(0, 3);
+
+  if (sessions.length < 3) return "new";
+
+  const first = sessions[2];
+  const last = sessions[0];
+
+  if (last.max > first.max || last.volume > first.volume) return "growing";
+
+  return "stalled";
 }
 
 async function loadExerciseStats(exerciseName) {
