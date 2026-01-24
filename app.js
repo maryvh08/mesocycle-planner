@@ -520,7 +520,7 @@ async function renderRegistroEditor(mesocycleId) {
      ====================== */
    
      const { data: templateExercises, error: tError } = await supabase
-       .from("template_exercises")
+       .from("templates")
        .select(`
          exercise_id,
          exercises ( id, name, subgroup )
