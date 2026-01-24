@@ -1027,7 +1027,7 @@ async function loadStatsMesocycles() {
   }
 
   const select = document.getElementById("stats-mesocycle");
-  select. = `<option value="">Selecciona mesociclo</option>`;
+  select.value = `<option value="">Selecciona mesociclo</option>`;
 
   data.forEach(m => {
     const opt = document.createElement("option");
