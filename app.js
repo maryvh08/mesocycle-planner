@@ -879,7 +879,7 @@ async function loadExerciseVolumeList() {
     .sort((a, b) => b[1].volume - a[1].volume);
 
   const container = document.getElementById("stats-overview");
-  container.innerHTML = "";
+     container.innerHTML = "";
 
   rows.forEach(async ([name, stats]) => {
     const div = document.createElement("div");
