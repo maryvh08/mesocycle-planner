@@ -813,33 +813,52 @@ async function loadStatsOverview(mesocycleId = null) {
   exercisesEl.textContent = exercises.size;
 }
 
-async function loadPRTable(mesocycleId) {
-   const container = document.getElementById("pr-table");
-   const { data: { user } } = await supabase.auth.getUser();
+async function loadPRTable(mesocycleId = null) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("exercise_records")
     .select("exercise_name, weight")
-    .eq("user_id", user.id)
-    .eq("mesocycle_id", mesocycleId);
+    .eq("user_id", user.id);
 
-  if (!container) {
-    console.warn("⏳ PR table no está en el DOM aún");
+  // 🔥 SOLO filtrar si es un id válido
+  if (mesocycleId !== null && mesocycleId !== undefined && mesocycleId !== "") {
+    query = query.eq("mesocycle_id", mesocycleId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("PR error", error);
     return;
   }
 
-  if (!data || data.length === 0) {
-    container.innerHTML = "<p class='muted'>No hay marcas aún</p>";
-    return;
-  }
+  const map = {};
 
   data.forEach(r => {
+    if (!r.exercise_name) return;
+
+    if (!map[r.exercise_name]) {
+      map[r.exercise_name] = { sets: 0, max: 0 };
+    }
+
+    map[r.exercise_name].sets++;
+    map[r.exercise_name].max = Math.max(map[r.exercise_name].max, r.weight || 0);
+  });
+
+  const container = document.getElementById("pr-table");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  Object.entries(map).forEach(([name, info]) => {
     const row = document.createElement("div");
     row.className = "pr-row";
     row.innerHTML = `
-      <strong>${r.exercise_name}</strong>
-      <span>${r.max_weight} kg</span>
-      <small>${r.sets} sets</small>
+      <strong>${name}</strong>
+      <span>${info.max} kg</span>
+      <small>${info.sets} sets</small>
     `;
     container.appendChild(row);
   });
