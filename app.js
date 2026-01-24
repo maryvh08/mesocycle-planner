@@ -92,13 +92,14 @@ async function showApp() {
 }
 
 function showError(container, message) {
-  container. `
+  container.innerHTML = `
     <div class="error-box">
       <strong>⚠️ Algo salió mal</strong>
       <p>${message}</p>
     </div>
   `;
 }
+
 
 /* ======================
    TABS
