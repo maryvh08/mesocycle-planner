@@ -641,9 +641,11 @@ async function renderRegistroEditor(mesocycleId) {
 ====================== */
 async function renderExercisesForDay(mesocycleId, week, day) {
   const container = document.getElementById("registered-exercises");
+  if (!container) return;
+
   container.innerHTML = "Cargando...";
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("exercise_records")
     .select("id, exercise_name, weight, reps")
     .eq("mesocycle_id", mesocycleId)
@@ -651,21 +653,56 @@ async function renderExercisesForDay(mesocycleId, week, day) {
     .eq("day_number", day)
     .order("updated_at", { ascending: false });
 
-  if (!data || !data.length) {
-    container.innerHTML = "<p>No hay ejercicios</p>";
+  if (error) {
+    console.error("❌ Error cargando ejercicios del día", error);
+    container.innerHTML = "<p>Error cargando ejercicios</p>";
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    container.innerHTML = "<p>No hay ejercicios registrados</p>";
     return;
   }
 
   container.innerHTML = "";
 
   data.forEach(r => {
-    const div = document.createElement("div");
-    div.className = "exercise-chip";
-    div.textContent = `${r.exercise_name} — ${r.weight}kg × ${r.reps}`;
-    container.appendChild(div);
+    const chip = document.createElement("div");
+    chip.className = "exercise-chip";
+
+    const label = document.createElement("span");
+    label.textContent = `${r.exercise_name} — ${r.weight}kg × ${r.reps}`;
+
+    // 👉 click para editar
+    label.onclick = () => editExerciseRecord(r);
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "chip-delete";
+    deleteBtn.textContent = "✕";
+
+    deleteBtn.onclick = async e => {
+      e.stopPropagation();
+      if (!confirm("¿Eliminar este ejercicio?")) return;
+
+      const { error } = await supabase
+        .from("exercise_records")
+        .delete()
+        .eq("id", r.id);
+
+      if (error) {
+        console.error("❌ Error eliminando", error);
+        alert("Error al eliminar");
+        return;
+      }
+
+      // 🔁 recargar lista
+      renderExercisesForDay(mesocycleId, week, day);
+    };
+
+    chip.append(label, deleteBtn);
+    container.appendChild(chip);
   });
 }
-
 
 /* ======================
    RENDER VIEW
