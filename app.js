@@ -702,6 +702,15 @@ function renderStatsView() {
   loadPRTable();
   loadStrengthChart();
    loadExerciseVolumeList();
+   loadStatsMesocycles();
+   document.getElementById("stats-mesocycle").onchange = e => {
+     const mesocycleId = e.target.value;
+     if (!mesocycleId) return;
+   
+     loadStatsOverview(mesocycleId);
+     loadPRTable(mesocycleId);
+     loadStrengthChart(mesocycleId);
+   };
 }
 
 /* ======================
@@ -984,6 +993,32 @@ async function getExerciseStatus(exerciseName) {
   if (last.max > first.max || last.volume > first.volume) return "growing";
 
   return "stalled";
+}
+
+async function loadStatsMesocycles() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data, error } = await supabase
+    .from("mesocycles")
+    .select("id, name")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const select = document.getElementById("stats-mesocycle");
+  select.innerHTML = `<option value="">Selecciona mesociclo</option>`;
+
+  data.forEach(m => {
+    const opt = document.createElement("option");
+    opt.value = m.id;
+    opt.textContent = m.name;
+    select.appendChild(opt);
+  });
 }
 
 async function loadExerciseStats(exerciseName) {
