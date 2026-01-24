@@ -330,3 +330,15 @@ input:focus {
   font-size: 0.9rem;
   color: var(--text-muted);
 }
+
+.stat-exercise.growing {
+  border-left: 6px solid #22c55e;
+}
+
+.stat-exercise.stalled {
+  border-left: 6px solid #ef4444;
+}
+
+.stat-exercise.new {
+  border-left: 6px solid #3b82f6;
+}
