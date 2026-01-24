@@ -808,15 +808,6 @@ async function loadStrengthChart(mesocycleId) {
     return;
   }
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-
-  const { data, error } = await supabase
-    .from("exercise_records")
-    .select("updated_at, weight, reps")
-    .eq("user_id", user.id)
-    .order("updated_at");
-
   if (error) {
     console.error(error);
     return;
