@@ -92,7 +92,7 @@ async function showApp() {
 }
 
 function showError(container, message) {
-  container.innerHTML = `
+  container. = `
     <div class="error-box">
       <strong>⚠️ Algo salió mal</strong>
       <p>${message}</p>
@@ -191,7 +191,7 @@ async function loadTemplates() {
   const { data, error } = await supabase.from("templates").select("*").order("name");
   if (error) return console.error(error);
 
-  templateSelect.innerHTML = `<option value="">Selecciona plantilla</option>`;
+  templateSelect. = `<option value="">Selecciona plantilla</option>`;
   data.forEach(t => {
     const opt = document.createElement("option");
     opt.value = t.id;
@@ -224,8 +224,8 @@ async function loadMesocycles() {
     return;
   }
 
-  historyList.innerHTML = "";
-  registroSelect.innerHTML = `<option value="">Selecciona mesociclo</option>`;
+  historyList. = "";
+  registroSelect. = `<option value="">Selecciona mesociclo</option>`;
 
   data.forEach(m => {
     const template = Array.isArray(m.templates)
@@ -235,7 +235,7 @@ async function loadMesocycles() {
     const li = document.createElement("li");
     li.className = "mesocycle-history-card";
 
-    li.innerHTML = `
+    li. = `
       <h4>${m.name}</h4>
       <div class="muted">
         Plantilla: <strong>${template?.name ?? "Sin plantilla"}</strong>
@@ -668,12 +668,19 @@ async function renderExercisesForDay(mesocycleId, week, day) {
 /* ======================
    RENDER VIEW
 ====================== */
-function renderStatsView() {
+ffunction renderStatsView() {
   const statsView = document.getElementById("stats");
   if (!statsView) return;
 
   statsView.innerHTML = `
     <h2>📊 Estadísticas</h2>
+
+    <div class="stats-control">
+      <label>Mesociclo</label>
+      <select id="stats-mesocycle">
+        <option value="">Todos</option>
+      </select>
+    </div>
 
     <div id="stats-summary" class="stats-grid">
       <div class="stat-card">
@@ -695,22 +702,29 @@ function renderStatsView() {
 
     <h3>📈 Progreso de fuerza</h3>
     <canvas id="strength-chart"></canvas>
+
+    <h3>📦 Volumen por ejercicio</h3>
+    <div id="exercise-volume-list"></div>
   `;
 
-  // 🔥 AHORA sí el DOM existe
+  // 🔥 Primero cargar mesociclos
+  loadStatsMesocycles();
+
+  // 🔥 Stats globales (todos los datos)
   loadStatsOverview();
   loadPRTable();
   loadStrengthChart();
-   loadExerciseVolumeList();
-   loadStatsMesocycles();
-   document.getElementById("stats-mesocycle").onchange = e => {
-     const mesocycleId = e.target.value;
-     if (!mesocycleId) return;
-   
-     loadStatsOverview(mesocycleId);
-     loadPRTable(mesocycleId);
-     loadStrengthChart(mesocycleId);
-   };
+  loadExerciseVolumeList();
+
+  // 🔥 Filtro por mesociclo
+  document.getElementById("stats-mesocycle").onchange = e => {
+    const mesocycleId = e.target.value || null;
+
+    loadStatsOverview(mesocycleId);
+    loadPRTable(mesocycleId);
+    loadStrengthChart(mesocycleId);
+    loadExerciseVolumeList(mesocycleId);
+  };
 }
 
 /* ======================
@@ -879,13 +893,13 @@ async function loadExerciseVolumeList() {
     .sort((a, b) => b[1].volume - a[1].volume);
 
   const container = document.getElementById("stats-overview");
-     container.innerHTML = "";
+  container.innerHTML = "";
 
   rows.forEach(async ([name, stats]) => {
     const div = document.createElement("div");
       const status = await getExerciseStatus(name);
     div.className = "stat-card stat-exercise " + status;
-    div.innerHTML = `
+    div. = `
       <strong>${name}</strong>
       <span>Volumen: ${stats.volume.toFixed(0)} kg</span>
       <small>PR: ${stats.max} kg · ${stats.sets} sets</small>
@@ -1012,7 +1026,7 @@ async function loadStatsMesocycles() {
   }
 
   const select = document.getElementById("stats-mesocycle");
-  select.innerHTML = `<option value="">Selecciona mesociclo</option>`;
+  select. = `<option value="">Selecciona mesociclo</option>`;
 
   data.forEach(m => {
     const opt = document.createElement("option");
@@ -1058,7 +1072,7 @@ async function loadExerciseStats(exerciseName) {
 
 function renderExerciseChart(rows) {
   const list = document.getElementById("statsList");
-  list.innerHTML = "";
+  list. = "";
 
   rows.forEach(r => {
     const li = document.createElement("li");
