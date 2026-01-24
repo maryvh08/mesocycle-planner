@@ -900,7 +900,7 @@ async function loadExerciseVolumeList() {
     const div = document.createElement("div");
       const status = await getExerciseStatus(name);
     div.className = "stat-card stat-exercise " + status;
-    div. = `
+    div.value = `
       <strong>${name}</strong>
       <span>Volumen: ${stats.volume.toFixed(0)} kg</span>
       <small>PR: ${stats.max} kg · ${stats.sets} sets</small>
