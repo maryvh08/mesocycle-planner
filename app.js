@@ -887,21 +887,32 @@ async function loadExerciseVolumeList() {
     }
 
     map[r.exercise_name].sets++;
-    map[r.exercise_name].max = Math.max(map[r.exercise_name].max, r.weight);
-    map[r.exercise_name].volume += r.weight * r.reps;
+    map[r.exercise_name].max = Math.max(map[r.exercise_name].max, r.weight || 0);
+    map[r.exercise_name].volume += (r.weight || 0) * (r.reps || 0);
   });
 
   const rows = Object.entries(map)
     .sort((a, b) => b[1].volume - a[1].volume);
 
   const container = document.getElementById("stats-overview");
+  if (!container) return;
+
   container.innerHTML = "";
 
-  rows.forEach(async ([name, stats]) => {
+  for (const [name, stats] of rows) {
     const div = document.createElement("div");
-      const status = await getExerciseStatus(name);
+
+    let status = "neutral";
+    try {
+      status = await getExerciseStatus(name);
+    } catch (e) {
+      console.warn("Status error", name);
+    }
+
     div.className = "stat-card stat-exercise " + status;
-    div.value = `
+
+    // 🔥 ESTO es lo correcto
+    div.innerHTML = `
       <strong>${name}</strong>
       <span>Volumen: ${stats.volume.toFixed(0)} kg</span>
       <small>PR: ${stats.max} kg · ${stats.sets} sets</small>
@@ -910,7 +921,7 @@ async function loadExerciseVolumeList() {
     div.onclick = () => loadExerciseProgress(name);
 
     container.appendChild(div);
-  });
+  }
 }
 
 async function loadExerciseProgress(exerciseName) {
