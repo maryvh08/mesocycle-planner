@@ -699,6 +699,7 @@ function renderStatsView() {
   loadStatsOverview();
   loadPRTable();
   loadStrengthChart();
+   loadExerciseVolumeList();
 }
 
 /* ======================
@@ -827,6 +828,59 @@ async function loadStrengthChart() {
         tension: 0.3
       }]
     }
+  });
+}
+
+async function loadExerciseVolumeList() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select("exercise_name, weight, reps")
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error("Volume list error", error);
+    return;
+  }
+
+  const map = {};
+
+  data.forEach(r => {
+    if (!r.exercise_name) return;
+
+    if (!map[r.exercise_name]) {
+      map[r.exercise_name] = {
+        sets: 0,
+        max: 0,
+        volume: 0
+      };
+    }
+
+    map[r.exercise_name].sets++;
+    map[r.exercise_name].max = Math.max(map[r.exercise_name].max, r.weight);
+    map[r.exercise_name].volume += r.weight * r.reps;
+  });
+
+  const rows = Object.entries(map)
+    .sort((a, b) => b[1].volume - a[1].volume);
+
+  const container = document.getElementById("stats-overview");
+  container.innerHTML = "";
+
+  rows.forEach(([name, stats]) => {
+    const div = document.createElement("div");
+    div.className = "stat-card stat-exercise";
+    div.innerHTML = `
+      <strong>${name}</strong>
+      <span>Volumen: ${stats.volume.toFixed(0)} kg</span>
+      <small>PR: ${stats.max} kg · ${stats.sets} sets</small>
+    `;
+
+    div.onclick = () => loadExerciseProgress(name);
+
+    container.appendChild(div);
   });
 }
 
