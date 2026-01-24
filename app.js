@@ -769,31 +769,48 @@ function renderStatsView() {
 /* ======================
    CARGA STATS + GRAFICA
 ====================== */
-async function loadStatsOverview(mesocycleId) {
-   const totalSetsEl = document.getElementById("total-sets");
-   const totalVolumeEl = document.getElementById("total-volume");
-   const totalExercisesEl = document.getElementById("total-exercises");
-   const { data: { user } } = await supabase.auth.getUser();
+async function loadStatsOverview(mesocycleId = null) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("exercise_records")
-    .select("weight,reps,exercise_name")
-    .eq("user_id", user.id)
-    .eq("mesocycle_id", mesocycleId);
-  
-  if (!totalSetsEl || !totalVolumeEl || !totalExercisesEl) {
-    console.warn("⏳ Stats DOM no listo aún");
+    .select("weight, reps, exercise_name")
+    .eq("user_id", user.id);
+
+  // 👉 solo filtrar si se seleccionó un mesociclo
+  if (mesocycleId) {
+    query = query.eq("mesocycle_id", mesocycleId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Stats overview error", error);
     return;
   }
 
+  let totalSets = 0;
+  let totalVolume = 0;
+  const exercises = new Set();
+
   data.forEach(r => {
-    volume += (r.reps || 0) * (r.weight || 0);
-    if (r.exercise_name) exercises.add(r.exercise_name);
+    if (!r.exercise_name) return;
+
+    totalSets++;
+    totalVolume += (r.weight || 0) * (r.reps || 0);
+    exercises.add(r.exercise_name);
   });
 
-  totalSetsEl.textContent = sets;
-  totalVolumeEl.textContent = Math.round(volume);
-  totalExercisesEl.textContent = exercises.size;
+  const setsEl = document.getElementById("total-sets");
+  const volumeEl = document.getElementById("total-volume");
+  const exercisesEl = document.getElementById("total-exercises");
+
+  if (!setsEl || !volumeEl || !exercisesEl) return;
+
+  setsEl.textContent = totalSets;
+  volumeEl.textContent = Math.round(totalVolume);
+  exercisesEl.textContent = exercises.size;
 }
 
 async function loadPRTable(mesocycleId) {
