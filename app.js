@@ -226,7 +226,7 @@ async function loadMesocycles() {
   }
 
   historyList.value = "";
-  registroSelect. = `<option value="">Selecciona mesociclo</option>`;
+  registroSelect.value = `<option value="">Selecciona mesociclo</option>`;
 
   data.forEach(m => {
     const template = Array.isArray(m.templates)
