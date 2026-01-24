@@ -669,7 +669,7 @@ async function renderExercisesForDay(mesocycleId, week, day) {
 /* ======================
    RENDER VIEW
 ====================== */
-ffunction renderStatsView() {
+function renderStatsView() {
   const statsView = document.getElementById("stats");
   if (!statsView) return;
 
