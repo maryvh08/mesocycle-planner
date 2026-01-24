@@ -225,7 +225,7 @@ async function loadMesocycles() {
     return;
   }
 
-  historyList. = "";
+  historyList.value = "";
   registroSelect. = `<option value="">Selecciona mesociclo</option>`;
 
   data.forEach(m => {
