@@ -515,19 +515,25 @@ async function renderRegistroEditor(mesocycleId) {
     return;
   }
 
-  /* ======================
-     CARGAR EJERCICIOS
+    /* ======================
+     CARGAR EJERCICIOS DE LA PLANTILLA
   ====================== */
-  const { data: exercises, error: eError } = await supabase
-    .from("exercises")
-    .select("id, name, subgroup")
-    .order("name");
 
-  if (eError) {
-    console.error(eError);
-    registroEditor.textContent = "Error cargando ejercicios";
+  const { data: templateExercises, error: tError } = await supabase
+    .from("template_exercises")
+    .select(`
+      exercise_id,
+      exercises ( id, name, subgroup )
+    `)
+    .eq("template_id", mesocycle.template_id);
+
+  if (tError || !templateExercises || templateExercises.length === 0) {
+    console.error(tError);
+    registroEditor.textContent = "Esta plantilla no tiene ejercicios";
     return;
   }
+
+  const exercises = templateExercises.map(te => te.exercises);
 
   const exercisesById = {};
   exercises.forEach(ex => exercisesById[ex.id] = ex);
