@@ -192,7 +192,7 @@ async function loadTemplates() {
   const { data, error } = await supabase.from("templates").select("*").order("name");
   if (error) return console.error(error);
 
-  templateSelect. = `<option value="">Selecciona plantilla</option>`;
+  templateSelect.value = `<option value="">Selecciona plantilla</option>`;
   data.forEach(t => {
     const opt = document.createElement("option");
     opt.value = t.id;
