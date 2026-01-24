@@ -884,6 +884,69 @@ async function loadExerciseVolumeList() {
   });
 }
 
+async function loadExerciseProgress(exerciseName) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select("updated_at, weight, reps")
+    .eq("user_id", user.id)
+    .eq("exercise_name", exerciseName)
+    .order("updated_at");
+
+  if (error) {
+    console.error("Progress error", error);
+    return;
+  }
+
+  const daily = {};
+
+  data.forEach(r => {
+    const day = r.updated_at.slice(0, 10);
+    const volume = r.weight * r.reps;
+
+    if (!daily[day]) {
+      daily[day] = { volume: 0, max: 0 };
+    }
+
+    daily[day].volume += volume;
+    daily[day].max = Math.max(daily[day].max, r.weight);
+  });
+
+  const labels = Object.keys(daily);
+  const volumes = Object.values(daily).map(d => d.volume);
+  const maxes = Object.values(daily).map(d => d.max);
+
+  document.getElementById("stats-chart-wrapper").classList.remove("hidden");
+  document.getElementById("stats-chart-title").textContent = exerciseName;
+
+  const ctx = document.getElementById("progressChart");
+
+  if (window.exerciseChart) window.exerciseChart.destroy();
+
+  window.exerciseChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Volumen",
+          data: volumes,
+          borderWidth: 2,
+          tension: 0.3
+        },
+        {
+          label: "Peso máximo",
+          data: maxes,
+          borderWidth: 2,
+          tension: 0.3
+        }
+      ]
+    }
+  });
+}
+
 async function loadExerciseStats(exerciseName) {
   const { data: { user } } = await supabase.auth.getUser();
 
