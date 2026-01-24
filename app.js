@@ -786,8 +786,6 @@ async function loadStatsOverview(mesocycleId) {
     return;
   }
 
-  if (!user) return;
-
   if (error) {
     console.error("Stats overview error", error);
     return;
@@ -826,8 +824,6 @@ async function loadPRTable(mesocycleId) {
     console.error("PR error", error);
     return;
   }
-
-  container.innerHTML = "";
 
   if (!data || data.length === 0) {
     container.innerHTML = "<p class='muted'>No hay marcas aún</p>";
