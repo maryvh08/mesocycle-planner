@@ -786,11 +786,6 @@ async function loadStatsOverview(mesocycleId) {
     return;
   }
 
-  if (error) {
-    console.error("Stats overview error", error);
-    return;
-  }
-
   let sets = data.length;
   let volume = 0;
   const exercises = new Set();
