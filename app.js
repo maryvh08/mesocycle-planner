@@ -105,34 +105,21 @@ function showError(container, message) {
 ====================== */
 function setupTabs() {
   document.querySelectorAll(".tab-btn").forEach(btn => {
-    btn.onclick = () => {
-      document
-        .querySelectorAll(".tab-btn")
-        .forEach(b => b.classList.remove("active"));
-
-      document
-        .querySelectorAll(".tab-content")
-        .forEach(c => c.classList.add("hidden"));
-
-      btn.classList.add("active");
-
-      const tabId = btn.dataset.tab;
-      const tabEl = document.getElementById(tabId);
-
-      if (!tabEl) {
-        console.error("❌ Tab no existe:", tabId);
-        return;
-      }
-
-      tabEl.classList.remove("hidden");
-
-      if (tabId === "stats") {
-        renderStatsView();
-      }
-    };
-  });
+     btn.onclick = () => {
+       const tab = btn.dataset.tab;
+   
+       document.querySelectorAll(".tab-content").forEach(t =>
+         t.classList.add("hidden")
+       );
+   
+       document.getElementById(tab).classList.remove("hidden");
+   
+       if (tab === "stats") {
+         renderStatsView(); // 👈 aquí y solo aquí
+       }
+     };
+   });
 }
-
 
 /* ======================
    DAY SELECTOR (CREAR)
@@ -681,30 +668,34 @@ async function renderExercisesForDay(mesocycleId, week, day) {
 ====================== */
 function renderStatsView() {
   const statsView = document.getElementById("stats");
-  if (!statsView) {
-    console.error("❌ No existe #stats en el DOM");
-    return;
-  }
+  if (!statsView) return;
 
-  console.log("📊 Cargando estadísticas...");
+  statsView.innerHTML = `
+    <h2>📊 Estadísticas</h2>
 
-  // Estados visuales de carga
-  const overview = document.getElementById("stats-overview");
-  if (overview) {
-    overview.innerHTML = `
-      <div class="stat-card"><strong>–</strong><span>Series totales</span></div>
-      <div class="stat-card"><strong>–</strong><span>Volumen total</span></div>
-      <div class="stat-card"><strong>–</strong><span>Ejercicios únicos</span></div>
-    `;
-  }
+    <div id="stats-summary" class="stats-grid">
+      <div class="stat-card">
+        <strong id="total-sets">–</strong>
+        <span>Series totales</span>
+      </div>
+      <div class="stat-card">
+        <strong id="total-volume">–</strong>
+        <span>Volumen total (kg)</span>
+      </div>
+      <div class="stat-card">
+        <strong id="total-exercises">–</strong>
+        <span>Ejercicios únicos</span>
+      </div>
+    </div>
 
-  const prTable = document.getElementById("pr-table");
-  if (prTable) prTable.innerHTML = "<p class='muted'>Cargando PRs...</p>";
+    <h3>🏆 Mejores marcas</h3>
+    <div id="pr-table" class="pr-table"></div>
 
-  const chartWrapper = document.getElementById("stats-chart-wrapper");
-  if (chartWrapper) chartWrapper.classList.add("hidden");
+    <h3>📈 Progreso de fuerza</h3>
+    <canvas id="strength-chart"></canvas>
+  `;
 
-  // 🚀 Cargar datos reales
+  // 🔥 AHORA sí el DOM existe
   loadStatsOverview();
   loadPRTable();
   loadStrengthChart();
