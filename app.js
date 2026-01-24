@@ -225,8 +225,9 @@ async function loadMesocycles() {
     return;
   }
 
-  historyList.value = "";
-  registroSelect.value = `<option value="">Selecciona mesociclo</option>`;
+  // 🔥 Limpiar UI
+  historyList.innerHTML = "";
+  registroSelect.innerHTML = `<option value="">Selecciona mesociclo</option>`;
 
   data.forEach(m => {
     const template = Array.isArray(m.templates)
@@ -236,7 +237,7 @@ async function loadMesocycles() {
     const li = document.createElement("li");
     li.className = "mesocycle-history-card";
 
-    li.value = `
+    li.innerHTML = `
       <h4>${m.name}</h4>
       <div class="muted">
         Plantilla: <strong>${template?.name ?? "Sin plantilla"}</strong>
@@ -275,13 +276,13 @@ async function loadMesocycles() {
 
     historyList.appendChild(li);
 
+    // 🔥 También al selector de registro
     const opt = document.createElement("option");
     opt.value = m.id;
     opt.textContent = m.name;
     registroSelect.appendChild(opt);
   });
 }
-
 
 async function loadExerciseHistory(mesocycleId, container) {
   container.innerHTML = "<p>Cargando historial...</p>";
