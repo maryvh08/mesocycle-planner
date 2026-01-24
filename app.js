@@ -236,7 +236,7 @@ async function loadMesocycles() {
     const li = document.createElement("li");
     li.className = "mesocycle-history-card";
 
-    li. = `
+    li.value = `
       <h4>${m.name}</h4>
       <div class="muted">
         Plantilla: <strong>${template?.name ?? "Sin plantilla"}</strong>
