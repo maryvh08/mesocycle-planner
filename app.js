@@ -515,28 +515,22 @@ async function renderRegistroEditor(mesocycleId) {
     return;
   }
 
-    /* ======================
-        CARGAR EJERCICIOS DE LA PLANTILLA
-     ====================== */
-   
-     const { data: templateExercises, error: tError } = await supabase
-       .from("templates")
-       .select(`
-         exercise_id,
-         exercises ( id, name, subgroup )
-       `)
-       .eq("template_id", mesocycle.template_id);
-   
-     if (tError || !templateExercises || templateExercises.length === 0) {
-       console.error(tError);
-       registroEditor.textContent = "Esta plantilla no tiene ejercicios";
-       return;
-     }
-   
-     const exercises = templateExercises.map(te => te.exercises);
-   
-     const exercisesById = {};
-     exercises.forEach(ex => exercisesById[ex.id] = ex);
+  /* ======================
+     CARGAR EJERCICIOS
+  ====================== */
+  const { data: exercises, error: eError } = await supabase
+    .from("exercises")
+    .select("id, name, subgroup")
+    .order("name");
+
+  if (eError) {
+    console.error(eError);
+    registroEditor.textContent = "Error cargando ejercicios";
+    return;
+  }
+
+  const exercisesById = {};
+  exercises.forEach(ex => exercisesById[ex.id] = ex);
 
   /* ======================
      UI
@@ -557,6 +551,8 @@ async function renderRegistroEditor(mesocycleId) {
   const dayContainer = document.createElement("div");
   dayContainer.className = "day-buttons";
   registroEditor.appendChild(dayContainer);
+
+  let selectedDay = null;
 
   for (let i = 1; i <= mesocycle.days_per_week; i++) {
     const btn = document.createElement("button");
