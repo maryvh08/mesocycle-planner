@@ -769,10 +769,6 @@ async function loadPRTable(mesocycleId) {
     return;
   }
 
-  const { data, error } = await supabase.rpc("exercise_prs", {
-    uid: user.id
-  });
-
   if (error) {
     console.error("PR error", error);
     return;
