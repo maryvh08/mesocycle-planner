@@ -746,6 +746,16 @@ function renderStatsView() {
     <div id="exercise-volume-list"></div>
   `;
 
+   // 🔥 Filtro por mesociclo
+   document.getElementById("stats-mesocycle").onchange = e => {
+     const mesocycleId = e.target.value || null;
+   
+     loadStatsOverview(mesocycleId);
+     loadPRTable(mesocycleId);
+     loadStrengthChart(mesocycleId);
+     loadExerciseVolumeList(mesocycleId);
+   };
+
   // 🔥 Primero cargar mesociclos
   loadStatsMesocycles();
 
@@ -754,16 +764,6 @@ function renderStatsView() {
   loadPRTable();
   loadStrengthChart();
   loadExerciseVolumeList();
-
-  // 🔥 Filtro por mesociclo
-  document.getElementById("stats-mesocycle").onchange = e => {
-    const mesocycleId = e.target.value || null;
-
-    loadStatsOverview(mesocycleId);
-    loadPRTable(mesocycleId);
-    loadStrengthChart(mesocycleId);
-    loadExerciseVolumeList(mesocycleId);
-  };
 }
 
 /* ======================
@@ -832,15 +832,27 @@ async function loadPRTable(mesocycleId) {
   });
 }
 
-async function loadStrengthChart(mesocycleId) {
+async function loadStrengthChart(mesocycleId = null) {
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("exercise_records")
     .select("updated_at, weight, reps")
     .eq("user_id", user.id)
-    .eq("mesocycle_id", mesocycleId)
     .order("updated_at");
+
+  // 👉 solo filtrar si hay mesociclo
+  if (mesocycleId) {
+    query = query.eq("mesocycle_id", mesocycleId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Strength chart error", error);
+    return;
+  }
 
   if (typeof Chart === "undefined") {
     console.warn("Chart.js no cargado — gráfica omitida");
@@ -940,6 +952,67 @@ async function loadExerciseVolumeList() {
 
     container.appendChild(div);
   }
+}
+
+async function loadExerciseVolumeList(mesocycleId = null) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  let query = supabase
+    .from("exercise_records")
+    .select("exercise_name, weight, reps")
+    .eq("user_id", user.id);
+
+  if (mesocycleId) {
+    query = query.eq("mesocycle_id", mesocycleId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Volume list error", error);
+    return;
+  }
+
+  const map = {};
+
+  data.forEach(r => {
+    if (!r.exercise_name) return;
+
+    if (!map[r.exercise_name]) {
+      map[r.exercise_name] = {
+        sets: 0,
+        max: 0,
+        volume: 0
+      };
+    }
+
+    map[r.exercise_name].sets++;
+    map[r.exercise_name].max = Math.max(map[r.exercise_name].max, r.weight || 0);
+    map[r.exercise_name].volume += (r.weight || 0) * (r.reps || 0);
+  });
+
+  const rows = Object.entries(map).sort((a, b) => b[1].volume - a[1].volume);
+
+  const container = document.getElementById("exercise-volume-list");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  rows.forEach(([name, stats]) => {
+    const div = document.createElement("div");
+    div.className = "exercise-volume-card";
+
+    div.innerHTML = `
+      <strong>${name}</strong>
+      <span>Volumen: ${stats.volume.toFixed(0)} kg</span>
+      <small>PR: ${stats.max} kg · ${stats.sets} sets</small>
+    `;
+
+    div.onclick = () => loadExerciseProgress(name);
+
+    container.appendChild(div);
+  });
 }
 
 async function loadExerciseProgress(exerciseName) {
