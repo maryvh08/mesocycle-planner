@@ -222,17 +222,12 @@ input:focus {
    CHIPS DE EJERCICIOS
 ====================== */
 .exercise-chip {
-  display: inline-flex;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: .5rem;
-  padding: .35rem .6rem;
-  margin: .25rem 0;
-  border-radius: 999px;
-  background: #1f1f24;
-  color: #eaeaea;
-  font-size: .85rem;
-  cursor: pointer;
+  font-weight: 600;
 }
+
 
 .exercise-chip:hover {
   background: #2a2a32;
