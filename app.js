@@ -770,8 +770,8 @@ function renderStatsView() {
   // 🔥 Stats globales (todos los datos)
    loadStatsOverview();
    loadPRTable();
-   loadStrengthChart(mesocycleId);
-   loadExerciseVolumeList(mesocycleId);
+   loadStrengthChart();
+   loadExerciseVolumeList();
 }
 
 /* ======================
