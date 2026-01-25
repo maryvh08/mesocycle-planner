@@ -520,19 +520,31 @@ async function renderRegistroEditor(mesocycleId) {
   /* ======================
      CARGAR EJERCICIOS
   ====================== */
-  const { data: exercises, error: eError } = await supabase
-    .from("exercises")
-    .select("id, name, subgroup")
-    .order("name");
+  const { data: templateExercises, error: eError } = await supabase
+     .from("template_exercises")
+     .select(`
+       exercise_id,
+       exercises (
+         id,
+         name,
+         subgroup
+       )
+     `)
+     .eq("template_id", mesocycle.template_id);
+   
+   if (eError || !templateExercises || templateExercises.length === 0) {
+     console.error("Plantilla sin ejercicios", eError);
+     registroEditor.innerHTML = `
+       <p class="error">
+         ⚠ Esta plantilla no tiene ejercicios asignados.
+       </p>
+     `;
+     return;
+   }
 
-  if (eError) {
-    console.error(eError);
-    registroEditor.textContent = "Error cargando ejercicios";
-    return;
-  }
-
-  const exercisesById = {};
-  exercises.forEach(ex => exercisesById[ex.id] = ex);
+   const exercises = templateExercises.map(te => te.exercises);
+   const exercisesById = {};
+   exercises.forEach(ex => exercisesById[ex.id] = ex);
 
   /* ======================
      UI
