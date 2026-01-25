@@ -1052,38 +1052,20 @@ async function loadExerciseProgress(exerciseName) {
 
 async function getExerciseStatus(exerciseName) {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return "unknown";
+  if (!user) return "new";
 
   const { data, error } = await supabase
-    .from("exercise_records")
-    .select("updated_at, weight, reps")
-    .eq("user_id", user.id)
-    .eq("exercise_name", exerciseName)
-    .order("updated_at", { ascending: false })
-    .limit(30);
+    .rpc("exercise_status", {
+      uid: user.id,
+      ex: exerciseName
+    });
 
-  if (error || !data || data.length < 6) return "new";
+  if (error) {
+    console.error("Status error", error);
+    return "new";
+  }
 
-  // Agrupar por día
-  const days = {};
-
-  data.forEach(r => {
-    const d = r.updated_at.slice(0, 10);
-    if (!days[d]) days[d] = { volume: 0, max: 0 };
-    days[d].volume += r.weight * r.reps;
-    days[d].max = Math.max(days[d].max, r.weight);
-  });
-
-  const sessions = Object.values(days).slice(0, 3);
-
-  if (sessions.length < 3) return "new";
-
-  const first = sessions[2];
-  const last = sessions[0];
-
-  if (last.max > first.max || last.volume > first.volume) return "growing";
-
-  return "stalled";
+  return data;
 }
 
 async function loadStatsMesocycles() {
