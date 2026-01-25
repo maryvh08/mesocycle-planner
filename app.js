@@ -13,7 +13,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 ====================== */
 let selectedDaysPerWeek = null;
 let selectedDay = null;
-let progressChart = null;
 let editingMesocycleId = null;
 let allowedSubgroups = null;
 let statsChart = null;
@@ -1132,51 +1131,6 @@ async function loadStatsMesocycles() {
     opt.value = m.id;
     opt.textContent = m.name;
     select.appendChild(opt);
-  });
-}
-
-async function loadExerciseStats(exerciseName) {
-  const { data: { user } } = await supabase.auth.getUser();
-
-  const { data } = await supabase
-    .from("exercise_records")
-    .select("weight, reps, updated_at")
-    .eq("user_id", user.id)
-    .eq("exercise_name", exerciseName)
-    .order("updated_at", { ascending: true });
-
-  const labels = data.map(r => new Date(r.updated_at).toLocaleDateString());
-  const values = data.map(r => r.weight);
-
-  document.getElementById("stats-chart-wrapper").classList.remove("hidden");
-  document.getElementById("stats-chart-title").textContent = exerciseName;
-
-  if (progressChart) progressChart.destroy();
-
-  const ctx = document.getElementById("progressChart");
-
-  progressChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels,
-      datasets: [{
-        label: "Peso (kg)",
-        data: values,
-        fill: false,
-        tension: 0.3
-      }]
-    }
-  });
-}
-
-function renderExerciseChart(rows) {
-  const list = document.getElementById("statsList");
-  list.innerHTML = "";
-
-  rows.forEach(r => {
-    const li = document.createElement("li");
-    li.textContent = `${r.weight} kg × ${r.reps} reps`;
-    list.appendChild(li);
   });
 }
 
