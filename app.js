@@ -897,6 +897,21 @@ async function checkForPR(exercise_name, newWeight) {
   return newWeight > data[0].weight;
 }
 
+function showPRBadge(exercise, weight) {
+  const badge = document.createElement("div");
+  badge.className = "pr-toast";
+  badge.innerHTML = `
+    🏆 <strong>Nuevo PR</strong><br>
+    ${exercise}<br>
+    ${weight} kg
+  `;
+
+  document.body.appendChild(badge);
+
+  setTimeout(() => badge.classList.add("show"), 50);
+  setTimeout(() => badge.remove(), 3500);
+}
+
 async function loadStrengthChart(mesocycleId = null) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
