@@ -876,6 +876,22 @@ async function loadPRTable(mesocycleId = null) {
   });
 }
 
+async function checkForPR(exercise_name, newWeight) {
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const { data } = await supabase
+    .from("exercise_records")
+    .select("weight")
+    .eq("user_id", user.id)
+    .eq("exercise_name", exercise_name)
+    .order("weight", { ascending: false })
+    .limit(1);
+
+  if (!data || data.length === 0) return false;
+
+  return newWeight > data[0].weight;
+}
+
 async function loadStrengthChart(mesocycleId = null) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
