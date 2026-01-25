@@ -618,6 +618,11 @@ async function renderRegistroEditor(mesocycleId) {
     const exercise = exercisesById[exerciseSelect.value];
     if (!exercise) return alert("Ejercicio inválido");
 
+   const isPR = await checkForPR(exercise.name, Number(weightInput.value));
+   if (isPR) {
+     showPRBadge(exercise.name, weightInput.value);
+   }
+
     const payload = {
       user_id: session.user.id,
       mesocycle_id: mesocycleId,
