@@ -760,8 +760,6 @@ function renderStatsView() {
    
       loadStatsOverview(mesocycleId);
       loadPRTable(mesocycleId);
-      loadStrengthChart(mesocycleId);
-      loadExerciseVolumeList(mesocycleId);
    };
 
   // 🔥 Primero cargar mesociclos
@@ -770,8 +768,6 @@ function renderStatsView() {
   // 🔥 Stats globales (todos los datos)
    loadStatsOverview();
    loadPRTable();
-   loadStrengthChart();
-   loadExerciseVolumeList();
 }
 
 /* ======================
@@ -885,128 +881,6 @@ function showPRBadge(exercise, weight) {
 
   setTimeout(() => badge.classList.add("show"), 50);
   setTimeout(() => badge.remove(), 3500);
-}
-
-async function loadStrengthChart(mesocycleId = null) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-
-  let query = supabase
-    .from("exercise_progress")
-    .select("updated_at, weight, reps")
-    .eq("user_id", user.id)
-    .order("updated_at");
-
-  // 👉 solo filtrar si hay mesociclo
-  if (mesocycleId) {
-    query = query.eq("mesocycle_id", mesocycleId);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error("Strength chart error", error);
-    return;
-  }
-
-  if (typeof Chart === "undefined") {
-    console.warn("Chart.js no cargado — gráfica omitida");
-    return;
-  }
-
-  const daily = {};
-
-  data.forEach(r => {
-    const day = r.updated_at.slice(0, 10);
-    const volume = (r.weight || 0) * (r.reps || 0);
-    daily[day] = (daily[day] || 0) + volume;
-  });
-
-  const labels = Object.keys(daily);
-  const values = Object.values(daily);
-
-  const ctx = document.getElementById("strength-chart");
-  if (!ctx) return;
-
-  if (window.statsChart) window.statsChart.destroy();
-
-  window.statsChart = new Chart(ctx, {
-     type: "line",
-     data: {
-       labels,
-       datasets: [{
-         label: "Volumen total",
-         data: values,
-         fill: true,
-         tension: 0.3
-       }]
-     },
-     animation: {
-       duration: 1200,
-       easing: "easeOutQuart"
-     }
-   });
-}
-
-async function loadExerciseVolumeList(mesocycleId = null) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-
-  let query = supabase
-    .from("exercise_progress")
-    .select("exercise_name, weight, reps")
-    .eq("user_id", user.id);
-
-  if (mesocycleId) {
-    query = query.eq("mesocycle_id", mesocycleId);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error("Volume list error", error);
-    return;
-  }
-
-  const map = {};
-
-  data.forEach(r => {
-    if (!r.exercise_name) return;
-
-    if (!map[r.exercise_name]) {
-      map[r.exercise_name] = {
-        sets: 0,
-        max: 0,
-        volume: 0
-      };
-    }
-
-    map[r.exercise_name].sets++;
-    map[r.exercise_name].max = Math.max(map[r.exercise_name].max, r.weight || 0);
-    map[r.exercise_name].volume += (r.weight || 0) * (r.reps || 0);
-  });
-
-  const rows = Object.entries(map).sort((a, b) => b[1].volume - a[1].volume);
-
-  const container = document.getElementById("exercise-volume-list");
-  if (!container) return;
-
-  container.innerHTML = "";
-
-  rows.forEach(([name, stats]) => {
-    const div = document.createElement("div");
-    div.className = "exercise-volume-card";
-
-    div.innerHTML = `
-      <strong>${name}</strong>
-      <span>Volumen: ${stats.volume.toFixed(0)} kg</span>
-      <small>PR: ${stats.max} kg · ${stats.sets} sets</small>
-    `;
-
-    div.onclick = () => loadExerciseProgress(name);
-
-    container.appendChild(div);
-  });
 }
 
 async function loadExerciseProgress(exerciseName) {
