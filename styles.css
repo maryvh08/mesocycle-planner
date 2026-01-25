@@ -27,8 +27,9 @@
 }
 
 body {
-  background-color: var(--bg-main);
-  padding: var(--spacing);
+  background: radial-gradient(circle at top, #141418, #0b0b0d);
+  color: var(--text-main);
+  font-family: "Inter", system-ui, sans-serif;
 }
 
 .hidden {
