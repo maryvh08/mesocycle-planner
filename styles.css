@@ -200,10 +200,54 @@ input:focus {
   margin-top: var(--spacing);
 }
 
-.day-buttons {
+.registro-editor {
   display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.registro-editor {
+  background: linear-gradient(180deg, #141418, #0c0c10);
+  padding: 18px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.registro-editor select {
+  background: linear-gradient(180deg, #191922, #0f0f14);
+  font-weight: 600;
+}
+
+.registro-editor input {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.registro-editor button {
+  margin-top: 10px;
+  font-size: 18px;
+  letter-spacing: 1px;
+  padding: 16px;
+}
+
+.day-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(60px,1fr));
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.day-buttons button {
+  background: #1a1a22;
+  border-radius: 12px;
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.05);
+}
+
+.day-buttons button.active {
+  background: linear-gradient(135deg, var(--red), var(--red-glow));
+  box-shadow: 0 0 20px rgba(255,50,50,.6);
 }
 
 .day-btn {
@@ -247,12 +291,15 @@ section {
    CHIPS DE EJERCICIOS
 ====================== */
 .exercise-chip {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background: linear-gradient(135deg, #1c1c26, #0e0e13);
+  padding: 12px 16px;
+  border-radius: 20px;
+  display: inline-block;
+  margin: 6px 6px 0 0;
   font-weight: 600;
+  border: 1px solid rgba(255,255,255,.05);
+  box-shadow: 0 5px 15px rgba(0,0,0,.5);
 }
-
 
 .exercise-chip:hover {
   background: #2a2a32;
