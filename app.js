@@ -1075,19 +1075,19 @@ async function loadExerciseProgress(exerciseName) {
       ]
     },
     options: {
-      animation: {
-          duration: 1200,
-          easing: "easeOutQuart"
-        }
-      scales: {
-        y: { title: { display: true, text: "Peso (kg)" }},
-        y1: {
-          position: "right",
-          grid: { drawOnChartArea: false },
-          title: { display: true, text: "Volumen" }
-        }
-      }
-    }
+     animation: {
+       duration: 1200,
+       easing: "easeOutQuart"
+     },
+     scales: {
+       y: { title: { display: true, text: "Peso (kg)" }},
+       y1: {
+         position: "right",
+         grid: { drawOnChartArea: false },
+         title: { display: true, text: "Volumen" }
+       }
+     }
+   }
   });
 }
 
