@@ -351,10 +351,17 @@ input:focus {
   border-left: 6px solid #3b82f6;
 }
 
-.stat-exercise.up { border-left: 5px solid #4caf50; }
-.stat-exercise.flat { border-left: 5px solid #ffc107; }
-.stat-exercise.down { border-left: 5px solid #f44336; }
-.stat-exercise.new { border-left: 5px solid #999; }
+.stat-exercise.up {
+  box-shadow: 0 0 0 1px #4caf50;
+}
+
+.stat-exercise.flat {
+  box-shadow: 0 0 0 1px #ffc107;
+}
+
+.stat-exercise.down {
+  box-shadow: 0 0 0 1px #f44336;
+}
 
 .stat-card,
 .mesocycle-history-card,
