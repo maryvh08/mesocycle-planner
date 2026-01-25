@@ -566,8 +566,6 @@ async function renderRegistroEditor(mesocycleId) {
   dayContainer.className = "day-buttons";
   registroEditor.appendChild(dayContainer);
 
-  let selectedDay = null;
-
   for (let i = 1; i <= mesocycle.days_per_week; i++) {
     const btn = document.createElement("button");
     btn.textContent = `Día ${i}`;
