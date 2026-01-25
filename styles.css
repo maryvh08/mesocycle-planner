@@ -214,6 +214,16 @@ input:focus {
   color: #fff;
 }
 
+section {
+  padding: 16px;
+}
+
+@keyframes fade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
 /* ======================
    SUBGRUPOS
 ====================== */
@@ -369,6 +379,10 @@ input:focus {
 
 .stat-exercise.down {
   box-shadow: 0 0 0 1px #f44336;
+}
+
+.tab-content {
+  animation: fade .3s ease-out;
 }
 
 .stat-card,
