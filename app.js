@@ -999,60 +999,53 @@ async function loadExerciseProgress(exerciseName) {
   if (!user) return;
 
   const { data, error } = await supabase
-    .from("exercise_records")
-    .select("updated_at, weight, reps")
+    .from("exercise_progress")
+    .select("day, max_weight, volume")
     .eq("user_id", user.id)
     .eq("exercise_name", exerciseName)
-    .order("updated_at");
+    .order("day");
 
-  if (error) {
-    console.error("Progress error", error);
+  if (error || !data || data.length === 0) {
+    console.warn("Sin datos de progreso", error);
     return;
   }
 
-  const daily = {};
+  const labels = data.map(d => d.day);
+  const weights = data.map(d => d.max_weight);
+  const volumes = data.map(d => d.volume);
 
-  data.forEach(r => {
-    const day = r.updated_at.slice(0, 10);
-    const volume = r.weight * r.reps;
+  const ctx = document.getElementById("strength-chart");
+  if (!ctx) return;
 
-    if (!daily[day]) {
-      daily[day] = { volume: 0, max: 0 };
-    }
+  if (window.statsChart) window.statsChart.destroy();
 
-    daily[day].volume += volume;
-    daily[day].max = Math.max(daily[day].max, r.weight);
-  });
-
-  const labels = Object.keys(daily);
-  const volumes = Object.values(daily).map(d => d.volume);
-  const maxes = Object.values(daily).map(d => d.max);
-
-  document.getElementById("stats-chart-wrapper").classList.remove("hidden");
-  document.getElementById("stats-chart-title").textContent = exerciseName;
-
-  const ctx = document.getElementById("progressChart");
-
-  if (window.exerciseChart) window.exerciseChart.destroy();
-
-  window.exerciseChart = new Chart(ctx, {
+  window.statsChart = new Chart(ctx, {
     type: "line",
     data: {
       labels,
       datasets: [
         {
-          label: "Volumen",
-          data: volumes,
-          borderWidth: 2,
+          label: "Peso máximo",
+          data: weights,
           tension: 0.3
         },
         {
-          label: "Peso máximo",
-          data: maxes,
-          borderWidth: 2,
-          tension: 0.3
+          label: "Volumen",
+          data: volumes,
+          tension: 0.3,
+          yAxisID: "y1"
         }
       ]
+    },
+    options: {
+      scales: {
+        y: { title: { display: true, text: "Peso (kg)" }},
+        y1: {
+          position: "right",
+          grid: { drawOnChartArea: false },
+          title: { display: true, text: "Volumen" }
+        }
+      }
     }
   });
 }
