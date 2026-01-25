@@ -760,6 +760,7 @@ function renderStatsView() {
    
       loadStatsOverview(mesocycleId);
       loadPRTable(mesocycleId);
+      loadExerciseVolumeList(mesocycleId);
    };
 
   // 🔥 Primero cargar mesociclos
@@ -768,6 +769,7 @@ function renderStatsView() {
   // 🔥 Stats globales (todos los datos)
    loadStatsOverview();
    loadPRTable();
+   loadExerciseVolumeList();
 }
 
 /* ======================
@@ -822,47 +824,29 @@ async function loadPRTable(mesocycleId = null) {
   if (!user) return;
 
   let query = supabase
-    .from("exercise_records")
-    .select("exercise_name, weight")
-    .eq("user_id", user.id);
-
-  // 🔥 SOLO filtrar si es un id válido
-  if (mesocycleId !== null && mesocycleId !== undefined && mesocycleId !== "") {
-    query = query.eq("mesocycle_id", mesocycleId);
-  }
+    .from("exercise_prs")
+    .select("exercise_name, pr_weight")
+    .eq("user_id", user.id)
+    .order("pr_weight", { ascending: false });
 
   const { data, error } = await query;
 
   if (error) {
-    console.error("PR error", error);
+    console.error("PRs error", error);
     return;
   }
-
-  const map = {};
-
-  data.forEach(r => {
-    if (!r.exercise_name) return;
-
-    if (!map[r.exercise_name]) {
-      map[r.exercise_name] = { sets: 0, max: 0 };
-    }
-
-    map[r.exercise_name].sets++;
-    map[r.exercise_name].max = Math.max(map[r.exercise_name].max, r.weight || 0);
-  });
 
   const container = document.getElementById("pr-table");
   if (!container) return;
 
   container.innerHTML = "";
 
-  Object.entries(map).forEach(([name, info]) => {
+  data.forEach(r => {
     const row = document.createElement("div");
     row.className = "pr-row";
     row.innerHTML = `
-      <strong>${name}</strong>
-      <span>${info.max} kg</span>
-      <small>${info.sets} sets</small>
+      <strong>${r.exercise_name}</strong>
+      <span>${r.pr_weight} kg</span>
     `;
     container.appendChild(row);
   });
@@ -883,25 +867,61 @@ function showPRBadge(exercise, weight) {
   setTimeout(() => badge.remove(), 3500);
 }
 
+async function loadExerciseVolumeList() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data, error } = await supabase
+    .from("exercise_volume_totals")
+    .select("exercise_name, lifetime_volume, lifetime_sets")
+    .eq("user_id", user.id)
+    .order("lifetime_volume", { ascending: false });
+
+  if (error) {
+    console.error("Volume error", error);
+    return;
+  }
+
+  const container = document.getElementById("exercise-volume-list");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  data.forEach(r => {
+    const div = document.createElement("div");
+    div.className = "exercise-volume-card";
+    div.innerHTML = `
+      <strong>${r.exercise_name}</strong>
+      <span>${Math.round(r.lifetime_volume)} kg</span>
+      <small>${r.lifetime_sets} sets</small>
+    `;
+
+    div.onclick = () => loadExerciseProgress(r.exercise_name);
+
+    container.appendChild(div);
+  });
+}
+
+
 async function loadExerciseProgress(exerciseName) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
   const { data, error } = await supabase
-    .from("exercise_progress")
-    .select("day, max_weight, volume")
+    .from("exercise_progress_chart")
+    .select("day, max_weight, total_volume")
     .eq("user_id", user.id)
     .eq("exercise_name", exerciseName)
     .order("day");
 
-  if (error || !data || data.length === 0) {
-    console.warn("Sin datos de progreso", error);
+  if (error || !data.length) {
+    console.warn("Sin datos", error);
     return;
   }
 
   const labels = data.map(d => d.day);
   const weights = data.map(d => d.max_weight);
-  const volumes = data.map(d => d.volume);
+  const volumes = data.map(d => d.total_volume);
 
   const ctx = document.getElementById("strength-chart");
   if (!ctx) return;
@@ -927,19 +947,15 @@ async function loadExerciseProgress(exerciseName) {
       ]
     },
     options: {
-     animation: {
-       duration: 1200,
-       easing: "easeOutQuart"
-     },
-     scales: {
-       y: { title: { display: true, text: "Peso (kg)" }},
-       y1: {
-         position: "right",
-         grid: { drawOnChartArea: false },
-         title: { display: true, text: "Volumen" }
-       }
-     }
-   }
+      scales: {
+        y: { title: { display: true, text: "Peso (kg)" }},
+        y1: {
+          position: "right",
+          grid: { drawOnChartArea: false },
+          title: { display: true, text: "Volumen" }
+        }
+      }
+    }
   });
 }
 
