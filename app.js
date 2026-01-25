@@ -965,11 +965,11 @@ async function loadStrengthChart(mesocycleId = null) {
         fill: true,
         tension: 0.3
       }]
-       animation: {
-        duration: 1200,
-        easing: "easeOutQuart"
-      }
     }
+   animation: {
+     duration: 1200,
+     easing: "easeOutQuart"
+   }
   });
 }
 
