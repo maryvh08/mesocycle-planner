@@ -2,107 +2,160 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Workout Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <!-- CSS -->
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-<h1>Workout Tracker</h1>
+<div id="app-shell">
 
-<!-- ================= LOGIN ================= -->
-<section id="login-view">
-  <input type="email" id="email" placeholder="Email" />
-  <input type="password" id="password" placeholder="Contraseña" />
-  <button id="login-btn">Iniciar sesión</button>
-  <button id="signup-btn">Registrarse</button>
-  <p id="auth-message"></p>
-</section>
+  <!-- ================= LOGIN ================= -->
+  <section id="login-view" class="screen">
+    <div class="auth-card">
+      <h1>🏋️‍♂️ Workout Tracker</h1>
+      <p class="muted">Registra y domina tu progreso</p>
 
-<!-- ================= APP ================= -->
-<section id="app-view" class="hidden">
+      <input type="email" id="email" placeholder="Email" />
+      <input type="password" id="password" placeholder="Contraseña" />
 
-  <header>
-    <button id="logout-btn">Cerrar sesión</button>
-  </header>
+      <button id="login-btn">Iniciar sesión</button>
+      <button id="signup-btn" class="secondary">Crear cuenta</button>
 
-  <!-- ================= TABS ================= -->
-  <nav id="tabs">
-    <button class="tab-btn active" data-tab="crear-tab">Crear mesociclo</button>
-    <button class="tab-btn" data-tab="historial-tab">Historial</button>
-    <button class="tab-btn" data-tab="registro-tab">Registro</button>
-    <button class="tab-btn" data-tab="stats">Estadísticas</button>
-  </nav>
-
-  <!-- ================= CREAR / EDITAR ================= -->
-  <section id="crear-tab" class="tab-content">
-    <h2>Crear / Editar Mesociclo</h2>
-
-    <label>Nombre del mesociclo</label>
-    <input type="text" id="mesocycle-name" />
-
-    <label>Semanas</label>
-    <input type="number" id="mesocycle-weeks" min="1" max="12" />
-
-    <label>Plantilla</label>
-    <select id="template-select">
-      <option value="">Selecciona una plantilla</option>
-    </select>
-
-    <label>Días de entrenamiento a la semana</label>
-    <div id="day-buttons-container" class="day-buttons">
-      <button class="day-btn" data-days="1">1</button>
-      <button class="day-btn" data-days="2">2</button>
-      <button class="day-btn" data-days="3">3</button>
-      <button class="day-btn" data-days="4">4</button>
-      <button class="day-btn" data-days="5">5</button>
-      <button class="day-btn" data-days="6">6</button>
-      <button class="day-btn" data-days="7">7</button>
-    </div>
-
-    <button id="create-mesocycle-btn">Guardar mesociclo</button>
-  </section>
-
-  <!-- ================= HISTORIAL ================= -->
-  <section id="historial-tab" class="tab-content hidden">
-    <h2>Historial de Mesociclos</h2>
-    <div id="history-list"></div>
-  </section>
-
-  <!-- ================= REGISTRO ================= -->
-  <section id="registro-tab" class="tab-content hidden">
-    <h2>Registro de Ejercicios</h2>
-
-    <label for="registro-select">Mesociclo</label>
-    <select id="registro-select">
-      <option value="">Selecciona un mesociclo</option>
-    </select>
-
-    <div id="registro-editor" class="registro-editor">
-      <p class="placeholder">
-        Selecciona un mesociclo para comenzar el registro
-      </p>
+      <p id="auth-message" class="auth-message"></p>
     </div>
   </section>
 
-  <!-- ================= ESTADÍSTICAS ================= -->
-  <section id="stats" class="tab-content hidden">
-    <h2>📊 Estadísticas</h2>
-    <label>Mesociclo</label>
-    <select id="stats-mesocycle"></select>
-    <div id="stats-overview" class="stats-grid">
-      <p class="muted">Cargando estadísticas...</p>
-    </div>
-  
-    <div class="chart-wrapper hidden" id="stats-chart-wrapper">
-      <h3 id="stats-chart-title"></h3>
-      <canvas id="progressChart"></canvas>
-    </div>
+  <!-- ================= APP ================= -->
+  <section id="app-view" class="hidden">
+
+    <!-- Header -->
+    <header id="app-header">
+      <span class="app-title">Workout</span>
+      <button id="logout-btn" class="icon-btn">⎋</button>
+    </header>
+
+    <!-- Main content -->
+    <main id="app-content">
+
+      <!-- ================= CREAR ================= -->
+      <section id="crear-tab" class="tab-content screen">
+        <div class="screen-header">Crear Mesociclo</div>
+
+        <div class="screen-content">
+
+          <div class="card">
+            <label>Nombre del mesociclo</label>
+            <input type="text" id="mesocycle-name" placeholder="Ej: Fuerza Enero" />
+          </div>
+
+          <div class="card">
+            <label>Semanas</label>
+            <input type="number" id="mesocycle-weeks" min="1" max="12" />
+          </div>
+
+          <div class="card">
+            <label>Plantilla</label>
+            <select id="template-select">
+              <option value="">Selecciona plantilla</option>
+            </select>
+          </div>
+
+          <div class="card">
+            <label>Días por semana</label>
+            <div id="day-buttons-container" class="day-buttons">
+              <button class="day-btn" data-days="1">1</button>
+              <button class="day-btn" data-days="2">2</button>
+              <button class="day-btn" data-days="3">3</button>
+              <button class="day-btn" data-days="4">4</button>
+              <button class="day-btn" data-days="5">5</button>
+              <button class="day-btn" data-days="6">6</button>
+              <button class="day-btn" data-days="7">7</button>
+            </div>
+          </div>
+
+          <button id="create-mesocycle-btn" class="primary">
+            Guardar mesociclo
+          </button>
+
+        </div>
+      </section>
+
+      <!-- ================= HISTORIAL ================= -->
+      <section id="historial-tab" class="tab-content screen hidden">
+        <div class="screen-header">Historial</div>
+        <div class="screen-content">
+          <div id="history-list"></div>
+        </div>
+      </section>
+
+      <!-- ================= REGISTRO ================= -->
+      <section id="registro-tab" class="tab-content screen hidden">
+        <div class="screen-header">Registro</div>
+
+        <div class="screen-content">
+
+          <div class="card">
+            <label>Mesociclo</label>
+            <select id="registro-select">
+              <option value="">Selecciona mesociclo</option>
+            </select>
+          </div>
+
+          <div id="registro-editor" class="registro-editor">
+            <p class="placeholder">Selecciona un mesociclo para comenzar</p>
+          </div>
+
+          <div id="registered-exercises"></div>
+
+        </div>
+      </section>
+
+      <!-- ================= STATS ================= -->
+      <section id="stats" class="tab-content screen hidden">
+        <div class="screen-header">Estadísticas</div>
+
+        <div class="screen-content">
+
+          <div class="card">
+            <label>Mesociclo</label>
+            <select id="stats-mesocycle"></select>
+          </div>
+
+          <div id="stats-summary" class="stats-grid"></div>
+
+          <h3>🏆 Mejores marcas</h3>
+          <div id="pr-table" class="pr-table"></div>
+
+          <h3>📈 Progreso</h3>
+          <canvas id="strength-chart"></canvas>
+
+          <h3>📦 Volumen por ejercicio</h3>
+          <div id="exercise-volume-list"></div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav id="tabs">
+      <button class="tab-btn active" data-tab="crear-tab">🏗 Crear</button>
+      <button class="tab-btn" data-tab="historial-tab">📜 Historial</button>
+      <button class="tab-btn" data-tab="registro-tab">✍️ Registro</button>
+      <button class="tab-btn" data-tab="stats">📊 Stats</button>
+    </nav>
+
   </section>
 
-<!-- ================= SCRIPTS ================= -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</div>
+
+<!-- JS -->
 <script type="module" src="app.js"></script>
 
 </body>
