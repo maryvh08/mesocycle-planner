@@ -331,9 +331,27 @@ section {
 ====================== */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
-  gap: 1rem;
-  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.stat-card {
+  background: linear-gradient(180deg, #16161d, #0c0c10);
+  padding: 18px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--red);
+}
+
+.stat-card strong {
+  font-size: 26px;
+  display: block;
+}
+
+.stat-card span {
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .exercise-card {
