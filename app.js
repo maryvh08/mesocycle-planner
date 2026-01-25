@@ -956,21 +956,21 @@ async function loadStrengthChart(mesocycleId = null) {
   if (window.statsChart) window.statsChart.destroy();
 
   window.statsChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels,
-      datasets: [{
-        label: "Volumen total",
-        data: values,
-        fill: true,
-        tension: 0.3
-      }]
-    }
-   animation: {
-     duration: 1200,
-     easing: "easeOutQuart"
-   }
-  });
+     type: "line",
+     data: {
+       labels,
+       datasets: [{
+         label: "Volumen total",
+         data: values,
+         fill: true,
+         tension: 0.3
+       }]
+     },
+     animation: {
+       duration: 1200,
+       easing: "easeOutQuart"
+     }
+   });
 }
 
 async function loadExerciseVolumeList(mesocycleId = null) {
