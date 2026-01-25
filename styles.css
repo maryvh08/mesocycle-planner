@@ -40,21 +40,23 @@ body {
    ELEMENTOS BÁSICOS
 ====================== */
 button {
-  cursor: pointer;
+  background: linear-gradient(135deg, var(--red), var(--red-soft));
+  color: white;
   border: none;
-  border-radius: var(--radius);
-  padding: 0.5rem 1rem;
-  background-color: var(--accent);
-  color: #fff;
-  transition: background-color 0.2s, transform 0.1s;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
 }
 
 button:hover {
-  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(225,6,0,.4);
 }
 
 button:active {
-  transform: scale(0.97);
+  transform: scale(.97);
 }
 
 select,
@@ -346,3 +348,13 @@ input:focus {
 .stat-exercise.down { border-left: 5px solid #f44336; }
 .stat-exercise.new { border-left: 5px solid #999; }
 
+.stat-card,
+.mesocycle-history-card,
+.exercise-chip,
+.pr-row {
+  background: linear-gradient(180deg, #1a1a1f, #121216);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.04),
+              0 8px 30px rgba(0,0,0,0.7);
+}
