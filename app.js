@@ -1075,6 +1075,10 @@ async function loadExerciseProgress(exerciseName) {
       ]
     },
     options: {
+      animation: {
+          duration: 1200,
+          easing: "easeOutQuart"
+        }
       scales: {
         y: { title: { display: true, text: "Peso (kg)" }},
         y1: {
