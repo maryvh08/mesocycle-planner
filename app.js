@@ -758,16 +758,20 @@ function renderStatsView() {
    document.getElementById("stats-mesocycle").onchange = e => {
      const mesocycleId = e.target.value || null;
    
-     loadStatsOverview(mesocycleId);
-     loadPRTable(mesocycleId);
+      loadStatsOverview(mesocycleId);
+      loadPRTable(mesocycleId);
+      loadStrengthChart(mesocycleId);
+      loadExerciseVolumeList(mesocycleId);
    };
 
   // 🔥 Primero cargar mesociclos
   loadStatsMesocycles();
 
   // 🔥 Stats globales (todos los datos)
-  loadStatsOverview();
-  loadPRTable();
+   loadStatsOverview();
+   loadPRTable();
+   loadStrengthChart(mesocycleId);
+   loadExerciseVolumeList(mesocycleId);
 }
 
 /* ======================
