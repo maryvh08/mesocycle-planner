@@ -887,6 +887,67 @@ function showPRBadge(exercise, weight) {
   setTimeout(() => badge.remove(), 3500);
 }
 
+async function loadStrengthChart(mesocycleId = null) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  let query = supabase
+    .from("exercise_progress")
+    .select("updated_at, weight, reps")
+    .eq("user_id", user.id)
+    .order("updated_at");
+
+  // 👉 solo filtrar si hay mesociclo
+  if (mesocycleId) {
+    query = query.eq("mesocycle_id", mesocycleId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Strength chart error", error);
+    return;
+  }
+
+  if (typeof Chart === "undefined") {
+    console.warn("Chart.js no cargado — gráfica omitida");
+    return;
+  }
+
+  const daily = {};
+
+  data.forEach(r => {
+    const day = r.updated_at.slice(0, 10);
+    const volume = (r.weight || 0) * (r.reps || 0);
+    daily[day] = (daily[day] || 0) + volume;
+  });
+
+  const labels = Object.keys(daily);
+  const values = Object.values(daily);
+
+  const ctx = document.getElementById("strength-chart");
+  if (!ctx) return;
+
+  if (window.statsChart) window.statsChart.destroy();
+
+  window.statsChart = new Chart(ctx, {
+     type: "line",
+     data: {
+       labels,
+       datasets: [{
+         label: "Volumen total",
+         data: values,
+         fill: true,
+         tension: 0.3
+       }]
+     },
+     animation: {
+       duration: 1200,
+       easing: "easeOutQuart"
+     }
+   });
+}
+
 async function loadExerciseVolumeList(mesocycleId = null) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
