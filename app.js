@@ -1171,7 +1171,7 @@ async function loadExerciseStats(exerciseName) {
 
 function renderExerciseChart(rows) {
   const list = document.getElementById("statsList");
-  list.value = "";
+  list.innerHTML = "";
 
   rows.forEach(r => {
     const li = document.createElement("li");
