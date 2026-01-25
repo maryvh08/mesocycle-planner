@@ -761,6 +761,7 @@ function renderStatsView() {
       loadStatsOverview(mesocycleId);
       loadPRTable(mesocycleId);
       loadExerciseVolumeList(mesocycleId);
+      loadStrengthChart(mesocycleId);
    };
 
   // 🔥 Primero cargar mesociclos
@@ -770,6 +771,7 @@ function renderStatsView() {
    loadStatsOverview();
    loadPRTable();
    loadExerciseVolumeList();
+   loadStrengthChart();
 }
 
 /* ======================
@@ -865,6 +867,54 @@ function showPRBadge(exercise, weight) {
 
   setTimeout(() => badge.classList.add("show"), 50);
   setTimeout(() => badge.remove(), 3500);
+}
+
+async function loadStrengthChart(mesocycleId = null) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  let query = supabase
+    .from("exercise_progress_chart")
+    .select("day, total_volume")
+    .eq("user_id", user.id)
+    .order("day");
+
+  if (mesocycleId) {
+    query = query.eq("mesocycle_id", mesocycleId); // si luego decides añadirlo
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Strength chart error", error);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    console.warn("Sin datos de progreso");
+    return;
+  }
+
+  const labels = data.map(r => r.day);
+  const values = data.map(r => r.total_volume);
+
+  const ctx = document.getElementById("strength-chart");
+  if (!ctx) return;
+
+  if (window.statsChart) window.statsChart.destroy();
+
+  window.statsChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Volumen diario",
+        data: values,
+        fill: true,
+        tension: 0.3
+      }]
+    }
+  });
 }
 
 async function loadExerciseVolumeList() {
