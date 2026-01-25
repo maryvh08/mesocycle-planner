@@ -454,14 +454,15 @@ section {
 
 .stat-card,
 .mesocycle-history-card,
-.exercise-chip,
-.pr-row {
-  background: linear-gradient(180deg, #1a1a1f, #121216);
-  border-radius: 14px;
-  padding: 14px;
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.04),
-              0 8px 30px rgba(0,0,0,0.7);
+.stat-card,
+.exercise-volume-card {
+  background: linear-gradient(180deg, var(--bg-card), #0b0b10);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(255,255,255,.04);
 }
+
 
 /* ======================
    PR
@@ -470,23 +471,21 @@ section {
   position: fixed;
   bottom: 30px;
   left: 50%;
-  transform: translateX(-50%) scale(.8);
-  background: linear-gradient(135deg, #e10600, #ff3b30);
+  transform: translateX(-50%) scale(.9);
+  background: linear-gradient(135deg, var(--red), var(--red-glow));
   color: white;
-  padding: 18px 24px;
-  border-radius: 14px;
-  font-weight: 700;
-  text-align: center;
-  box-shadow: 0 20px 60px rgba(225,6,0,.6);
+  padding: 20px 30px;
+  border-radius: 20px;
+  box-shadow: 0 0 40px rgba(255,0,0,.6);
   opacity: 0;
-  transition: all .4s cubic-bezier(.2,1,.2,1);
-  z-index: 999;
+  transition: .4s;
 }
 
 .pr-toast.show {
   opacity: 1;
   transform: translateX(-50%) scale(1);
 }
+
 
 input, select {
   width: 100%;
