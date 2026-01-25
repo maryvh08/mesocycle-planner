@@ -123,17 +123,25 @@ input:focus {
 /* ======================
    TABS
 ====================== */
+#tabs {
+  display: flex;
+  background: var(--bg-card);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
 .tab-btn {
-  padding: 0.5rem 1rem;
-  margin-right: 0.5rem;
-  background-color: var(--bg-card);
-  color: var(--text-main);
-  border-radius: var(--radius);
+  flex: 1;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  padding: 12px;
 }
 
 .tab-btn.active {
-  background-color: var(--accent);
-  color: #fff;
+  background: linear-gradient(135deg, var(--red), var(--red-soft));
+  color: white;
 }
 
 .tab-content {
