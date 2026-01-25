@@ -368,3 +368,28 @@ input:focus {
   box-shadow: 0 0 0 1px rgba(255,255,255,0.04),
               0 8px 30px rgba(0,0,0,0.7);
 }
+
+/* ======================
+   PR
+====================== */
+.pr-toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) scale(.8);
+  background: linear-gradient(135deg, #e10600, #ff3b30);
+  color: white;
+  padding: 18px 24px;
+  border-radius: 14px;
+  font-weight: 700;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(225,6,0,.6);
+  opacity: 0;
+  transition: all .4s cubic-bezier(.2,1,.2,1);
+  z-index: 999;
+}
+
+.pr-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
