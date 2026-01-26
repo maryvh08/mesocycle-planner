@@ -782,6 +782,7 @@ function renderStatsView() {
       loadPRTable(mesocycleId);
       loadExerciseVolumeList(mesocycleId);
       loadStrengthChart(mesocycleId);
+      loadMesocycleComparison(mesocycleId);
    };
 
   // 🔥 Primero cargar mesociclos
