@@ -539,18 +539,18 @@ async function renderRegistroEditor(mesocycleId) {
 
   // Blindaje contra relaciones rotas
   const exercises = templateExercises
-    .map(te => te.exercises)
-    .filter(ex => ex && ex.id && ex.name);
+     .map(te => te.exercises)
+     .filter(e => e && e.id && e.name);
 
-  if (!exercises.length) {
-    registroEditor.innerHTML = `
-      <p class="error">
-        ⚠ Esta plantilla existe, pero no tiene ejercicios válidos.
-        Revisa la relación template_exercises → exercises en Supabase.
-      </p>
-    `;
-    return;
-  }
+  iif (!exercises.length) {
+     registroEditor.innerHTML = `
+       <p class="error">
+         ⚠ La plantilla existe pero no tiene ejercicios válidos.
+         Revisa la relación en Supabase.
+       </p>
+     `;
+     return;
+   }
 
   const exercisesById = {};
   exercises.forEach(ex => exercisesById[ex.id] = ex);
@@ -629,10 +629,10 @@ async function renderRegistroEditor(mesocycleId) {
     if (!exerciseSelect.value) return alert("Selecciona un ejercicio");
 
     const exercise = exercisesById[exerciseSelect.value];
-    if (!exercise || !exercise.name) {
-      alert("Ejercicio inválido o mal vinculado");
-      return;
-    }
+      if (!exercise || !exercise.name) {
+        alert("Ejercicio inválido o mal vinculado");
+        return;
+      }
 
     const payload = {
       user_id: session.user.id,
