@@ -520,16 +520,16 @@ async function renderRegistroEditor(mesocycleId) {
      CARGAR EJERCICIOS DE PLANTILLA
   ====================== */
   const { data: templateExercises, error: eError } = await supabase
-    .from("template_exercises")
-    .select(`
-      exercise_id,
-      exercises (
-        id,
-        name,
-        subgroup
-      )
-    `)
-    .eq("template_id", mesocycle.template_id);
+     .from("template_exercises")
+     .select(`
+       exercise_id,
+       exercises:template_exercises_exercise_id_fkey (
+         id,
+         name,
+         subgroup
+       )
+     `)
+     .eq("template_id", mesocycle.template_id);
 
   if (eError) {
     console.error("❌ Error cargando ejercicios de plantilla", eError);
