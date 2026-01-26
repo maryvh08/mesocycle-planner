@@ -542,7 +542,7 @@ async function renderRegistroEditor(mesocycleId) {
      .map(te => te.exercises)
      .filter(e => e && e.id && e.name);
 
-  iif (!exercises.length) {
+  if (!exercises.length) {
      registroEditor.innerHTML = `
        <p class="error">
          ⚠ La plantilla existe pero no tiene ejercicios válidos.
