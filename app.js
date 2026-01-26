@@ -828,19 +828,20 @@ async function loadPRTable(mesocycleId = null) {
   let query = supabase
     .from("exercise_prs")
     .select("exercise_name, pr_weight")
-    .eq("user_id", user.id)
-    .order("pr_weight", { ascending: false });
+    .eq("user_id", user.id);
+
+  if (mesocycleId) {
+    query = query.eq("mesocycle_id", mesocycleId);
+  }
 
   const { data, error } = await query;
 
   if (error) {
-    console.error("PRs error", error);
+    console.error("PR error", error);
     return;
   }
 
   const container = document.getElementById("pr-table");
-  if (!container) return;
-
   container.innerHTML = "";
 
   data.forEach(r => {
@@ -880,18 +881,12 @@ async function loadStrengthChart(mesocycleId = null) {
     .order("day");
 
   if (mesocycleId) {
-    query = query.eq("mesocycle_id", mesocycleId); // si luego decides añadirlo
+    query = query.eq("mesocycle_id", mesocycleId);
   }
 
   const { data, error } = await query;
-
   if (error) {
-    console.error("Strength chart error", error);
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    console.warn("Sin datos de progreso");
+    console.error(error);
     return;
   }
 
@@ -908,50 +903,50 @@ async function loadStrengthChart(mesocycleId = null) {
     data: {
       labels,
       datasets: [{
-        label: "Volumen diario",
+        label: "Volumen total",
         data: values,
-        fill: true,
-        tension: 0.3
+        tension: 0.3,
+        fill: true
       }]
     }
   });
 }
 
-async function loadExerciseVolumeList() {
+async function loadExerciseVolumeList(mesocycleId = null) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("exercise_volume_totals")
     .select("exercise_name, lifetime_volume, lifetime_sets")
-    .eq("user_id", user.id)
-    .order("lifetime_volume", { ascending: false });
+    .eq("user_id", user.id);
 
+  if (mesocycleId) {
+    query = query.eq("mesocycle_id", mesocycleId);
+  }
+
+  const { data, error } = await query;
   if (error) {
-    console.error("Volume error", error);
+    console.error(error);
     return;
   }
 
   const container = document.getElementById("exercise-volume-list");
-  if (!container) return;
-
   container.innerHTML = "";
 
-  data.forEach(r => {
-    const div = document.createElement("div");
-    div.className = "exercise-volume-card";
-    div.innerHTML = `
-      <strong>${r.exercise_name}</strong>
-      <span>${Math.round(r.lifetime_volume)} kg</span>
-      <small>${r.lifetime_sets} sets</small>
-    `;
-
-    div.onclick = () => loadExerciseProgress(r.exercise_name);
-
-    container.appendChild(div);
-  });
+  data
+    .sort((a, b) => b.lifetime_volume - a.lifetime_volume)
+    .forEach(r => {
+      const div = document.createElement("div");
+      div.className = "exercise-volume-card";
+      div.innerHTML = `
+        <strong>${r.exercise_name}</strong>
+        <span>${r.lifetime_volume.toFixed(0)} kg</span>
+        <small>${r.lifetime_sets} sets</small>
+      `;
+      container.appendChild(div);
+    });
 }
-
 
 async function loadExerciseProgress(exerciseName) {
   const { data: { user } } = await supabase.auth.getUser();
