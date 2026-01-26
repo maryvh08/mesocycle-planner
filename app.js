@@ -782,6 +782,7 @@ function renderStatsView() {
       loadPRTable(mesocycleId);
       loadExerciseVolumeList(mesocycleId);
       loadStrengthChart(mesocycleId);
+      loadMesocycleComparison();
    };
 
   // 🔥 Primero cargar mesociclos
@@ -875,21 +876,6 @@ async function loadPRTable(mesocycleId = null) {
     container.appendChild(row);
   });
 }
-
-  count(distinct exercise_name) as exercises
-from exercise_volume_totals
-group by mesocycle_id, user_id;
-Y otra para contar PRs:
-
-create or replace view mesocycle_prs as
-select
-  mesocycle_id,
-  user_id,
-  count(*) as pr_count
-from exercise_prs
-group by mesocycle_id, user_id;
-🧩 2️⃣ Función frontend
-Agrega esto a tu app.js:
 
 async function loadMesocycleComparison() {
   const { data: { user } } = await supabase.auth.getUser();
