@@ -792,6 +792,7 @@ function renderStatsView() {
    loadPRTable();
    loadExerciseVolumeList();
    loadStrengthChart();
+   loadMesocycleComparison();
 }
 
 /* ======================
@@ -872,6 +873,64 @@ async function loadPRTable(mesocycleId = null) {
       <span>${r.pr_weight} kg</span>
     `;
     container.appendChild(row);
+  });
+}
+
+  count(distinct exercise_name) as exercises
+from exercise_volume_totals
+group by mesocycle_id, user_id;
+Y otra para contar PRs:
+
+create or replace view mesocycle_prs as
+select
+  mesocycle_id,
+  user_id,
+  count(*) as pr_count
+from exercise_prs
+group by mesocycle_id, user_id;
+🧩 2️⃣ Función frontend
+Agrega esto a tu app.js:
+
+async function loadMesocycleComparison() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: mesocycles } = await supabase
+    .from("mesocycles")
+    .select("id, name")
+    .eq("user_id", user.id);
+
+  const { data: stats } = await supabase
+    .from("mesocycle_stats")
+    .select("*")
+    .eq("user_id", user.id);
+
+  const { data: prs } = await supabase
+    .from("mesocycle_prs")
+    .select("*")
+    .eq("user_id", user.id);
+
+  const prMap = {};
+  prs.forEach(p => prMap[p.mesocycle_id] = p.pr_count);
+
+  const container = document.getElementById("mesocycle-comparison");
+  container.innerHTML = "";
+
+  mesocycles.forEach(m => {
+    const s = stats.find(x => x.mesocycle_id === m.id);
+    const pr = prMap[m.id] || 0;
+
+    const div = document.createElement("div");
+    div.className = "mesocycle-stat-card";
+
+    div.innerHTML = `
+      <h4>${m.name}</h4>
+      <p>Volumen: <strong>${(s?.total_volume || 0).toFixed(0)} kg</strong></p>
+      <p>PRs: <strong>${pr}</strong></p>
+      <p>Ejercicios: <strong>${s?.exercises || 0}</strong></p>
+    `;
+
+    container.appendChild(div);
   });
 }
 
