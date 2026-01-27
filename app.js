@@ -92,6 +92,24 @@ if (!profile || !profile.onboarding_completed) {
   showView("app-view");
 }
 
+document.getElementById("finish-onboarding").onclick = async () => {
+  const goal = document.getElementById("onboarding-goal").value;
+  const level = document.getElementById("onboarding-level").value;
+  const days = document.getElementById("onboarding-days").value;
+
+  await supabase
+    .from("user_profiles")
+    .upsert({
+      id: session.user.id,
+      goal,
+      level,
+      days_per_week: days,
+      onboarding_completed: true
+    });
+
+  showView("app-view");
+};
+
 async function showApp() {
   loginView.classList.add("hidden");
   appView.classList.remove("hidden");
