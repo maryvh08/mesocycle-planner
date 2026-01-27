@@ -792,12 +792,15 @@ function renderStatsView() {
    loadMesocycleComparison();
 
   // 🔥 Filtro por mesociclo
-  select.onchange = () => {
-    const id = select.value || null;
-    applyStatsFilter(id);
+  document.getElementById("stats-mesocycle").onchange = e => {
+    const mesocycleId = e.target.value || null;
+
+    loadStatsOverview(mesocycleId);
+    loadPRTable(mesocycleId);
+    loadStrengthChart(mesocycleId);
+    loadExerciseVolumeList(mesocycleId);
   };
 }
-
 
 /* ======================
    CARGA STATS + GRAFICA
@@ -960,13 +963,6 @@ function showPRBadge(exercise, weight) {
 
   setTimeout(() => badge.classList.add("show"), 50);
   setTimeout(() => badge.remove(), 3500);
-}
-
-async function applyStatsFilter(mesocycleId) {
-  await loadStatsOverview(mesocycleId);
-  await loadPRTable(mesocycleId);
-  await loadStrengthChart(mesocycleId);
-  await loadExerciseVolumeList(mesocycleId);
 }
 
 async function loadStrengthChart(mesocycleId = null) {
