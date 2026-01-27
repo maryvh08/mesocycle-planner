@@ -40,15 +40,16 @@
       <button id="logout-btn" class="icon-btn">⎋</button>
     </header>
 
-    <!-- Main content -->
-    <main id="app-content">
-      <!-- Bottom Navigation -->
+    <!-- Tabs -->
     <nav id="tabs">
       <button class="tab-btn active" data-tab="crear-tab">🏗 Crear</button>
       <button class="tab-btn" data-tab="historial-tab">📜 Historial</button>
       <button class="tab-btn" data-tab="registro-tab">✍️ Registro</button>
-      <button class="tab-btn" data-tab="stats">📊 Stats</button>
+      <button class="tab-btn" data-tab="stats-tab">📊 Stats</button>
     </nav>
+
+    <!-- Main content -->
+    <main id="app-content">
 
       <!-- ================= CREAR ================= -->
       <section id="crear-tab" class="tab-content screen">
@@ -124,30 +125,33 @@
       </section>
 
       <!-- ================= STATS ================= -->
-      statsView.innerHTML = `
-        <h2>📊 Estadísticas</h2>
-      
-        <div class="stats-control">
-          <label>Mesociclo</label>
-          <select id="stats-mesocycle">
-            <option value="">Todos</option>
-          </select>
+      <section id="stats-tab" class="tab-content screen hidden">
+        <div class="screen-header">Estadísticas</div>
+
+        <div class="screen-content">
+
+          <div class="card">
+            <label>Mesociclo</label>
+            <select id="stats-mesocycle">
+              <option value="">Todos</option>
+            </select>
+          </div>
+
+          <div id="stats-summary" class="stats-grid"></div>
+
+          <h3>🏆 Mejores marcas</h3>
+          <div id="pr-table"></div>
+
+          <h3>📈 Progreso de fuerza</h3>
+          <canvas id="strength-chart"></canvas>
+
+          <h3>📦 Volumen por ejercicio</h3>
+          <div id="exercise-volume-list"></div>
+
+          <h3>🔄 Comparación de mesociclos</h3>
+          <div id="mesocycle-comparison"></div>
+
         </div>
-      
-        <div id="stats-summary" class="stats-grid"></div>
-      
-        <h3>🏆 Mejores marcas</h3>
-        <div id="pr-table"></div>
-      
-        <h3>📈 Progreso de fuerza</h3>
-        <canvas id="strength-chart"></canvas>
-      
-        <h3>📦 Volumen por ejercicio</h3>
-        <div id="exercise-volume-list"></div>
-      
-        <h3>🔄 Comparación de mesociclos</h3>
-        <div id="mesocycle-comparison"></div>
-    
       </section>
 
     </main>
