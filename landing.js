@@ -21,6 +21,6 @@ document.getElementById("signup-btn").onclick = async () => {
 
   msg.textContent = "Cuenta creada. Redirigiendo...";
   setTimeout(() => {
-    window.location.href = "index.html";
+    window.location.href = "app.html";
   }, 1000);
 };
