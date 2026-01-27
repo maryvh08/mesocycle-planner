@@ -856,34 +856,55 @@ async function loadPRTable(mesocycleId = null) {
 
 async function loadMesocycleComparison() {
   const container = document.getElementById("mesocycle-comparison");
-   if (!container) {
-     console.warn("⏳ mesocycle-comparison aún no está en el DOM");
-     return;
-   }
+  if (!container) {
+    console.warn("⏳ mesocycle-comparison aún no está en el DOM");
+    return;
+  }
 
-  const { data: mesocycles } = await supabase
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  // Mesociclos
+  const { data: mesocycles, error: mError } = await supabase
     .from("mesocycles")
     .select("id, name")
     .eq("user_id", user.id);
 
-  const { data: stats } = await supabase
+  if (mError || !mesocycles) {
+    console.error("❌ Error cargando mesociclos", mError);
+    return;
+  }
+
+  // Stats por mesociclo
+  const { data: stats, error: sError } = await supabase
     .from("mesocycle_stats")
     .select("*")
     .eq("user_id", user.id);
 
-  const { data: prs } = await supabase
+  if (sError) {
+    console.error("❌ Error cargando mesocycle_stats", sError);
+  }
+
+  // PRs por mesociclo
+  const { data: prs, error: pError } = await supabase
     .from("mesocycle_prs")
     .select("*")
     .eq("user_id", user.id);
 
-  const prMap = {};
-  prs.forEach(p => prMap[p.mesocycle_id] = p.pr_count);
+  if (pError) {
+    console.error("❌ Error cargando mesocycle_prs", pError);
+  }
 
-  const container = document.getElementById("mesocycle-comparison");
+  // Mapear PRs por mesociclo
+  const prMap = {};
+  (prs || []).forEach(p => {
+    prMap[p.mesocycle_id] = p.pr_count;
+  });
+
   container.innerHTML = "";
 
   mesocycles.forEach(m => {
-    const s = stats.find(x => x.mesocycle_id === m.id);
+    const s = (stats || []).find(x => x.mesocycle_id === m.id);
     const pr = prMap[m.id] || 0;
 
     const div = document.createElement("div");
