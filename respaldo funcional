@@ -13,7 +13,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 ====================== */
 let selectedDaysPerWeek = null;
 let selectedDay = null;
-let progressChart = null;
 let editingMesocycleId = null;
 let allowedSubgroups = null;
 let statsChart = null;
@@ -513,38 +512,48 @@ async function renderRegistroEditor(mesocycleId) {
 
   if (mError || !mesocycle) {
     console.error(mError);
-    registroEditor.textContent = "Error cargando mesociclo";
+    registroEditor.textContent = "❌ Error cargando mesociclo";
     return;
   }
 
   /* ======================
-     CARGAR EJERCICIOS
+     CARGAR EJERCICIOS DE PLANTILLA
   ====================== */
   const { data: templateExercises, error: eError } = await supabase
      .from("template_exercises")
      .select(`
        exercise_id,
-       exercises (
+       exercises:template_exercises_exercise_id_fkey (
          id,
          name,
          subgroup
        )
      `)
      .eq("template_id", mesocycle.template_id);
-   
-   if (eError || !templateExercises || templateExercises.length === 0) {
-     console.error("Plantilla sin ejercicios", eError);
+
+  if (eError) {
+    console.error("❌ Error cargando ejercicios de plantilla", eError);
+    registroEditor.innerHTML = "<p class='error'>Error cargando ejercicios</p>";
+    return;
+  }
+
+  // Blindaje contra relaciones rotas
+  const exercises = templateExercises
+     .map(te => te.exercises)
+     .filter(e => e && e.id && e.name);
+
+  if (!exercises.length) {
      registroEditor.innerHTML = `
        <p class="error">
-         ⚠ Esta plantilla no tiene ejercicios asignados.
+         ⚠ La plantilla existe pero no tiene ejercicios válidos.
+         Revisa la relación en Supabase.
        </p>
      `;
      return;
    }
 
-   const exercises = templateExercises.map(te => te.exercises);
-   const exercisesById = {};
-   exercises.forEach(ex => exercisesById[ex.id] = ex);
+  const exercisesById = {};
+  exercises.forEach(ex => exercisesById[ex.id] = ex);
 
   /* ======================
      UI
@@ -565,6 +574,8 @@ async function renderRegistroEditor(mesocycleId) {
   const dayContainer = document.createElement("div");
   dayContainer.className = "day-buttons";
   registroEditor.appendChild(dayContainer);
+
+  let selectedDay = null;
 
   for (let i = 1; i <= mesocycle.days_per_week; i++) {
     const btn = document.createElement("button");
@@ -599,11 +610,15 @@ async function renderRegistroEditor(mesocycleId) {
   const saveBtn = document.createElement("button");
   saveBtn.textContent = "Guardar";
 
+  const registeredContainer = document.createElement("div");
+  registeredContainer.id = "registered-exercises";
+
   registroEditor.append(
     exerciseSelect,
     weightInput,
     repsInput,
-    saveBtn
+    saveBtn,
+    registeredContainer
   );
 
   /* ======================
@@ -614,18 +629,16 @@ async function renderRegistroEditor(mesocycleId) {
     if (!exerciseSelect.value) return alert("Selecciona un ejercicio");
 
     const exercise = exercisesById[exerciseSelect.value];
-    if (!exercise) return alert("Ejercicio inválido");
-
-   const isPR = await checkForPR(exercise.name, Number(weightInput.value));
-   if (isPR) {
-     showPRBadge(exercise.name, weightInput.value);
-   }
+      if (!exercise || !exercise.name) {
+        alert("Ejercicio inválido o mal vinculado");
+        return;
+      }
 
     const payload = {
       user_id: session.user.id,
       mesocycle_id: mesocycleId,
       exercise_id: exercise.id,
-      exercise_name: exercise.name,  // 🔥 CLAVE DE TODO
+      exercise_name: exercise.name, // 🔥 CLAVE para stats y vistas
       week_number: Number(weekSelect.value),
       day_number: selectedDay,
       weight: Number(weightInput.value),
@@ -648,8 +661,9 @@ async function renderRegistroEditor(mesocycleId) {
     renderExercisesForDay(mesocycleId, Number(weekSelect.value), selectedDay);
   };
 
-  console.log("✅ RegistroEditor listo");
+  console.log("✅ RegistroEditor listo y blindado");
 }
+
 
 /* ======================
    RENDER EJERCICIOS DÍA
@@ -723,6 +737,7 @@ async function renderExercisesForDay(mesocycleId, week, day) {
    RENDER VIEW
 ====================== */
 function renderStatsView() {
+  const statsView = document.getElementById("stats");
   if (!statsView) return;
 
   statsView.innerHTML = `
@@ -758,17 +773,10 @@ function renderStatsView() {
 
     <h3>📦 Volumen por ejercicio</h3>
     <div id="exercise-volume-list"></div>
-  `;
 
-   // 🔥 Filtro por mesociclo
-   document.getElementById("stats-mesocycle").onchange = e => {
-     const mesocycleId = e.target.value || null;
-   
-     loadStatsOverview(mesocycleId);
-     loadPRTable(mesocycleId);
-     loadStrengthChart(mesocycleId);
-     loadExerciseVolumeList(mesocycleId);
-   };
+    <h3>🔄 Comparación de mesociclos</h3>
+    <div id="mesocycle-comparison"></div>
+  `;
 
   // 🔥 Primero cargar mesociclos
   loadStatsMesocycles();
@@ -778,7 +786,19 @@ function renderStatsView() {
   loadPRTable();
   loadStrengthChart();
   loadExerciseVolumeList();
+   loadMesocycleComparison();
+
+  // 🔥 Filtro por mesociclo
+  document.getElementById("stats-mesocycle").onchange = e => {
+    const mesocycleId = e.target.value || null;
+
+    loadStatsOverview(mesocycleId);
+    loadPRTable(mesocycleId);
+    loadStrengthChart(mesocycleId);
+    loadExerciseVolumeList(mesocycleId);
+  };
 }
+
 
 /* ======================
    CARGA STATS + GRAFICA
@@ -832,12 +852,11 @@ async function loadPRTable(mesocycleId = null) {
   if (!user) return;
 
   let query = supabase
-    .from("exercise_records")
-    .select("exercise_name, weight")
+    .from("exercise_prs")
+    .select("exercise_name, pr_weight")
     .eq("user_id", user.id);
 
-  // 🔥 SOLO filtrar si es un id válido
-  if (mesocycleId !== null && mesocycleId !== undefined && mesocycleId !== "") {
+  if (mesocycleId) {
     query = query.eq("mesocycle_id", mesocycleId);
   }
 
@@ -848,50 +867,85 @@ async function loadPRTable(mesocycleId = null) {
     return;
   }
 
-  const map = {};
-
-  data.forEach(r => {
-    if (!r.exercise_name) return;
-
-    if (!map[r.exercise_name]) {
-      map[r.exercise_name] = { sets: 0, max: 0 };
-    }
-
-    map[r.exercise_name].sets++;
-    map[r.exercise_name].max = Math.max(map[r.exercise_name].max, r.weight || 0);
-  });
-
   const container = document.getElementById("pr-table");
-  if (!container) return;
-
   container.innerHTML = "";
 
-  Object.entries(map).forEach(([name, info]) => {
+  data.forEach(r => {
     const row = document.createElement("div");
     row.className = "pr-row";
     row.innerHTML = `
-      <strong>${name}</strong>
-      <span>${info.max} kg</span>
-      <small>${info.sets} sets</small>
+      <strong>${r.exercise_name}</strong>
+      <span>${r.pr_weight} kg</span>
     `;
     container.appendChild(row);
   });
 }
 
-async function checkForPR(exercise_name, newWeight) {
+async function loadMesocycleComparison() {
+  const container = document.getElementById("mesocycle-comparison");
+  if (!container) {
+    console.warn("⏳ mesocycle-comparison aún no está en el DOM");
+    return;
+  }
+
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
 
-  const { data } = await supabase
-    .from("exercise_records")
-    .select("weight")
-    .eq("user_id", user.id)
-    .eq("exercise_name", exercise_name)
-    .order("weight", { ascending: false })
-    .limit(1);
+  // Mesociclos
+  const { data: mesocycles, error: mError } = await supabase
+    .from("mesocycles")
+    .select("id, name")
+    .eq("user_id", user.id);
 
-  if (!data || data.length === 0) return false;
+  if (mError || !mesocycles) {
+    console.error("❌ Error cargando mesociclos", mError);
+    return;
+  }
 
-  return newWeight > data[0].weight;
+  // Stats por mesociclo
+  const { data: stats, error: sError } = await supabase
+    .from("mesocycle_stats")
+    .select("*")
+    .eq("user_id", user.id);
+
+  if (sError) {
+    console.error("❌ Error cargando mesocycle_stats", sError);
+  }
+
+  // PRs por mesociclo
+  const { data: prs, error: pError } = await supabase
+    .from("mesocycle_prs")
+    .select("*")
+    .eq("user_id", user.id);
+
+  if (pError) {
+    console.error("❌ Error cargando mesocycle_prs", pError);
+  }
+
+  // Mapear PRs por mesociclo
+  const prMap = {};
+  (prs || []).forEach(p => {
+    prMap[p.mesocycle_id] = p.pr_count;
+  });
+
+  container.innerHTML = "";
+
+  mesocycles.forEach(m => {
+    const s = (stats || []).find(x => x.mesocycle_id === m.id);
+    const pr = prMap[m.id] || 0;
+
+    const div = document.createElement("div");
+    div.className = "mesocycle-stat-card";
+
+    div.innerHTML = `
+      <h4>${m.name}</h4>
+      <p>Volumen: <strong>${(s?.total_volume || 0).toFixed(0)} kg</strong></p>
+      <p>Record Personal: <strong>${pr}</strong></p>
+      <p>Ejercicios: <strong>${s?.exercises || 0}</strong></p>
+    `;
+
+    container.appendChild(div);
+  });
 }
 
 function showPRBadge(exercise, weight) {
@@ -914,38 +968,23 @@ async function loadStrengthChart(mesocycleId = null) {
   if (!user) return;
 
   let query = supabase
-    .from("exercise_records")
-    .select("updated_at, weight, reps")
+    .from("exercise_progress_chart")
+    .select("day, total_volume")
     .eq("user_id", user.id)
-    .order("updated_at");
+    .order("day");
 
-  // 👉 solo filtrar si hay mesociclo
   if (mesocycleId) {
     query = query.eq("mesocycle_id", mesocycleId);
   }
 
   const { data, error } = await query;
-
   if (error) {
-    console.error("Strength chart error", error);
+    console.error(error);
     return;
   }
 
-  if (typeof Chart === "undefined") {
-    console.warn("Chart.js no cargado — gráfica omitida");
-    return;
-  }
-
-  const daily = {};
-
-  data.forEach(r => {
-    const day = r.updated_at.slice(0, 10);
-    const volume = (r.weight || 0) * (r.reps || 0);
-    daily[day] = (daily[day] || 0) + volume;
-  });
-
-  const labels = Object.keys(daily);
-  const values = Object.values(daily);
+  const labels = data.map(r => r.day);
+  const values = data.map(r => r.total_volume);
 
   const ctx = document.getElementById("strength-chart");
   if (!ctx) return;
@@ -953,21 +992,17 @@ async function loadStrengthChart(mesocycleId = null) {
   if (window.statsChart) window.statsChart.destroy();
 
   window.statsChart = new Chart(ctx, {
-     type: "line",
-     data: {
-       labels,
-       datasets: [{
-         label: "Volumen total",
-         data: values,
-         fill: true,
-         tension: 0.3
-       }]
-     },
-     animation: {
-       duration: 1200,
-       easing: "easeOutQuart"
-     }
-   });
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Volumen total",
+        data: values,
+        tension: 0.3,
+        fill: true
+      }]
+    }
+  });
 }
 
 async function loadExerciseVolumeList(mesocycleId = null) {
@@ -975,8 +1010,8 @@ async function loadExerciseVolumeList(mesocycleId = null) {
   if (!user) return;
 
   let query = supabase
-    .from("exercise_records")
-    .select("exercise_name, weight, reps")
+    .from("exercise_volume_totals")
+    .select("exercise_name, lifetime_volume, lifetime_sets")
     .eq("user_id", user.id);
 
   if (mesocycleId) {
@@ -984,51 +1019,26 @@ async function loadExerciseVolumeList(mesocycleId = null) {
   }
 
   const { data, error } = await query;
-
   if (error) {
-    console.error("Volume list error", error);
+    console.error(error);
     return;
   }
 
-  const map = {};
-
-  data.forEach(r => {
-    if (!r.exercise_name) return;
-
-    if (!map[r.exercise_name]) {
-      map[r.exercise_name] = {
-        sets: 0,
-        max: 0,
-        volume: 0
-      };
-    }
-
-    map[r.exercise_name].sets++;
-    map[r.exercise_name].max = Math.max(map[r.exercise_name].max, r.weight || 0);
-    map[r.exercise_name].volume += (r.weight || 0) * (r.reps || 0);
-  });
-
-  const rows = Object.entries(map).sort((a, b) => b[1].volume - a[1].volume);
-
   const container = document.getElementById("exercise-volume-list");
-  if (!container) return;
-
   container.innerHTML = "";
 
-  rows.forEach(([name, stats]) => {
-    const div = document.createElement("div");
-    div.className = "exercise-volume-card";
-
-    div.innerHTML = `
-      <strong>${name}</strong>
-      <span>Volumen: ${stats.volume.toFixed(0)} kg</span>
-      <small>PR: ${stats.max} kg · ${stats.sets} sets</small>
-    `;
-
-    div.onclick = () => loadExerciseProgress(name);
-
-    container.appendChild(div);
-  });
+  data
+    .sort((a, b) => b.lifetime_volume - a.lifetime_volume)
+    .forEach(r => {
+      const div = document.createElement("div");
+      div.className = "exercise-volume-card";
+      div.innerHTML = `
+        <strong>${r.exercise_name}</strong>
+        <span>${r.lifetime_volume.toFixed(0)} kg</span>
+        <small>${r.lifetime_sets} sets</small>
+      `;
+      container.appendChild(div);
+    });
 }
 
 async function loadExerciseProgress(exerciseName) {
@@ -1036,20 +1046,20 @@ async function loadExerciseProgress(exerciseName) {
   if (!user) return;
 
   const { data, error } = await supabase
-    .from("exercise_progress")
-    .select("day, max_weight, volume")
+    .from("exercise_progress_chart")
+    .select("day, max_weight, total_volume")
     .eq("user_id", user.id)
     .eq("exercise_name", exerciseName)
     .order("day");
 
-  if (error || !data || data.length === 0) {
-    console.warn("Sin datos de progreso", error);
+  if (error || !data.length) {
+    console.warn("Sin datos", error);
     return;
   }
 
   const labels = data.map(d => d.day);
   const weights = data.map(d => d.max_weight);
-  const volumes = data.map(d => d.volume);
+  const volumes = data.map(d => d.total_volume);
 
   const ctx = document.getElementById("strength-chart");
   if (!ctx) return;
@@ -1075,38 +1085,16 @@ async function loadExerciseProgress(exerciseName) {
       ]
     },
     options: {
-     animation: {
-       duration: 1200,
-       easing: "easeOutQuart"
-     },
-     scales: {
-       y: { title: { display: true, text: "Peso (kg)" }},
-       y1: {
-         position: "right",
-         grid: { drawOnChartArea: false },
-         title: { display: true, text: "Volumen" }
-       }
-     }
-   }
+      scales: {
+        y: { title: { display: true, text: "Peso (kg)" }},
+        y1: {
+          position: "right",
+          grid: { drawOnChartArea: false },
+          title: { display: true, text: "Volumen" }
+        }
+      }
+    }
   });
-}
-
-async function getExerciseStatus(exerciseName) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return "new";
-
-  const { data, error } = await supabase
-    .rpc("exercise_status", {
-      uid: user.id,
-      ex: exerciseName
-    });
-
-  if (error) {
-    console.error("Status error", error);
-    return "new";
-  }
-
-  return data;
 }
 
 async function loadStatsMesocycles() {
@@ -1132,51 +1120,6 @@ async function loadStatsMesocycles() {
     opt.value = m.id;
     opt.textContent = m.name;
     select.appendChild(opt);
-  });
-}
-
-async function loadExerciseStats(exerciseName) {
-  const { data: { user } } = await supabase.auth.getUser();
-
-  const { data } = await supabase
-    .from("exercise_records")
-    .select("weight, reps, updated_at")
-    .eq("user_id", user.id)
-    .eq("exercise_name", exerciseName)
-    .order("updated_at", { ascending: true });
-
-  const labels = data.map(r => new Date(r.updated_at).toLocaleDateString());
-  const values = data.map(r => r.weight);
-
-  document.getElementById("stats-chart-wrapper").classList.remove("hidden");
-  document.getElementById("stats-chart-title").textContent = exerciseName;
-
-  if (progressChart) progressChart.destroy();
-
-  const ctx = document.getElementById("progressChart");
-
-  progressChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels,
-      datasets: [{
-        label: "Peso (kg)",
-        data: values,
-        fill: false,
-        tension: 0.3
-      }]
-    }
-  });
-}
-
-function renderExerciseChart(rows) {
-  const list = document.getElementById("statsList");
-  list.innerHTML = "";
-
-  rows.forEach(r => {
-    const li = document.createElement("li");
-    li.textContent = `${r.weight} kg × ${r.reps} reps`;
-    list.appendChild(li);
   });
 }
 
