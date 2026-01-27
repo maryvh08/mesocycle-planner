@@ -80,36 +80,6 @@ function showLogin() {
   appView.classList.add("hidden");
 }
 
-const { data: profile } = await supabase
-  .from("user_profiles")
-  .select("onboarding_completed")
-  .eq("id", user.id)
-  .single();
-
-if (!profile || !profile.onboarding_completed) {
-  showView("onboarding-view");
-} else {
-  showView("app-view");
-}
-
-document.getElementById("finish-onboarding").onclick = async () => {
-  const goal = document.getElementById("onboarding-goal").value;
-  const level = document.getElementById("onboarding-level").value;
-  const days = document.getElementById("onboarding-days").value;
-
-  await supabase
-    .from("user_profiles")
-    .upsert({
-      id: session.user.id,
-      goal,
-      level,
-      days_per_week: days,
-      onboarding_completed: true
-    });
-
-  showView("app-view");
-};
-
 async function showApp() {
   loginView.classList.add("hidden");
   appView.classList.remove("hidden");
@@ -203,6 +173,36 @@ async function saveMesocycle() {
   resetMesocycleForm();
   loadMesocycles();
 }
+
+const { data: profile } = await supabase
+  .from("user_profiles")
+  .select("onboarding_completed")
+  .eq("id", user.id)
+  .single();
+
+if (!profile || !profile.onboarding_completed) {
+  showView("onboarding-view");
+} else {
+  showView("app-view");
+}
+
+document.getElementById("finish-onboarding").onclick = async () => {
+  const goal = document.getElementById("onboarding-goal").value;
+  const level = document.getElementById("onboarding-level").value;
+  const days = document.getElementById("onboarding-days").value;
+
+  await supabase
+    .from("user_profiles")
+    .upsert({
+      id: session.user.id,
+      goal,
+      level,
+      days_per_week: days,
+      onboarding_completed: true
+    });
+
+  showView("app-view");
+};
 
 function resetMesocycleForm() {
   mesocycleNameInput.value = "";
