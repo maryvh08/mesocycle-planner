@@ -877,8 +877,11 @@ async function loadPRTable(mesocycleId = null) {
 }
 
 async function loadMesocycleComparison() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+  const container = document.getElementById("mesocycle-comparison");
+   if (!container) {
+     console.warn("⏳ mesocycle-comparison aún no está en el DOM");
+     return;
+   }
 
   const { data: mesocycles } = await supabase
     .from("mesocycles")
