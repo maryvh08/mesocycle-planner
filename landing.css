@@ -1,0 +1,81 @@
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #0b0b0d;
+  color: #fff;
+}
+
+.hero {
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at top, #220000, #000);
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 3rem;
+  color: #ff3b3b;
+}
+
+.hero p {
+  color: #ccc;
+  max-width: 500px;
+  margin: 1rem auto;
+}
+
+.cta-btn {
+  background: #ff3b3b;
+  padding: 1rem 2rem;
+  color: black;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+  padding: 3rem;
+  gap: 2rem;
+  background: #111;
+}
+
+.feature {
+  background: #161616;
+  padding: 2rem;
+  border-radius: 10px;
+}
+
+.signup {
+  display: flex;
+  justify-content: center;
+  padding: 4rem 1rem;
+}
+
+.signup-card {
+  background: #161616;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.signup-card input {
+  width: 100%;
+  padding: 0.8rem;
+  margin: 0.5rem 0;
+  background: #0b0b0d;
+  border: 1px solid #333;
+  color: white;
+}
+
+.signup-card button {
+  width: 100%;
+  background: #ff3b3b;
+  border: none;
+  padding: 1rem;
+  font-weight: bold;
+  margin-top: 1rem;
+}
