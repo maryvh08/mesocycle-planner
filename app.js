@@ -750,10 +750,23 @@ function renderStatsView() {
       </select>
     </div>
 
-    <div id="stats-summary" class="stats-grid"></div>
+    <div id="stats-summary" class="stats-grid">
+      <div class="stat-card">
+        <strong id="total-sets">–</strong>
+        <span>Series totales</span>
+      </div>
+      <div class="stat-card">
+        <strong id="total-volume">–</strong>
+        <span>Volumen total (kg)</span>
+      </div>
+      <div class="stat-card">
+        <strong id="total-exercises">–</strong>
+        <span>Ejercicios únicos</span>
+      </div>
+    </div>
 
     <h3>🏆 Mejores marcas</h3>
-    <div id="pr-table"></div>
+    <div id="pr-table" class="pr-table"></div>
 
     <h3>📈 Progreso de fuerza</h3>
     <canvas id="strength-chart"></canvas>
@@ -765,13 +778,27 @@ function renderStatsView() {
     <div id="mesocycle-comparison"></div>
   `;
 
+  // 🔥 Primero cargar mesociclos
   loadStatsMesocycles();
+
+  // 🔥 Stats globales (todos los datos)
   loadStatsOverview();
   loadPRTable();
   loadStrengthChart();
   loadExerciseVolumeList();
-  loadMesocycleComparison();
+   loadMesocycleComparison();
+
+  // 🔥 Filtro por mesociclo
+  document.getElementById("stats-mesocycle").onchange = e => {
+    const mesocycleId = e.target.value || null;
+
+    loadStatsOverview(mesocycleId);
+    loadPRTable(mesocycleId);
+    loadStrengthChart(mesocycleId);
+    loadExerciseVolumeList(mesocycleId);
+  };
 }
+
 
 /* ======================
    CARGA STATS + GRAFICA
