@@ -80,6 +80,18 @@ function showLogin() {
   appView.classList.add("hidden");
 }
 
+const { data: profile } = await supabase
+  .from("user_profiles")
+  .select("onboarding_completed")
+  .eq("id", user.id)
+  .single();
+
+if (!profile || !profile.onboarding_completed) {
+  showView("onboarding-view");
+} else {
+  showView("app-view");
+}
+
 async function showApp() {
   loginView.classList.add("hidden");
   appView.classList.remove("hidden");
