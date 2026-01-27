@@ -1,3 +1,17 @@
+:root {
+  --bg-main: #0b0b0d;
+  --bg-card: #141418;
+  --bg-soft: #1c1c22;
+
+  --red: #ff2e2e;
+  --red-glow: #ff2e2e55;
+
+  --text-main: #ffffff;
+  --text-muted: #b3b3b3;
+
+  --border: #2a2a30;
+}
+
 /* ========== RESET ========== */
 * {
   margin: 0;
