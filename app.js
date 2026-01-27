@@ -44,7 +44,6 @@ const statsView = document.getElementById("stats");
 ====================== */
 function initAuth() {
   document.getElementById("login-btn").onclick = login;
-  document.getElementById("signup-btn").onclick = signup;
   document.getElementById("logout-btn").onclick = logout;
 
   supabase.auth.onAuthStateChange((_e, session) => {
