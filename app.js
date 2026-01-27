@@ -737,6 +737,7 @@ async function renderExercisesForDay(mesocycleId, week, day) {
    RENDER VIEW
 ====================== */
 function renderStatsView() {
+  const statsView = document.getElementById("stats");
   if (!statsView) return;
 
   statsView.innerHTML = `
@@ -749,50 +750,27 @@ function renderStatsView() {
       </select>
     </div>
 
-    <div id="stats-summary" class="stats-grid">
-      <div class="stat-card">
-        <strong id="total-sets">–</strong>
-        <span>Series totales</span>
-      </div>
-      <div class="stat-card">
-        <strong id="total-volume">–</strong>
-        <span>Volumen total (kg)</span>
-      </div>
-      <div class="stat-card">
-        <strong id="total-exercises">–</strong>
-        <span>Ejercicios únicos</span>
-      </div>
-    </div>
+    <div id="stats-summary" class="stats-grid"></div>
 
     <h3>🏆 Mejores marcas</h3>
-    <div id="pr-table" class="pr-table"></div>
+    <div id="pr-table"></div>
 
     <h3>📈 Progreso de fuerza</h3>
     <canvas id="strength-chart"></canvas>
 
     <h3>📦 Volumen por ejercicio</h3>
     <div id="exercise-volume-list"></div>
+
+    <h3>🔄 Comparación de mesociclos</h3>
+    <div id="mesocycle-comparison"></div>
   `;
 
-   // 🔥 Filtro por mesociclo
-   document.getElementById("stats-mesocycle").onchange = e => {
-     const mesocycleId = e.target.value || null;
-   
-      loadStatsOverview(mesocycleId);
-      loadPRTable(mesocycleId);
-      loadExerciseVolumeList(mesocycleId);
-      loadStrengthChart(mesocycleId);
-   };
-
-  // 🔥 Primero cargar mesociclos
   loadStatsMesocycles();
-
-  // 🔥 Stats globales (todos los datos)
-   loadStatsOverview();
-   loadPRTable();
-   loadExerciseVolumeList();
-   loadStrengthChart();
-   loadMesocycleComparison();
+  loadStatsOverview();
+  loadPRTable();
+  loadStrengthChart();
+  loadExerciseVolumeList();
+  loadMesocycleComparison();
 }
 
 /* ======================
