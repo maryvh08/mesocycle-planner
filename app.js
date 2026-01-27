@@ -658,6 +658,24 @@ async function renderRegistroEditor(mesocycleId) {
     weightInput.value = "";
     repsInput.value = "";
 
+      // 🏆 comprobar si fue PR
+      const { data: prRows } = await supabase
+        .from("exercise_prs")
+        .select("pr_weight")
+        .eq("user_id", session.user.id)
+        .eq("exercise_name", exercise.name)
+        .single();
+      
+      if (prRows && payload.weight >= prRows.pr_weight) {
+        showPRBadge(exercise.name, payload.weight);
+      }
+   // 🔄 refrescar stats si están visibles
+   if (!document.getElementById("stats").classList.contains("hidden")) {
+     const select = document.getElementById("stats-mesocycle");
+     const id = select?.value || null;
+     applyStatsFilter(id);
+     loadMesocycleComparison();
+   }
     renderExercisesForDay(mesocycleId, Number(weekSelect.value), selectedDay);
   };
 
@@ -852,7 +870,7 @@ async function loadPRTable(mesocycleId = null) {
 
   let query = supabase
     .from("exercise_prs")
-    .select("exercise_name, pr_weight")
+    .select("exercise_name, pr_weight, mesocycle_id")
     .eq("user_id", user.id);
 
   if (mesocycleId) {
@@ -873,9 +891,10 @@ async function loadPRTable(mesocycleId = null) {
     const row = document.createElement("div");
     row.className = "pr-row";
     row.innerHTML = `
-      <strong>${r.exercise_name}</strong>
-      <span>${r.pr_weight} kg</span>
-    `;
+     <strong>${r.exercise_name}</strong>
+     <span>${r.pr_weight} kg</span>
+     ${mesocycleId ? "" : `<small>mesociclo</small>`}
+   `;
     container.appendChild(row);
   });
 }
