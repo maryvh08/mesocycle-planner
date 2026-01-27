@@ -1,0 +1,124 @@
+:root {
+  --bg: #050507;
+  --card: #120b0f;
+  --text: #f2e9ec;
+  --muted: #9a8a8f;
+
+  --accent: #b11226;        /* rojo sangre */
+  --accent-light: #ff3b3b;
+  --accent-glow: #b1122644;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  background: radial-gradient(circle at top, #2a0a0a, var(--bg));
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* PAGE */
+.auth-page {
+  width: 100%;
+  padding: 2rem;
+}
+
+/* CARD */
+.auth-card {
+  max-width: 420px;
+  margin: auto;
+  background: linear-gradient(180deg, #140c10, #080406);
+  border-radius: 22px;
+  padding: 3rem;
+  border: 1px solid #2a0f14;
+  box-shadow:
+    0 40px 90px rgba(0,0,0,0.75),
+    0 0 40px rgba(177,18,38,0.15);
+}
+
+/* TITLE */
+.auth-card h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* MUTED TEXT */
+.muted {
+  color: var(--muted);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+/* INPUTS */
+.auth-card input {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  margin-bottom: 1.3rem;
+  background: #080406;
+  border: 1px solid #2a0f14;
+  border-radius: 10px;
+  color: var(--text);
+  transition: all 0.25s ease;
+}
+
+.auth-card input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 2px var(--accent-glow),
+    inset 0 0 10px rgba(177,18,38,0.15);
+}
+
+/* BUTTON */
+.auth-card button {
+  width: 100%;
+  padding: 0.95rem;
+  background: linear-gradient(135deg, #8e0e1f, var(--accent-light));
+  border: none;
+  border-radius: 14px;
+  color: white;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.auth-card button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 45px rgba(177,18,38,0.45);
+}
+
+/* FOOTER */
+.auth-footer {
+  margin-top: 1.6rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.auth-footer a {
+  color: var(--accent-light);
+  text-decoration: none;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+/* MESSAGE */
+.auth-message {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #ff4d4d;
+}
