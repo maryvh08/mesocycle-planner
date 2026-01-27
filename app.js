@@ -776,9 +776,6 @@ function renderStatsView() {
       
       <h3>🔄 Comparación de mesociclos</h3>
       <div id="mesocycle-comparison"></div>
-      
-      <h3 📈 Progreso de fuerza</h3>
-      <div id="strength-chart"></div>
   `;
 
   // 🔥 Primero cargar mesociclos
