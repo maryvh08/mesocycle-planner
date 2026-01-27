@@ -187,3 +187,60 @@ body {
   text-align: center;
   color: #ff6b6b;
 }
+
+/* ========== HOW IT WORKS ========== */
+
+.how-it-works {
+  padding: 6rem 10%;
+  background: #050507;
+  text-align: center;
+}
+
+.how-it-works h2 {
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 3rem;
+}
+
+.step {
+  background: #0e0e14;
+  padding: 2.5rem 2rem;
+  border-radius: 18px;
+  border: 1px solid #1a1a24;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.step:hover {
+  transform: translateY(-8px);
+  border-color: #7c8cff;
+  box-shadow: 0 20px 50px rgba(124,140,255,0.15);
+}
+
+.step span {
+  display: inline-flex;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #7c8cff, #5a6bff);
+  color: white;
+  font-weight: 900;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.step h3 {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.step p {
+  color: #aaa;
+}
