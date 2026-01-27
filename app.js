@@ -765,17 +765,20 @@ function renderStatsView() {
       </div>
     </div>
 
-    <h3>🏆 Mejores marcas</h3>
-    <div id="pr-table" class="pr-table"></div>
-
-    <h3>📈 Progreso de fuerza</h3>
-    <canvas id="strength-chart"></canvas>
-
-    <h3>📦 Volumen por ejercicio</h3>
-    <div id="exercise-volume-list"></div>
-
-    <h3>🔄 Comparación de mesociclos</h3>
-    <div id="mesocycle-comparison"></div>
+      <h3>🏆 Mejores marcas</h3>
+      <div id="pr-table" class="pr-table"></div>
+      
+      <h3>📈 Progreso de fuerza</h3>
+      <canvas id="strength-chart"></canvas>
+      
+      <h3>📦 Volumen por ejercicio</h3>
+      <div id="exercise-volume-list"></div>
+      
+      <h3>🔄 Comparación de mesociclos</h3>
+      <div id="mesocycle-comparison"></div>
+      
+      <h3 📈 Progreso de fuerza</h3>
+      <div id="strength-chart"></div>
   `;
 
   // 🔥 Primero cargar mesociclos
@@ -789,13 +792,9 @@ function renderStatsView() {
    loadMesocycleComparison();
 
   // 🔥 Filtro por mesociclo
-  document.getElementById("stats-mesocycle").onchange = e => {
-    const mesocycleId = e.target.value || null;
-
-    loadStatsOverview(mesocycleId);
-    loadPRTable(mesocycleId);
-    loadStrengthChart(mesocycleId);
-    loadExerciseVolumeList(mesocycleId);
+  select.onchange = () => {
+    const id = select.value || null;
+    applyStatsFilter(id);
   };
 }
 
@@ -963,6 +962,13 @@ function showPRBadge(exercise, weight) {
   setTimeout(() => badge.remove(), 3500);
 }
 
+async function applyStatsFilter(mesocycleId) {
+  await loadStatsOverview(mesocycleId);
+  await loadPRTable(mesocycleId);
+  await loadStrengthChart(mesocycleId);
+  await loadExerciseVolumeList(mesocycleId);
+}
+
 async function loadStrengthChart(mesocycleId = null) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
@@ -1037,6 +1043,11 @@ async function loadExerciseVolumeList(mesocycleId = null) {
         <span>${r.lifetime_volume.toFixed(0)} kg</span>
         <small>${r.lifetime_sets} sets</small>
       `;
+      
+      div.onclick = () => {
+        loadExerciseProgress(r.exercise_name);
+      };
+      
       container.appendChild(div);
     });
 }
