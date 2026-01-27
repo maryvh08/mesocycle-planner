@@ -16,21 +16,33 @@
 <div id="app-shell">
 
   <!-- ================= LOGIN ================= -->
-  <section id="login-view" class="screen">
+  <section id="login-view" class="screen login-screen">
     <div class="auth-card">
-      <h1>🏋️‍♂️ Workout Tracker</h1>
-      <p class="muted">Registra y domina tu progreso</p>
-
-      <input type="email" id="email" placeholder="Email" />
-      <input type="password" id="password" placeholder="Contraseña" />
-
-      <button id="login-btn">Iniciar sesión</button>
-
-      <p id="auth-message" class="auth-message"></p>
+  
+      <div class="auth-header">
+        <h1>Workout</h1>
+        <p>Entrena con datos. Mejora con intención.</p>
+      </div>
+  
+      <div class="auth-form">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="tucorreo@email.com" />
+  
+        <label>Contraseña</label>
+        <input type="password" id="password" placeholder="••••••••" />
+  
+        <button id="login-btn" class="primary">Entrar</button>
+  
+        <p class="auth-message" id="auth-message"></p>
+  
+        <p class="auth-footer">
+          ¿Nuevo aquí? <a href="index.html">Crear cuenta</a>
+        </p>
+      </div>
+  
     </div>
   </section>
-
-
+  
   <!-- ================= APP ================= -->
   <section id="app-view" class="hidden">
 
