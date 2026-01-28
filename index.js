@@ -38,7 +38,7 @@ document.getElementById("reset-btn").onclick = async () => {
   const msg = document.getElementById("reset-msg");
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: "https://TU_USUARIO.github.io/TU_REPO/update-password.html"
+    redirectTo: "https://maryvh08.github.io/mesocycle-planner/update-password.html"
   });
 
   if (error) {
