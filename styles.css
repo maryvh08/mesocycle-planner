@@ -380,14 +380,9 @@ section {
   margin-top: 4px;
   color: #333;
 
-  opacity: 0;               
+  opacity: 1;               
   transition: opacity 0.3s ease-in-out; 
 }
-
-.stats-subtitle.visible {
-  opacity: 1;                
-}
-
 
 /* ======================
    PR TOAST
