@@ -6,10 +6,16 @@ const supabase = createClient(
 );
 
 document.getElementById("signup-btn").onclick = async () => {
-  const email = document.getElementById("email").value;
+  const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
   const msg = document.getElementById("signup-msg");
+
+  if (!email || !password) {
+    msg.textContent = "Ingresa email y contraseña.";
+    return;
+  }
+
   msg.textContent = "Creando cuenta...";
 
   const { error } = await supabase.auth.signUp({ email, password });
