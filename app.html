@@ -139,47 +139,41 @@
       <!-- ================= STATS ================= -->
       <section id="stats" class="tab-content screen hidden">
         <div class="screen-header">Estadísticas</div>
-
+      
         <div class="screen-content">
-
+      
+          <!-- KPIs -->
+          <div class="kpi-grid">
+            <div id="kpi-volume" class="kpi-card"></div>
+            <div id="kpi-prs" class="kpi-card"></div>
+            <div id="kpi-sessions" class="kpi-card"></div>
+          </div>
+      
           <div class="card">
             <label>Mesociclo</label>
             <select id="stats-mesocycle">
               <option value="">Todos</option>
             </select>
           </div>
-
-          <div id="stats-summary" class="stats-grid"></div>
-
-          <h3>Progreso de fuerza</h3>
+      
+          <h3>Evolución de fuerza</h3>
           <canvas id="strength-chart"></canvas>
-
+      
+          <h3>Fuerza promedio por ejercicio</h3>
+          <div id="strength-trends" class="strength-list"></div>
+      
           <h3>Volumen por ejercicio</h3>
           <div id="exercise-volume-list"></div>
-
+      
           <h3>Mejores marcas</h3>
           <div id="pr-table"></div>
-
+      
           <h3>Comparación de mesociclos</h3>
           <div id="mesocycle-comparison"></div>
-
+      
         </div>
       </section>
 
-      <section id="stats-dashboard" class="dashboard">
-       <div class="kpi-grid">
-         <div id="kpi-volume" class="kpi-card"></div>
-         <div id="kpi-prs" class="kpi-card"></div>
-         <div id="kpi-sessions" class="kpi-card"></div>
-       </div>
-      
-       <div class="chart-card">
-         <h3>Evolución de fuerza</h3>
-         <canvas id="strengthChart"></canvas>
-       </div>
-       <h3>Fuerza promedio por ejercicio</h3>
-        <div id="strength-trends" class="strength-list"></div>
-      </section>
       
     </main>
 
