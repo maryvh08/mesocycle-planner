@@ -359,9 +359,15 @@ section {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .pr-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .pr-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -571,26 +577,25 @@ section {
 
 .pr-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 0.8rem;
 }
 
 .pr-row {
-  padding: 0.8rem 0.9rem;
+  padding: 0.5rem 0.6rem;  /* antes era 0.8 / 0.9 */
   border-radius: 14px;
 }
 
 .pr-row strong {
-  font-size: 0.8rem;
-  line-height: 1.2;
+  font-size: 0.75rem;  /* antes 0.8 */
 }
 
 .pr-row span {
-  font-size: 1.25rem;
+  font-size: 1.1rem;   /* antes 1.25 */
 }
 
 .pr-row small {
-  font-size: 0.65rem;
+  font-size: 0.6rem;   /* antes 0.65 */
 }
 
 .pr-row::before {
