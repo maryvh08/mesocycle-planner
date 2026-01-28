@@ -25,20 +25,27 @@ document.getElementById("signup-btn").onclick = async () => {
   }, 1000);
 };
 
+// Crée un nouvel IntersectionObserver
 const observer = new IntersectionObserver(
-  entries => {
+  (entries, observer) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
+        // Ajoute la classe "visible" quand l'élément apparaît
         entry.target.classList.add("visible");
+        // Arrête d'observer cet élément
         observer.unobserve(entry.target);
       }
     });
   },
   {
-    threshold: 0.15
+    threshold: 0.15 // Déclenchement quand 15% de l'élément est visible
   }
 );
 
-document.querySelectorAll(".fade-up, .fade-in").forEach(el => {
-  observer.observe(el);
-});
+// Sélectionne tous les éléments à observer
+const elements = document.querySelectorAll(".fade-up, .fade-in");
+
+// Vérifie que des éléments existent avant d'observer
+if (elements.length) {
+  elements.forEach(el => observer.observe(el));
+}
