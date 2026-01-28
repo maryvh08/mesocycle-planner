@@ -2,22 +2,21 @@
    VARIABLES DE COLOR
 ====================== */
 :root {
-  --bg: #0b0b0d;
-  --bg-card: #141418;
-  --bg-soft: #1b1b22;
+  --bg: #050507;
+  --bg-card: #120b0f;
+  --bg-soft: #1a0f13;
 
-  --red: #e10600;
-  --red-soft: #b80000;
-  --red-glow: #ff3b30;
+  --accent: #b11226;        /* sangre oscura */
+  --accent-soft: #8e0e1f;
+  --accent-light: #ff3b3b;
+  --accent-glow: rgba(177,18,38,.45);
 
-  --accent: #b11226;
-
-  --text-main: #f5f5f5;
-  --text-muted: #9a9a9a;
+  --text-main: #f2e9ec;
+  --text-muted: #9a8a8f;
 
   --spacing: 16px;
   --radius: 14px;
-  --shadow: 0 20px 50px rgba(0,0,0,.6);
+  --shadow: 0 20px 50px rgba(0,0,0,.7);
 }
 
 /* ======================
@@ -125,8 +124,8 @@ section {
 .loader {
   width: 28px;
   height: 28px;
-  border: 3px solid rgba(255,255,255,.2);
-  border-top-color: #7c8cff;
+  border: 3px solid rgba(255,255,255,.15);
+  border-top-color: var(--accent-light);
   border-radius: 50%;
   animation: spin .8s linear infinite;
   margin: 1rem auto;
@@ -155,8 +154,9 @@ section {
 }
 
 .tab-btn.active {
-  background: linear-gradient(135deg, var(--red), var(--red-soft));
+  background: linear-gradient(135deg, var(--accent), var(--accent-soft));
   color: white;
+  box-shadow: 0 0 20px var(--accent-glow);
 }
 
 .tab-content {
@@ -235,8 +235,8 @@ section {
 }
 
 .day-buttons button.active {
-  background: linear-gradient(135deg, var(--red), var(--red-glow));
-  box-shadow: 0 0 20px rgba(255,50,50,.6);
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  box-shadow: 0 0 25px var(--accent-glow);
 }
 
 /* ======================
@@ -469,4 +469,18 @@ section {
   margin-top: 0.75rem;
   color: #ff4d4d;
   text-align: center;
+}
+
+/* ======================
+   DETALLES FINOS
+====================== */
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 15px rgba(177,18,38,.25); }
+  50% { box-shadow: 0 0 30px rgba(177,18,38,.45); }
+  100% { box-shadow: 0 0 15px rgba(177,18,38,.25); }
+}
+
+.pr-toast.show {
+  animation: pulse 2.5s infinite;
 }
