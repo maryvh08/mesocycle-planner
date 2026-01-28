@@ -1255,20 +1255,22 @@ async function loadStrengthChart(mesocycleId = null) {
 
   // Verificar si hay datos suficientes
   if (!data || data.length < 2) {
-    // Ocultar gráfico
-    const ctx = document.getElementById("strength-chart");
-    if (ctx) ctx.style.display = "none";
-
-    // Mostrar badge
-    if (noDataBadge) noDataBadge.classList.remove("hidden");
-    return;
-  }
-
-  // Mostrar gráfico y ocultar badge
-  const ctx = document.getElementById("strength-chart");
-  if (!ctx) return;
-  ctx.style.display = "block";
-  if (noDataBadge) noDataBadge.classList.add("hidden");
+     // Ocultar gráfico
+     const ctx = document.getElementById("strength-chart");
+     if (ctx) ctx.style.display = "none";
+   
+     // Mostrar badge
+     const noDataBadge = document.getElementById("no-data-badge");
+     if (noDataBadge) noDataBadge.classList.remove("hidden");
+   
+     return;
+   }
+   
+   // Mostrar gráfico y ocultar badge
+   const ctx = document.getElementById("strength-chart");
+   ctx.style.display = "block";
+   const noDataBadge = document.getElementById("no-data-badge");
+   if (noDataBadge) noDataBadge.classList.add("hidden");
 
   const labels = data.map(r => r.day);
   const values = data.map(r => r.total_volume);
