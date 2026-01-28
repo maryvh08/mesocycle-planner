@@ -954,11 +954,12 @@ function renderStatsView() {
    loadMesocycleComparison();
    loadSessionsKPI();
    loadVolumeKPI();
-   updateStatsMesocycleLabel();
 
   // 🔥 Filtro por mesociclo
   document.getElementById("stats-mesocycle").onchange = e => {
      const mesocycleId = e.target.value || null;
+   
+     updateStatsMesocycleLabel(); // 👈 NUEVO
    
      loadStatsOverview(mesocycleId);
      loadPRTable(mesocycleId);
