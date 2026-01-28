@@ -910,6 +910,71 @@ function renderKPIs(stats) {
   `;
 }
 
+async function loadVolumeKPI(mesocycleId) {
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select("weight, reps")
+    .eq("user_id", user.id)
+    .eq("mesocycle_id", mesocycleId);
+
+  if (error) {
+    console.error("❌ Error volumen", error);
+    return;
+  }
+
+  const totalVolume = data.reduce(
+    (sum, r) => sum + (r.weight || 0) * (r.reps || 0),
+    0
+  );
+
+  document.getElementById("kpi-volume").innerHTML = `
+    <h4>Volumen total</h4>
+    <strong>${Math.round(totalVolume).toLocaleString()} kg</strong>
+    <span class="kpi-sub">Mesociclo</span>
+  `;
+}
+
+async function loadPRsKPI(mesocycleId) {
+  const { data, error } = await supabase
+    .from("mesocycle_prs")
+    .select("pr_count")
+    .eq("user_id", user.id)
+    .eq("mesocycle_id", mesocycleId)
+    .single();
+
+  const prs = data?.pr_count || 0;
+
+  document.getElementById("kpi-prs").innerHTML = `
+    <h4>PRs</h4>
+    <strong>${prs}</strong>
+    <span class="kpi-sub">Récords personales</span>
+  `;
+}
+
+async function loadSessionsKPI(mesocycleId) {
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select("week_number, day_number")
+    .eq("user_id", user.id)
+    .eq("mesocycle_id", mesocycleId);
+
+  if (error) {
+    console.error("❌ Error sesiones", error);
+    return;
+  }
+
+  const sessions = new Set(
+    data.map(r => `${r.week_number}-${r.day_number}`)
+  );
+
+  document.getElementById("kpi-sessions").innerHTML = `
+    <h4>Sesiones</h4>
+    <strong>${sessions.size}</strong>
+    <span class="kpi-sub">Entrenamientos realizados</span>
+  `;
+}
+
+
 async function loadMesocycleComparison() {
   const container = document.getElementById("mesocycle-comparison");
   if (!container) {
