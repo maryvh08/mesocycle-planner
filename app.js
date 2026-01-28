@@ -1228,8 +1228,11 @@ async function loadStrengthChart(mesocycleId = null, exerciseName = "") {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  // Actualizar etiqueta del ejercicio
   const exerciseLabel = document.getElementById("strength-exercise-label");
+  const noDataBadge = document.getElementById("no-data-badge");
+  const ctx = document.getElementById("strength-chart");
+
+  // Reset labels
   if (exerciseLabel) {
     if (exerciseName) {
       exerciseLabel.textContent = exerciseName;
@@ -1239,21 +1242,17 @@ async function loadStrengthChart(mesocycleId = null, exerciseName = "") {
       exerciseLabel.classList.add("hidden");
     }
   }
-
-  // Badge para "no hay datos"
-  const noDataBadge = document.getElementById("no-data-badge");
   if (noDataBadge) noDataBadge.classList.add("hidden");
+  if (ctx) ctx.style.display = "block"; // mostrar canvas por defecto
 
-  // Construir consulta
+  // Consultar datos
   let query = supabase
     .from("exercise_progress_chart")
     .select("day, total_volume")
     .eq("user_id", user.id)
     .order("day", { ascending: true });
 
-  if (mesocycleId) {
-    query = query.eq("mesocycle_id", mesocycleId);
-  }
+  if (mesocycleId) query = query.eq("mesocycle_id", mesocycleId);
 
   const { data, error } = await query;
   if (error) {
@@ -1261,67 +1260,43 @@ async function loadStrengthChart(mesocycleId = null, exerciseName = "") {
     return;
   }
 
-  const ctx = document.getElementById("strength-chart");
-  if (!ctx) return;
-
-  // Verificar datos suficientes
+  // Si hay menos de 2 sets, mostrar badge y ocultar gráfico
   if (!data || data.length < 2) {
-    // Ocultar gráfica
-    ctx.style.display = "none";
-
-    // Mostrar badge
+    if (ctx) ctx.style.display = "none";
     if (noDataBadge) noDataBadge.classList.remove("hidden");
-
     return;
   }
-
-  // Mostrar gráfica y ocultar badge
-  ctx.style.display = "block";
-  if (noDataBadge) noDataBadge.classList.add("hidden");
 
   // Preparar datos
   const labels = data.map(r => r.day);
   const values = data.map(r => r.total_volume);
 
-  // Destruir gráfico previo si existe
-  if (window.statsChart) {
-    window.statsChart.destroy();
-  }
+  // Destruir gráfico previo
+  if (window.statsChart) window.statsChart.destroy();
 
   // Crear gráfico
   window.statsChart = new Chart(ctx, {
     type: "line",
     data: {
       labels,
-      datasets: [
-        {
-          label: "Volumen total",
-          data: values,
-          tension: 0.35,
-          fill: true,
-          borderColor: "#b11226",
-          backgroundColor: "rgba(177,18,38,0.25)",
-          pointBackgroundColor: "#ff3b3b",
-          pointBorderColor: "#120b0f",
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          borderWidth: 2
-        }
-      ]
+      datasets: [{
+        label: "Volumen total",
+        data: values,
+        tension: 0.35,
+        fill: true,
+        borderColor: "#b11226",
+        backgroundColor: "rgba(177,18,38,0.25)",
+        pointBackgroundColor: "#ff3b3b",
+        pointBorderColor: "#120b0f",
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        borderWidth: 2
+      }]
     },
     options: {
       responsive: true,
-      plugins: {
-        legend: {
-          display: true,
-          position: "top"
-        },
-      },
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
+      plugins: { legend: { display: true, position: "top" } },
+      scales: { y: { beginAtZero: true } }
     }
   });
 }
