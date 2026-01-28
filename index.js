@@ -49,6 +49,21 @@ document.getElementById("reset-btn").onclick = async () => {
   msg.textContent = "📧 Revisa tu email para continuar";
 };
 
+document.getElementById("update-btn").onclick = async () => {
+  const password = document.getElementById("new-password").value;
+  const msg = document.getElementById("update-msg");
+
+  const { error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    msg.textContent = error.message;
+    return;
+  }
+
+  msg.textContent = "✅ Contraseña actualizada";
+  setTimeout(() => location.href = "app.html", 1500);
+};
+
 const observer = new IntersectionObserver(
   (entries, observer) => {
     entries.forEach(entry => {
