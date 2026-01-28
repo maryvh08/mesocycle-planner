@@ -1210,6 +1210,12 @@ function showPRBadge(exercise, weight) {
 async function loadStrengthChart(mesocycleId = null) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
+   
+   const label = document.getElementById("strength-exercise-label");
+   if (label) {
+     label.textContent = "";
+     label.classList.add("hidden");
+   }
 
   let query = supabase
     .from("exercise_progress_chart")
@@ -1306,6 +1312,12 @@ async function loadExerciseVolumeList(mesocycleId = null) {
 async function loadExerciseProgress(exerciseName) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
+
+   const label = document.getElementById("strength-exercise-label");
+   if (label) {
+     label.textContent = exerciseName;
+     label.classList.remove("hidden");
+   }
 
   const { data, error } = await supabase
     .from("exercise_progress_chart")
