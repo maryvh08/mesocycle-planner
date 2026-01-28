@@ -681,6 +681,26 @@ async function renderRegistroEditor(mesocycleId) {
   console.log("✅ RegistroEditor listo y blindado");
 }
 
+async function loadStrengthTrends(mesocycleId) {
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select(`
+      exercise_id,
+      exercise_name,
+      weight,
+      week_number
+    `)
+    .eq("user_id", user.id)
+    .eq("mesocycle_id", mesocycleId)
+    .not("weight", "is", null);
+
+  if (error) {
+    console.error("❌ Error fuerza", error);
+    return;
+  }
+
+  processStrengthData(data);
+}
 
 /* ======================
    RENDER EJERCICIOS DÍA
