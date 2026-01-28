@@ -490,3 +490,40 @@ section {
 .pr-toast.show {
   animation: pulse 2.5s infinite;
 }
+
+/* ======================
+   KPIs
+====================== */
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  background: #141418;
+  border-radius: 16px;
+  padding: 1.4rem;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,.3);
+}
+
+.kpi-card h4 {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin-bottom: 0.4rem;
+}
+
+.kpi-card strong {
+  font-size: 2rem;
+  color: #ff3b3b;
+}
+
+.kpi-sub {
+  display: block;
+  font-size: 0.7rem;
+  opacity: 0.5;
+}
+
