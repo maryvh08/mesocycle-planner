@@ -1404,15 +1404,33 @@ async function loadStatsMesocycles() {
   }
 
   const select = document.getElementById("stats-mesocycle");
-  select.innerHTML = `<option value="">Selecciona mesociclo</option>`;
+  const statsMesocycleLabel = document.getElementById('stats-mesocycle-label');
 
+  // Limpiar opciones y agregar opción por defecto
+  select.innerHTML = `<option value="">Todos los mesociclos</option>`;
+
+  // Llenar select con mesociclos del usuario
   data.forEach(m => {
     const opt = document.createElement("option");
-    opt.value = m.id;
+    opt.value = m.name;  // usar el nombre para mostrarlo
     opt.textContent = m.name;
     select.appendChild(opt);
-   const select = document.getElementById("stats-mesocycle");
   });
+
+  // Listener para actualizar el subtítulo
+  select.addEventListener('change', () => {
+    const selected = select.value;
+    statsMesocycleLabel.textContent = selected ? selected : 'Todos los mesociclos';
+
+    // efecto fade opcional
+    statsMesocycleLabel.classList.remove('visible');  // reinicia animación
+    void statsMesocycleLabel.offsetWidth;             // trigger reflow
+    statsMesocycleLabel.classList.add('visible');    // fade in
+  });
+
+  // Inicialmente mostrar "Todos los mesociclos"
+  statsMesocycleLabel.textContent = 'Todos los mesociclos';
+  statsMesocycleLabel.classList.add('visible');
 }
 
 function getCoachInsight(trend) {
