@@ -1417,20 +1417,6 @@ async function loadStatsMesocycles() {
     select.appendChild(opt);
   });
 
-  // Listener para actualizar el subtítulo
-  select.addEventListener('change', () => {
-    const selected = select.value;
-    statsMesocycleLabel.textContent = selected ? selected : 'Todos los mesociclos';
-
-    // efecto fade opcional
-    statsMesocycleLabel.classList.remove('visible');  // reinicia animación
-    void statsMesocycleLabel.offsetWidth;             // trigger reflow
-    statsMesocycleLabel.classList.add('visible');    // fade in
-  });
-
-  // Inicialmente mostrar "Todos los mesociclos"
-  statsMesocycleLabel.textContent = 'Todos los mesociclos';
-  statsMesocycleLabel.classList.add('visible');
 }
 
 function getCoachInsight(trend) {
