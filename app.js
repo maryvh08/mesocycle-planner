@@ -1412,7 +1412,17 @@ async function loadStatsMesocycles() {
     opt.textContent = m.name;
     select.appendChild(opt);
 
-   const label = document.getElementById("stats-mesocycle-label");
+   const statsMesocycleLabel = document.getElementById('stats-mesocycle-label');
+   
+   statsMesocycleSelect.addEventListener('change', () => {
+     const selected = statsMesocycleSelect.value;
+     statsMesocycleLabel.textContent = selected ? selected : 'Todos los mesociclos';
+   
+     // activar efecto de fade
+     statsMesocycleLabel.classList.remove('visible');  // reinicia animación
+     void statsMesocycleLabel.offsetWidth;             // trigger reflow
+     statsMesocycleLabel.classList.add('visible');    // fade in
+   });
   });
 }
 
