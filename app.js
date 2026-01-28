@@ -1391,15 +1391,12 @@ async function loadExerciseProgress(exerciseName) {
   const backBtn = document.getElementById("back-to-general");
   const ctx = document.getElementById("strength-chart");
 
-  // Mostrar el nombre del ejercicio y el botón de volver
+  // Mostrar nombre del ejercicio y el botón de volver
   if (exerciseLabel) {
     exerciseLabel.textContent = exerciseName;
     exerciseLabel.classList.remove("hidden");
   }
-  if (backBtn) {
-    backBtn.classList.remove("hidden");
-    backBtn.classList.add("visible");
-  }
+  if (backBtn) backBtn.classList.remove("hidden");
 
   // Traer datos del ejercicio
   const { data, error } = await supabase
@@ -1409,15 +1406,20 @@ async function loadExerciseProgress(exerciseName) {
     .eq("exercise_name", exerciseName)
     .order("day");
 
+  // Si hay error o no hay datos
   if (error || !data.length) {
-    console.warn("Sin datos", error);
-    if (exerciseLabel) exerciseLabel.classList.add("hidden");
-    if (backBtn) {
-      backBtn.classList.remove("visible");
-      backBtn.classList.add("hidden");
-    }
+    showExerciseWarning("No se tienen suficientes datos para graficar");
     return;
   }
+
+  // Si hay menos de 2 registros, mostrar advertencia y no graficar
+  if (data.length < 2) {
+    showExerciseWarning("No se tienen suficientes datos para graficar");
+    return;
+  }
+
+  // Limpiar cualquier mensaje previo
+  hideExerciseWarning();
 
   const labels = data.map(d => d.day);
   const weights = data.map(d => d.max_weight);
@@ -1445,7 +1447,7 @@ async function loadExerciseProgress(exerciseName) {
           data: volumes,
           tension: 0.3,
           yAxisID: "y1",
-          borderColor: "white",
+          borderColor: "#120b0f",
           backgroundColor: "rgba(0,0,0,0.1)"
         }
       ]
@@ -1463,6 +1465,37 @@ async function loadExerciseProgress(exerciseName) {
       }
     }
   });
+}
+
+/* ================= BADGE FUNCIONES ================= */
+function showExerciseWarning(message) {
+  const exerciseLabel = document.getElementById("strength-exercise-label");
+  const backBtn = document.getElementById("back-to-general");
+  const ctx = document.getElementById("strength-chart");
+
+  // Ocultar gráfico
+  if (ctx) ctx.style.display = "none";
+
+  // Mostrar mensaje de advertencia
+  if (exerciseLabel) {
+    exerciseLabel.textContent = message;
+    exerciseLabel.classList.remove("hidden");
+    exerciseLabel.classList.add("warning"); // puedes agregar estilo rojo
+  }
+
+  // Mantener botón de volver visible
+  if (backBtn) backBtn.classList.remove("hidden");
+}
+
+function hideExerciseWarning() {
+  const exerciseLabel = document.getElementById("strength-exercise-label");
+  const ctx = document.getElementById("strength-chart");
+
+  if (exerciseLabel) {
+    exerciseLabel.classList.remove("warning");
+  }
+
+  if (ctx) ctx.style.display = "block";
 }
 
 async function loadStatsMesocycles() {
