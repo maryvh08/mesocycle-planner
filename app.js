@@ -853,19 +853,19 @@ function renderStatsView() {
   loadStrengthChart();
   loadExerciseVolumeList();
   loadMesocycleComparison();
-  loadVolumeKPI();
-  loadPRsKPI();
-  loadSessionsKPI();
-  loadStrengthTrends();
 
   // 🔥 Filtro por mesociclo
   document.getElementById("stats-mesocycle").onchange = e => {
     const mesocycleId = e.target.value || null;
 
-    loadStatsOverview(mesocycleId);
-    loadPRTable(mesocycleId);
-    loadStrengthChart(mesocycleId);
-    loadExerciseVolumeList(mesocycleId);
+      loadStatsOverview(mesocycleId);
+      loadPRTable(mesocycleId);
+      loadStrengthChart(mesocycleId);
+      loadExerciseVolumeList(mesocycleId);
+      loadVolumeKPI(mesocycleId); 
+      loadPRsKPI(mesocycleId
+      loadSessionsKPI(mesocycleId);
+      loadStrengthTrends(mesocycleId);
   };
 }
 
@@ -994,6 +994,10 @@ async function loadVolumeKPI(mesocycleId) {
    const {
      data: { user }
    } = await supabase.auth.getUser();
+
+   if (mesocycleId) {
+     query = query.eq("mesocycle_id", mesocycleId);
+   }
    
   const { data, error } = await supabase
     .from("exercise_records")
@@ -1022,6 +1026,10 @@ async function loadPRsKPI(mesocycleId) {
    const {
      data: { user }
    } = await supabase.auth.getUser();
+
+   if (mesocycleId) {
+     query = query.eq("mesocycle_id", mesocycleId);
+   }
    
   const { data, error } = await supabase
     .from("mesocycle_prs")
@@ -1043,6 +1051,10 @@ async function loadSessionsKPI(mesocycleId) {
    const {
      data: { user }
    } = await supabase.auth.getUser();
+
+   if (mesocycleId) {
+     query = query.eq("mesocycle_id", mesocycleId);
+   }
    
   const { data, error } = await supabase
     .from("exercise_records")
@@ -1073,6 +1085,10 @@ async function loadMesocycleComparison() {
     console.warn("⏳ mesocycle-comparison aún no está en el DOM");
     return;
   }
+
+   if (mesocycleId) {
+     query = query.eq("mesocycle_id", mesocycleId);
+   }
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
