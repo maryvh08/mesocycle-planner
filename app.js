@@ -1224,19 +1224,27 @@ function showPRBadge(exercise, weight) {
   setTimeout(() => badge.remove(), 3500);
 }
 
-async function loadStrengthChart(mesocycleId = null) {
+async function loadStrengthChart(mesocycleId = null, exerciseName = "") {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
-   
-  const label = document.getElementById("strength-exercise-label");
-  if (label) {
-    label.textContent = "";
-    label.classList.add("hidden");
+
+  // Actualizar etiqueta del ejercicio
+  const exerciseLabel = document.getElementById("strength-exercise-label");
+  if (exerciseLabel) {
+    if (exerciseName) {
+      exerciseLabel.textContent = exerciseName;
+      exerciseLabel.classList.remove("hidden");
+    } else {
+      exerciseLabel.textContent = "";
+      exerciseLabel.classList.add("hidden");
+    }
   }
 
+  // Badge para "no hay datos"
   const noDataBadge = document.getElementById("no-data-badge");
-  if (noDataBadge) noDataBadge.classList.add("hidden"); // ocultar badge inicialmente
+  if (noDataBadge) noDataBadge.classList.add("hidden");
 
+  // Construir consulta
   let query = supabase
     .from("exercise_progress_chart")
     .select("day, total_volume")
@@ -1253,30 +1261,34 @@ async function loadStrengthChart(mesocycleId = null) {
     return;
   }
 
-  // Verificar si hay datos suficientes
+  const ctx = document.getElementById("strength-chart");
+  if (!ctx) return;
+
+  // Verificar datos suficientes
   if (!data || data.length < 2) {
-    // Ocultar gráfico
-    const ctx = document.getElementById("strength-chart");
-    if (ctx) ctx.style.display = "none";
+    // Ocultar gráfica
+    ctx.style.display = "none";
 
     // Mostrar badge
     if (noDataBadge) noDataBadge.classList.remove("hidden");
+
     return;
   }
 
-  // Mostrar gráfico y ocultar badge
-  const ctx = document.getElementById("strength-chart");
-  if (!ctx) return;
+  // Mostrar gráfica y ocultar badge
   ctx.style.display = "block";
   if (noDataBadge) noDataBadge.classList.add("hidden");
 
+  // Preparar datos
   const labels = data.map(r => r.day);
   const values = data.map(r => r.total_volume);
 
+  // Destruir gráfico previo si existe
   if (window.statsChart) {
     window.statsChart.destroy();
   }
 
+  // Crear gráfico
   window.statsChart = new Chart(ctx, {
     type: "line",
     data: {
@@ -1298,7 +1310,18 @@ async function loadStrengthChart(mesocycleId = null) {
       ]
     },
     options: {
-      responsive: true
+      responsive: true,
+      plugins: {
+        legend: {
+          display: true,
+          position: "top"
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
     }
   });
 }
