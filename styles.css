@@ -566,6 +566,16 @@ section {
   border-radius: 12px;
 }
 
+.strength-row.clickable {
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.strength-row.clickable:hover {
+  background: #1b1b22;
+  transform: translateY(-2px);
+}
+
 .exercise {
   font-weight: 500;
 }
