@@ -1404,19 +1404,14 @@ async function loadStatsMesocycles() {
   }
 
   const select = document.getElementById("stats-mesocycle");
-  const statsMesocycleLabel = document.getElementById('stats-mesocycle-label');
+  select.innerHTML = `<option value="">Selecciona mesociclo</option>`;
 
-  // Limpiar opciones y agregar opción por defecto
-  select.innerHTML = `<option value="">Todos los mesociclos</option>`;
-
-  // Llenar select con mesociclos del usuario
   data.forEach(m => {
     const opt = document.createElement("option");
-    opt.value = m.name;  // usar el nombre para mostrarlo
+    opt.value = m.id;
     opt.textContent = m.name;
     select.appendChild(opt);
   });
-
 }
 
 function getCoachInsight(trend) {
