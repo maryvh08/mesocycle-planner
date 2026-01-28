@@ -384,6 +384,20 @@ section {
   transition: opacity 0.3s ease-in-out; 
 }
 
+#no-data-badge {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  background-color: #f8d7da; /* rojo suave */
+  color: #721c24;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+#no-data-badge.hidden {
+  display: none;
+}
+
 /* ======================
    PR TOAST
 ====================== */
