@@ -854,7 +854,13 @@ function renderMiniChart(name, data, start, end) {
 }
 
 function closeModal() {
-  document.getElementById("exercise-modal").classList.add("hidden");
+  const modal = document.getElementById("exercise-modal");
+  modal.classList.add("hidden");
+
+  if (window.miniChart) {
+    window.miniChart.destroy();
+    window.miniChart = null;
+  }
 }
 
 /* ======================
@@ -1457,3 +1463,10 @@ document.addEventListener("click", e => {
 
 document.getElementById("close-modal-btn")
   .addEventListener("click", closeModal);
+
+document.getElementById("exercise-modal")
+  .addEventListener("click", e => {
+    if (e.target.id === "exercise-modal") {
+      closeModal();
+    }
+  });
