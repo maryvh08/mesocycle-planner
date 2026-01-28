@@ -56,6 +56,17 @@ body.human {
   display: none !important;
 }
 
+.separator {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--accent),
+    transparent
+  );
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+
 /* ======================
    TIPOGRAFÍA
 ====================== */
