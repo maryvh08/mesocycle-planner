@@ -840,44 +840,6 @@ function renderStatsView() {
   const statsView = document.getElementById("stats");
   if (!statsView) return;
 
-  statsView.innerHTML = `
-    <h2>Estadísticas</h2>
-
-    <div class="stats-control">
-      <label>Mesociclo</label>
-      <select id="stats-mesocycle">
-        <option value="">Todos</option>
-      </select>
-    </div>
-
-    <div id="stats-summary" class="stats-grid">
-      <div class="stat-card">
-        <strong id="total-sets">–</strong>
-        <span>Series totales</span>
-      </div>
-      <div class="stat-card">
-        <strong id="total-volume">–</strong>
-        <span>Volumen total (kg)</span>
-      </div>
-      <div class="stat-card">
-        <strong id="total-exercises">–</strong>
-        <span>Ejercicios únicos</span>
-      </div>
-    </div>
-      
-      <h3>Progreso de fuerza</h3>
-      <canvas id="strength-chart"></canvas>
-      
-      <h3>Volumen por ejercicio</h3>
-      <div id="exercise-volume-list"></div>
-
-      <h3>Mejores marcas</h3>
-      <div id="pr-table" class="pr-table"></div>
-      
-      <h3>Comparación de mesociclos</h3>
-      <div id="mesocycle-comparison"></div>     
-  `;
-
   // 🔥 Primero cargar mesociclos
   loadStatsMesocycles();
 
@@ -886,7 +848,11 @@ function renderStatsView() {
   loadPRTable();
   loadStrengthChart();
   loadExerciseVolumeList();
-   loadMesocycleComparison();
+  loadMesocycleComparison();
+  loadVolumeKPI();
+  loadPRsKPI();
+  loadSessionsKPI();
+  loadStrengthTrends();
 
   // 🔥 Filtro por mesociclo
   document.getElementById("stats-mesocycle").onchange = e => {
