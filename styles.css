@@ -374,6 +374,13 @@ section {
   color: var(--text-muted);
 }
 
+.stats-subtitle {
+  margin-top: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
 /* ======================
    PR TOAST
 ====================== */
