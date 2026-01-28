@@ -1089,10 +1089,6 @@ async function loadMesocycleComparison() {
     return;
   }
 
-   if (mesocycleId) {
-     query = query.eq("mesocycle_id", mesocycleId);
-   }
-
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
