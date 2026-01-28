@@ -682,6 +682,10 @@ async function renderRegistroEditor(mesocycleId) {
 }
 
 async function loadStrengthTrends(mesocycleId) {
+   const {
+     data: { user }
+   } = await supabase.auth.getUser();
+   
   const { data, error } = await supabase
     .from("exercise_records")
     .select(`
@@ -987,6 +991,10 @@ async function getActiveMesocycle() {
 }
 
 async function loadVolumeKPI(mesocycleId) {
+   const {
+     data: { user }
+   } = await supabase.auth.getUser();
+   
   const { data, error } = await supabase
     .from("exercise_records")
     .select("weight, reps")
@@ -1011,6 +1019,10 @@ async function loadVolumeKPI(mesocycleId) {
 }
 
 async function loadPRsKPI(mesocycleId) {
+   const {
+     data: { user }
+   } = await supabase.auth.getUser();
+   
   const { data, error } = await supabase
     .from("mesocycle_prs")
     .select("pr_count")
@@ -1028,6 +1040,10 @@ async function loadPRsKPI(mesocycleId) {
 }
 
 async function loadSessionsKPI(mesocycleId) {
+   const {
+     data: { user }
+   } = await supabase.auth.getUser();
+   
   const { data, error } = await supabase
     .from("exercise_records")
     .select("week_number, day_number")
