@@ -871,11 +871,20 @@ function renderStatsView() {
       <h3>Volumen por ejercicio</h3>
       <div id="exercise-volume-list"></div>
 
+      <div class="kpi-grid">
+        <div id="kpi-volume" class="kpi-card"></div>
+        <div id="kpi-prs" class="kpi-card"></div>
+        <div id="kpi-sessions" class="kpi-card"></div>
+      </div>
+
       <h3>Mejores marcas</h3>
       <div id="pr-table" class="pr-table"></div>
       
       <h3>Comparación de mesociclos</h3>
       <div id="mesocycle-comparison"></div>
+
+      <h3>Fuerza promedio por ejercicio</h3>
+      <div id="strength-trends" class="strength-list"></div>
   `;
 
   // 🔥 Primero cargar mesociclos
