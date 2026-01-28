@@ -988,7 +988,7 @@ async function loadStrengthChart(mesocycleId = null) {
     .from("exercise_progress_chart")
     .select("day, total_volume")
     .eq("user_id", user.id)
-    .order("day");
+    .order("day", { ascending: true });
 
   if (mesocycleId) {
     query = query.eq("mesocycle_id", mesocycleId);
@@ -1000,32 +1000,39 @@ async function loadStrengthChart(mesocycleId = null) {
     return;
   }
 
+  if (!data || data.length === 0) return;
+
   const labels = data.map(r => r.day);
   const values = data.map(r => r.total_volume);
 
   const ctx = document.getElementById("strength-chart");
   if (!ctx) return;
 
-  if (window.statsChart) window.statsChart.destroy();
+  if (window.statsChart) {
+    window.statsChart.destroy();
+  }
 
   window.statsChart = new Chart(ctx, {
-  type: "line",
-  data: {
-    labels,
-    datasets: [{
-      label: "Volumen total",
-      data: values,
-      tension: 0.35,
-      fill: true,
-      borderColor: "#b11226",
-      backgroundColor: "rgba(177,18,38,0.25)",
-      pointBackgroundColor: "#ff3b3b",
-      pointBorderColor: "#120b0f",
-      pointRadius: 4,
-      pointHoverRadius: 6,
-      borderWidth: 2
-    }]
-  }}),
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Volumen total",
+          data: values,
+          tension: 0.35,
+          fill: true,
+          borderColor: "#b11226",
+          backgroundColor: "rgba(177,18,38,0.25)",
+          pointBackgroundColor: "#ff3b3b",
+          pointBorderColor: "#120b0f",
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          borderWidth: 2
+        }
+      ]
+    }
+  });
 }
 
 async function loadExerciseVolumeList(mesocycleId = null) {
