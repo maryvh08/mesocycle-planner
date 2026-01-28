@@ -1454,3 +1454,6 @@ document.addEventListener("click", e => {
 
   openExerciseChart(exercise, start, end);
 });
+
+document.getElementById("close-modal-btn")
+  .addEventListener("click", closeModal);
