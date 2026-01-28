@@ -798,6 +798,9 @@ function renderStrengthTrends(data) {
 }
 
 async function openExerciseChart(exerciseName, start, end) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
   const { data, error } = await supabase
     .from("exercise_records")
     .select("week_number, weight")
