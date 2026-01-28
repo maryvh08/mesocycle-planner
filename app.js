@@ -1009,63 +1009,17 @@ async function loadStrengthChart(mesocycleId = null) {
   if (window.statsChart) window.statsChart.destroy();
 
   window.statsChart = new Chart(ctx, {
-     type: "line",
-     data: {
-       labels,
-       datasets: [{
-         label: "Volumen total",
-         data: values,
-         tension: 0.35,
-         fill: true,
-         borderColor: "#b11226",
-         backgroundColor: "rgba(177,18,38,0.25)",
-         pointBackgroundColor: "#ff3b3b",
-         pointBorderColor: "#120b0f",
-         pointRadius: 4,
-         pointHoverRadius: 6,
-         borderWidth: 2
-       }]
-     },
-     options: {
-       responsive: true,
-       maintainAspectRatio: false,
-       plugins: {
-         legend: {
-           labels: {
-             color: "#9a8a8f",
-             font: {
-               weight: "600"
-             }
-           }
-         },
-         tooltip: {
-           backgroundColor: "#120b0f",
-           borderColor: "#b11226",
-           borderWidth: 1,
-           titleColor: "#f2e9ec",
-           bodyColor: "#f2e9ec"
-         }
-       },
-       scales: {
-         x: {
-           ticks: {
-             color: "#8a6a72"
-           },
-           grid: {
-             color: "rgba(255,255,255,0.05)"
-           }
-         },
-         y: {
-           ticks: {
-             color: "#8a6a72"
-           },
-           grid: {
-             color: "rgba(255,255,255,0.05)"
-           }
-         }
-       }
-     }
-   });
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Volumen total",
+        data: values,
+        tension: 0.3,
+        fill: true
+      }]
+    }
+  });
 }
 
 async function loadExerciseVolumeList(mesocycleId = null) {
