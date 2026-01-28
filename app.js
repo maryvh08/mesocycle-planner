@@ -1383,3 +1383,14 @@ function getCoachInsight(trend) {
 document.addEventListener("DOMContentLoaded", () => {
   initAuth();        
 });
+
+document.addEventListener("click", e => {
+  const row = e.target.closest(".strength-row");
+  if (!row) return;
+
+  const exercise = row.dataset.exercise;
+  const start = Number(row.dataset.start);
+  const end = Number(row.dataset.end);
+
+  openExerciseChart(exercise, start, end);
+});
