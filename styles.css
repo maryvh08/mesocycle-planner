@@ -421,6 +421,16 @@ section {
   pointer-events: auto;
 }
 
+.exercise-label.warning {
+  color: #fff;
+  background-color: #e74c3c;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 1rem; /* un poco más grande que texto normal */
+  display: inline-block;
+  margin-left: 10px;
+}
+
 /* ======================
    PR TOAST
 ====================== */
