@@ -1230,16 +1230,15 @@ async function loadStrengthChart(mesocycleId = null, exerciseName = "") {
   if (!user) return;
 
   const exerciseLabel = document.getElementById("strength-exercise-label");
-  const noDataBadge = document.getElementById("no-data-badge");
   const ctx = document.getElementById("strength-chart");
   const backBtn = document.getElementById("back-to-general");
 
-  // Reset labels
+  // Configurar la etiqueta del ejercicio
   if (exerciseLabel) {
     if (exerciseName) {
       exerciseLabel.textContent = exerciseName;
       exerciseLabel.classList.remove("hidden");
-      backBtn.classList.remove("hidden"); // mostrar botón si es un ejercicio individual
+      backBtn.classList.remove("hidden"); // mostrar botón si es ejercicio individual
     } else {
       exerciseLabel.textContent = "";
       exerciseLabel.classList.add("hidden");
@@ -1247,10 +1246,7 @@ async function loadStrengthChart(mesocycleId = null, exerciseName = "") {
     }
   }
 
-  if (noDataBadge) noDataBadge.classList.add("hidden");
-  if (ctx) ctx.style.display = "block";
-
-  // Consultar datos
+  // Construir la consulta
   let query = supabase
     .from("exercise_progress_chart")
     .select("day, total_volume")
@@ -1264,14 +1260,9 @@ async function loadStrengthChart(mesocycleId = null, exerciseName = "") {
     console.error(error);
     return;
   }
+  if (!data || data.length === 0) return;
 
-  if (!data || data.length < 2) {
-    if (ctx) ctx.style.display = "none";
-    if (noDataBadge) noDataBadge.classList.remove("hidden");
-    return;
-  }
-
-  // Guardar datos generales si no hay ejercicioName (es evolución general)
+  // Guardar los datos generales si no hay ejercicioName
   if (!exerciseName) generalStrengthData = data;
 
   const labels = data.map(r => r.day);
@@ -1468,7 +1459,7 @@ document.getElementById("exercise-modal")
     }
   });
 
-// Botón para volver a evolución general
+// Botón para volver a la evolución general
 document.getElementById("back-to-general").addEventListener("click", () => {
   if (!generalStrengthData) return;
 
@@ -1503,12 +1494,9 @@ document.getElementById("back-to-general").addEventListener("click", () => {
     }
   });
 
-  // Reset labels
+  // Reset labels y botón
   const exerciseLabel = document.getElementById("strength-exercise-label");
   const backBtn = document.getElementById("back-to-general");
-  if (exerciseLabel) {
-    exerciseLabel.textContent = "";
-    exerciseLabel.classList.add("hidden");
-  }
+  if (exerciseLabel) exerciseLabel.classList.add("hidden");
   if (backBtn) backBtn.classList.add("hidden");
 });
