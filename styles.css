@@ -658,6 +658,12 @@ section {
   gap: 0.8rem;
 }
 
+#strength-trends {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
 .strength-row {
   display: grid;
   grid-template-columns: 1fr auto auto;
@@ -693,6 +699,75 @@ section {
 .trend.up { color: #4ade80; }
 .trend.down { color: #f87171; }
 .trend.flat { color: #9ca3af; }
+
+.trend-card {
+  background: linear-gradient(180deg, #1a0f13, #0b0608);
+  border-radius: 18px;
+  padding: 1.2rem 1.4rem;
+  box-shadow: 0 20px 50px rgba(0,0,0,.7);
+  border: 1px solid rgba(255,255,255,.05);
+  position: relative;
+  overflow: hidden;
+  transition: transform .2s, box-shadow .2s;
+}
+
+.trend-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 25px 60px rgba(177,18,38,.45);
+}
+
+.trend-card h4 {
+  font-size: 1rem;
+  margin-bottom: 0.6rem;
+  background: linear-gradient(90deg, #fff, var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.trend-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.trend-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+.trend-card.up .trend-value {
+  color: #4ade80;
+}
+
+.trend-card.down .trend-value {
+  color: #f87171;
+}
+
+.trend-card.flat .trend-value {
+  color: #9ca3af;
+}
+
+.trend-icon {
+  font-size: 2rem;
+  opacity: 0.15;
+}
+
+.trend-card::before {
+  content: "📊";
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 1.6rem;
+  opacity: 0.08;
+}
+
+.trend-card small {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.7rem;
+  opacity: 0.5;
+  text-transform: uppercase;
+}
 
 /* ======================
    PR TABLE – HALL OF FAME
