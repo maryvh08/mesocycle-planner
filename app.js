@@ -14,6 +14,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let selectedDaysPerWeek = null;
 let editingMesocycleId = null;
 let statsChart = null;
+let generalStrengthData = null;
 
 /* ======================
    UI ELEMENTS
@@ -1231,19 +1232,23 @@ async function loadStrengthChart(mesocycleId = null, exerciseName = "") {
   const exerciseLabel = document.getElementById("strength-exercise-label");
   const noDataBadge = document.getElementById("no-data-badge");
   const ctx = document.getElementById("strength-chart");
+  const backBtn = document.getElementById("back-to-general");
 
   // Reset labels
   if (exerciseLabel) {
     if (exerciseName) {
       exerciseLabel.textContent = exerciseName;
       exerciseLabel.classList.remove("hidden");
+      backBtn.classList.remove("hidden"); // mostrar botón si es un ejercicio individual
     } else {
       exerciseLabel.textContent = "";
       exerciseLabel.classList.add("hidden");
+      backBtn.classList.add("hidden"); // ocultar botón en gráfico general
     }
   }
+
   if (noDataBadge) noDataBadge.classList.add("hidden");
-  if (ctx) ctx.style.display = "block"; // mostrar canvas por defecto
+  if (ctx) ctx.style.display = "block";
 
   // Consultar datos
   let query = supabase
@@ -1260,21 +1265,20 @@ async function loadStrengthChart(mesocycleId = null, exerciseName = "") {
     return;
   }
 
-  // Si hay menos de 2 sets, mostrar badge y ocultar gráfico
   if (!data || data.length < 2) {
     if (ctx) ctx.style.display = "none";
     if (noDataBadge) noDataBadge.classList.remove("hidden");
     return;
   }
 
-  // Preparar datos
+  // Guardar datos generales si no hay ejercicioName (es evolución general)
+  if (!exerciseName) generalStrengthData = data;
+
   const labels = data.map(r => r.day);
   const values = data.map(r => r.total_volume);
 
-  // Destruir gráfico previo
   if (window.statsChart) window.statsChart.destroy();
 
-  // Crear gráfico
   window.statsChart = new Chart(ctx, {
     type: "line",
     data: {
@@ -1463,3 +1467,48 @@ document.getElementById("exercise-modal")
       closeModal();
     }
   });
+
+// Botón para volver a evolución general
+document.getElementById("back-to-general").addEventListener("click", () => {
+  if (!generalStrengthData) return;
+
+  const ctx = document.getElementById("strength-chart");
+  if (window.statsChart) window.statsChart.destroy();
+
+  const labels = generalStrengthData.map(r => r.day);
+  const values = generalStrengthData.map(r => r.total_volume);
+
+  window.statsChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Volumen total",
+        data: values,
+        tension: 0.35,
+        fill: true,
+        borderColor: "#b11226",
+        backgroundColor: "rgba(177,18,38,0.25)",
+        pointBackgroundColor: "#ff3b3b",
+        pointBorderColor: "#120b0f",
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: true, position: "top" } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  // Reset labels
+  const exerciseLabel = document.getElementById("strength-exercise-label");
+  const backBtn = document.getElementById("back-to-general");
+  if (exerciseLabel) {
+    exerciseLabel.textContent = "";
+    exerciseLabel.classList.add("hidden");
+  }
+  if (backBtn) backBtn.classList.add("hidden");
+});
