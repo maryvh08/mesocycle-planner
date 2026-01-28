@@ -822,26 +822,34 @@ function renderMiniChart(name, data, start, end) {
   if (window.miniChart) window.miniChart.destroy();
 
   window.miniChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: weeks.map(w => `Semana ${w}`),
-      datasets: [{
-        data: avgByWeek,
-        borderWidth: 2,
-        tension: 0.3
-      }]
-    },
-    options: {
-      plugins: {
-        tooltip: {
-          callbacks: {
-            afterBody: () => `Cambio total: ${pctChange}%`
-          }
-        },
-        legend: { display: false }
-      }
-    }
-  });
+     type: "line",
+     data: {
+       labels: weeks.map(w => `Semana ${w}`),
+       datasets: [{
+         data: avgByWeek,
+         borderWidth: 2,
+         tension: 0.3
+       }]
+     },
+     options: {
+       plugins: {
+         tooltip: {
+           callbacks: {
+             afterBody: () => `Cambio total: ${pctChange}%`
+           }
+         },
+         legend: { display: false }
+       },
+       scales: {
+         y: {
+           title: {
+             display: true,
+             text: "kg"
+           }
+         }
+       }
+     }
+   });
 }
 
 function closeModal() {
