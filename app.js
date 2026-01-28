@@ -1228,11 +1228,14 @@ async function loadStrengthChart(mesocycleId = null) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
    
-   const label = document.getElementById("strength-exercise-label");
-   if (label) {
-     label.textContent = "";
-     label.classList.add("hidden");
-   }
+  const label = document.getElementById("strength-exercise-label");
+  if (label) {
+    label.textContent = "";
+    label.classList.add("hidden");
+  }
+
+  const noDataBadge = document.getElementById("no-data-badge");
+  if (noDataBadge) noDataBadge.classList.add("hidden"); // ocultar badge inicialmente
 
   let query = supabase
     .from("exercise_progress_chart")
@@ -1250,13 +1253,25 @@ async function loadStrengthChart(mesocycleId = null) {
     return;
   }
 
-  if (!data || data.length === 0) return;
+  // Verificar si hay datos suficientes
+  if (!data || data.length < 2) {
+    // Ocultar gráfico
+    const ctx = document.getElementById("strength-chart");
+    if (ctx) ctx.style.display = "none";
+
+    // Mostrar badge
+    if (noDataBadge) noDataBadge.classList.remove("hidden");
+    return;
+  }
+
+  // Mostrar gráfico y ocultar badge
+  const ctx = document.getElementById("strength-chart");
+  if (!ctx) return;
+  ctx.style.display = "block";
+  if (noDataBadge) noDataBadge.classList.add("hidden");
 
   const labels = data.map(r => r.day);
   const values = data.map(r => r.total_volume);
-
-  const ctx = document.getElementById("strength-chart");
-  if (!ctx) return;
 
   if (window.statsChart) {
     window.statsChart.destroy();
@@ -1281,6 +1296,9 @@ async function loadStrengthChart(mesocycleId = null) {
           borderWidth: 2
         }
       ]
+    },
+    options: {
+      responsive: true
     }
   });
 }
