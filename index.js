@@ -33,6 +33,22 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 });
 
+document.getElementById("reset-btn").onclick = async () => {
+  const email = document.getElementById("reset-email").value;
+  const msg = document.getElementById("reset-msg");
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: "https://TU_USUARIO.github.io/TU_REPO/update-password.html"
+  });
+
+  if (error) {
+    msg.textContent = error.message;
+    return;
+  }
+
+  msg.textContent = "📧 Revisa tu email para continuar";
+};
+
 const observer = new IntersectionObserver(
   (entries, observer) => {
     entries.forEach(entry => {
