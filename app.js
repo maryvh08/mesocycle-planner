@@ -12,9 +12,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
    STATE
 ====================== */
 let selectedDaysPerWeek = null;
-let selectedDay = null;
 let editingMesocycleId = null;
-let allowedSubgroups = null;
 let statsChart = null;
 
 /* ======================
@@ -459,14 +457,6 @@ async function deleteMesocycle(mesocycleId) {
 
   loadMesocycles();
   registroEditor.innerHTML = "";
-}
-
-/* ======================
-   UTILIDADES
-====================== */
-function getAllowedSubgroups(emphasis) {
-  if (!emphasis || emphasis === "Todos") return null;
-  return emphasis.split(",").map(s => s.trim());
 }
 
 /* ======================
@@ -1048,48 +1038,6 @@ async function loadPRTable(mesocycleId = null) {
    `;
     container.appendChild(row);
   });
-}
-
-function renderKPIs(stats) {
-  document.getElementById("kpi-volume").innerHTML = `
-    <h4>Volumen</h4>
-    <strong>${stats.total_volume.toLocaleString()} kg</strong>
-  `;
-
-  document.getElementById("kpi-prs").innerHTML = `
-    <h4>PRs</h4>
-    <strong>${stats.pr_count}</strong>
-  `;
-}
-
-async function loadDashboardKPIs() {
-  const activeMesocycle = await getActiveMesocycle();
-  if (!activeMesocycle) return;
-
-  await Promise.all([
-    loadVolumeKPI(activeMesocycle.id),
-    loadPRsKPI(activeMesocycle.id),
-    loadSessionsKPI(activeMesocycle.id),
-  ]);
-}
-
-async function getActiveMesocycle() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  const { data, error } = await supabase
-    .from("mesocycles")
-    .select("id, name")
-    .eq("user_id", user.id)
-    .eq("is_active", true)
-    .single();
-
-  if (error) {
-    console.warn("No hay mesociclo activo");
-    return null;
-  }
-
-  return data;
 }
 
 async function loadVolumeKPI(mesocycleId) {
