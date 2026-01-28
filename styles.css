@@ -602,17 +602,11 @@ section {
 }
 
 .pr-row span {
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: var(--accent-light);
+  font-size: 1.25rem;
 }
 
 .pr-row small {
-  display: block;
-  margin-top: 0.4rem;
-  font-size: 0.7rem;
-  opacity: 0.5;
-  text-transform: uppercase;
+  font-size: 0.65rem;
 }
 
 /* ======================
