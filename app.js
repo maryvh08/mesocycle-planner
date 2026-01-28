@@ -781,15 +781,15 @@ function renderStatsView() {
         <span>Ejercicios únicos</span>
       </div>
     </div>
-
-      <h3>Mejores marcas</h3>
-      <div id="pr-table" class="pr-table"></div>
       
       <h3>Progreso de fuerza</h3>
       <canvas id="strength-chart"></canvas>
       
       <h3>Volumen por ejercicio</h3>
       <div id="exercise-volume-list"></div>
+
+      <h3>Mejores marcas</h3>
+      <div id="pr-table" class="pr-table"></div>
       
       <h3>Comparación de mesociclos</h3>
       <div id="mesocycle-comparison"></div>
