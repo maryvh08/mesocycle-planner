@@ -1146,68 +1146,95 @@ async function loadSessionsKPI(mesocycleId) {
 
 async function loadMesocycleComparison() {
   const container = document.getElementById("mesocycle-comparison");
-  if (!container) {
-    console.warn("⏳ mesocycle-comparison aún no está en el DOM");
-    return;
-  }
+  if (!container) return;
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  // Mesociclos
-  const { data: mesocycles, error: mError } = await supabase
+  const { data: mesocycles } = await supabase
     .from("mesocycles")
     .select("id, name")
+    .eq("user_id", user.id)
+    .order("created_at");
+
+  const { data: records } = await supabase
+    .from("exercise_records")
+    .select("mesocycle_id, exercise_name, weight, reps")
     .eq("user_id", user.id);
 
-  if (mError || !mesocycles) {
-    console.error("❌ Error cargando mesociclos", mError);
-    return;
-  }
-
-  // Stats por mesociclo
-  const { data: stats, error: sError } = await supabase
-    .from("mesocycle_stats")
-    .select("*")
-    .eq("user_id", user.id);
-
-  if (sError) {
-    console.error("❌ Error cargando mesocycle_stats", sError);
-  }
-
-  // PRs por mesociclo
-  const { data: prs, error: pError } = await supabase
+  const { data: prs } = await supabase
     .from("mesocycle_prs")
     .select("*")
     .eq("user_id", user.id);
 
-  if (pError) {
-    console.error("❌ Error cargando mesocycle_prs", pError);
-  }
-
-  // Mapear PRs por mesociclo
   const prMap = {};
-  (prs || []).forEach(p => {
-    prMap[p.mesocycle_id] = p.pr_count;
+  prs.forEach(p => prMap[p.mesocycle_id] = p.pr_count);
+
+  const statsByCycle = {};
+
+  records.forEach(r => {
+    if (!statsByCycle[r.mesocycle_id]) {
+      statsByCycle[r.mesocycle_id] = {
+        volume: 0,
+        exercises: {}
+      };
+    }
+
+    statsByCycle[r.mesocycle_id].volume +=
+      (r.weight || 0) * (r.reps || 0);
+
+    if (!statsByCycle[r.mesocycle_id].exercises[r.exercise_name]) {
+      statsByCycle[r.mesocycle_id].exercises[r.exercise_name] = [];
+    }
+
+    statsByCycle[r.mesocycle_id].exercises[r.exercise_name].push(r.weight);
   });
 
   container.innerHTML = "";
 
   mesocycles.forEach(m => {
-    const s = (stats || []).find(x => x.mesocycle_id === m.id);
-    const pr = prMap[m.id] || 0;
+    const s = statsByCycle[m.id];
+    if (!s) return;
+
+    const exerciseAverages = Object.values(s.exercises)
+      .map(arr => arr.reduce((a,b)=>a+b,0) / arr.length);
+
+    const avgStrength =
+      exerciseAverages.reduce((a,b)=>a+b,0) / exerciseAverages.length || 0;
 
     const div = document.createElement("div");
     div.className = "mesocycle-stat-card";
 
     div.innerHTML = `
       <h4>${m.name}</h4>
-      <p>Volumen: <strong>${(s?.total_volume || 0).toFixed(0)} kg</strong></p>
-      <p>Record Personal: <strong>${pr} ejercicios</strong></p>
+      <p>Volumen: <strong>${Math.round(s.volume)} kg</strong></p>
+      <p>PRs: <strong>${prMap[m.id] || 0}</strong></p>
+      <p>Fuerza media: <strong>${avgStrength.toFixed(1)} kg</strong></p>
     `;
 
     container.appendChild(div);
   });
+}
+
+function compareMesocycles(a, b) {
+  return {
+    strengthDiff: ((b.avgStrength - a.avgStrength) / a.avgStrength) * 100,
+    volumeDiff: ((b.volume - a.volume) / a.volume) * 100,
+    prsDiff: b.prs - a.prs
+  };
+}
+
+function mesocycleInsight(a, b) {
+  if (b.strength > a.strength && b.volume < a.volume)
+    return "Mejor eficiencia de fuerza";
+
+  if (b.volume > a.volume && b.prs === 0)
+    return "Mucho volumen, poco progreso";
+
+  if (b.prs > a.prs)
+    return "Ciclo óptimo para PRs";
+
+  return "Resultados similares";
 }
 
 function showPRBadge(exercise, weight) {
