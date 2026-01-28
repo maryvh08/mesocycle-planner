@@ -200,6 +200,18 @@ section {
   margin-bottom: var(--spacing);
 }
 
+.exercise-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  opacity: 0.7;
+  margin-top: 4px;
+}
+
+.exercise-label.hidden {
+  display: none;
+}
+
 .history-card {
   display: flex;
   flex-direction: column;
