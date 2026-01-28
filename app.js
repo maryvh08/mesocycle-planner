@@ -785,12 +785,15 @@ function renderStrengthTrends(data) {
       trend === "down" ? "↓" : "→";
 
     container.innerHTML += `
-      <div class="strength-row">
-        <span class="exercise">${ex.name}</span>
-        <span class="avg">${Math.round(endAvg)} kg</span>
-        <span class="trend ${trend}">${icon}</span>
-      </div>
-    `;
+     <div class="strength-row clickable"
+          data-exercise="${ex.name}"
+          data-start="${startAvg}"
+          data-end="${endAvg}">
+       <span class="exercise">${ex.name}</span>
+       <span class="avg">${Math.round(endAvg)} kg</span>
+       <span class="trend ${trend}">${icon}</span>
+     </div>
+   `;
   });
 }
 
