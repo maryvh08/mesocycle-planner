@@ -797,6 +797,63 @@ function renderStrengthTrends(data) {
   });
 }
 
+async function openExerciseChart(exerciseName, start, end) {
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select("week_number, weight")
+    .eq("user_id", user.id)
+    .eq("exercise_name", exerciseName)
+    .order("week_number");
+
+  if (error || !data.length) return;
+
+  renderMiniChart(exerciseName, data, start, end);
+}
+
+function renderMiniChart(name, data, start, end) {
+  document.getElementById("modal-title").textContent = name;
+  document.getElementById("exercise-modal").classList.remove("hidden");
+
+  const weeks = [...new Set(data.map(d => d.week_number))];
+
+  const avgByWeek = weeks.map(w => {
+    const arr = data.filter(d => d.week_number === w).map(d => d.weight);
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
+  });
+
+  const pctChange = (((end - start) / start) * 100).toFixed(1);
+
+  const ctx = document.getElementById("mini-chart");
+
+  if (window.miniChart) window.miniChart.destroy();
+
+  window.miniChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: weeks.map(w => `Semana ${w}`),
+      datasets: [{
+        data: avgByWeek,
+        borderWidth: 2,
+        tension: 0.3
+      }]
+    },
+    options: {
+      plugins: {
+        tooltip: {
+          callbacks: {
+            afterBody: () => `Cambio total: ${pctChange}%`
+          }
+        },
+        legend: { display: false }
+      }
+    }
+  });
+}
+
+function closeModal() {
+  document.getElementById("exercise-modal").classList.add("hidden");
+}
+
 /* ======================
    RENDER EJERCICIOS DÍA
 ====================== */
