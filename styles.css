@@ -574,6 +574,7 @@ section {
 /* ======================
    PR TABLE – HALL OF FAME
 ====================== */
+
 .pr-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -591,22 +592,33 @@ section {
   overflow: hidden;
 }
 
-.pr-row {
-  padding: 0.8rem 0.9rem;
-  border-radius: 14px;
+.pr-row::before {
+  content: "🏆";
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 1.4rem;
+  opacity: 0.15;
 }
 
 .pr-row strong {
-  font-size: 0.8rem;
-  line-height: 1.2;
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 0.4rem;
 }
 
 .pr-row span {
-  font-size: 1.25rem;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--accent-light);
 }
 
 .pr-row small {
-  font-size: 0.65rem;
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.7rem;
+  opacity: 0.5;
+  text-transform: uppercase;
 }
 
 /* ======================
