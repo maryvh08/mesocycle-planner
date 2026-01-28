@@ -682,21 +682,20 @@ async function renderRegistroEditor(mesocycleId) {
 }
 
 async function loadStrengthTrends(mesocycleId) {
-   const {
-     data: { user }
-   } = await supabase.auth.getUser();
-   
-  const { data, error } = await supabase
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  let query = supabase
     .from("exercise_records")
-    .select(`
-      exercise_id,
-      exercise_name,
-      weight,
-      week_number
-    `)
+    .select("exercise_id, exercise_name, weight, week_number")
     .eq("user_id", user.id)
-    .eq("mesocycle_id", mesocycleId)
     .not("weight", "is", null);
+
+  if (mesocycleId) {
+    query = query.eq("mesocycle_id", mesocycleId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("❌ Error fuerza", error);
@@ -978,6 +977,9 @@ async function loadDashboardKPIs() {
 }
 
 async function getActiveMesocycle() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
   const { data, error } = await supabase
     .from("mesocycles")
     .select("id, name")
@@ -994,19 +996,19 @@ async function getActiveMesocycle() {
 }
 
 async function loadVolumeKPI(mesocycleId) {
-   const {
-     data: { user }
-   } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
 
-   if (mesocycleId) {
-     query = query.eq("mesocycle_id", mesocycleId);
-   }
-   
-  const { data, error } = await supabase
+  let query = supabase
     .from("exercise_records")
     .select("weight, reps")
-    .eq("user_id", user.id)
-    .eq("mesocycle_id", mesocycleId);
+    .eq("user_id", user.id);
+
+  if (mesocycleId) {
+    query = query.eq("mesocycle_id", mesocycleId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("❌ Error volumen", error);
@@ -1021,19 +1023,14 @@ async function loadVolumeKPI(mesocycleId) {
   document.getElementById("kpi-volume").innerHTML = `
     <h4>Volumen total</h4>
     <strong>${Math.round(totalVolume).toLocaleString()} kg</strong>
-    <span class="kpi-sub">Mesociclo</span>
+    <span class="kpi-sub">${mesocycleId ? "Mesociclo" : "Global"}</span>
   `;
 }
 
 async function loadPRsKPI(mesocycleId) {
-   const {
-     data: { user }
-   } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user || !mesocycleId) return; // 👈 aquí SÍ es obligatorio
 
-   if (mesocycleId) {
-     query = query.eq("mesocycle_id", mesocycleId);
-   }
-   
   const { data, error } = await supabase
     .from("mesocycle_prs")
     .select("pr_count")
@@ -1041,29 +1038,32 @@ async function loadPRsKPI(mesocycleId) {
     .eq("mesocycle_id", mesocycleId)
     .single();
 
-  const prs = data?.pr_count || 0;
+  if (error) {
+    console.error("❌ Error PRs", error);
+    return;
+  }
 
   document.getElementById("kpi-prs").innerHTML = `
     <h4>PRs</h4>
-    <strong>${prs}</strong>
+    <strong>${data?.pr_count || 0}</strong>
     <span class="kpi-sub">Récords personales</span>
   `;
 }
 
 async function loadSessionsKPI(mesocycleId) {
-   const {
-     data: { user }
-   } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
 
-   if (mesocycleId) {
-     query = query.eq("mesocycle_id", mesocycleId);
-   }
-   
-  const { data, error } = await supabase
+  let query = supabase
     .from("exercise_records")
     .select("week_number, day_number")
-    .eq("user_id", user.id)
-    .eq("mesocycle_id", mesocycleId);
+    .eq("user_id", user.id);
+
+  if (mesocycleId) {
+    query = query.eq("mesocycle_id", mesocycleId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("❌ Error sesiones", error);
@@ -1077,10 +1077,9 @@ async function loadSessionsKPI(mesocycleId) {
   document.getElementById("kpi-sessions").innerHTML = `
     <h4>Sesiones</h4>
     <strong>${sessions.size}</strong>
-    <span class="kpi-sub">Entrenamientos realizados</span>
+    <span class="kpi-sub">${mesocycleId ? "Mesociclo" : "Global"}</span>
   `;
 }
-
 
 async function loadMesocycleComparison() {
   const container = document.getElementById("mesocycle-comparison");
