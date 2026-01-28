@@ -703,6 +703,10 @@ async function renderRegistroEditor(mesocycleId) {
   console.log("✅ RegistroEditor listo y blindado");
 }
 
+/* ======================
+   TENDENCIAS Y PROGRESO
+====================== */
+
 async function loadStrengthTrends(mesocycleId) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
@@ -767,7 +771,7 @@ function renderStrengthTrends(data) {
   Object.values(data).forEach(ex => {
     const weeks = Object.keys(ex.weeks).sort((a, b) => a - b);
 
-    if (weeks.length < 3) return; // evita ruido
+    if (weeks.length < 2) return; // evita ruido
 
     const firstWeeks = weeks.slice(0, 2).flatMap(w => ex.weeks[w]);
     const lastWeeks = weeks.slice(-2).flatMap(w => ex.weeks[w]);
