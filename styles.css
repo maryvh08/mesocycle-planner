@@ -359,6 +359,12 @@ section {
   }
 }
 
+@media (max-width: 480px) {
+  .pr-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 /* ======================
    LOGIN — VAMPIRO
 ====================== */
@@ -585,6 +591,12 @@ section {
 
 .pr-row small {
   font-size: 0.65rem;
+}
+
+.pr-row::before {
+  font-size: 1.1rem;
+  top: 6px;
+  right: 8px;
 }
 
 /* ======================
