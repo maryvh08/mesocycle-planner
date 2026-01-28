@@ -1233,20 +1233,22 @@ async function loadStrengthChart(mesocycleId = null, exerciseName = "") {
   const ctx = document.getElementById("strength-chart");
   const backBtn = document.getElementById("back-to-general");
 
-  // Configurar la etiqueta del ejercicio
+  // Mostrar el nombre del ejercicio y el badge solo si es ejercicio individual
   if (exerciseLabel) {
     if (exerciseName) {
       exerciseLabel.textContent = exerciseName;
       exerciseLabel.classList.remove("hidden");
-      backBtn.classList.remove("hidden"); // mostrar botón si es ejercicio individual
+      backBtn.classList.remove("hidden");
+      backBtn.classList.add("visible");
     } else {
       exerciseLabel.textContent = "";
       exerciseLabel.classList.add("hidden");
-      backBtn.classList.add("hidden"); // ocultar botón en gráfico general
+      backBtn.classList.remove("visible");
+      backBtn.classList.add("hidden");
     }
   }
 
-  // Construir la consulta
+  // Consulta de datos
   let query = supabase
     .from("exercise_progress_chart")
     .select("day, total_volume")
@@ -1262,7 +1264,7 @@ async function loadStrengthChart(mesocycleId = null, exerciseName = "") {
   }
   if (!data || data.length === 0) return;
 
-  // Guardar los datos generales si no hay ejercicioName
+  // Guardar datos generales
   if (!exerciseName) generalStrengthData = data;
 
   const labels = data.map(r => r.day);
@@ -1296,6 +1298,50 @@ async function loadStrengthChart(mesocycleId = null, exerciseName = "") {
   });
 }
 
+// Evento para volver a la evolución general
+document.getElementById("back-to-general").addEventListener("click", () => {
+  if (!generalStrengthData) return;
+
+  const ctx = document.getElementById("strength-chart");
+  if (window.statsChart) window.statsChart.destroy();
+
+  const labels = generalStrengthData.map(r => r.day);
+  const values = generalStrengthData.map(r => r.total_volume);
+
+  window.statsChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Volumen total",
+        data: values,
+        tension: 0.35,
+        fill: true,
+        borderColor: "#b11226",
+        backgroundColor: "rgba(177,18,38,0.25)",
+        pointBackgroundColor: "#ff3b3b",
+        pointBorderColor: "#120b0f",
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: true, position: "top" } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  const exerciseLabel = document.getElementById("strength-exercise-label");
+  const backBtn = document.getElementById("back-to-general");
+
+  if (exerciseLabel) exerciseLabel.classList.add("hidden");
+  if (backBtn) {
+    backBtn.classList.remove("visible");
+    backBtn.classList.add("hidden");
+  }
+});
 async function loadExerciseVolumeList(mesocycleId = null) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
@@ -1458,45 +1504,3 @@ document.getElementById("exercise-modal")
       closeModal();
     }
   });
-
-// Botón para volver a la evolución general
-document.getElementById("back-to-general").addEventListener("click", () => {
-  if (!generalStrengthData) return;
-
-  const ctx = document.getElementById("strength-chart");
-  if (window.statsChart) window.statsChart.destroy();
-
-  const labels = generalStrengthData.map(r => r.day);
-  const values = generalStrengthData.map(r => r.total_volume);
-
-  window.statsChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels,
-      datasets: [{
-        label: "Volumen total",
-        data: values,
-        tension: 0.35,
-        fill: true,
-        borderColor: "#b11226",
-        backgroundColor: "rgba(177,18,38,0.25)",
-        pointBackgroundColor: "#ff3b3b",
-        pointBorderColor: "#120b0f",
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        borderWidth: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: true, position: "top" } },
-      scales: { y: { beginAtZero: true } }
-    }
-  });
-
-  // Reset labels y botón
-  const exerciseLabel = document.getElementById("strength-exercise-label");
-  const backBtn = document.getElementById("back-to-general");
-  if (exerciseLabel) exerciseLabel.classList.add("hidden");
-  if (backBtn) backBtn.classList.add("hidden");
-});
