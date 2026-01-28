@@ -1447,7 +1447,7 @@ async function loadExerciseProgress(exerciseName) {
           data: volumes,
           tension: 0.3,
           yAxisID: "y1",
-          borderColor: "#white",
+          borderColor: "white",
           backgroundColor: "rgba(0,0,0,0.1)"
         }
       ]
