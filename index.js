@@ -5,33 +5,34 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZod2ZlbmVmZXZ6emtzeHJzbGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MTE3ODAsImV4cCI6MjA4MzQ4Nzc4MH0.CG1KzxpxGHifXsgBvH-4E4WvXbj6d-8WsagqaHAtVwo"
 );
 
-document.getElementById("signup-btn").onclick = async () => {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
+document.addEventListener("DOMContentLoaded", () => {
+  const signupBtn = document.getElementById("signup-btn");
+  if (!signupBtn) return; // No hacer nada si no existe
 
-  const msg = document.getElementById("signup-msg");
+  signupBtn.onclick = async () => {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const msg = document.getElementById("signup-msg");
 
-  if (!email || !password) {
-    msg.textContent = "Ingresa email y contraseña.";
-    return;
-  }
+    if (!email || !password) {
+      msg.textContent = "Ingresa email y contraseña.";
+      return;
+    }
 
-  msg.textContent = "Creando cuenta...";
+    msg.textContent = "Creando cuenta...";
 
-  const { error } = await supabase.auth.signUp({ email, password });
+    try {
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error) throw error;
+      msg.textContent = "Cuenta creada. Redirigiendo...";
+      setTimeout(() => (window.location.href = "app.html"), 1000);
+    } catch (err) {
+      console.error(err);
+      msg.textContent = err.message;
+    }
+  };
+});
 
-  if (error) {
-    msg.textContent = error.message;
-    return;
-  }
-
-  msg.textContent = "Cuenta creada. Redirigiendo...";
-  setTimeout(() => {
-    window.location.href = "app.html";
-  }, 1000);
-};
-
-// Crée un nouvel IntersectionObserver
 const observer = new IntersectionObserver(
   (entries, observer) => {
     entries.forEach(entry => {
