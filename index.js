@@ -6,63 +6,74 @@ const supabase = createClient(
 );
 
 document.addEventListener("DOMContentLoaded", () => {
+  // ---------- SIGN UP ----------
   const signupBtn = document.getElementById("signup-btn");
-  if (!signupBtn) return; // No hacer nada si no existe
+  if (signupBtn) {
+    signupBtn.onclick = async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const msg = document.getElementById("signup-msg");
 
-  signupBtn.onclick = async () => {
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-    const msg = document.getElementById("signup-msg");
+      if (!email || !password) {
+        msg.textContent = "Ingresa email y contraseña.";
+        return;
+      }
 
-    if (!email || !password) {
-      msg.textContent = "Ingresa email y contraseña.";
-      return;
-    }
+      msg.textContent = "Creando cuenta...";
 
-    msg.textContent = "Creando cuenta...";
+      try {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) throw error;
 
-    try {
-      const { error } = await supabase.auth.signUp({ email, password });
-      if (error) throw error;
-      msg.textContent = "Cuenta creada. Redirigiendo...";
-      setTimeout(() => (window.location.href = "app.html"), 1000);
-    } catch (err) {
-      console.error(err);
-      msg.textContent = err.message;
-    }
-  };
+        msg.textContent = "Cuenta creada. Redirigiendo...";
+        setTimeout(() => (window.location.href = "app.html"), 1000);
+      } catch (err) {
+        console.error(err);
+        msg.textContent = err.message;
+      }
+    };
+  }
+
+  // ---------- RESET PASSWORD ----------
+  const resetBtn = document.getElementById("reset-btn");
+  if (resetBtn) {
+    resetBtn.onclick = async () => {
+      const email = document.getElementById("reset-email").value;
+      const msg = document.getElementById("reset-msg");
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo:
+          "https://maryvh08.github.io/mesocycle-planner/update-password.html",
+      });
+
+      if (error) {
+        msg.textContent = error.message;
+        return;
+      }
+
+      msg.textContent = "📧 Revisa tu email para continuar";
+    };
+  }
+
+  // ---------- UPDATE PASSWORD ----------
+  const updateBtn = document.getElementById("update-btn");
+  if (updateBtn) {
+    updateBtn.onclick = async () => {
+      const password = document.getElementById("new-password").value;
+      const msg = document.getElementById("update-msg");
+
+      const { error } = await supabase.auth.updateUser({ password });
+
+      if (error) {
+        msg.textContent = error.message;
+        return;
+      }
+
+      msg.textContent = "✅ Contraseña actualizada";
+      setTimeout(() => (location.href = "app.html"), 1500);
+    };
+  }
 });
-
-document.getElementById("reset-btn").onclick = async () => {
-  const email = document.getElementById("reset-email").value;
-  const msg = document.getElementById("reset-msg");
-
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: "https://maryvh08.github.io/mesocycle-planner/update-password.html"
-  });
-
-  if (error) {
-    msg.textContent = error.message;
-    return;
-  }
-
-  msg.textContent = "📧 Revisa tu email para continuar";
-};
-
-document.getElementById("update-btn").onclick = async () => {
-  const password = document.getElementById("new-password").value;
-  const msg = document.getElementById("update-msg");
-
-  const { error } = await supabase.auth.updateUser({ password });
-
-  if (error) {
-    msg.textContent = error.message;
-    return;
-  }
-
-  msg.textContent = "✅ Contraseña actualizada";
-  setTimeout(() => location.href = "app.html", 1500);
-};
 
 const observer = new IntersectionObserver(
   (entries, observer) => {
