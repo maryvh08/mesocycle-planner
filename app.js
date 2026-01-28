@@ -852,6 +852,8 @@ function renderStatsView() {
   loadStrengthChart();
   loadExerciseVolumeList();
   loadMesocycleComparison();
+   loadSessionsKPI();
+   loadVolumeKPI();
 
   // 🔥 Filtro por mesociclo
   document.getElementById("stats-mesocycle").onchange = e => {
