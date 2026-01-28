@@ -644,6 +644,28 @@ async function renderRegistroEditor(mesocycleId) {
       reps: Number(repsInput.value)
     };
 
+   // 🚨 COMPROBAR DUPLICADO (mismo ejercicio, mismo día y semana)
+   const { data: existing, error: checkError } = await supabase
+     .from("exercise_records")
+     .select("id")
+     .eq("user_id", session.user.id)
+     .eq("mesocycle_id", mesocycleId)
+     .eq("exercise_id", exercise.id)
+     .eq("week_number", Number(weekSelect.value))
+     .eq("day_number", selectedDay)
+     .limit(1);
+   
+   if (checkError) {
+     console.error("❌ Error comprobando duplicado", checkError);
+     alert("Error al validar el ejercicio");
+     return;
+   }
+   
+   if (existing.length > 0) {
+     alert("Ya ha registrado este ejercicio para este día");
+     return;
+   }
+
     const { error } = await supabase
       .from("exercise_records")
       .insert(payload);
