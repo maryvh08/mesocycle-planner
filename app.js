@@ -847,11 +847,11 @@ function renderStatsView() {
   loadStatsMesocycles();
 
   // 🔥 Stats globales (todos los datos)
-  loadStatsOverview();
-  loadPRTable();
-  loadStrengthChart();
-  loadExerciseVolumeList();
-  loadMesocycleComparison();
+   loadStatsOverview();
+   loadPRTable();
+   loadStrengthChart();
+   loadExerciseVolumeList();
+   loadMesocycleComparison();
    loadSessionsKPI();
    loadVolumeKPI();
 
