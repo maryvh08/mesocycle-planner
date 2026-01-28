@@ -856,17 +856,20 @@ function renderStatsView() {
 
   // 🔥 Filtro por mesociclo
   document.getElementById("stats-mesocycle").onchange = e => {
-    const mesocycleId = e.target.value || null;
-
-      loadStatsOverview(mesocycleId);
-      loadPRTable(mesocycleId);
-      loadStrengthChart(mesocycleId);
-      loadExerciseVolumeList(mesocycleId);
-      loadVolumeKPI(mesocycleId); 
-      loadPRsKPI(mesocycleId
-      loadSessionsKPI(mesocycleId);
-      loadStrengthTrends(mesocycleId);
-  };
+     const mesocycleId = e.target.value || null;
+   
+     loadStatsOverview(mesocycleId);
+     loadPRTable(mesocycleId);
+     loadStrengthChart(mesocycleId);
+     loadExerciseVolumeList(mesocycleId);
+   
+     if (mesocycleId) {
+       loadVolumeKPI(mesocycleId);
+       loadPRsKPI(mesocycleId);
+       loadSessionsKPI(mesocycleId);
+       loadStrengthTrends(mesocycleId);
+     }
+   };
 }
 
 /* ======================
