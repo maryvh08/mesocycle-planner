@@ -853,6 +853,21 @@ function closeModal() {
   }
 }
 
+function updateStatsMesocycleLabel() {
+  const select = document.getElementById("stats-mesocycle");
+  const label = document.getElementById("stats-mesocycle-label");
+
+  if (!select || !label) return;
+
+  const selectedOption = select.options[select.selectedIndex];
+
+  if (!select.value) {
+    label.textContent = "Todos los mesociclos";
+  } else {
+    label.textContent = selectedOption.textContent;
+  }
+}
+
 /* ======================
    RENDER EJERCICIOS DÍA
 ====================== */
@@ -939,6 +954,7 @@ function renderStatsView() {
    loadMesocycleComparison();
    loadSessionsKPI();
    loadVolumeKPI();
+   updateStatsMesocycleLabel();
 
   // 🔥 Filtro por mesociclo
   document.getElementById("stats-mesocycle").onchange = e => {
