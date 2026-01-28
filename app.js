@@ -898,6 +898,18 @@ async function loadPRTable(mesocycleId = null) {
   });
 }
 
+function renderKPIs(stats) {
+  document.getElementById("kpi-volume").innerHTML = `
+    <h4>Volumen</h4>
+    <strong>${stats.total_volume.toLocaleString()} kg</strong>
+  `;
+
+  document.getElementById("kpi-prs").innerHTML = `
+    <h4>PRs</h4>
+    <strong>${stats.pr_count}</strong>
+  `;
+}
+
 async function loadMesocycleComparison() {
   const container = document.getElementById("mesocycle-comparison");
   if (!container) {
