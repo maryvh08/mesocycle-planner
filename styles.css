@@ -570,43 +570,21 @@ section {
 }
 
 .pr-row {
-  background: linear-gradient(180deg, #1a0f13, #0b0608);
-  border-radius: 16px;
-  padding: 1rem 1.2rem;
-  text-align: center;
-  box-shadow: 0 15px 40px rgba(0,0,0,.6);
-  border: 1px solid rgba(255,255,255,.05);
-  position: relative;
-  overflow: hidden;
-}
-
-.pr-row::before {
-  content: "🏆";
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  font-size: 1.4rem;
-  opacity: 0.15;
+  padding: 0.8rem 0.9rem;
+  border-radius: 14px;
 }
 
 .pr-row strong {
-  display: block;
-  font-size: 0.95rem;
-  margin-bottom: 0.4rem;
+  font-size: 0.8rem;
+  line-height: 1.2;
 }
 
 .pr-row span {
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: var(--accent-light);
+  font-size: 1.25rem;
 }
 
 .pr-row small {
-  display: block;
-  margin-top: 0.4rem;
-  font-size: 0.7rem;
-  opacity: 0.5;
-  text-transform: uppercase;
+  font-size: 0.65rem;
 }
 
 /* ======================
