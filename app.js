@@ -1388,30 +1388,29 @@ async function loadExerciseProgress(exerciseName) {
   });
 }
 
-async function loadStatsMesocycles() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-
-  const { data, error } = await supabase
-    .from("mesocycles")
-    .select("id, name")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
+function loadStatsMesocycles() {
   const select = document.getElementById("stats-mesocycle");
-  select.innerHTML = `<option value="">Selecciona mesociclo</option>`;
-
-  data.forEach(m => {
-    const opt = document.createElement("option");
-    opt.value = m.id;
-    opt.textContent = m.name;
-    select.appendChild(opt);
+  select.innerHTML = `<option value="">Todos</option>`;
+  
+  mesocycles.forEach(m => {
+    const option = document.createElement("option");
+    option.value = m.id;
+    option.textContent = m.name;
+    select.appendChild(option);
   });
+
+  // 🔹 Aquí actualizamos el label por primera vez
+  updateStatsMesocycleLabel();
+
+  // 🔹 Añadimos el listener onchange
+  select.onchange = () => {
+    updateStatsMesocycleLabel();
+    const mesocycleId = select.value || null;
+    loadStatsOverview(mesocycleId);
+    loadPRTable(mesocycleId);
+    loadStrengthChart(mesocycleId);
+    loadExerciseVolumeList(mesocycleId);
+  };
 }
 
 function getCoachInsight(trend) {
