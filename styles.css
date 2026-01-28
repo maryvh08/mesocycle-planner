@@ -958,6 +958,19 @@ h3 {
   pointer-events: none;
 }
 
+.forgot-link {
+  margin-top: 12px;
+  display: block;
+  font-size: 0.9rem;
+  color: #7c8cff;
+  text-align: center;
+  text-decoration: none;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
 /* ======================
    VOLUME LIST
 ====================== */
