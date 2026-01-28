@@ -56,18 +56,6 @@ body.human {
   display: none !important;
 }
 
-hr {
-  border: none;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255,255,255,.2),
-    transparent
-  );
-  margin: 1.5rem 0;
-}
-
 .separator {
   height: 1px;
   background: linear-gradient(
@@ -77,6 +65,10 @@ hr {
     transparent
   );
   box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.spacer {
+  height: 1.5rem;
 }
 
 /* ======================
