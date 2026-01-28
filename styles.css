@@ -488,6 +488,18 @@ section {
   }
 }
 
+@media (max-width: 900px) {
+  #strength-trends {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  #strength-trends {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ======================
    LOGIN — VAMPIRO
 ====================== */
@@ -675,8 +687,8 @@ section {
 
 #strength-trends {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 1.2rem;
 }
 
 .strength-row {
