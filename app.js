@@ -702,6 +702,69 @@ async function loadStrengthTrends(mesocycleId) {
   processStrengthData(data);
 }
 
+function processStrengthData(records) {
+  const byExercise = {};
+
+  records.forEach(r => {
+    if (!byExercise[r.exercise_id]) {
+      byExercise[r.exercise_id] = {
+        name: r.exercise_name,
+        weeks: {}
+      };
+    }
+
+    if (!byExercise[r.exercise_id].weeks[r.week_number]) {
+      byExercise[r.exercise_id].weeks[r.week_number] = [];
+    }
+
+    byExercise[r.exercise_id].weeks[r.week_number].push(r.weight);
+  });
+
+  renderStrengthTrends(byExercise);
+}
+
+function avg(arr) {
+  return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+
+function calcTrend(start, end) {
+  const diff = ((end - start) / start) * 100;
+
+  if (diff > 2.5) return "up";
+  if (diff < -2.5) return "down";
+  return "flat";
+}
+
+function renderStrengthTrends(data) {
+  const container = document.getElementById("strength-trends");
+  container.innerHTML = "";
+
+  Object.values(data).forEach(ex => {
+    const weeks = Object.keys(ex.weeks).sort((a, b) => a - b);
+
+    if (weeks.length < 3) return; // evita ruido
+
+    const firstWeeks = weeks.slice(0, 2).flatMap(w => ex.weeks[w]);
+    const lastWeeks = weeks.slice(-2).flatMap(w => ex.weeks[w]);
+
+    const startAvg = avg(firstWeeks);
+    const endAvg = avg(lastWeeks);
+    const trend = calcTrend(startAvg, endAvg);
+
+    const icon =
+      trend === "up" ? "↑" :
+      trend === "down" ? "↓" : "→";
+
+    container.innerHTML += `
+      <div class="strength-row">
+        <span class="exercise">${ex.name}</span>
+        <span class="avg">${Math.round(endAvg)} kg</span>
+        <span class="trend ${trend}">${icon}</span>
+      </div>
+    `;
+  });
+}
+
 /* ======================
    RENDER EJERCICIOS DÍA
 ====================== */
