@@ -910,6 +910,33 @@ function renderKPIs(stats) {
   `;
 }
 
+async function loadDashboardKPIs() {
+  const activeMesocycle = await getActiveMesocycle();
+  if (!activeMesocycle) return;
+
+  await Promise.all([
+    loadVolumeKPI(activeMesocycle.id),
+    loadPRsKPI(activeMesocycle.id),
+    loadSessionsKPI(activeMesocycle.id),
+  ]);
+}
+
+async function getActiveMesocycle() {
+  const { data, error } = await supabase
+    .from("mesocycles")
+    .select("id, name")
+    .eq("user_id", user.id)
+    .eq("is_active", true)
+    .single();
+
+  if (error) {
+    console.warn("No hay mesociclo activo");
+    return null;
+  }
+
+  return data;
+}
+
 async function loadVolumeKPI(mesocycleId) {
   const { data, error } = await supabase
     .from("exercise_records")
