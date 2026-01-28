@@ -1387,12 +1387,21 @@ async function loadExerciseProgress(exerciseName) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-   const label = document.getElementById("strength-exercise-label");
-   if (label) {
-     label.textContent = exerciseName;
-     label.classList.remove("hidden");
-   }
+  const exerciseLabel = document.getElementById("strength-exercise-label");
+  const backBtn = document.getElementById("back-to-general");
+  const ctx = document.getElementById("strength-chart");
 
+  // Mostrar el nombre del ejercicio y el botón de volver
+  if (exerciseLabel) {
+    exerciseLabel.textContent = exerciseName;
+    exerciseLabel.classList.remove("hidden");
+  }
+  if (backBtn) {
+    backBtn.classList.remove("hidden");
+    backBtn.classList.add("visible");
+  }
+
+  // Traer datos del ejercicio
   const { data, error } = await supabase
     .from("exercise_progress_chart")
     .select("day, max_weight, total_volume")
@@ -1402,6 +1411,11 @@ async function loadExerciseProgress(exerciseName) {
 
   if (error || !data.length) {
     console.warn("Sin datos", error);
+    if (exerciseLabel) exerciseLabel.classList.add("hidden");
+    if (backBtn) {
+      backBtn.classList.remove("visible");
+      backBtn.classList.add("hidden");
+    }
     return;
   }
 
@@ -1409,7 +1423,6 @@ async function loadExerciseProgress(exerciseName) {
   const weights = data.map(d => d.max_weight);
   const volumes = data.map(d => d.total_volume);
 
-  const ctx = document.getElementById("strength-chart");
   if (!ctx) return;
 
   if (window.statsChart) window.statsChart.destroy();
@@ -1422,19 +1435,26 @@ async function loadExerciseProgress(exerciseName) {
         {
           label: "Peso máximo",
           data: weights,
-          tension: 0.3
+          tension: 0.3,
+          borderColor: "#b11226",
+          backgroundColor: "rgba(177,18,38,0.25)",
+          yAxisID: "y"
         },
         {
           label: "Volumen",
           data: volumes,
           tension: 0.3,
-          yAxisID: "y1"
+          yAxisID: "y1",
+          borderColor: "#120b0f",
+          backgroundColor: "rgba(0,0,0,0.1)"
         }
       ]
     },
     options: {
+      responsive: true,
+      plugins: { legend: { display: true, position: "top" } },
       scales: {
-        y: { title: { display: true, text: "Peso (kg)" }},
+        y: { title: { display: true, text: "Peso (kg)" } },
         y1: {
           position: "right",
           grid: { drawOnChartArea: false },
