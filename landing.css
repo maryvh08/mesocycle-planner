@@ -449,6 +449,13 @@ body {
   animation: heroFade 1s ease forwards;
 }
 
+.visual-img {
+  width: 100%;
+  max-width: 520px;
+  border-radius: 18px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.45);
+}
+
 @keyframes heroFade {
   from {
     opacity: 0;
