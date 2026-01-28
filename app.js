@@ -1208,7 +1208,7 @@ async function loadMesocycleComparison() {
     div.innerHTML = `
       <h4>${m.name}</h4>
       <p>Volumen: <strong>${Math.round(s.volume)} kg</strong></p>
-      <p>Record Personal: <strong>${pr} ejercicios</strong></p>
+      <p>Record Personal: <strong>${prMap[m.id] || 0} ejercicios</strong></p>
       <p>Fuerza media: <strong>${avgStrength.toFixed(1)} kg</strong></p>
     `;
 
