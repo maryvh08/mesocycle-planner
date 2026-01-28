@@ -12,10 +12,9 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
    STATE
 ====================== */
 let selectedDaysPerWeek = null;
-let selectedDay = null;
 let editingMesocycleId = null;
-let allowedSubgroups = null;
 let statsChart = null;
+let generalStrengthData = null;
 
 /* ======================
    UI ELEMENTS
@@ -44,7 +43,6 @@ const statsView = document.getElementById("stats");
 ====================== */
 function initAuth() {
   document.getElementById("login-btn").onclick = login;
-  document.getElementById("signup-btn").onclick = signup;
   document.getElementById("logout-btn").onclick = logout;
 
   supabase.auth.onAuthStateChange((_e, session) => {
@@ -463,14 +461,6 @@ async function deleteMesocycle(mesocycleId) {
 }
 
 /* ======================
-   UTILIDADES
-====================== */
-function getAllowedSubgroups(emphasis) {
-  if (!emphasis || emphasis === "Todos") return null;
-  return emphasis.split(",").map(s => s.trim());
-}
-
-/* ======================
    REGISTRO
 ====================== */
 registroSelect.onchange = () => {
@@ -645,6 +635,28 @@ async function renderRegistroEditor(mesocycleId) {
       reps: Number(repsInput.value)
     };
 
+   // 🚨 COMPROBAR DUPLICADO (mismo ejercicio, mismo día y semana)
+   const { data: existing, error: checkError } = await supabase
+     .from("exercise_records")
+     .select("id")
+     .eq("user_id", session.user.id)
+     .eq("mesocycle_id", mesocycleId)
+     .eq("exercise_id", exercise.id)
+     .eq("week_number", Number(weekSelect.value))
+     .eq("day_number", selectedDay)
+     .limit(1);
+   
+   if (checkError) {
+     console.error("❌ Error comprobando duplicado", checkError);
+     alert("Error al validar el ejercicio");
+     return;
+   }
+   
+   if (existing.length > 0) {
+     alert("Ya ha registrado este ejercicio para este día");
+     return;
+   }
+
     const { error } = await supabase
       .from("exercise_records")
       .insert(payload);
@@ -658,12 +670,204 @@ async function renderRegistroEditor(mesocycleId) {
     weightInput.value = "";
     repsInput.value = "";
 
+      // 🏆 comprobar si fue PR
+      const { data: prRows } = await supabase
+        .from("exercise_prs")
+        .select("pr_weight")
+        .eq("user_id", session.user.id)
+        .eq("exercise_name", exercise.name)
+        .single();
+      
+      if (prRows && payload.weight >= prRows.pr_weight) {
+        showPRBadge(exercise.name, payload.weight);
+      }
+   // 🔄 refrescar stats si están visibles
+   if (!document.getElementById("stats").classList.contains("hidden")) {
+     const select = document.getElementById("stats-mesocycle");
+     const id = select?.value || null;
+     applyStatsFilter(id);
+     loadMesocycleComparison();
+   }
     renderExercisesForDay(mesocycleId, Number(weekSelect.value), selectedDay);
   };
 
   console.log("✅ RegistroEditor listo y blindado");
 }
 
+/* ======================
+   TENDENCIAS Y PROGRESO
+====================== */
+
+async function loadStrengthTrends(mesocycleId) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  let query = supabase
+    .from("exercise_records")
+    .select("exercise_id, exercise_name, weight, week_number")
+    .eq("user_id", user.id)
+    .not("weight", "is", null);
+
+  if (mesocycleId) {
+    query = query.eq("mesocycle_id", mesocycleId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("❌ Error fuerza", error);
+    return;
+  }
+
+  processStrengthData(data);
+}
+
+function processStrengthData(records) {
+  const byExercise = {};
+
+  records.forEach(r => {
+    if (!byExercise[r.exercise_id]) {
+      byExercise[r.exercise_id] = {
+        name: r.exercise_name,
+        weeks: {}
+      };
+    }
+
+    if (!byExercise[r.exercise_id].weeks[r.week_number]) {
+      byExercise[r.exercise_id].weeks[r.week_number] = [];
+    }
+
+    byExercise[r.exercise_id].weeks[r.week_number].push(r.weight);
+  });
+
+  renderStrengthTrends(byExercise);
+}
+
+function avg(arr) {
+  return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+
+function calcTrend(start, end) {
+  const diff = ((end - start) / start) * 100;
+
+  if (diff > 2.5) return "up";
+  if (diff < -2.5) return "down";
+  return "flat";
+}
+
+function renderStrengthTrends(data) {
+  const container = document.getElementById("strength-trends");
+  container.innerHTML = "";
+
+  Object.values(data).forEach(ex => {
+    const weeks = Object.keys(ex.weeks).sort((a, b) => a - b);
+
+    if (weeks.length < 2) return; // evita ruido
+
+    const firstWeeks = weeks.slice(0, 2).flatMap(w => ex.weeks[w]);
+    const lastWeeks = weeks.slice(-2).flatMap(w => ex.weeks[w]);
+
+    const startAvg = avg(firstWeeks);
+    const endAvg = avg(lastWeeks);
+    const trend = calcTrend(startAvg, endAvg);
+
+    const icon =
+      trend === "up" ? "↑" :
+      trend === "down" ? "↓" : "→";
+
+    container.innerHTML += `
+     <div class="strength-row clickable"
+          data-exercise="${ex.name}"
+          data-start="${startAvg}"
+          data-end="${endAvg}">
+       <span class="exercise">${ex.name}</span>
+       <span class="avg">${Math.round(endAvg)} kg</span>
+       <span class="trend ${trend}">${icon}</span>
+     </div>
+   `;
+  });
+}
+
+async function openExerciseChart(exerciseName, start, end) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select("week_number, weight")
+    .eq("user_id", user.id)
+    .eq("exercise_name", exerciseName)
+    .order("week_number");
+
+  if (error || !data.length) return;
+
+  renderMiniChart(exerciseName, data, start, end);
+}
+
+function renderMiniChart(name, data, start, end) {
+  document.getElementById("modal-title").textContent = name;
+  document.getElementById("exercise-modal").classList.remove("hidden");
+
+  const weeks = [...new Set(data.map(d => d.week_number))];
+
+  const avgByWeek = weeks.map(w => {
+    const arr = data.filter(d => d.week_number === w).map(d => d.weight);
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
+  });
+
+  const pctChange = (((end - start) / start) * 100).toFixed(1);
+
+  const ctx = document.getElementById("mini-chart");
+
+  if (window.miniChart) window.miniChart.destroy();
+
+  window.miniChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: weeks.map(w => `Semana ${w}`),
+      datasets: [{
+        data: avgByWeek,
+        borderWidth: 2,
+        tension: 0.3
+      }]
+    },
+    options: {
+      plugins: {
+        tooltip: {
+          callbacks: {
+            afterBody: () => `Cambio total: ${pctChange}%`
+          }
+        },
+        legend: { display: false }
+      }
+    }
+  });
+}
+
+function closeModal() {
+  const modal = document.getElementById("exercise-modal");
+  modal.classList.add("hidden");
+
+  if (window.miniChart) {
+    window.miniChart.destroy();
+    window.miniChart = null;
+  }
+}
+
+function updateStatsMesocycleLabel() {
+  const select = document.getElementById("stats-mesocycle");
+  const label = document.getElementById("stats-mesocycle-label");
+
+  if (!select || !label) return;
+
+  const selectedOption = select.options[select.selectedIndex];
+
+  if (!select.value) {
+    label.textContent = "Todos los mesociclos";
+  } else {
+    label.textContent = selectedOption.textContent;
+  }
+}
 
 /* ======================
    RENDER EJERCICIOS DÍA
@@ -740,65 +944,37 @@ function renderStatsView() {
   const statsView = document.getElementById("stats");
   if (!statsView) return;
 
-  statsView.innerHTML = `
-    <h2>📊 Estadísticas</h2>
-
-    <div class="stats-control">
-      <label>Mesociclo</label>
-      <select id="stats-mesocycle">
-        <option value="">Todos</option>
-      </select>
-    </div>
-
-    <div id="stats-summary" class="stats-grid">
-      <div class="stat-card">
-        <strong id="total-sets">–</strong>
-        <span>Series totales</span>
-      </div>
-      <div class="stat-card">
-        <strong id="total-volume">–</strong>
-        <span>Volumen total (kg)</span>
-      </div>
-      <div class="stat-card">
-        <strong id="total-exercises">–</strong>
-        <span>Ejercicios únicos</span>
-      </div>
-    </div>
-
-    <h3>🏆 Mejores marcas</h3>
-    <div id="pr-table" class="pr-table"></div>
-
-    <h3>📈 Progreso de fuerza</h3>
-    <canvas id="strength-chart"></canvas>
-
-    <h3>📦 Volumen por ejercicio</h3>
-    <div id="exercise-volume-list"></div>
-
-    <h3>🔄 Comparación de mesociclos</h3>
-    <div id="mesocycle-comparison"></div>
-  `;
-
   // 🔥 Primero cargar mesociclos
   loadStatsMesocycles();
 
   // 🔥 Stats globales (todos los datos)
-  loadStatsOverview();
-  loadPRTable();
-  loadStrengthChart();
-  loadExerciseVolumeList();
+   loadStatsOverview();
+   loadPRTable();
+   loadStrengthChart();
+   loadExerciseVolumeList();
    loadMesocycleComparison();
+   loadSessionsKPI();
+   loadVolumeKPI();
 
   // 🔥 Filtro por mesociclo
   document.getElementById("stats-mesocycle").onchange = e => {
-    const mesocycleId = e.target.value || null;
-
-    loadStatsOverview(mesocycleId);
-    loadPRTable(mesocycleId);
-    loadStrengthChart(mesocycleId);
-    loadExerciseVolumeList(mesocycleId);
-  };
+     const mesocycleId = e.target.value || null;
+   
+     updateStatsMesocycleLabel(); // 👈 NUEVO
+   
+     loadStatsOverview(mesocycleId);
+     loadPRTable(mesocycleId);
+     loadStrengthChart(mesocycleId);
+     loadExerciseVolumeList(mesocycleId);
+   
+     if (mesocycleId) {
+       loadVolumeKPI(mesocycleId);
+       loadPRsKPI(mesocycleId);
+       loadSessionsKPI(mesocycleId);
+       loadStrengthTrends(mesocycleId);
+     }
+   };
 }
-
 
 /* ======================
    CARGA STATS + GRAFICA
@@ -853,7 +1029,7 @@ async function loadPRTable(mesocycleId = null) {
 
   let query = supabase
     .from("exercise_prs")
-    .select("exercise_name, pr_weight")
+    .select("exercise_name, pr_weight, mesocycle_id")
     .eq("user_id", user.id);
 
   if (mesocycleId) {
@@ -874,78 +1050,191 @@ async function loadPRTable(mesocycleId = null) {
     const row = document.createElement("div");
     row.className = "pr-row";
     row.innerHTML = `
-      <strong>${r.exercise_name}</strong>
-      <span>${r.pr_weight} kg</span>
-    `;
+     <strong>${r.exercise_name}</strong>
+     <span>${r.pr_weight} kg</span>
+     ${mesocycleId ? "" : `<small>mesociclo</small>`}
+   `;
     container.appendChild(row);
   });
 }
 
-async function loadMesocycleComparison() {
-  const container = document.getElementById("mesocycle-comparison");
-  if (!container) {
-    console.warn("⏳ mesocycle-comparison aún no está en el DOM");
+async function loadVolumeKPI(mesocycleId) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  let query = supabase
+    .from("exercise_records")
+    .select("weight, reps")
+    .eq("user_id", user.id);
+
+  if (mesocycleId) {
+    query = query.eq("mesocycle_id", mesocycleId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("❌ Error volumen", error);
     return;
   }
+
+  const totalVolume = data.reduce(
+    (sum, r) => sum + (r.weight || 0) * (r.reps || 0),
+    0
+  );
+
+  document.getElementById("kpi-volume").innerHTML = `
+    <h4>Volumen total</h4>
+    <strong>${Math.round(totalVolume).toLocaleString()} kg</strong>
+    <span class="kpi-sub">${mesocycleId ? "Mesociclo" : "Global"}</span>
+  `;
+}
+
+async function loadPRsKPI(mesocycleId) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user || !mesocycleId) return; // 👈 aquí SÍ es obligatorio
+
+  const { data, error } = await supabase
+    .from("mesocycle_prs")
+    .select("pr_count")
+    .eq("user_id", user.id)
+    .eq("mesocycle_id", mesocycleId)
+    .single();
+
+  if (error) {
+    console.error("❌ Error PRs", error);
+    return;
+  }
+
+  document.getElementById("kpi-prs").innerHTML = `
+    <h4>PRs</h4>
+    <strong>${data?.pr_count || 0}</strong>
+    <span class="kpi-sub">Récords personales</span>
+  `;
+}
+
+async function loadSessionsKPI(mesocycleId) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  let query = supabase
+    .from("exercise_records")
+    .select("week_number, day_number")
+    .eq("user_id", user.id);
+
+  if (mesocycleId) {
+    query = query.eq("mesocycle_id", mesocycleId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("❌ Error sesiones", error);
+    return;
+  }
+
+  const sessions = new Set(
+    data.map(r => `${r.week_number}-${r.day_number}`)
+  );
+
+  document.getElementById("kpi-sessions").innerHTML = `
+    <h4>Sesiones</h4>
+    <strong>${sessions.size}</strong>
+    <span class="kpi-sub">${mesocycleId ? "Mesociclo" : "Global"}</span>
+  `;
+}
+
+async function loadMesocycleComparison() {
+  const container = document.getElementById("mesocycle-comparison");
+  if (!container) return;
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  // Mesociclos
-  const { data: mesocycles, error: mError } = await supabase
+  const { data: mesocycles } = await supabase
     .from("mesocycles")
     .select("id, name")
+    .eq("user_id", user.id)
+    .order("created_at");
+
+  const { data: records } = await supabase
+    .from("exercise_records")
+    .select("mesocycle_id, exercise_name, weight, reps")
     .eq("user_id", user.id);
 
-  if (mError || !mesocycles) {
-    console.error("❌ Error cargando mesociclos", mError);
-    return;
-  }
-
-  // Stats por mesociclo
-  const { data: stats, error: sError } = await supabase
-    .from("mesocycle_stats")
-    .select("*")
-    .eq("user_id", user.id);
-
-  if (sError) {
-    console.error("❌ Error cargando mesocycle_stats", sError);
-  }
-
-  // PRs por mesociclo
-  const { data: prs, error: pError } = await supabase
+  const { data: prs } = await supabase
     .from("mesocycle_prs")
     .select("*")
     .eq("user_id", user.id);
 
-  if (pError) {
-    console.error("❌ Error cargando mesocycle_prs", pError);
-  }
-
-  // Mapear PRs por mesociclo
   const prMap = {};
-  (prs || []).forEach(p => {
-    prMap[p.mesocycle_id] = p.pr_count;
+  prs.forEach(p => prMap[p.mesocycle_id] = p.pr_count);
+
+  const statsByCycle = {};
+
+  records.forEach(r => {
+    if (!statsByCycle[r.mesocycle_id]) {
+      statsByCycle[r.mesocycle_id] = {
+        volume: 0,
+        exercises: {}
+      };
+    }
+
+    statsByCycle[r.mesocycle_id].volume +=
+      (r.weight || 0) * (r.reps || 0);
+
+    if (!statsByCycle[r.mesocycle_id].exercises[r.exercise_name]) {
+      statsByCycle[r.mesocycle_id].exercises[r.exercise_name] = [];
+    }
+
+    statsByCycle[r.mesocycle_id].exercises[r.exercise_name].push(r.weight);
   });
 
   container.innerHTML = "";
 
   mesocycles.forEach(m => {
-    const s = (stats || []).find(x => x.mesocycle_id === m.id);
-    const pr = prMap[m.id] || 0;
+    const s = statsByCycle[m.id];
+    if (!s) return;
+
+    const exerciseAverages = Object.values(s.exercises)
+      .map(arr => arr.reduce((a,b)=>a+b,0) / arr.length);
+
+    const avgStrength =
+      exerciseAverages.reduce((a,b)=>a+b,0) / exerciseAverages.length || 0;
 
     const div = document.createElement("div");
     div.className = "mesocycle-stat-card";
 
     div.innerHTML = `
       <h4>${m.name}</h4>
-      <p>Volumen: <strong>${(s?.total_volume || 0).toFixed(0)} kg</strong></p>
-      <p>Record Personal: <strong>${pr}</strong></p>
-      <p>Ejercicios: <strong>${s?.exercises || 0}</strong></p>
+      <p>Volumen: <strong>${Math.round(s.volume)} kg</strong></p>
+      <p>Record Personal: <strong>${prMap[m.id] || 0} ejercicios</strong></p>
+      <p>Fuerza media: <strong>${avgStrength.toFixed(1)} kg</strong></p>
     `;
 
     container.appendChild(div);
   });
+}
+
+function compareMesocycles(a, b) {
+  return {
+    strengthDiff: ((b.avgStrength - a.avgStrength) / a.avgStrength) * 100,
+    volumeDiff: ((b.volume - a.volume) / a.volume) * 100,
+    prsDiff: b.prs - a.prs
+  };
+}
+
+function mesocycleInsight(a, b) {
+  if (b.strength > a.strength && b.volume < a.volume)
+    return "Mejor eficiencia de fuerza";
+
+  if (b.volume > a.volume && b.prs === 0)
+    return "Mucho volumen, poco progreso";
+
+  if (b.prs > a.prs)
+    return "Ciclo óptimo para PRs";
+
+  return "Resultados similares";
 }
 
 function showPRBadge(exercise, weight) {
@@ -963,31 +1252,50 @@ function showPRBadge(exercise, weight) {
   setTimeout(() => badge.remove(), 3500);
 }
 
-async function loadStrengthChart(mesocycleId = null) {
+async function loadStrengthChart(mesocycleId = null, exerciseName = "") {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
+  const exerciseLabel = document.getElementById("strength-exercise-label");
+  const ctx = document.getElementById("strength-chart");
+  const backBtn = document.getElementById("back-to-general");
+
+  // Mostrar el nombre del ejercicio y el badge solo si es ejercicio individual
+  if (exerciseLabel) {
+    if (exerciseName) {
+      exerciseLabel.textContent = exerciseName;
+      exerciseLabel.classList.remove("hidden");
+      backBtn.classList.remove("hidden");
+      backBtn.classList.add("visible");
+    } else {
+      exerciseLabel.textContent = "";
+      exerciseLabel.classList.add("hidden");
+      backBtn.classList.remove("visible");
+      backBtn.classList.add("hidden");
+    }
+  }
+
+  // Consulta de datos
   let query = supabase
     .from("exercise_progress_chart")
     .select("day, total_volume")
     .eq("user_id", user.id)
-    .order("day");
+    .order("day", { ascending: true });
 
-  if (mesocycleId) {
-    query = query.eq("mesocycle_id", mesocycleId);
-  }
+  if (mesocycleId) query = query.eq("mesocycle_id", mesocycleId);
 
   const { data, error } = await query;
   if (error) {
     console.error(error);
     return;
   }
+  if (!data || data.length === 0) return;
+
+  // Guardar datos generales
+  if (!exerciseName) generalStrengthData = data;
 
   const labels = data.map(r => r.day);
   const values = data.map(r => r.total_volume);
-
-  const ctx = document.getElementById("strength-chart");
-  if (!ctx) return;
 
   if (window.statsChart) window.statsChart.destroy();
 
@@ -998,13 +1306,69 @@ async function loadStrengthChart(mesocycleId = null) {
       datasets: [{
         label: "Volumen total",
         data: values,
-        tension: 0.3,
-        fill: true
+        tension: 0.35,
+        fill: true,
+        borderColor: "#b11226",
+        backgroundColor: "rgba(177,18,38,0.25)",
+        pointBackgroundColor: "#ff3b3b",
+        pointBorderColor: "#120b0f",
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        borderWidth: 2
       }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: true, position: "top" } },
+      scales: { y: { beginAtZero: true } }
     }
   });
 }
 
+// Evento para volver a la evolución general
+document.getElementById("back-to-general").addEventListener("click", () => {
+  if (!generalStrengthData) return;
+
+  const ctx = document.getElementById("strength-chart");
+  if (window.statsChart) window.statsChart.destroy();
+
+  const labels = generalStrengthData.map(r => r.day);
+  const values = generalStrengthData.map(r => r.total_volume);
+
+  window.statsChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Volumen total",
+        data: values,
+        tension: 0.35,
+        fill: true,
+        borderColor: "#b11226",
+        backgroundColor: "rgba(177,18,38,0.25)",
+        pointBackgroundColor: "#ff3b3b",
+        pointBorderColor: "#120b0f",
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: true, position: "top" } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  const exerciseLabel = document.getElementById("strength-exercise-label");
+  const backBtn = document.getElementById("back-to-general");
+
+  if (exerciseLabel) exerciseLabel.classList.add("hidden");
+  if (backBtn) {
+    backBtn.classList.remove("visible");
+    backBtn.classList.add("hidden");
+  }
+});
 async function loadExerciseVolumeList(mesocycleId = null) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
@@ -1037,6 +1401,11 @@ async function loadExerciseVolumeList(mesocycleId = null) {
         <span>${r.lifetime_volume.toFixed(0)} kg</span>
         <small>${r.lifetime_sets} sets</small>
       `;
+      
+      div.onclick = () => {
+        loadExerciseProgress(r.exercise_name);
+      };
+      
       container.appendChild(div);
     });
 }
@@ -1045,6 +1414,18 @@ async function loadExerciseProgress(exerciseName) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
+  const exerciseLabel = document.getElementById("strength-exercise-label");
+  const backBtn = document.getElementById("back-to-general");
+  const ctx = document.getElementById("strength-chart");
+
+  // Mostrar nombre del ejercicio y el botón de volver
+  if (exerciseLabel) {
+    exerciseLabel.textContent = exerciseName;
+    exerciseLabel.classList.remove("hidden");
+  }
+  if (backBtn) backBtn.classList.remove("hidden");
+
+  // Traer datos del ejercicio
   const { data, error } = await supabase
     .from("exercise_progress_chart")
     .select("day, max_weight, total_volume")
@@ -1052,16 +1433,25 @@ async function loadExerciseProgress(exerciseName) {
     .eq("exercise_name", exerciseName)
     .order("day");
 
+  // Si hay error o no hay datos
   if (error || !data.length) {
-    console.warn("Sin datos", error);
+    showExerciseWarning("No se tienen suficientes datos para graficar");
     return;
   }
+
+  // Si hay menos de 2 registros, mostrar advertencia y no graficar
+  if (data.length < 2) {
+    showExerciseWarning("No se tienen suficientes datos para graficar");
+    return;
+  }
+
+  // Limpiar cualquier mensaje previo
+  hideExerciseWarning();
 
   const labels = data.map(d => d.day);
   const weights = data.map(d => d.max_weight);
   const volumes = data.map(d => d.total_volume);
 
-  const ctx = document.getElementById("strength-chart");
   if (!ctx) return;
 
   if (window.statsChart) window.statsChart.destroy();
@@ -1074,19 +1464,26 @@ async function loadExerciseProgress(exerciseName) {
         {
           label: "Peso máximo",
           data: weights,
-          tension: 0.3
+          tension: 0.3,
+          borderColor: "#b11226",
+          backgroundColor: "rgba(177,18,38,0.25)",
+          yAxisID: "y"
         },
         {
           label: "Volumen",
           data: volumes,
           tension: 0.3,
-          yAxisID: "y1"
+          yAxisID: "y1",
+          borderColor: "white",
+          backgroundColor: "rgba(0,0,0,0.1)"
         }
       ]
     },
     options: {
+      responsive: true,
+      plugins: { legend: { display: true, position: "top" } },
       scales: {
-        y: { title: { display: true, text: "Peso (kg)" }},
+        y: { title: { display: true, text: "Peso (kg)" } },
         y1: {
           position: "right",
           grid: { drawOnChartArea: false },
@@ -1095,6 +1492,37 @@ async function loadExerciseProgress(exerciseName) {
       }
     }
   });
+}
+
+/* ================= BADGE FUNCIONES ================= */
+function showExerciseWarning(message) {
+  const exerciseLabel = document.getElementById("strength-exercise-label");
+  const backBtn = document.getElementById("back-to-general");
+  const ctx = document.getElementById("strength-chart");
+
+  // Ocultar gráfico
+  if (ctx) ctx.style.display = "none";
+
+  // Mostrar mensaje de advertencia
+  if (exerciseLabel) {
+    exerciseLabel.textContent = message;
+    exerciseLabel.classList.remove("hidden");
+    exerciseLabel.classList.add("warning"); // puedes agregar estilo rojo
+  }
+
+  // Mantener botón de volver visible
+  if (backBtn) backBtn.classList.remove("hidden");
+}
+
+function hideExerciseWarning() {
+  const exerciseLabel = document.getElementById("strength-exercise-label");
+  const ctx = document.getElementById("strength-chart");
+
+  if (exerciseLabel) {
+    exerciseLabel.classList.remove("warning");
+  }
+
+  if (ctx) ctx.style.display = "block";
 }
 
 async function loadStatsMesocycles() {
@@ -1135,3 +1563,24 @@ function getCoachInsight(trend) {
 document.addEventListener("DOMContentLoaded", () => {
   initAuth();        
 });
+
+document.addEventListener("click", e => {
+  const row = e.target.closest(".strength-row");
+  if (!row) return;
+
+  const exercise = row.dataset.exercise;
+  const start = Number(row.dataset.start);
+  const end = Number(row.dataset.end);
+
+  openExerciseChart(exercise, start, end);
+});
+
+document.getElementById("close-modal-btn")
+  .addEventListener("click", closeModal);
+
+document.getElementById("exercise-modal")
+  .addEventListener("click", e => {
+    if (e.target.id === "exercise-modal") {
+      closeModal();
+    }
+  });
