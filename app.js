@@ -1404,34 +1404,16 @@ async function loadStatsMesocycles() {
   }
 
   const select = document.getElementById("stats-mesocycle");
-  const statsMesocycleLabel = document.getElementById('stats-mesocycle-label');
+  select.innerHTML = `<option value="">Selecciona mesociclo</option>`;
 
-  // Limpiar opciones
-  select.innerHTML = `<option value="">Todos los mesociclos</option>`;
-
-  // Llenar opciones
   data.forEach(m => {
     const opt = document.createElement("option");
-    opt.value = m.name;  // <-- usar el nombre para mostrarlo
+    opt.value = m.id;
     opt.textContent = m.name;
     select.appendChild(opt);
+   const select = document.getElementById("stats-mesocycle");
   });
-
-  // Listener para actualizar el subtítulo
-  select.addEventListener('change', () => {
-    const selected = select.value;
-    statsMesocycleLabel.textContent = selected ? selected : 'Todos los mesociclos';
-
-    // efecto fade
-    statsMesocycleLabel.classList.remove('visible');  // reinicia animación
-    void statsMesocycleLabel.offsetWidth;             // trigger reflow
-    statsMesocycleLabel.classList.add('visible');    // fade in
-  });
-
-  // Opcional: activar el fade desde el inicio
-  statsMesocycleLabel.classList.add('visible');
 }
-
 
 function getCoachInsight(trend) {
   if (trend === "up") return "💪 Excelente progresión, sigue así";
