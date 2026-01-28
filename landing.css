@@ -409,3 +409,39 @@ body {
   color: #6f5a60;
   letter-spacing: 0.05em;
 }
+
+/* ===== Animaciones suaves ===== */
+
+.fade-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-in {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.fade-in.visible {
+  opacity: 1;
+}
+
+/* Micro animación hover premium */
+.cta-btn,
+.feature,
+.signup-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature:hover,
+.signup-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
