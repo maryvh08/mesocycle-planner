@@ -1185,6 +1185,27 @@ h3 {
 .fav-btn:active .star {
   transform: scale(0.9);
 }
+
+.fav-text {
+  font-size: 12px;
+  margin-left: 4px;
+  color: #777;
+}
+
+.fav-btn.active .fav-text {
+  color: #fff;
+}
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+
+.fav-btn.active .star {
+  animation: pop 0.25s ease;
+}
+
 /* Animation */
 @keyframes slideDown {
   from {
