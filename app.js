@@ -1631,8 +1631,6 @@ function getCoachInsight(trend) {
 // =====================
 // TUTORIALES
 // =====================
-
-
 function renderTutorials(exercises) {
   const list = document.getElementById('tutorial-list');
   list.innerHTML = '';
@@ -1659,8 +1657,15 @@ function renderTutorials(exercises) {
 }
 
 function openTutorial(name, tutorial) {
+  const embedUrl = toEmbedUrl(tutorial.video_url);
+
+  if (!embedUrl) {
+    console.error('No se pudo generar embed URL', tutorial.video_url);
+    return;
+  }
+
   document.getElementById('tutorial-title').textContent = name;
-  document.getElementById('tutorial-video').src = tutorial.video_url;
+  document.getElementById('tutorial-video').src = embedUrl;
   document.getElementById('tutorial-cues').textContent = tutorial.cues;
 
   document.getElementById('tutorial-modal').classList.remove('hidden');
@@ -1720,6 +1725,30 @@ function handleTutorialSelect(e) {
   if (!exercise || !exercise.exercise_tutorials.length) return;
 
   openTutorial(exercise.name, exercise.exercise_tutorials[0]);
+}
+
+function toEmbedUrl(url) {
+  try {
+    const parsedUrl = new URL(url);
+
+    // https://www.youtube.com/watch?v=XXXX
+    if (parsedUrl.hostname.includes('youtube.com')) {
+      const videoId = parsedUrl.searchParams.get('v');
+      if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}`;
+      }
+    }
+
+    // https://youtu.be/XXXX
+    if (parsedUrl.hostname === 'youtu.be') {
+      const videoId = parsedUrl.pathname.slice(1);
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+  } catch (e) {
+    console.error('URL inválida:', url);
+  }
+
+  return '';
 }
 
 // =====================
