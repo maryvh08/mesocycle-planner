@@ -1732,18 +1732,18 @@ function renderTutorials(exercises) {
     card.className = 'tutorial-card';
 
     card.innerHTML = `
-      <div class="tutorial-info">
-        <h4>${ex.name}</h4>
-        <span>${ex.subgroup} · ${ex.type}</span>
-      </div>
-
-      <div class="tutorial-actions">
-        <button class="fav-btn ${favorite ? 'active' : ''}">
-           <span class="star">★</span>
-           <span class="fav-text">Favorito</span>
-         </button>
-      </div>
-    `;
+     <div class="tutorial-info">
+       <h4>${ex.name}</h4>
+       <span>${ex.subgroup} · ${ex.type}</span>
+     </div>
+   
+     <div class="tutorial-actions">
+       <button class="fav-btn ${favorite ? 'active' : ''}" title="Favorito">
+         <span class="star">★</span>
+       </button>
+       <button class="play-btn">▶ Ver</button>
+     </div>
+   `;
 
     card.querySelector('.play-btn').onclick = () =>
       openTutorial(ex.name, ex.exercise_tutorials[0]);
