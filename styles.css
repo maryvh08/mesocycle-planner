@@ -1126,3 +1126,11 @@ h3 {
     transform: translateY(0);
   }
 }
+
+.video-wrapper iframe {
+  pointer-events: auto;
+}
+
+.modal {
+  pointer-events: all;
+}
