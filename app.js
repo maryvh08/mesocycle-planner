@@ -1650,8 +1650,54 @@ async function loadTutorials() {
     return;
   }
 
-  tutorialsData = data; // importante para el buscador
+  tutorialsData = data;
+  populateFilters(data);
   renderTutorials(data);
+}
+
+function populateFilters(exercises) {
+  const typeSelect = document.getElementById('filter-type');
+  const subgroupSelect = document.getElementById('filter-subgroup');
+
+  const types = [...new Set(exercises.map(e => e.type).filter(Boolean))];
+  const subgroups = [...new Set(exercises.map(e => e.subgroup).filter(Boolean))];
+
+  types.forEach(type => {
+    const option = document.createElement('option');
+    option.value = type;
+    option.textContent = type;
+    typeSelect.appendChild(option);
+  });
+
+  subgroups.forEach(subgroup => {
+    const option = document.createElement('option');
+    option.value = subgroup;
+    option.textContent = subgroup;
+    subgroupSelect.appendChild(option);
+  });
+}
+
+function applyFilters() {
+  const search = document.getElementById('tutorial-search').value.toLowerCase();
+  const type = document.getElementById('filter-type').value;
+  const subgroup = document.getElementById('filter-subgroup').value;
+
+  const filtered = tutorialsData.filter(ex => {
+    if (!ex.exercise_tutorials || !ex.exercise_tutorials.length) return false;
+
+    const matchesSearch =
+      ex.name.toLowerCase().includes(search);
+
+    const matchesType =
+      !type || ex.type === type;
+
+    const matchesSubgroup =
+      !subgroup || ex.subgroup === subgroup;
+
+    return matchesSearch && matchesType && matchesSubgroup;
+  });
+
+  renderTutorials(filtered);
 }
 
 function renderTutorials(exercises) {
@@ -1729,7 +1775,7 @@ function toEmbedUrl(url) {
 }
 
 // =====================
-// INIT
+// LISTENERS
 // =====================
 supabase.auth.onAuthStateChange((_e, session) => {
   session ? showApp() : showLogin();
@@ -1783,5 +1829,23 @@ searchInput.addEventListener('input', (e) => {
 
   renderTutorials(filtered);
 });
+
+document.getElementById('tutorial-search')
+  .addEventListener('input', applyFilters);
+
+document.getElementById('filter-type')
+  .addEventListener('change', applyFilters);
+
+document.getElementById('filter-subgroup')
+  .addEventListener('change', applyFilters);
+
+document.getElementById('clear-filters')
+  .addEventListener('click', () => {
+    document.getElementById('tutorial-search').value = '';
+    document.getElementById('filter-type').value = '';
+    document.getElementById('filter-subgroup').value = '';
+
+    renderTutorials(tutorialsData);
+  });
 
 loadTutorials();
