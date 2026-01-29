@@ -66,6 +66,7 @@
       <button class="menu-item" data-tab="historial-tab">Historial</button>
       <button class="menu-item" data-tab="registro-tab">Registro</button>
       <button class="menu-item" data-tab="stats">Estadísticas</button>
+      <button class="menu-item" data-tab="tutorials-view">Tutoriales</button>
     </nav>
 
     <!-- Main content -->
@@ -214,6 +215,41 @@
       
         </div>
       </section>
+
+      !-- ================= TUTORIALES ================= -->
+      <section id="tutorials-view" class="screen hidden">
+        <h2>📹 Tutoriales de ejercicios</h2>
+      
+        <input
+          type="text"
+          id="tutorial-search"
+          placeholder="Buscar ejercicio..."
+          class="search-input"
+        />
+      
+        <div id="tutorial-list" class="tutorial-list"></div>
+      </section>
+      
+      <!-- Modal -->
+      <div id="tutorial-modal" class="modal hidden">
+        <div class="modal-content">
+          <button class="close-btn" onclick="closeTutorial()">×</button>
+      
+          <h3 id="tutorial-title"></h3>
+      
+          <div class="video-wrapper">
+            <iframe
+              id="tutorial-video"
+              src=""
+              frameborder="0"
+              allowfullscreen
+            ></iframe>
+          </div>
+      
+          <p class="tutorial-cues" id="tutorial-cues"></p>
+        </div>
+      </div>
+
 
 </div>
 
