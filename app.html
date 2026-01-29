@@ -224,12 +224,15 @@
         <!-- Buscador -->
         <div class="tutorial-filters">
           <input id="tutorial-search" class="search-input" placeholder="Buscar ejercicio..." />
-          <select id="filter-type" class="search-input">
-            <option value="">Tipo</option>
-          </select>
-          <select id="filter-subgroup" class="search-input">
-            <option value="">Subgrupo</option>
-          </select>
+          <div class="multi-filter" id="type-filter">
+            <button class="filter-btn">Tipo ▾</button>
+            <div class="filter-dropdown" id="type-options"></div>
+          </div>
+          
+          <div class="multi-filter" id="subgroup-filter">
+            <button class="filter-btn">Subgrupo ▾</button>
+            <div class="filter-dropdown" id="subgroup-options"></div>
+          </div>
           <select id="sort-by" class="search-input">
             <option value="">Ordenar por</option>
             <option value="name-asc">Nombre (A–Z)</option>
