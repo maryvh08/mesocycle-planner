@@ -1712,18 +1712,22 @@ function renderTutorials(exercises) {
       </div>
 
       <div class="tutorial-actions">
-        <button class="fav-btn">${favorite ? '⭐' : '☆'}</button>
+        <button class="fav-btn ${favorite ? 'active' : ''}" title="Favorito">
+          <span class="star">★</span>
+        </button>
         <button class="play-btn">▶ Ver</button>
       </div>
     `;
 
+    // Abrir modal
     card.querySelector('.play-btn').onclick = () =>
       openTutorial(ex.name, ex.exercise_tutorials[0]);
 
+    // Toggle favorito
     card.querySelector('.fav-btn').onclick = (e) => {
       e.stopPropagation();
       toggleFavorite(ex.id);
-      applyFilters(); // refresca UI
+      applyFilters(); // refresca la UI y mantiene filtros
     };
 
     list.appendChild(card);
