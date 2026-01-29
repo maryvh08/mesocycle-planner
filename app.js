@@ -1681,27 +1681,17 @@ function closeTutorial() {
   iframe.src = '';
 }
 
-async function loadTutorials() {
-  const { data, error } = await supabase
-    .from('exercises')
-    .select(`
-      id,
-      name,
-      type,
-      subgroup,
-      exercise_tutorials (
-        video_url,
-        cues
-      )
-    `);
+function openTutorial(name, tutorial) {
+  const embedUrl = toEmbedUrl(tutorial.video_url);
+  if (!embedUrl) return;
 
-  if (error) {
-    console.error(error);
-    return;
-  }
+  document.getElementById('tutorial-title').textContent = name;
+  document.getElementById('tutorial-video').src = embedUrl;
 
-  tutorialsData = data;
-  populateTutorialSelect(data);
+  document.getElementById('tutorial-cues').innerHTML =
+    `<strong>Consejo:</strong> ${tutorial.cues}`;
+
+  document.getElementById('tutorial-modal').classList.remove('hidden');
 }
 
 function populateTutorialSelect(exercises) {
