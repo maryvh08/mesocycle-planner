@@ -1738,8 +1738,9 @@ function renderTutorials(exercises) {
       </div>
 
       <div class="tutorial-actions">
-        <button class="fav-btn ${favorite ? 'active' : ''}" aria-label="Favorito">
+        <button class="fav-btn ${favorite ? 'active' : ''}">
            <span class="star">★</span>
+           <span class="fav-text">Favorito</span>
          </button>
       </div>
     `;
