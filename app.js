@@ -206,8 +206,6 @@ function initDaySelector() {
 /* ======================
    MESOCYCLES
 ====================== */
-createBtn.onclick = saveMesocycle;
-
 async function saveMesocycle() {
   const name = mesocycleNameInput.value.trim();
   const weeks = Number(mesocycleWeeksInput.value);
