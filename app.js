@@ -46,6 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Login / Logout
   document.getElementById("login-btn")?.addEventListener("click", login);
   document.getElementById("logout-btn")?.addEventListener("click", logout);
+   createBtn?.addEventListener("click", saveMesocycle);
 
   // Signup
   const signupBtn = document.getElementById("signup-btn");
