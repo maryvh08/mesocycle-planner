@@ -1134,3 +1134,33 @@ h3 {
 .modal {
   pointer-events: all;
 }
+
+.tutorial-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tutorial-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px;
+  border-radius: 10px;
+  background: #f5f5f5;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tutorial-item:hover {
+  background: #eaeaea;
+}
+
+.tutorial-info span {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.tutorial-play {
+  font-size: 1.2rem;
+}
