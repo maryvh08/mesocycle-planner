@@ -79,22 +79,17 @@ const observer = new IntersectionObserver(
   (entries, observer) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        // Ajoute la classe "visible" quand l'élément apparaît
         entry.target.classList.add("visible");
-        // Arrête d'observer cet élément
         observer.unobserve(entry.target);
       }
     });
   },
   {
-    threshold: 0.15 // Déclenchement quand 15% de l'élément est visible
-  }
+    threshold: 0.15 
 );
 
-// Sélectionne tous les éléments à observer
 const elements = document.querySelectorAll(".fade-up, .fade-in");
 
-// Vérifie que des éléments existent avant d'observer
 if (elements.length) {
   elements.forEach(el => observer.observe(el));
 }
