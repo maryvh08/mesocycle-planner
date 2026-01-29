@@ -1632,27 +1632,6 @@ function getCoachInsight(trend) {
 // TUTORIALES
 // =====================
 
-async function loadTutorials() {
-  const { data, error } = await supabase
-    .from('exercises')
-    .select(`
-      id,
-      name,
-      type,
-      subgroup,
-      exercise_tutorials (
-        video_url,
-        cues
-      )
-    `);
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  renderTutorials(data);
-}
 
 function renderTutorials(exercises) {
   const list = document.getElementById('tutorial-list');
