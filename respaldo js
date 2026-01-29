@@ -1,3 +1,4 @@
+
 console.log("🔥 app.js cargado");
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
@@ -39,39 +40,111 @@ const tabs = document.querySelectorAll(".tab-btn");
 const statsView = document.getElementById("stats");
 
 /* ======================
-   AUTH
+   DOM CONTENT LOADED
 ====================== */
-function initAuth() {
-  document.getElementById("login-btn").onclick = login;
-  document.getElementById("logout-btn").onclick = logout;
+document.addEventListener("DOMContentLoaded", () => {
+  /* ---------- AUTH HANDLERS ---------- */
+  // Login / Logout
+  document.getElementById("login-btn")?.addEventListener("click", login);
+  document.getElementById("logout-btn")?.addEventListener("click", logout);
 
-  supabase.auth.onAuthStateChange((_e, session) => {
-    session ? showApp() : showLogin();
-  });
-}
+  // Signup
+  const signupBtn = document.getElementById("signup-btn");
+  if (signupBtn) {
+    signupBtn.onclick = async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const msg = document.getElementById("signup-msg");
 
+      if (!email || !password) {
+        msg.textContent = "Ingresa email y contraseña.";
+        return;
+      }
+
+      msg.textContent = "Creando cuenta...";
+      try {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) throw error;
+        msg.textContent = "Cuenta creada. Redirigiendo...";
+        setTimeout(() => (window.location.href = "app.html"), 1000);
+      } catch (err) {
+        console.error(err);
+        msg.textContent = err.message;
+      }
+    };
+  }
+
+  // Reset password
+  const resetBtn = document.getElementById("reset-btn");
+  if (resetBtn) {
+    resetBtn.onclick = async () => {
+      const email = document.getElementById("reset-email").value;
+      const msg = document.getElementById("reset-msg");
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo:
+          "https://maryvh08.github.io/mesocycle-planner/update-password.html",
+      });
+
+      msg.textContent = error ? error.message : "Revisa tu email para continuar";
+    };
+  }
+
+  // Update password
+  const updateBtn = document.getElementById("update-btn");
+  if (updateBtn) {
+    updateBtn.onclick = async () => {
+      const password = document.getElementById("new-password").value;
+      const msg = document.getElementById("update-msg");
+
+      const { error } = await supabase.auth.updateUser({ password });
+      msg.textContent = error ? error.message : "Contraseña actualizada";
+      if (!error) setTimeout(() => (location.href = "app.html"), 1500);
+    };
+  }
+
+  /* ---------- INTERSECTION OBSERVER ---------- */
+  const observer = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.15 }
+  );
+
+  const elements = document.querySelectorAll(".fade-up, .fade-in");
+  if (elements.length) elements.forEach((el) => observer.observe(el));
+});
+
+/* ======================
+   AUTH FUNCTIONS
+====================== */
 async function login() {
   const { error } = await supabase.auth.signInWithPassword({
     email: emailInput.value,
-    password: passwordInput.value
+    password: passwordInput.value,
   });
   message.textContent = error?.message || "";
-}
-
-async function signup() {
-  const { error } = await supabase.auth.signUp({
-    email: emailInput.value,
-    password: passwordInput.value
-  });
-  message.textContent = error ? error.message : "Usuario creado";
 }
 
 async function logout() {
   await supabase.auth.signOut();
 }
 
+async function signup() {
+  const { error } = await supabase.auth.signUp({
+    email: emailInput.value,
+    password: passwordInput.value,
+  });
+  message.textContent = error ? error.message : "Usuario creado";
+}
+
 /* ======================
-   VIEW
+   VIEW FUNCTIONS
 ====================== */
 function showLogin() {
   loginView.classList.remove("hidden");
@@ -96,7 +169,6 @@ function showError(container, message) {
     </div>
   `;
 }
-
 
 /* ======================
    TABS
@@ -135,8 +207,6 @@ function initDaySelector() {
 /* ======================
    MESOCYCLES
 ====================== */
-createBtn.onclick = saveMesocycle;
-
 async function saveMesocycle() {
   const name = mesocycleNameInput.value.trim();
   const weeks = Number(mesocycleWeeksInput.value);
@@ -463,10 +533,6 @@ async function deleteMesocycle(mesocycleId) {
 /* ======================
    REGISTRO
 ====================== */
-registroSelect.onchange = () => {
-  if (registroSelect.value) openRegistro(registroSelect.value);
-};
-
 async function openRegistro(mesocycleId) {
   // activar tab manualmente (seguro)
   document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
@@ -1568,8 +1634,8 @@ function getCoachInsight(trend) {
 // =====================
 // INIT
 // =====================
-document.addEventListener("DOMContentLoaded", () => {
-  initAuth();        
+supabase.auth.onAuthStateChange((_e, session) => {
+  session ? showApp() : showLogin();
 });
 
 document.addEventListener("click", e => {
