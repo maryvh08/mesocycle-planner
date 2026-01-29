@@ -1802,8 +1802,12 @@ function toggleFavorite(id) {
 }
 
 function populateMultiFilters(exercises) {
+  console.log('Ejercicios recibidos:', exercises.length);
+
   const typeContainer = document.getElementById('type-options');
   const subgroupContainer = document.getElementById('subgroup-options');
+
+  console.log(typeContainer, subgroupContainer);
 
   typeContainer.innerHTML = '';
   subgroupContainer.innerHTML = '';
