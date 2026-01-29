@@ -1172,8 +1172,7 @@ h3 {
 
 /* Activo (favorito) */
 .fav-btn.active {
-  background: #f5c518;
-  border-color: #f5c518;
+  box-shadow: 0 0 0 2px rgba(245, 197, 24, 0.35);
 }
 
 .fav-btn.active .star {
