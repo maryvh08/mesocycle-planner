@@ -1153,8 +1153,12 @@ h3 {
   transition: all 0.2s ease;
 }
  .fav-btn.active {
-  background-color: #f5c518 !important;
-  border-color: #f5c518 !important;
+  background-color: #f5c518;   
+  border-color: #f5c518;
+}
+
+.fav-btn.active .star {
+  color: #fff;
 }
 
 .fav-btn .star {
@@ -1177,11 +1181,6 @@ h3 {
 /* Activo (favorito) */
 .fav-btn.active {
   box-shadow: 0 0 0 2px rgba(245, 197, 24, 0.35);
-}
-
-.fav-btn.active .star {
-  color: #fff;
-  transform: scale(1.15);
 }
 
 /* Click animation */
