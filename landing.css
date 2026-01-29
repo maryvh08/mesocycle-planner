@@ -1,81 +1,588 @@
-body {
-  margin: 0;
-  font-family: system-ui, sans-serif;
-  background: #0b0b0d;
-  color: #fff;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+
+* {
+  box-sizing: border-box;
 }
 
+/* ================== VARIABLES ================== */
+:root {
+  --bg-main: #0b0b0d;
+  --bg-card: #141418;
+  --bg-soft: #1c1c22;
+
+  --accent: #b11226;        /* ROJO SANGRE */
+  --accent-light: #ff3b3b;
+  --accent-glow: #b1122644;
+
+  --text-main: #ffffff;
+  --text-muted: #b3b3b3;
+
+  --border: #2a2a30;
+}
+
+/* ================== RESET ================== */
+* {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  background: #050507;
+  color: #eaeaea;
+  line-height: 1.6;
+}
+
+/* ================== HERO ================== */
 .hero {
-  min-height: 90vh;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #2a0a0a, #050507);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at top, #220000, #000);
+  padding: 4rem 2rem;
+}
+
+.hero-content {
+  max-width: 900px;
   text-align: center;
 }
 
 .hero h1 {
-  font-size: 3rem;
-  color: #ff3b3b;
+  font-size: 4rem;
+  font-weight: 900;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+}
+
+.hero h1 span {
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .hero p {
-  color: #ccc;
-  max-width: 500px;
-  margin: 1rem auto;
+  font-size: 1.3rem;
+  color: #aaa;
+  max-width: 600px;
+  margin: 0 auto 2.5rem;
 }
 
+/* ================== BUTTONS ================== */
 .cta-btn {
-  background: #ff3b3b;
-  padding: 1rem 2rem;
-  color: black;
+  display: inline-block;
+  padding: 1rem 2.2rem;
+  margin: 0.5rem;
+  border-radius: 12px;
+  font-weight: 700;
   text-decoration: none;
-  border-radius: 8px;
-  font-weight: bold;
+  transition: all 0.25s ease;
 }
 
+.cta-btn:first-of-type {
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  color: #fff;
+}
+
+.cta-btn:last-of-type {
+  border: 1px solid #333;
+  color: #ccc;
+  background: rgba(255,255,255,0.02);
+}
+
+.cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 40px var(--accent-glow);
+}
+
+/* ================== FEATURES ================== */
 .features {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
-  padding: 3rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 2rem;
-  background: #111;
+  padding: 6rem 10%;
+  background: #050507;
 }
 
 .feature {
-  background: #161616;
+  background: #0e0e14;
+  border: 1px solid #1a1a24;
   padding: 2rem;
-  border-radius: 10px;
+  border-radius: 16px;
+  transition: all 0.3s ease;
 }
 
+.feature:hover {
+  transform: translateY(-6px);
+  border-color: var(--accent);
+  box-shadow: 0 20px 50px var(--accent-glow);
+}
+
+.feature h3 {
+  font-size: 1.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.feature p {
+  color: #aaa;
+}
+
+/* ================== SIGNUP ================== */
 .signup {
+  padding: 8rem 2rem;
   display: flex;
   justify-content: center;
-  padding: 4rem 1rem;
+  background: linear-gradient(to top, #050507, #120606);
 }
 
 .signup-card {
-  background: #161616;
-  padding: 2rem;
-  border-radius: 12px;
+  background: #111118;
+  border-radius: 20px;
+  padding: 3rem;
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+}
+
+.signup-card h2 {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
 }
 
 .signup-card input {
   width: 100%;
-  padding: 0.8rem;
-  margin: 0.5rem 0;
-  background: #0b0b0d;
-  border: 1px solid #333;
-  color: white;
+  padding: 0.9rem 1rem;
+  background: #050507;
+  border: 1px solid #222;
+  border-radius: 10px;
+  color: #fff;
+  margin-bottom: 1.25rem;
+}
+
+.signup-card input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-glow);
 }
 
 .signup-card button {
   width: 100%;
-  background: #ff3b3b;
-  border: none;
   padding: 1rem;
-  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.signup-card button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 40px var(--accent-glow);
+}
+
+#signup-msg {
+  min-height: 1.2em;
   margin-top: 1rem;
+  text-align: center;
+  color: var(--accent-light);
+}
+
+/* ================== HOW IT WORKS ================== */
+.how-it-works {
+  padding: 6rem 10%;
+  background: #050507;
+  text-align: center;
+}
+
+.how-it-works h2 {
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 3rem;
+}
+
+.step {
+  background: #0e0e14;
+  padding: 2.5rem 2rem;
+  border-radius: 18px;
+  border: 1px solid #1a1a24;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.step:hover {
+  transform: translateY(-8px);
+  border-color: var(--accent);
+  box-shadow: 0 20px 50px var(--accent-glow);
+}
+
+.step span {
+  display: inline-flex;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  color: white;
+  font-weight: 900;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.step h3 {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.step p {
+  color: #aaa;
+}
+
+/* ========== OUTCOMES — VAMPIRO ========== */
+
+.outcomes {
+  padding: 6rem 10%;
+  background: radial-gradient(circle at top, #2a0a0a, #050507);
+  text-align: center;
+}
+
+.outcomes h2 {
+  font-size: 2.6rem;
+  margin-bottom: 4rem;
+  background: linear-gradient(135deg, #b11226, #ff3b3b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* GRID */
+.outcomes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 3rem;
+}
+
+/* CARD */
+.outcome-card {
+  background: linear-gradient(180deg, #120b0f, #080406);
+  border-radius: 22px;
+  padding: 2.6rem;
+  border: 1px solid #2a0f14;
+  position: relative;
+  transition: all 0.35s ease;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+}
+
+.outcome-card:hover {
+  transform: translateY(-12px);
+  border-color: #b11226;
+  box-shadow:
+    0 35px 80px rgba(0,0,0,0.8),
+    0 0 40px rgba(177,18,38,0.25);
+}
+
+/* TITLE */
+.outcome-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #f2e9ec;
+}
+
+/* TEXT */
+.outcome-card p {
+  color: #9a8a8f;
+  line-height: 1.6;
+  margin-bottom: 1.8rem;
+}
+
+/* TAG */
+.outcome-card span {
+  display: inline-block;
+  padding: 0.55rem 1.3rem;
+  border-radius: 999px;
+  background: rgba(177,18,38,0.12);
+  color: #ff3b3b;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(177,18,38,0.35);
+}
+
+/* ========== VISUALES ========== */
+.visual-proof {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  padding: 6rem 8%;
+  background: linear-gradient(180deg, #0a0a0f, #050507);
+}
+
+.visual-content h2 {
+  font-size: 2.4rem;
+  margin-bottom: 1rem;
+}
+
+.visual-content p {
+  color: var(--text-muted);
+  line-height: 1.6;
+  max-width: 480px;
+}
+
+.visual-image img {
+  width: 100%;
+  border-radius: 20px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+  border: 1px solid #1c1c28;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .visual-proof {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .visual-content p {
+    margin: auto;
+  }
+}
+
+/* ========== FOOTER — VAMPIRO ========== */
+
+.site-footer {
+  background: radial-gradient(circle at top, #140608, #050507);
+  border-top: 1px solid #2a0f14;
+  padding: 4rem 8% 2.2rem;
+}
+
+/* CONTENT */
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+/* BRAND */
+.footer-brand h3 {
+  margin-bottom: 0.5rem;
+  color: #f2e9ec;
+  letter-spacing: 0.04em;
+}
+
+.footer-brand p {
+  color: #9a8a8f;
+  font-size: 0.95rem;
+}
+
+/* LINKS */
+.footer-links {
+  display: flex;
+  gap: 1.6rem;
+}
+
+.footer-links a {
+  color: #9a8a8f;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.25s ease;
+}
+
+.footer-links a:hover {
+  color: #ff3b3b;
+  text-shadow: 0 0 8px rgba(177,18,38,0.4);
+}
+
+/* COPY */
+.footer-copy {
+  text-align: center;
+  margin-top: 2.8rem;
+  font-size: 0.8rem;
+  color: #6f5a60;
+  letter-spacing: 0.05em;
+}
+
+/* ===== Animaciones suaves ===== */
+
+.fade-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-in {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.fade-in.visible {
+  opacity: 1;
+}
+
+/* Micro animación hover premium */
+.cta-btn,
+.feature,
+.signup-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature:hover,
+.signup-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.hero-content {
+  animation: heroFade 1s ease forwards;
+}
+
+.visual-img {
+  width: 100%;
+  max-width: 520px;
+  border-radius: 18px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.45);
+}
+
+@keyframes heroFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================
+   AUTH / FORMS SYSTEM
+========================= */
+
+.auth-bg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at top, #1a1a1a, #0b0b0d 60%);
+}
+
+/* Card */
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: #141418;
+  border-radius: 18px;
+  padding: 32px;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  animation: fadeUp 0.6s ease;
+}
+
+/* Titles */
+.auth-card h1,
+.auth-card h2 {
+  margin-bottom: 8px;
+  font-size: 1.6rem;
+  text-align: center;
+}
+
+.auth-card p {
+  text-align: center;
+  color: #b3b3b3;
+  font-size: 0.95rem;
+  margin-bottom: 24px;
+}
+
+/* Inputs */
+.auth-card input {
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  border-radius: 10px;
+  border: none;
+  background: #0f0f12;
+  color: #eaeaea;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.auth-card input::placeholder {
+  color: #777;
+}
+
+.auth-card input:focus {
+  box-shadow: 0 0 0 2px rgba(255, 60, 60, 0.5);
+}
+
+/* Buttons */
+.auth-card button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #ff3c3c, #ff1f1f);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.auth-card button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(255, 60, 60, 0.4);
+}
+
+/* Links */
+.auth-link {
+  display: block;
+  margin-top: 14px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #7c8cff;
+  text-decoration: none;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+/* Messages */
+.auth-message {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #ff6b6b;
+}
+
+.auth-message.success {
+  color: #5cff8d;
+}
+
+/* Animations */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
