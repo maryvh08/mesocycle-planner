@@ -1111,6 +1111,23 @@ h3 {
   margin-bottom: 20px;
 }
 
+.tutorial-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.fav-btn {
+  font-size: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.fav-btn:hover {
+  transform: scale(1.1);
+}
+
 .clear-btn {
   padding: 8px 14px;
   border-radius: 6px;
