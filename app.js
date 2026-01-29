@@ -1639,10 +1639,6 @@ function getCoachInsight(trend) {
 // =====================
 // INIT
 // =====================
-document.addEventListener("DOMContentLoaded", () => {
-  initAuth();        
-});
-
 supabase.auth.onAuthStateChange((_e, session) => {
   session ? showApp() : showLogin();
 });
