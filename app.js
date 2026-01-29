@@ -1630,11 +1630,10 @@ supabase.auth.onAuthStateChange((_e, session) => {
 
 const registroSelect = document.getElementById("registro-select");
 
-registroSelect.addEventListener("change", (e) => {
-  const mesocycleId = e.target.value;
+registroSelect.addEventListener("change", () => {
+  const mesocycleId = registroSelect.value;
   if (!mesocycleId) return;
 
-  console.log("🟡 Mesociclo seleccionado:", mesocycleId);
   openRegistro(mesocycleId);
 });
 
