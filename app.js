@@ -1650,33 +1650,33 @@ async function loadTutorials() {
     return;
   }
 
-  tutorialsData = data;
-  renderTutorialList(data);
+  tutorialsData = data; // importante para el buscador
+  renderTutorials(data);
 }
 
-function renderTutorialList(exercises) {
+function renderTutorials(exercises) {
   const list = document.getElementById('tutorial-list');
   list.innerHTML = '';
 
-  exercises
-    .filter(ex => ex.exercise_tutorials && ex.exercise_tutorials.length)
-    .forEach(ex => {
-      const card = document.createElement('div');
-      card.className = 'tutorial-card';
+  exercises.forEach(ex => {
+    if (!ex.exercise_tutorials || !ex.exercise_tutorials.length) return;
 
-      card.innerHTML = `
-        <div>
-          <h4>${ex.name}</h4>
-          <span>${ex.subgroup} · ${ex.type}</span>
-        </div>
-        <button class="play-btn">▶ Ver</button>
-      `;
+    const card = document.createElement('div');
+    card.className = 'tutorial-card';
 
-      card.querySelector('button').onclick = () =>
-        openTutorial(ex.name, ex.exercise_tutorials[0]);
+    card.innerHTML = `
+      <div>
+        <h4>${ex.name}</h4>
+        <span>${ex.subgroup || ''} · ${ex.type || ''}</span>
+      </div>
+      <button class="play-btn">▶ Ver</button>
+    `;
 
-      list.appendChild(card);
-    });
+    card.querySelector('button').onclick = () =>
+      openTutorial(ex.name, ex.exercise_tutorials[0]);
+
+    list.appendChild(card);
+  });
 }
 
 function openTutorial(name, tutorial) {
@@ -1769,12 +1769,18 @@ document.getElementById('tutorial-modal').addEventListener('click', e => {
   }
 });
 
-document.getElementById('tutorial-search').addEventListener('input', (e) => {
+const searchInput = document.getElementById('tutorial-search');
+
+searchInput.addEventListener('input', (e) => {
   const query = e.target.value.toLowerCase();
-  const filtered = tutorialsData.filter(ex =>
-    ex.name.toLowerCase().includes(query) ||
-    ex.subgroup.toLowerCase().includes(query)
-  );
+
+  const filtered = tutorialsData.filter(ex => {
+    return (
+      ex.name.toLowerCase().includes(query) ||
+      (ex.subgroup && ex.subgroup.toLowerCase().includes(query))
+    );
+  });
+
   renderTutorials(filtered);
 });
 
