@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
           "https://maryvh08.github.io/mesocycle-planner/update-password.html",
       });
 
-      msg.textContent = error ? error.message : "📧 Revisa tu email para continuar";
+      msg.textContent = error ? error.message : "Revisa tu email para continuar";
     };
   }
 
@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const msg = document.getElementById("update-msg");
 
       const { error } = await supabase.auth.updateUser({ password });
-      msg.textContent = error ? error.message : "✅ Contraseña actualizada";
+      msg.textContent = error ? error.message : "Contraseña actualizada";
       if (!error) setTimeout(() => (location.href = "app.html"), 1500);
     };
   }
