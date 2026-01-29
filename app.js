@@ -1628,6 +1628,70 @@ function getCoachInsight(trend) {
 }
 
 // =====================
+// TUTORIALES
+// =====================
+
+async function loadTutorials() {
+  const { data, error } = await supabase
+    .from('exercises')
+    .select(`
+      id,
+      name,
+      type,
+      subgroup,
+      exercise_tutorials (
+        video_url,
+        cues
+      )
+    `);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  renderTutorials(data);
+}
+
+function renderTutorials(exercises) {
+  const list = document.getElementById('tutorial-list');
+  list.innerHTML = '';
+
+  exercises.forEach(ex => {
+    if (!ex.exercise_tutorials.length) return;
+
+    const card = document.createElement('div');
+    card.className = 'tutorial-card';
+
+    card.innerHTML = `
+      <div>
+        <h4>${ex.name}</h4>
+        <span>${ex.subgroup} · ${ex.type}</span>
+      </div>
+      <button class="play-btn">▶ Ver</button>
+    `;
+
+    card.querySelector('button').onclick = () =>
+      openTutorial(ex.name, ex.exercise_tutorials[0]);
+
+    list.appendChild(card);
+  });
+}
+
+function openTutorial(name, tutorial) {
+  document.getElementById('tutorial-title').textContent = name;
+  document.getElementById('tutorial-video').src = tutorial.video_url;
+  document.getElementById('tutorial-cues').textContent = tutorial.cues;
+
+  document.getElementById('tutorial-modal').classList.remove('hidden');
+}
+
+function closeTutorial() {
+  document.getElementById('tutorial-modal').classList.add('hidden');
+  document.getElementById('tutorial-video').src = '';
+}
+
+// =====================
 // INIT
 // =====================
 supabase.auth.onAuthStateChange((_e, session) => {
