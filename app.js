@@ -1659,41 +1659,37 @@ async function loadTutorials() {
 
 function applyFilters() {
   const search = document.getElementById('tutorial-search').value.toLowerCase();
-  const type = document.getElementById('filter-type').value;
-  const subgroup = document.getElementById('filter-subgroup').value;
+  const selectedTypes = getSelectedValues('type-options');
+  const selectedSubgroups = getSelectedValues('subgroup-options');
+  const onlyFavorites = document.getElementById('filter-favorites')?.checked;
   const sortBy = document.getElementById('sort-by').value;
 
   let filtered = tutorialsData.filter(ex => {
-    if (!ex.exercise_tutorials || !ex.exercise_tutorials.length) return false;
+    if (!ex.exercise_tutorials?.length) return false;
 
-    const matchesSearch =
-      ex.name.toLowerCase().includes(search);
+    if (onlyFavorites && !isFavorite(ex.id)) return false;
 
+    const matchesSearch = ex.name.toLowerCase().includes(search);
     const matchesType =
-      !type || ex.type === type;
-
+      !selectedTypes.length || selectedTypes.includes(ex.type);
     const matchesSubgroup =
-      !subgroup || ex.subgroup === subgroup;
+      !selectedSubgroups.length || selectedSubgroups.includes(ex.subgroup);
 
     return matchesSearch && matchesType && matchesSubgroup;
   });
 
-  // 🔽 ORDENAMIENTO
+  // Orden
   if (sortBy) {
     const [field, direction] = sortBy.split('-');
-
     filtered.sort((a, b) => {
-      const valA = (a[field] || '').toLowerCase();
-      const valB = (b[field] || '').toLowerCase();
-
-      if (valA < valB) return direction === 'asc' ? -1 : 1;
-      if (valA > valB) return direction === 'asc' ? 1 : -1;
-      return 0;
+      const aVal = (a[field] || '').toLowerCase();
+      const bVal = (b[field] || '').toLowerCase();
+      return direction === 'asc'
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
     });
   }
-   const onlyFavorites =
-     document.getElementById('filter-favorites')?.checked;
-   
+
   renderTutorials(filtered);
 }
 
