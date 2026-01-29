@@ -1377,3 +1377,48 @@ h3 {
   border: 1px solid #ccc;
   font-size: 1rem;
 }
+
+!-- ================= FILTRO ================= -->
+
+.multi-filter {
+  position: relative;
+}
+
+.filter-btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+}
+
+.filter-dropdown {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  min-width: 180px;
+  max-height: 220px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px;
+  display: none;
+  z-index: 20;
+}
+
+.multi-filter.open .filter-dropdown {
+  display: block;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  cursor: pointer;
+}
+
+.filter-option:hover {
+  background: #f5f5f5;
+}
