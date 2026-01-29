@@ -869,18 +869,6 @@ async function openExerciseChart(exerciseName, start, end) {
   renderMiniChart(exerciseName, data, start, end);
 }
 
-function renderExerciseStrengthRow(ex) {
-  return `
-    <div class="exercise-row">
-      <strong>${ex.exercise_name}</strong>
-      <span>${ex.avg_weight.toFixed(1)} kg</span>
-      <span class="trend ${ex.trend}">
-        ${ex.trendIcon} ${ex.delta}%
-      </span>
-    </div>
-  `;
-}
-
 function renderMiniChart(name, data, start, end) {
   document.getElementById("modal-title").textContent = name;
   document.getElementById("exercise-modal").classList.remove("hidden");
