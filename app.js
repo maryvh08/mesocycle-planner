@@ -238,11 +238,16 @@ async function saveMesocycle() {
   };
 
   const { error } = editingMesocycleId
-    ? await supabase.from("mesocycles").update(payload).eq("id", editingMesocycleId)
-    : await supabase.from("mesocycles").insert(payload);
+    ? await supabase
+        .from("mesocycles")
+        .update(payload)
+        .eq("id", editingMesocycleId)
+    : await supabase
+        .from("mesocycles")
+        .insert(payload);
 
   if (error) {
-    console.error(error);
+    console.error("❌ Error guardando mesociclo:", error);
     alert("Error al guardar");
     return;
   }
