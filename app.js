@@ -1659,34 +1659,36 @@ async function loadTutorials() {
 
 function applyFilters() {
   const search = document.getElementById('tutorial-search').value.toLowerCase();
-  const selectedTypes = getSelectedValues('type-options');
-  const selectedSubgroups = getSelectedValues('subgroup-options');
-  const onlyFavorites = document.getElementById('filter-favorites')?.checked;
+  const type = document.getElementById('filter-type').value;
+  const subgroup = document.getElementById('filter-subgroup').value;
   const sortBy = document.getElementById('sort-by').value;
 
   let filtered = tutorialsData.filter(ex => {
-    if (!ex.exercise_tutorials?.length) return false;
+    if (!ex.exercise_tutorials || !ex.exercise_tutorials.length) return false;
 
-    if (onlyFavorites && !isFavorite(ex.id)) return false;
+    const matchesSearch =
+      ex.name.toLowerCase().includes(search);
 
-    const matchesSearch = ex.name.toLowerCase().includes(search);
     const matchesType =
-      !selectedTypes.length || selectedTypes.includes(ex.type);
+      !type || ex.type === type;
+
     const matchesSubgroup =
-      !selectedSubgroups.length || selectedSubgroups.includes(ex.subgroup);
+      !subgroup || ex.subgroup === subgroup;
 
     return matchesSearch && matchesType && matchesSubgroup;
   });
 
-  // Orden
+  // 🔽 ORDENAMIENTO
   if (sortBy) {
     const [field, direction] = sortBy.split('-');
+
     filtered.sort((a, b) => {
-      const aVal = (a[field] || '').toLowerCase();
-      const bVal = (b[field] || '').toLowerCase();
-      return direction === 'asc'
-        ? aVal.localeCompare(bVal)
-        : bVal.localeCompare(aVal);
+      const valA = (a[field] || '').toLowerCase();
+      const valB = (b[field] || '').toLowerCase();
+
+      if (valA < valB) return direction === 'asc' ? -1 : 1;
+      if (valA > valB) return direction === 'asc' ? 1 : -1;
+      return 0;
     });
   }
 
@@ -1799,36 +1801,25 @@ function toggleFavorite(id) {
   localStorage.setItem(favorites_key, JSON.stringify(favorites));
 }
 
-function populateMultiFilters(exercises) {
-  console.log('Ejercicios recibidos:', exercises.length);
-
-  const typeContainer = document.getElementById('type-options');
-  const subgroupContainer = document.getElementById('subgroup-options');
-
-  console.log(typeContainer, subgroupContainer);
-
-  typeContainer.innerHTML = '';
-  subgroupContainer.innerHTML = '';
+function populateFilters(exercises) {
+  const typeSelect = document.getElementById('filter-type');
+  const subgroupSelect = document.getElementById('filter-subgroup');
 
   const types = [...new Set(exercises.map(e => e.type).filter(Boolean))];
   const subgroups = [...new Set(exercises.map(e => e.subgroup).filter(Boolean))];
 
   types.forEach(type => {
-    typeContainer.innerHTML += `
-      <label class="filter-option">
-        <input type="checkbox" value="${type}" />
-        ${type}
-      </label>
-    `;
+    const option = document.createElement('option');
+    option.value = type;
+    option.textContent = type;
+    typeSelect.appendChild(option);
   });
 
   subgroups.forEach(subgroup => {
-    subgroupContainer.innerHTML += `
-      <label class="filter-option">
-        <input type="checkbox" value="${subgroup}" />
-        ${subgroup}
-      </label>
-    `;
+    const option = document.createElement('option');
+    option.value = subgroup;
+    option.textContent = subgroup;
+    subgroupSelect.appendChild(option);
   });
 }
 
