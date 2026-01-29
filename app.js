@@ -532,10 +532,6 @@ async function deleteMesocycle(mesocycleId) {
 /* ======================
    REGISTRO
 ====================== */
-registroSelect.onchange = () => {
-  if (registroSelect.value) openRegistro(registroSelect.value);
-};
-
 async function openRegistro(mesocycleId) {
   // activar tab manualmente (seguro)
   document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
