@@ -1769,5 +1769,13 @@ document.getElementById('tutorial-modal').addEventListener('click', e => {
   }
 });
 
+document.getElementById('tutorial-search').addEventListener('input', (e) => {
+  const query = e.target.value.toLowerCase();
+  const filtered = tutorialsData.filter(ex =>
+    ex.name.toLowerCase().includes(query) ||
+    ex.subgroup.toLowerCase().includes(query)
+  );
+  renderTutorials(filtered);
+});
 
 loadTutorials();
