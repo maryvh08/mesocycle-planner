@@ -15,6 +15,7 @@ let selectedDaysPerWeek = null;
 let editingMesocycleId = null;
 let statsChart = null;
 let generalStrengthData = null;
+let tutorialsData = [];
 
 /* ======================
    UI ELEMENTS
@@ -1689,6 +1690,55 @@ function openTutorial(name, tutorial) {
 function closeTutorial() {
   document.getElementById('tutorial-modal').classList.add('hidden');
   document.getElementById('tutorial-video').src = '';
+}
+
+async function loadTutorials() {
+  const { data, error } = await supabase
+    .from('exercises')
+    .select(`
+      id,
+      name,
+      type,
+      subgroup,
+      exercise_tutorials (
+        video_url,
+        cues
+      )
+    `);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  tutorialsData = data;
+  populateTutorialSelect(data);
+}
+
+function populateTutorialSelect(exercises) {
+  const select = document.getElementById('tutorial-select');
+
+  exercises.forEach(ex => {
+    if (!ex.exercise_tutorials.length) return;
+
+    const option = document.createElement('option');
+    option.value = ex.id;
+    option.textContent = `${ex.name} (${ex.subgroup})`;
+
+    select.appendChild(option);
+  });
+
+  select.onchange = handleTutorialSelect;
+}
+
+function handleTutorialSelect(e) {
+  const exerciseId = e.target.value;
+  if (!exerciseId) return;
+
+  const exercise = tutorialsData.find(ex => ex.id === exerciseId);
+  if (!exercise || !exercise.exercise_tutorials.length) return;
+
+  openTutorial(exercise.name, exercise.exercise_tutorials[0]);
 }
 
 // =====================
