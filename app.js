@@ -1628,15 +1628,6 @@ supabase.auth.onAuthStateChange((_e, session) => {
   session ? showApp() : showLogin();
 });
 
-const registroSelect = document.getElementById("registro-select");
-
-registroSelect.addEventListener("change", () => {
-  const mesocycleId = registroSelect.value;
-  if (!mesocycleId) return;
-
-  openRegistro(mesocycleId);
-});
-
 document.addEventListener("click", e => {
   const row = e.target.closest(".strength-row");
   if (!row) return;
