@@ -1882,7 +1882,7 @@ document.getElementById('tutorial-modal')
 
 // 🔍 Buscador
 document.getElementById('tutorial-search')
-  .addEventListener('input', applyFilters);
+  ?.addEventListener('input', applyFilters);
 
 
 // 🔃 Orden
@@ -1907,7 +1907,7 @@ document.getElementById('clear-filters')
       .querySelectorAll('.filter-dropdown input[type="checkbox"]')
       .forEach(cb => cb.checked = false);
 
-    renderTutorials(tutorialsData);
+    applyFilters();
   });
 
 
