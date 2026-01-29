@@ -1653,30 +1653,8 @@ async function loadTutorials() {
   }
 
   tutorialsData = data;
-  populateFilters(data);
+  populateMultiFilters(tutorialsData);
   renderTutorials(data);
-}
-
-function populateFilters(exercises) {
-  const typeSelect = document.getElementById('filter-type');
-  const subgroupSelect = document.getElementById('filter-subgroup');
-
-  const types = [...new Set(exercises.map(e => e.type).filter(Boolean))];
-  const subgroups = [...new Set(exercises.map(e => e.subgroup).filter(Boolean))];
-
-  types.forEach(type => {
-    const option = document.createElement('option');
-    option.value = type;
-    option.textContent = type;
-    typeSelect.appendChild(option);
-  });
-
-  subgroups.forEach(subgroup => {
-    const option = document.createElement('option');
-    option.value = subgroup;
-    option.textContent = subgroup;
-    subgroupSelect.appendChild(option);
-  });
 }
 
 function applyFilters() {
@@ -1857,7 +1835,6 @@ function getSelectedValues(containerId) {
     document.querySelectorAll(`#${containerId} input:checked`)
   ).map(input => input.value);
 }
-
 
 // =====================
 // LISTENERS
