@@ -1754,3 +1754,5 @@ document.getElementById("exercise-modal")
       closeModal();
     }
   });
+
+loadTutorials();
