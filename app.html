@@ -222,32 +222,23 @@
       <h3 class="subtitle">Aprende y mejora tu técnica</h3>
     
       <!-- Buscador -->
-      <input
-        type="text"
-        id="tutorial-search"
-        placeholder="Buscar ejercicio..."
-        class="search-input"
-      />
-    <div class="tutorial-filters">
-      <input
-        type="text"
-        id="tutorial-search"
-        placeholder="Buscar ejercicio..."
-        class="search-input"
-      />
-    
-      <select id="filter-type" class="search-input">
-        <option value="">Tipo</option>
-      </select>
-    
-      <select id="filter-subgroup" class="search-input">
-        <option value="">Subgrupo</option>
-      </select>
-    
-      <button id="clear-filters" class="clear-btn">
-        Borrar filtros
-      </button>
-    </div>
+      <div class="tutorial-filters">
+        <input id="tutorial-search" class="search-input" placeholder="Buscar ejercicio..." />
+        <select id="filter-type" class="search-input">
+          <option value="">Tipo</option>
+        </select>
+        <select id="filter-subgroup" class="search-input">
+          <option value="">Subgrupo</option>
+        </select>
+        <select id="sort-by" class="search-input">
+          <option value="">Ordenar por</option>
+          <option value="name-asc">Nombre (A–Z)</option>
+          <option value="name-desc">Nombre (Z–A)</option>
+          <option value="subgroup-asc">Subgrupo (A–Z)</option>
+          <option value="subgroup-desc">Subgrupo (Z–A)</option>
+        </select>
+        <button id="clear-filters" class="clear-btn">Borrar filtros</button>
+      </div>
 
       <!-- Lista de ejercicios -->
       <div id="tutorial-list" class="tutorial-list"></div>
