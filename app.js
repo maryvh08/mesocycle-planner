@@ -1653,7 +1653,7 @@ async function loadTutorials() {
   }
 
   tutorialsData = data;
-  populateMultiFilters(tutorialsData);
+  populateFilters(tutorialsData);
   renderTutorials(data);
 }
 
