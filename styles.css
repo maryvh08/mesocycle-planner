@@ -1104,6 +1104,25 @@ h3 {
   color: #9a8a8f;
 }
 
+.tutorial-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.clear-btn {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  background: #eee;
+  cursor: pointer;
+}
+
+.clear-btn:hover {
+  background: #ddd;
+}
+
 .play-btn {
   background: linear-gradient(135deg, #b11226, #ff3b3b);
   border: none;
