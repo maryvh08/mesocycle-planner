@@ -1218,3 +1218,19 @@ h3 {
   cursor: pointer;
 }
 
+.subtitle {
+  font-weight: normal;
+  font-size: 1.2rem;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 8px 12px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
