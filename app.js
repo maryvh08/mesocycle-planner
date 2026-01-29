@@ -1685,6 +1685,8 @@ async function loadTutorials() {
       )
     `);
 
+  console.log('DATA:', data);
+
   if (error) {
     console.error(error);
     return;
