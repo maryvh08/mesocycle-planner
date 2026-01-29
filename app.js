@@ -561,9 +561,11 @@ async function openRegistro(mesocycleId) {
 ====================== */
 async function renderRegistroEditor(mesocycleId) {
   console.log("🟢 renderRegistroEditor", mesocycleId);
-  registroEditor.innerHTML = "";
 
+  const registroEditor = document.getElementById("registro-editor");
   const registeredContainer = document.getElementById("registered-exercises");
+
+  registroEditor.innerHTML = "";
   registeredContainer.innerHTML = "";
 
   const { data: { session } } = await supabase.auth.getSession();
@@ -648,6 +650,7 @@ async function renderRegistroEditor(mesocycleId) {
       [...dayContainer.children].forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       selectedDay = i;
+
       renderExercisesForDay(
         mesocycleId,
         Number(weekSelect.value),
@@ -663,15 +666,13 @@ async function renderRegistroEditor(mesocycleId) {
     exerciseSelect.append(new Option(ex.name, ex.id))
   );
 
-  const weightInput = Object.assign(document.createElement("input"), {
-    type: "number",
-    placeholder: "Peso (kg)"
-  });
+  const weightInput = document.createElement("input");
+  weightInput.type = "number";
+  weightInput.placeholder = "Peso (kg)";
 
-  const repsInput = Object.assign(document.createElement("input"), {
-    type: "number",
-    placeholder: "Reps"
-  });
+  const repsInput = document.createElement("input");
+  repsInput.type = "number";
+  repsInput.placeholder = "Reps";
 
   const saveBtn = document.createElement("button");
   saveBtn.textContent = "Guardar";
@@ -704,7 +705,8 @@ async function renderRegistroEditor(mesocycleId) {
       reps: Number(repsInput.value)
     };
 
-    const { data: existing } = await supabase
+    // 🚨 comprobar duplicado
+    const { data: existing, error: checkError } = await supabase
       .from("exercise_records")
       .select("id")
       .eq("user_id", session.user.id)
@@ -713,6 +715,12 @@ async function renderRegistroEditor(mesocycleId) {
       .eq("week_number", payload.week_number)
       .eq("day_number", selectedDay)
       .limit(1);
+
+    if (checkError) {
+      console.error(checkError);
+      alert("Error validando el ejercicio");
+      return;
+    }
 
     if (existing?.length) {
       alert("Ya ha registrado este ejercicio para este día");
@@ -739,7 +747,7 @@ async function renderRegistroEditor(mesocycleId) {
     );
   };
 
-  console.log("✅ RegistroEditor limpio y sin duplicados");
+  console.log("✅ RegistroEditor renderizado correctamente");
 }
 
 /* ======================
@@ -1618,6 +1626,16 @@ function getCoachInsight(trend) {
 // =====================
 supabase.auth.onAuthStateChange((_e, session) => {
   session ? showApp() : showLogin();
+});
+
+const registroSelect = document.getElementById("registro-select");
+
+registroSelect.addEventListener("change", (e) => {
+  const mesocycleId = e.target.value;
+  if (!mesocycleId) return;
+
+  console.log("🟡 Mesociclo seleccionado:", mesocycleId);
+  openRegistro(mesocycleId);
 });
 
 document.addEventListener("click", e => {
