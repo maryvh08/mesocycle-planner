@@ -1152,6 +1152,10 @@ h3 {
   cursor: pointer;
   transition: all 0.2s ease;
 }
+ .fav-btn.active {
+  background-color: #f5c518 !important;
+  border-color: #f5c518 !important;
+}
 
 .fav-btn .star {
   font-size: 18px;
