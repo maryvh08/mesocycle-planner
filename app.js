@@ -1672,8 +1672,13 @@ function openTutorial(name, tutorial) {
 }
 
 function closeTutorial() {
-  document.getElementById('tutorial-modal').classList.add('hidden');
-  document.getElementById('tutorial-video').src = '';
+  const modal = document.getElementById('tutorial-modal');
+  const iframe = document.getElementById('tutorial-video');
+
+  modal.classList.add('hidden');
+
+  // 🔴 Detiene el video y libera el iframe
+  iframe.src = '';
 }
 
 async function loadTutorials() {
@@ -1785,5 +1790,12 @@ document.getElementById("exercise-modal")
       closeModal();
     }
   });
+
+document.getElementById('tutorial-modal').addEventListener('click', e => {
+  if (e.target.id === 'tutorial-modal') {
+    closeTutorial();
+  }
+});
+
 
 loadTutorials();
