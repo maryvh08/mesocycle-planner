@@ -1186,6 +1186,57 @@ h3 {
   transform: scale(0.9);
 }
 
+.favorites-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Oculta el checkbox nativo */
+.favorites-filter input {
+  display: none;
+}
+
+/* Cuadro custom */
+.checkmark {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid #ccc;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+/* Check */
+.checkmark::after {
+  content: '';
+  width: 10px;
+  height: 6px;
+  border-left: 2px solid white;
+  border-bottom: 2px solid white;
+  transform: rotate(-45deg);
+  opacity: 0;
+}
+
+/* Activo */
+.favorites-filter input:checked + .checkmark {
+  background: #f5c518;
+  border-color: #f5c518;
+}
+
+.favorites-filter input:checked + .checkmark::after {
+  opacity: 1;
+}
+
+/* Hover */
+.favorites-filter:hover .checkmark {
+  border-color: #f5c518;
+}
+
 !-- ================= WRAPPER Y MODAL ================= -->
 /* Animation */
 @keyframes slideDown {
