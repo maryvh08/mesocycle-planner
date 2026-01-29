@@ -173,22 +173,32 @@ function showError(container, message) {
    TABS
 ====================== */
 function setupTabs() {
-  document.querySelectorAll(".tab-btn").forEach(btn => {
-     btn.onclick = () => {
-       const tab = btn.dataset.tab;
-   
-       document.querySelectorAll(".tab-content").forEach(t =>
-         t.classList.add("hidden")
-       );
-   
-       document.getElementById(tab).classList.remove("hidden");
-   
-       if (tab === "stats") {
-         renderStatsView(); // 👈 aquí y solo aquí
-       }
-     };
-   });
+  document.querySelectorAll("[data-tab]").forEach(btn => {
+    btn.onclick = () => {
+      const tab = btn.dataset.tab;
+
+      document.querySelectorAll(".tab-content").forEach(t =>
+        t.classList.add("hidden")
+      );
+
+      document.getElementById(tab)?.classList.remove("hidden");
+
+      // cerrar menú al seleccionar
+      document.getElementById("side-menu")?.classList.add("hidden");
+
+      if (tab === "stats") {
+        renderStatsView();
+      }
+    };
+  });
 }
+
+const menuToggle = document.getElementById("menu-toggle");
+const sideMenu = document.getElementById("side-menu");
+
+menuToggle.onclick = () => {
+  sideMenu.classList.toggle("hidden");
+};
 
 /* ======================
    DAY SELECTOR (CREAR)
