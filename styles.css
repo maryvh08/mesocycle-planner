@@ -1160,7 +1160,7 @@ h3 {
 }
 
 /* Hover */
-.fav-btn:hover {
+.fav-btn:not(.active):hover {
   border-color: #f5c518;
   background: #fff8dc;
 }
@@ -1202,9 +1202,11 @@ h3 {
   100% { transform: scale(1); }
 }
 
-.fav-btn.active .star {
-  animation: pop 0.25s ease;
+.fav-btn.active {
+  background-color: #f5c518 !important;
+  border-color: #f5c518 !important;
 }
+
 
 .favorites-filter {
   display: flex;
