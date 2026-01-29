@@ -1694,17 +1694,6 @@ function applyFilters() {
    const onlyFavorites =
      document.getElementById('filter-favorites')?.checked;
    
-   let filtered = tutorialsData.filter(ex => {
-     if (!ex.exercise_tutorials || !ex.exercise_tutorials.length) return false;
-   
-     if (onlyFavorites && !isFavorite(ex.id)) return false;
-   
-     const matchesSearch = ex.name.toLowerCase().includes(search);
-     const matchesType = !type || ex.type === type;
-     const matchesSubgroup = !subgroup || ex.subgroup === subgroup;
-   
-     return matchesSearch && matchesType && matchesSubgroup;
-   });
   renderTutorials(filtered);
 }
 
