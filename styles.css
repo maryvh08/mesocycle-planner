@@ -1019,3 +1019,67 @@ h3 {
 .kpi-card.highlight {
   background: linear-gradient(135deg, #ff3c3c, #ff1f1f);
 }
+
+/* =====================
+   HAMBURGER MENU
+===================== */
+
+.menu-toggle {
+  font-size: 1.6rem;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  user-select: none;
+}
+
+.menu-toggle:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+/* Menu container */
+.side-menu {
+  position: absolute;
+  top: 56px;
+  left: 12px;
+  background: #141418;
+  border-radius: 14px;
+  padding: 8px;
+  width: 220px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  animation: slideDown 0.25s ease;
+  z-index: 100;
+}
+
+/* Menu items */
+.menu-item {
+  width: 100%;
+  background: none;
+  border: none;
+  color: #eaeaea;
+  text-align: left;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.menu-item:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+/* Hide */
+.hidden {
+  display: none;
+}
+
+/* Animation */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
