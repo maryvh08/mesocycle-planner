@@ -1681,8 +1681,9 @@ function applyFilters() {
   const search = document.getElementById('tutorial-search').value.toLowerCase();
   const type = document.getElementById('filter-type').value;
   const subgroup = document.getElementById('filter-subgroup').value;
+  const sortBy = document.getElementById('sort-by').value;
 
-  const filtered = tutorialsData.filter(ex => {
+  let filtered = tutorialsData.filter(ex => {
     if (!ex.exercise_tutorials || !ex.exercise_tutorials.length) return false;
 
     const matchesSearch =
@@ -1696,6 +1697,20 @@ function applyFilters() {
 
     return matchesSearch && matchesType && matchesSubgroup;
   });
+
+  // 🔽 ORDENAMIENTO
+  if (sortBy) {
+    const [field, direction] = sortBy.split('-');
+
+    filtered.sort((a, b) => {
+      const valA = (a[field] || '').toLowerCase();
+      const valB = (b[field] || '').toLowerCase();
+
+      if (valA < valB) return direction === 'asc' ? -1 : 1;
+      if (valA > valB) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
 
   renderTutorials(filtered);
 }
@@ -1844,8 +1859,12 @@ document.getElementById('clear-filters')
     document.getElementById('tutorial-search').value = '';
     document.getElementById('filter-type').value = '';
     document.getElementById('filter-subgroup').value = '';
+    document.getElementById('sort-by').value = '';
 
     renderTutorials(tutorialsData);
   });
+
+document.getElementById('sort-by')
+  .addEventListener('change', applyFilters);
 
 loadTutorials();
