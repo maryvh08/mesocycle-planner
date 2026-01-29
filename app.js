@@ -1660,39 +1660,39 @@ function renderTutorialList(exercises) {
 
   exercises
     .filter(ex => ex.exercise_tutorials && ex.exercise_tutorials.length)
-    .sort((a, b) => a.name.localeCompare(b.name))
     .forEach(ex => {
-      const item = document.createElement('div');
-      item.className = 'tutorial-item';
+      const card = document.createElement('div');
+      card.className = 'tutorial-card';
 
-      item.innerHTML = `
-        <div class="tutorial-info">
-          <strong>${ex.name}</strong>
+      card.innerHTML = `
+        <div>
+          <h4>${ex.name}</h4>
           <span>${ex.subgroup} · ${ex.type}</span>
         </div>
-        <span class="tutorial-play">▶</span>
+        <button class="play-btn">▶ Ver</button>
       `;
 
-      item.onclick = () =>
+      card.querySelector('button').onclick = () =>
         openTutorial(ex.name, ex.exercise_tutorials[0]);
 
-      list.appendChild(item);
+      list.appendChild(card);
     });
 }
 
 function openTutorial(name, tutorial) {
   const embedUrl = toEmbedUrl(tutorial.video_url);
-  if (!embedUrl) return;
+  if (!embedUrl) {
+    console.error('No se pudo generar embed URL', tutorial.video_url);
+    return;
+  }
 
   document.getElementById('tutorial-title').textContent = name;
   document.getElementById('tutorial-video').src = embedUrl;
-
   document.getElementById('tutorial-cues').innerHTML =
     `<strong>Consejo:</strong> ${tutorial.cues}`;
 
   document.getElementById('tutorial-modal').classList.remove('hidden');
 }
-
 
 function closeTutorial() {
   const modal = document.getElementById('tutorial-modal');
@@ -1702,45 +1702,6 @@ function closeTutorial() {
 
   // 🔴 Detiene el video y libera el iframe
   iframe.src = '';
-}
-
-function openTutorial(name, tutorial) {
-  const embedUrl = toEmbedUrl(tutorial.video_url);
-  if (!embedUrl) return;
-
-  document.getElementById('tutorial-title').textContent = name;
-  document.getElementById('tutorial-video').src = embedUrl;
-
-  document.getElementById('tutorial-cues').innerHTML =
-    `<strong>Consejo:</strong> ${tutorial.cues}`;
-
-  document.getElementById('tutorial-modal').classList.remove('hidden');
-}
-
-function populateTutorialSelect(exercises) {
-  const select = document.getElementById('tutorial-select');
-
-  exercises.forEach(ex => {
-    if (!ex.exercise_tutorials.length) return;
-
-    const option = document.createElement('option');
-    option.value = ex.id;
-    option.textContent = `${ex.name} (${ex.subgroup})`;
-
-    select.appendChild(option);
-  });
-
-  select.onchange = handleTutorialSelect;
-}
-
-function handleTutorialSelect(e) {
-  const exerciseId = e.target.value;
-  if (!exerciseId) return;
-
-  const exercise = tutorialsData.find(ex => ex.id === exerciseId);
-  if (!exercise || !exercise.exercise_tutorials.length) return;
-
-  openTutorial(exercise.name, exercise.exercise_tutorials[0]);
 }
 
 function toEmbedUrl(url) {
