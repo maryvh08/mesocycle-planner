@@ -39,6 +39,8 @@ const registroEditor = document.getElementById("registro-editor");
 const tabs = document.querySelectorAll(".tab-btn");
 const statsView = document.getElementById("stats");
 
+const favorites_key = 'favorite_exercises';
+
 /* ======================
    DOM CONTENT LOADED
 ====================== */
@@ -1722,19 +1724,31 @@ function renderTutorials(exercises) {
   exercises.forEach(ex => {
     if (!ex.exercise_tutorials || !ex.exercise_tutorials.length) return;
 
+    const favorite = isFavorite(ex.id);
+
     const card = document.createElement('div');
     card.className = 'tutorial-card';
 
     card.innerHTML = `
-      <div>
+      <div class="tutorial-info">
         <h4>${ex.name}</h4>
-        <span>${ex.subgroup || ''} · ${ex.type || ''}</span>
+        <span>${ex.subgroup} · ${ex.type}</span>
       </div>
-      <button class="play-btn">▶ Ver</button>
+
+      <div class="tutorial-actions">
+        <button class="fav-btn">${favorite ? '⭐' : '☆'}</button>
+        <button class="play-btn">▶ Ver</button>
+      </div>
     `;
 
-    card.querySelector('button').onclick = () =>
+    card.querySelector('.play-btn').onclick = () =>
       openTutorial(ex.name, ex.exercise_tutorials[0]);
+
+    card.querySelector('.fav-btn').onclick = (e) => {
+      e.stopPropagation();
+      toggleFavorite(ex.id);
+      applyFilters(); // refresca UI
+    };
 
     list.appendChild(card);
   });
@@ -1787,6 +1801,26 @@ function toEmbedUrl(url) {
   }
 
   return '';
+}
+
+function getFavorites() {
+  return JSON.parse(localStorage.getItem(favorites_key)) || [];
+}
+
+function isFavorite(id) {
+  return getFavorites().includes(id);
+}
+
+function toggleFavorite(id) {
+  let favorites = getFavorites();
+
+  if (favorites.includes(id)) {
+    favorites = favorites.filter(favId => favId !== id);
+  } else {
+    favorites.push(id);
+  }
+
+  localStorage.setItem(favorites_key, JSON.stringify(favorites));
 }
 
 // =====================
