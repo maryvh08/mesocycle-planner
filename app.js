@@ -1894,53 +1894,47 @@ document.getElementById("exercise-modal")
     }
   });
 
-document.getElementById('tutorial-modal').addEventListener('click', e => {
-  if (e.target.id === 'tutorial-modal') {
-    closeTutorial();
-  }
-});
-
-const searchInput = document.getElementById('tutorial-search');
-
-searchInput.addEventListener('input', (e) => {
-  const query = e.target.value.toLowerCase();
-
-  const filtered = tutorialsData.filter(ex => {
-    return (
-      ex.name.toLowerCase().includes(query) ||
-      (ex.subgroup && ex.subgroup.toLowerCase().includes(query))
-    );
+// Cerrar modal al hacer click fuera
+document.getElementById('tutorial-modal')
+  .addEventListener('click', e => {
+    if (e.target.id === 'tutorial-modal') {
+      closeTutorial();
+    }
   });
 
-  renderTutorials(filtered);
-});
 
+// 🔍 Buscador
 document.getElementById('tutorial-search')
   .addEventListener('input', applyFilters);
 
-document.getElementById('filter-type')
-  .addEventListener('change', applyFilters);
 
-document.getElementById('filter-subgroup')
-  .addEventListener('change', applyFilters);
-
-document.getElementById('clear-filters')
-  .addEventListener('click', () => {
-    document.getElementById('tutorial-search').value = '';
-    document.getElementById('filter-type').value = '';
-    document.getElementById('filter-subgroup').value = '';
-    document.getElementById('sort-by').value = '';
-
-    renderTutorials(tutorialsData);
-      populateMultiFilters(tutorialsData);
-  });
-
+// 🔃 Orden
 document.getElementById('sort-by')
   .addEventListener('change', applyFilters);
 
+
+// ⭐ Solo favoritos
 document.getElementById('filter-favorites')
   .addEventListener('change', applyFilters);
 
+
+// ♻️ Borrar filtros
+document.getElementById('clear-filters')
+  .addEventListener('click', () => {
+    document.getElementById('tutorial-search').value = '';
+    document.getElementById('sort-by').value = '';
+    document.getElementById('filter-favorites').checked = false;
+
+    // Desmarcar todos los checkboxes de filtros
+    document
+      .querySelectorAll('.filter-dropdown input[type="checkbox"]')
+      .forEach(cb => cb.checked = false);
+
+    renderTutorials(tutorialsData);
+  });
+
+
+// ⬇️ Abrir / cerrar dropdowns
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', e => {
     e.stopPropagation();
@@ -1948,11 +1942,15 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
   });
 });
 
+
+// ⬆️ Cerrar dropdowns al clickear fuera
 document.addEventListener('click', () => {
   document.querySelectorAll('.multi-filter')
     .forEach(f => f.classList.remove('open'));
 });
 
+
+// ☑️ Re-filtrar al marcar checkboxes
 document.addEventListener('change', e => {
   if (e.target.closest('.filter-dropdown')) {
     applyFilters();
@@ -1960,4 +1958,3 @@ document.addEventListener('change', e => {
 });
 
 loadTutorials();
-
