@@ -1631,45 +1631,68 @@ function getCoachInsight(trend) {
 // =====================
 // TUTORIALES
 // =====================
-function renderTutorials(exercises) {
+async function loadTutorials() {
+  const { data, error } = await supabase
+    .from('exercises')
+    .select(`
+      id,
+      name,
+      type,
+      subgroup,
+      exercise_tutorials (
+        video_url,
+        cues
+      )
+    `);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  tutorialsData = data;
+  renderTutorialList(data);
+}
+
+function renderTutorialList(exercises) {
   const list = document.getElementById('tutorial-list');
   list.innerHTML = '';
 
-  exercises.forEach(ex => {
-    if (!ex.exercise_tutorials.length) return;
+  exercises
+    .filter(ex => ex.exercise_tutorials && ex.exercise_tutorials.length)
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .forEach(ex => {
+      const item = document.createElement('div');
+      item.className = 'tutorial-item';
 
-    const card = document.createElement('div');
-    card.className = 'tutorial-card';
+      item.innerHTML = `
+        <div class="tutorial-info">
+          <strong>${ex.name}</strong>
+          <span>${ex.subgroup} · ${ex.type}</span>
+        </div>
+        <span class="tutorial-play">▶</span>
+      `;
 
-    card.innerHTML = `
-      <div>
-        <h4>${ex.name}</h4>
-        <span>${ex.subgroup} · ${ex.type}</span>
-      </div>
-      <button class="play-btn">▶ Ver</button>
-    `;
+      item.onclick = () =>
+        openTutorial(ex.name, ex.exercise_tutorials[0]);
 
-    card.querySelector('button').onclick = () =>
-      openTutorial(ex.name, ex.exercise_tutorials[0]);
-
-    list.appendChild(card);
-  });
+      list.appendChild(item);
+    });
 }
 
 function openTutorial(name, tutorial) {
   const embedUrl = toEmbedUrl(tutorial.video_url);
-
-  if (!embedUrl) {
-    console.error('No se pudo generar embed URL', tutorial.video_url);
-    return;
-  }
+  if (!embedUrl) return;
 
   document.getElementById('tutorial-title').textContent = name;
   document.getElementById('tutorial-video').src = embedUrl;
-  document.getElementById('tutorial-cues').textContent = tutorial.cues;
+
+  document.getElementById('tutorial-cues').innerHTML =
+    `<strong>Consejo:</strong> ${tutorial.cues}`;
 
   document.getElementById('tutorial-modal').classList.remove('hidden');
 }
+
 
 function closeTutorial() {
   const modal = document.getElementById('tutorial-modal');
