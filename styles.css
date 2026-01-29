@@ -1115,7 +1115,7 @@ h3 {
   padding: 8px 14px;
   border-radius: 6px;
   border: none;
-  background: #eee;
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
   cursor: pointer;
 }
 
