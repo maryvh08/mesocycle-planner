@@ -1706,18 +1706,16 @@ function renderTutorials(exercises) {
     card.className = 'tutorial-card';
 
     card.innerHTML = `
-     <div class="tutorial-info">
-       <h4>${ex.name}</h4>
-       <span>${ex.subgroup} · ${ex.type}</span>
-     </div>
-   
-     <div class="tutorial-actions">
-       <button class="fav-btn ${favorite ? 'active' : ''}" title="Favorito">
-         <span class="star">★</span>
-       </button>
-       <button class="play-btn">▶ Ver</button>
-     </div>
-   `;
+      <div class="tutorial-info">
+        <h4>${ex.name}</h4>
+        <span>${ex.subgroup} · ${ex.type}</span>
+      </div>
+
+      <div class="tutorial-actions">
+        <button class="fav-btn">${favorite ? '⭐' : '☆'}</button>
+        <button class="play-btn">▶ Ver</button>
+      </div>
+    `;
 
     card.querySelector('.play-btn').onclick = () =>
       openTutorial(ex.name, ex.exercise_tutorials[0]);
@@ -1903,15 +1901,11 @@ document.getElementById('filter-favorites')
 document.getElementById('clear-filters')
   .addEventListener('click', () => {
     document.getElementById('tutorial-search').value = '';
+    document.getElementById('filter-type').value = '';
+    document.getElementById('filter-subgroup').value = '';
     document.getElementById('sort-by').value = '';
-    document.getElementById('filter-favorites').checked = false;
 
-    // Desmarcar todos los checkboxes de filtros
-    document
-      .querySelectorAll('.filter-dropdown input[type="checkbox"]')
-      .forEach(cb => cb.checked = false);
-
-    applyFilters();
+    renderTutorials(tutorialsData);
   });
 
 
