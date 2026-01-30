@@ -1714,10 +1714,11 @@ function renderTutorials(exercises) {
       </div>
 
       <div class="tutorial-actions">
-        <button class="fav-btn ${favorite ? 'active' : ''}" title="Favorito">
-          <span class="star">★</span>
-        </button>
-        <button class="play-btn">▶ Ver</button>
+          <button class="fav-btn active">
+            <span class="star">★</span>
+          </button>
+          <button class="play-btn">▶ Ver</button>
+        </div>
       </div>
     `;
 
