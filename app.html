@@ -217,9 +217,7 @@
         <h2>Tutoriales de ejercicios</h2>
         <h3 class="subtitle">Aprende y mejora tu técnica</h3>
       
-        <!-- =========================
-             FILTROS Y BÚSQUEDA
-        ========================= -->
+        <!-- FILTROS Y BÚSQUEDA -->
         <div class="filters-container">
       
           <!-- Búsqueda -->
@@ -231,14 +229,14 @@
           <div class="multi-filter filter-dropdown">
             <button class="filter-btn">Tipo</button>
             <div class="filter-options" id="type-options">
-              <!-- JS llenará checkboxes tipo aquí -->
+              <!-- JS llenará checkboxes -->
             </div>
           </div>
-          
+      
           <div class="multi-filter filter-dropdown">
             <button class="filter-btn">Subgrupo</button>
             <div class="filter-options" id="subgroup-options">
-              <!-- JS llenará checkboxes subgrupo aquí -->
+              <!-- JS llenará checkboxes -->
             </div>
           </div>
       
@@ -262,16 +260,10 @@
           <button id="clear-filters">Borrar filtros</button>
         </div>
       
-        <!-- =========================
-             LISTA DE TUTORIALES
-        ========================= -->
-        <div id="tutorial-list">
-          <!-- Los cards se generan desde JS -->
-        </div>
+        <!-- LISTA DE TUTORIALES -->
+        <div id="tutorial-list"></div>
       
-        <!-- =========================
-             MODAL TUTORIAL
-        ========================= -->
+        <!-- MODAL TUTORIAL -->
         <div id="tutorial-modal" class="hidden">
           <div class="modal-content">
             <h3 id="tutorial-title"></h3>
@@ -280,18 +272,7 @@
             <button id="close-tutorial-modal-btn">Cerrar</button>
           </div>
         </div>
-      
-        <!-- =========================
-             MODAL EXERCISE (Opcional)
-        ========================= -->
-        <div id="exercise-modal" class="hidden">
-          <div class="modal-content">
-            <!-- Contenido dinámico -->
-            <button id="close-exercise-modal-btn">Cerrar</button>
-          </div>
-        </div>
       </section>
-
 </div>
 
 <!-- JS -->
