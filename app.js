@@ -1631,11 +1631,6 @@ function getCoachInsight(trend) {
 }
 
 // ---------- TUTORIAL ----------
-function closeTutorial() {
-  document.getElementById('tutorial-modal').classList.add('hidden');
-  document.getElementById('tutorial-video').src = '';
-}
-
 async function loadTutorials() {
   const { data, error } = await supabase
     .from('exercises')
