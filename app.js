@@ -1630,8 +1630,8 @@ function getCoachInsight(trend) {
   return "🛑 Posible fatiga, revisa descanso";
 }
 
-// =====================
-// TUTORIALES
+/// =====================
+// CARGA DE TUTORIALES
 // =====================
 async function loadTutorials() {
   const { data, error } = await supabase
@@ -1658,78 +1658,26 @@ async function loadTutorials() {
 }
 
 // =====================
-// LLENA LOS FILTROS CON CHECKBOXES
-// =====================
-function populateFilters(exercises) {
-  const typeContainer = document.getElementById('type-options');
-  const subgroupContainer = document.getElementById('subgroup-options');
-
-  if (!typeContainer || !subgroupContainer) {
-    console.warn("Contenedores de filtros no encontrados");
-    return;
-  }
-   
-  typeContainer.innerHTML = '';
-  subgroupContainer.innerHTML = '';
-
-  const types = [...new Set(exercises.map(e => e.type).filter(Boolean))];
-  const subgroups = [...new Set(exercises.map(e => e.subgroup).filter(Boolean))];
-
-  types.forEach(type => {
-    typeContainer.innerHTML += `
-      <label class="filter-option">
-        <input type="checkbox" value="${type}" />
-        ${type}
-      </label>
-    `;
-  });
-
-  subgroups.forEach(subgroup => {
-    subgroupContainer.innerHTML += `
-      <label class="filter-option">
-        <input type="checkbox" value="${subgroup}" />
-        ${subgroup}
-      </label>
-    `;
-  });
-}
-
-// =====================
-// DEVUELVE LOS VALORES SELECCIONADOS DE UN CONTENEDOR
-// =====================
-function getSelectedValues(containerId) {
-  return Array.from(
-    document.querySelectorAll(`#${containerId} input:checked`)
-  ).map(input => input.value);
-}
-
-// =====================
-// FILTRA TUTORIALES
+// FILTROS
 // =====================
 function applyFilters() {
   const search = document.getElementById('tutorial-search').value.toLowerCase();
-  const selectedTypes = getSelectedValues('type-options');       // checkbox tipo
-  const selectedSubgroups = getSelectedValues('subgroup-options'); // checkbox subgrupo
+  const selectedTypes = getSelectedValues('type-options');
+  const selectedSubgroups = getSelectedValues('subgroup-options');
   const onlyFavorites = document.getElementById('filter-favorites')?.checked;
   const sortBy = document.getElementById('sort-by').value;
 
   let filtered = tutorialsData.filter(ex => {
     if (!ex.exercise_tutorials?.length) return false;
-
-    // Solo favoritos
     if (onlyFavorites && !isFavorite(ex.id)) return false;
 
-    // Coincidencias de búsqueda
     const matchesSearch = ex.name.toLowerCase().includes(search);
-
-    // Coincidencias de tipo/subgrupo
     const matchesType = !selectedTypes.length || selectedTypes.includes(ex.type);
     const matchesSubgroup = !selectedSubgroups.length || selectedSubgroups.includes(ex.subgroup);
 
     return matchesSearch && matchesType && matchesSubgroup;
   });
 
-  // Ordenar si aplica
   if (sortBy) {
     const [field, direction] = sortBy.split('-');
     filtered.sort((a, b) => {
@@ -1744,18 +1692,51 @@ function applyFilters() {
   renderTutorials(filtered);
 }
 
+function populateFilters(exercises) {
+  const typeContainer = document.getElementById('type-options');
+  const subgroupContainer = document.getElementById('subgroup-options');
+
+  typeContainer.innerHTML = '';
+  subgroupContainer.innerHTML = '';
+
+  const types = [...new Set(exercises.map(e => e.type).filter(Boolean))];
+  const subgroups = [...new Set(exercises.map(e => e.subgroup).filter(Boolean))];
+
+  types.forEach(type => {
+    const label = document.createElement('label');
+    label.className = 'filter-option';
+    label.innerHTML = `<input type="checkbox" value="${type}"> ${type}`;
+    typeContainer.appendChild(label);
+  });
+
+  subgroups.forEach(subgroup => {
+    const label = document.createElement('label');
+    label.className = 'filter-option';
+    label.innerHTML = `<input type="checkbox" value="${subgroup}"> ${subgroup}`;
+    subgroupContainer.appendChild(label);
+  });
+}
+
+function getSelectedValues(containerId) {
+  return Array.from(
+    document.querySelectorAll(`#${containerId} input:checked`)
+  ).map(input => input.value);
+}
+
+// =====================
+// RENDER TUTORIALES
+// =====================
 function renderTutorials(exercises) {
   const list = document.getElementById('tutorial-list');
   list.innerHTML = '';
 
   exercises.forEach(ex => {
-    if (!ex.exercise_tutorials || !ex.exercise_tutorials.length) return;
+    if (!ex.exercise_tutorials?.length) return;
 
     const favorite = isFavorite(ex.id);
 
     const card = document.createElement('div');
     card.className = 'tutorial-card';
-
     card.innerHTML = `
       <div class="tutorial-info">
         <h4>${ex.name}</h4>
@@ -1770,70 +1751,22 @@ function renderTutorials(exercises) {
       </div>
     `;
 
-    // Abrir modal
     card.querySelector('.play-btn').onclick = () =>
       openTutorial(ex.name, ex.exercise_tutorials[0]);
 
-    // Toggle favorito
     card.querySelector('.fav-btn').onclick = (e) => {
       e.stopPropagation();
       toggleFavorite(ex.id);
-      applyFilters(); // refresca la UI y mantiene filtros
+      applyFilters();
     };
 
     list.appendChild(card);
   });
 }
 
-function openTutorial(name, tutorial) {
-  const embedUrl = toEmbedUrl(tutorial.video_url);
-  if (!embedUrl) {
-    console.error('No se pudo generar embed URL', tutorial.video_url);
-    return;
-  }
-
-  document.getElementById('tutorial-title').textContent = name;
-  document.getElementById('tutorial-video').src = embedUrl;
-  document.getElementById('tutorial-cues').innerHTML =
-    `<strong>Consejo:</strong> ${tutorial.cues}`;
-
-  document.getElementById('tutorial-modal').classList.remove('hidden');
-}
-
-function closeTutorial() {
-  const modal = document.getElementById('tutorial-modal');
-  const iframe = document.getElementById('tutorial-video');
-
-  modal.classList.add('hidden');
-
-  // 🔴 Detiene el video y libera el iframe
-  iframe.src = '';
-}
-
-function toEmbedUrl(url) {
-  try {
-    const parsedUrl = new URL(url);
-
-    // https://www.youtube.com/watch?v=XXXX
-    if (parsedUrl.hostname.includes('youtube.com')) {
-      const videoId = parsedUrl.searchParams.get('v');
-      if (videoId) {
-        return `https://www.youtube.com/embed/${videoId}`;
-      }
-    }
-
-    // https://youtu.be/XXXX
-    if (parsedUrl.hostname === 'youtu.be') {
-      const videoId = parsedUrl.pathname.slice(1);
-      return `https://www.youtube.com/embed/${videoId}`;
-    }
-  } catch (e) {
-    console.error('URL inválida:', url);
-  }
-
-  return '';
-}
-
+// =====================
+// FAVORITOS
+// =====================
 function getFavorites() {
   return JSON.parse(localStorage.getItem(favorites_key)) || [];
 }
@@ -1855,103 +1788,79 @@ function toggleFavorite(id) {
 }
 
 // =====================
+// MODAL TUTORIAL
+// =====================
+function openTutorial(name, tutorial) {
+  const embedUrl = toEmbedUrl(tutorial.video_url);
+  if (!embedUrl) {
+    console.error('No se pudo generar embed URL', tutorial.video_url);
+    return;
+  }
+
+  document.getElementById('tutorial-title').textContent = name;
+  document.getElementById('tutorial-video').src = embedUrl;
+  document.getElementById('tutorial-cues').innerHTML = `<strong>Consejo:</strong> ${tutorial.cues}`;
+  document.getElementById('tutorial-modal').classList.remove('hidden');
+}
+
+function closeTutorial() {
+  document.getElementById('tutorial-video').src = '';
+  document.getElementById('tutorial-modal').classList.add('hidden');
+}
+
+function toEmbedUrl(url) {
+  try {
+    const parsedUrl = new URL(url);
+    if (parsedUrl.hostname.includes('youtube.com')) {
+      const videoId = parsedUrl.searchParams.get('v');
+      if (videoId) return `https://www.youtube.com/embed/${videoId}`;
+    }
+    if (parsedUrl.hostname === 'youtu.be') {
+      const videoId = parsedUrl.pathname.slice(1);
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+  } catch (e) { console.error('URL inválida:', url); }
+  return '';
+}
+
+// =====================
 // LISTENERS
 // =====================
-supabase.auth.onAuthStateChange((_e, session) => {
-  session ? showApp() : showLogin();
-});
-
-registroSelect.addEventListener("change", () => {
-  const mesocycleId = registroSelect.value;
-  if (!mesocycleId) return;
-
-  openRegistro(mesocycleId);
-});
-
-document.getElementById('filter-type')
-  .addEventListener('change', applyFilters);
-
-document.getElementById('filter-subgroup')
-  .addEventListener('change', applyFilters);
-
-document.addEventListener("click", e => {
-  const row = e.target.closest(".strength-row");
-  if (!row) return;
-
-  const exercise = row.dataset.exercise;
-  const start = Number(row.dataset.start);
-  const end = Number(row.dataset.end);
-
-  openExerciseChart(exercise, start, end);
-});
-
-document.getElementById("close-modal-btn")
-  .addEventListener("click", closeModal);
-
-document.getElementById("exercise-modal")
-  .addEventListener("click", e => {
-    if (e.target.id === "exercise-modal") {
-      closeModal();
-    }
-  });
-
-// Cerrar modal al hacer click fuera
-document.getElementById('tutorial-modal')
-  .addEventListener('click', e => {
-    if (e.target.id === 'tutorial-modal') {
-      closeTutorial();
-    }
-  });
-
-
-// 🔍 Buscador
 document.getElementById('tutorial-search')
   ?.addEventListener('input', applyFilters);
 
-
-// 🔃 Orden
-document.getElementById('sort-by')
-  .addEventListener('change', applyFilters);
-
-
-// ⭐ Solo favoritos
 document.getElementById('filter-favorites')
-  .addEventListener('change', applyFilters);
+  ?.addEventListener('change', applyFilters);
 
+document.getElementById('sort-by')
+  ?.addEventListener('change', applyFilters);
 
-// ♻️ Borrar filtros
 document.getElementById('clear-filters')
-  .addEventListener('click', () => {
+  ?.addEventListener('click', () => {
     document.getElementById('tutorial-search').value = '';
-    document.getElementById('filter-type').value = '';
-    document.getElementById('filter-subgroup').value = '';
+    document.querySelectorAll('#type-options input, #subgroup-options input').forEach(cb => cb.checked = false);
+    document.getElementById('filter-favorites').checked = false;
     document.getElementById('sort-by').value = '';
-
     renderTutorials(tutorialsData);
   });
 
-
-// ⬇️ Abrir / cerrar dropdowns
+// Abrir/ cerrar dropdowns
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', e => {
     e.stopPropagation();
     btn.parentElement.classList.toggle('open');
   });
 });
-
-
-// ⬆️ Cerrar dropdowns al clickear fuera
 document.addEventListener('click', () => {
-  document.querySelectorAll('.multi-filter')
-    .forEach(f => f.classList.remove('open'));
+  document.querySelectorAll('.multi-filter').forEach(f => f.classList.remove('open'));
 });
 
+// Modal tutorial
+document.getElementById('close-tutorial-modal-btn')
+  .addEventListener('click', closeTutorial);
 
-// ☑️ Re-filtrar al marcar checkboxes
-document.addEventListener('change', e => {
-  if (e.target.closest('.filter-dropdown')) {
-    applyFilters();
-  }
-});
+// Modal exercise
+document.getElementById('close-exercise-modal-btn')
+  .addEventListener('click', () => document.getElementById('exercise-modal').classList.add('hidden'));
 
 loadTutorials();
