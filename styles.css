@@ -1213,33 +1213,30 @@ h3 {
 .tutorial-card {
   background: #120b0f;
   border: 1px solid #2a0f14;
-  border-radius: 16px;
-  padding: 1.4rem;
+  border-radius: 18px;
+  padding: 1.8rem 2rem;        /* 👈 más aire interno */
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: all 0.25s ease;
-}
-
-.tutorial-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between; /* 👈 separa info y botones */
-  gap: 24px;
+  gap: 32px;                   /* 👈 separación interna */
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .tutorial-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(177,18,38,0.25);
+  transform: translateY(-6px);
+  box-shadow: 0 24px 50px rgba(177,18,38,0.35);
 }
 
 .tutorial-card h4 {
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.05rem;
 }
 
 .tutorial-card span {
+  display: block;
   font-size: 0.85rem;
   color: #9a8a8f;
+  line-height: 1.4;
 }
 
 .tutorial-filters {
@@ -1252,8 +1249,8 @@ h3 {
 .tutorial-actions {
   display: flex;
   align-items: center;
-  gap: 24px;
-  flex-shrink: 0; /* 👈 evita que se vayan abajo */
+  gap: 28px;        /* 👈 más espacio entre botones */
+  flex-shrink: 0;
 }
 
 .clear-btn {
@@ -1416,10 +1413,11 @@ h3 {
   pointer-events: all;
 }
 
-.tutorial-list {
-  display: flex;
-  flex-direction: column;
-  gap: 34 px;
+#tutorial-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;          /* 👈 MÁS separación entre tarjetas */
+  margin-top: 2rem;
 }
 
 .tutorial-item {
