@@ -1809,9 +1809,6 @@ function populateFilters(exercises) {
   const typeContainer = document.getElementById('type-options');
   const subgroupContainer = document.getElementById('subgroup-options');
 
-  typeContainer.innerHTML = '';
-  subgroupContainer.innerHTML = '';
-
   // Obtener valores únicos
   const types = [...new Set(exercises.map(e => e.type).filter(Boolean))];
   const subgroups = [...new Set(exercises.map(e => e.subgroup).filter(Boolean))];
