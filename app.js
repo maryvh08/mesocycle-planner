@@ -1828,6 +1828,19 @@ supabase.auth.onAuthStateChange((_e, session) => {
   session ? showApp() : showLogin();
 });
 
+registroSelect.addEventListener("change", () => {
+  const mesocycleId = registroSelect.value;
+  if (!mesocycleId) return;
+
+  openRegistro(mesocycleId);
+});
+
+document.getElementById('filter-type')
+  .addEventListener('change', applyFilters);
+
+document.getElementById('filter-subgroup')
+  .addEventListener('change', applyFilters);
+
 document.addEventListener("click", e => {
   const row = e.target.closest(".strength-row");
   if (!row) return;
@@ -1849,39 +1862,63 @@ document.getElementById("exercise-modal")
     }
   });
 
+// Cerrar modal al hacer click fuera
+document.getElementById('tutorial-modal')
+  .addEventListener('click', e => {
+    if (e.target.id === 'tutorial-modal') {
+      closeTutorial();
+    }
+  });
+
+
+// 🔍 Buscador
 document.getElementById('tutorial-search')
   ?.addEventListener('input', applyFilters);
 
-document.getElementById('filter-favorites')
-  ?.addEventListener('change', applyFilters);
 
+// 🔃 Orden
 document.getElementById('sort-by')
-  ?.addEventListener('change', applyFilters);
+  .addEventListener('change', applyFilters);
 
+
+// ⭐ Solo favoritos
+document.getElementById('filter-favorites')
+  .addEventListener('change', applyFilters);
+
+
+// ♻️ Borrar filtros
 document.getElementById('clear-filters')
-  ?.addEventListener('click', () => {
+  .addEventListener('click', () => {
     document.getElementById('tutorial-search').value = '';
-    document.querySelectorAll('#type-options input, #subgroup-options input').forEach(cb => cb.checked = false);
-    document.getElementById('filter-favorites').checked = false;
+    document.getElementById('filter-type').value = '';
+    document.getElementById('filter-subgroup').value = '';
     document.getElementById('sort-by').value = '';
+
     renderTutorials(tutorialsData);
   });
 
-// Abrir/ cerrar dropdowns
+
+// ⬇️ Abrir / cerrar dropdowns
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', e => {
     e.stopPropagation();
     btn.parentElement.classList.toggle('open');
   });
 });
+
+
+// ⬆️ Cerrar dropdowns al clickear fuera
 document.addEventListener('click', () => {
-  document.querySelectorAll('.multi-filter').forEach(f => f.classList.remove('open'));
+  document.querySelectorAll('.multi-filter')
+    .forEach(f => f.classList.remove('open'));
 });
 
-// Modal tutorial
-document.getElementById('close-tutorial-modal-btn')
-  .addEventListener('click', closeTutorial);
 
-// Modal exercise
-document.getElementById('close-exercise-modal-btn')
-  .addEventListener('click', () => document.getElementById('exercise-modal').classList.add('hidden'));
+// ☑️ Re-filtrar al marcar checkboxes
+document.addEventListener('change', e => {
+  if (e.target.closest('.filter-dropdown')) {
+    applyFilters();
+  }
+});
+
+loadTutorials();
