@@ -1371,6 +1371,28 @@ h3 {
   background: #fff;
   cursor: pointer;
 }
+.multi-filter {
+  position: relative;
+}
+
+.filter-options {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  min-width: 180px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 8px;
+  display: none;
+  z-index: 100;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+/* 🔥 AQUÍ ESTÁ LA CLAVE */
+.multi-filter.open .filter-options {
+  display: block;
+}
 
 .filter-dropdown {
   position: absolute;
