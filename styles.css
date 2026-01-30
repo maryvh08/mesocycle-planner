@@ -1452,8 +1452,13 @@ h3 {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px;
+  padding: 6px 8px;
   cursor: pointer;
+  font-size: 14px;
+}
+
+.filter-option input {
+  accent-color: #f5c518;
 }
 
 .filter-option:hover {
