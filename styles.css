@@ -1251,7 +1251,8 @@ h3 {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-shrink: 0; /* 👈 evita que se vayan abajo */
+  flex-shrink: 0;
+  margin-left: auto; /* 👈 CLAVE */
 }
 
 .clear-btn {
