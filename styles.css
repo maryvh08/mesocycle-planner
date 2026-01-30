@@ -1087,22 +1087,25 @@ h3 {
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  padding: 16px;
+  padding: 12px;
 }
 
 #tutorial-modal.hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
+  display: none;
 }
 
 #tutorial-modal .modal-content {
   background: #fff;
   width: 100%;
   max-width: 900px;
+
+  /* 👇 RESPONSIVE REAL */
+  max-height: 95vh;
+  display: flex;
+  flex-direction: column;
+
   border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  padding: 12px;
 }
 
 .video-wrapper {
