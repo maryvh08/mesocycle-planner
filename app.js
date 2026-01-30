@@ -1657,30 +1657,74 @@ async function loadTutorials() {
   renderTutorials(data);
 }
 
+// =====================
+// LLENA LOS FILTROS CON CHECKBOXES
+// =====================
+function populateFilters(exercises) {
+  const typeContainer = document.getElementById('type-options');
+  const subgroupContainer = document.getElementById('subgroup-options');
+
+  typeContainer.innerHTML = '';
+  subgroupContainer.innerHTML = '';
+
+  const types = [...new Set(exercises.map(e => e.type).filter(Boolean))];
+  const subgroups = [...new Set(exercises.map(e => e.subgroup).filter(Boolean))];
+
+  types.forEach(type => {
+    typeContainer.innerHTML += `
+      <label class="filter-option">
+        <input type="checkbox" value="${type}" />
+        ${type}
+      </label>
+    `;
+  });
+
+  subgroups.forEach(subgroup => {
+    subgroupContainer.innerHTML += `
+      <label class="filter-option">
+        <input type="checkbox" value="${subgroup}" />
+        ${subgroup}
+      </label>
+    `;
+  });
+}
+
+// =====================
+// DEVUELVE LOS VALORES SELECCIONADOS DE UN CONTENEDOR
+// =====================
+function getSelectedValues(containerId) {
+  return Array.from(
+    document.querySelectorAll(`#${containerId} input:checked`)
+  ).map(input => input.value);
+}
+
+// =====================
+// FILTRA TUTORIALES
+// =====================
 function applyFilters() {
   const search = document.getElementById('tutorial-search').value.toLowerCase();
-  const typeSelect = document.getElementById('filter-type');
-  const subgroupSelect = document.getElementById('filter-subgroup');
-
-  const selectedTypes = Array.from(typeSelect.selectedOptions).map(opt => opt.value);
-  const selectedSubgroups = Array.from(subgroupSelect.selectedOptions).map(opt => opt.value);
-
+  const selectedTypes = getSelectedValues('type-options');       // checkbox tipo
+  const selectedSubgroups = getSelectedValues('subgroup-options'); // checkbox subgrupo
   const onlyFavorites = document.getElementById('filter-favorites')?.checked;
   const sortBy = document.getElementById('sort-by').value;
 
   let filtered = tutorialsData.filter(ex => {
     if (!ex.exercise_tutorials?.length) return false;
 
+    // Solo favoritos
     if (onlyFavorites && !isFavorite(ex.id)) return false;
 
+    // Coincidencias de búsqueda
     const matchesSearch = ex.name.toLowerCase().includes(search);
+
+    // Coincidencias de tipo/subgrupo
     const matchesType = !selectedTypes.length || selectedTypes.includes(ex.type);
     const matchesSubgroup = !selectedSubgroups.length || selectedSubgroups.includes(ex.subgroup);
 
     return matchesSearch && matchesType && matchesSubgroup;
   });
 
-  // Orden
+  // Ordenar si aplica
   if (sortBy) {
     const [field, direction] = sortBy.split('-');
     filtered.sort((a, b) => {
@@ -1803,41 +1847,6 @@ function toggleFavorite(id) {
   }
 
   localStorage.setItem(favorites_key, JSON.stringify(favorites));
-}
-
-function populateFilters(exercises) {
-  const typeContainer = document.getElementById('type-options');
-  const subgroupContainer = document.getElementById('subgroup-options');
-
-  typeContainer.innerHTML = '';
-  subgroupContainer.innerHTML = '';
-
-  const types = [...new Set(exercises.map(e => e.type).filter(Boolean))];
-  const subgroups = [...new Set(exercises.map(e => e.subgroup).filter(Boolean))];
-
-  types.forEach(type => {
-    typeContainer.innerHTML += `
-      <label>
-        <input type="checkbox" value="${type}" />
-        ${type}
-      </label>
-    `;
-  });
-
-  subgroups.forEach(subgroup => {
-    subgroupContainer.innerHTML += `
-      <label>
-        <input type="checkbox" value="${subgroup}" />
-        ${subgroup}
-      </label>
-    `;
-  });
-}
-
-function getSelectedValues(containerId) {
-  return Array.from(
-    document.querySelectorAll(`#${containerId} input:checked`)
-  ).map(input => input.value);
 }
 
 // =====================
