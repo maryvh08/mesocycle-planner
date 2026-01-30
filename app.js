@@ -1653,31 +1653,6 @@ async function loadTutorials() {
   renderTutorials(data);
 }
 
-function renderTutorials(exercises) {
-  const list = document.getElementById('tutorial-list');
-  list.innerHTML = '';
-
-  exercises.forEach(ex => {
-    if (!ex.exercise_tutorials.length) return;
-
-    const card = document.createElement('div');
-    card.className = 'tutorial-card';
-
-    card.innerHTML = `
-      <div>
-        <h4>${ex.name}</h4>
-        <span>${ex.subgroup} · ${ex.type}</span>
-      </div>
-      <button class="play-btn">▶ Ver</button>
-    `;
-
-    card.querySelector('button').onclick = () =>
-      openTutorial(ex.name, ex.exercise_tutorials[0]);
-
-    list.appendChild(card);
-  });
-}
-
 function openTutorial(name, tutorial) {
   document.getElementById('tutorial-title').textContent = name;
   document.getElementById('tutorial-video').src = tutorial.video_url;
