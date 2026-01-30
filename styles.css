@@ -582,6 +582,33 @@ section {
 }
 
 @media (max-width: 600px) {
+  .trend-card.up {
+    padding: 1rem;
+  }
+
+  .trend-card.up .trend-main {
+    flex-direction: column;      /* 👈 apila */
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .trend-card.up .trend-value {
+    font-size: 1.4rem;
+    font-weight: 800;
+  }
+
+  .trend-card.up .trend-icon {
+    align-self: flex-end;
+    font-size: 1.6rem;
+    opacity: 0.12;
+  }
+
+  .trend-card.up small {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 600px) {
   .strength-list {
     grid-template-columns: 1fr; /* 👈 UNA SOLA COLUMNA */
   }
