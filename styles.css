@@ -1079,6 +1079,22 @@ h3 {
   margin-top: 1.5rem;
 }
 
+#tutorial-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+#tutorial-modal.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
 .tutorial-card {
   background: #120b0f;
   border: 1px solid #2a0f14;
