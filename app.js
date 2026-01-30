@@ -1695,43 +1695,29 @@ function applyFilters() {
   renderTutorials(filtered);
 }
 
-function renderTutorials(exercises) {
+function renderTutorials(exercises){
   const list = document.getElementById('tutorial-list');
   list.innerHTML = '';
-
-  exercises.forEach(ex => {
-    if (!ex.exercise_tutorials || !ex.exercise_tutorials.length) return;
-
+  exercises.forEach(ex=>{
+    if(!ex.exercise_tutorials?.length) return;
     const favorite = isFavorite(ex.id);
-
     const card = document.createElement('div');
-    card.className = 'tutorial-card';
-
-    card.innerHTML = `
+    card.className='tutorial-card';
+    card.innerHTML=`
       <div class="tutorial-info">
         <h4>${ex.name}</h4>
         <span>${ex.subgroup} · ${ex.type}</span>
       </div>
-
       <div class="tutorial-actions">
-       <button class="fav-btn active">
-         <span class="star">★</span>
-       </button>
-       <button class="play-btn">▶ Ver</button>
-     </div>
-    `;
-
-    // Abrir modal
-    card.querySelector('.play-btn').onclick = () =>
-      openTutorial(ex.name, ex.exercise_tutorials[0]);
-
-    // Toggle favorito
-    card.querySelector('.fav-btn').onclick = (e) => {
+        <button class="fav-btn ${favorite?'active':''}" title="Favorito"><span class="star">★</span></button>
+        <button class="play-btn">▶ Ver</button>
+      </div>`;
+    card.querySelector('.play-btn').onclick = ()=>openTutorial(ex.name, ex.exercise_tutorials[0]);
+    card.querySelector('.fav-btn').onclick = (e)=>{
       e.stopPropagation();
       toggleFavorite(ex.id);
-      applyFilters(); // refresca la UI y mantiene filtros
+      applyFilters();
     };
-
     list.appendChild(card);
   });
 }
