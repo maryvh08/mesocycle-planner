@@ -1667,18 +1667,20 @@ function applyFilters() {
   let filtered = tutorialsData.filter(ex => {
     if (!ex.exercise_tutorials?.length) return false;
 
+    // Solo favoritos
     if (onlyFavorites && !isFavorite(ex.id)) return false;
 
+    // Coincidencias de búsqueda
     const matchesSearch = ex.name.toLowerCase().includes(search);
-    const matchesType =
-      !selectedTypes.length || selectedTypes.includes(ex.type);
-    const matchesSubgroup =
-      !selectedSubgroups.length || selectedSubgroups.includes(ex.subgroup);
+
+    // Coincidencias de tipo/subgrupo
+    const matchesType = !selectedTypes.length || selectedTypes.includes(ex.type);
+    const matchesSubgroup = !selectedSubgroups.length || selectedSubgroups.includes(ex.subgroup);
 
     return matchesSearch && matchesType && matchesSubgroup;
   });
 
-  // Orden
+  // Ordenar si aplica
   if (sortBy) {
     const [field, direction] = sortBy.split('-');
     filtered.sort((a, b) => {
@@ -1804,24 +1806,34 @@ function toggleFavorite(id) {
 }
 
 function populateFilters(exercises) {
-  const typeSelect = document.getElementById('filter-type');
-  const subgroupSelect = document.getElementById('filter-subgroup');
+  const typeContainer = document.getElementById('type-options');
+  const subgroupContainer = document.getElementById('subgroup-options');
 
+  typeContainer.innerHTML = '';
+  subgroupContainer.innerHTML = '';
+
+  // Obtener valores únicos
   const types = [...new Set(exercises.map(e => e.type).filter(Boolean))];
   const subgroups = [...new Set(exercises.map(e => e.subgroup).filter(Boolean))];
 
+  // Crear checkboxes para tipos
   types.forEach(type => {
-    const option = document.createElement('option');
-    option.value = type;
-    option.textContent = type;
-    typeSelect.appendChild(option);
+    typeContainer.innerHTML += `
+      <label class="filter-option">
+        <input type="checkbox" value="${type}" />
+        ${type}
+      </label>
+    `;
   });
 
+  // Crear checkboxes para subgrupos
   subgroups.forEach(subgroup => {
-    const option = document.createElement('option');
-    option.value = subgroup;
-    option.textContent = subgroup;
-    subgroupSelect.appendChild(option);
+    subgroupContainer.innerHTML += `
+      <label class="filter-option">
+        <input type="checkbox" value="${subgroup}" />
+        ${subgroup}
+      </label>
+    `;
   });
 }
 
