@@ -1958,8 +1958,4 @@ document
   .getElementById('tutorial-modal')
   .addEventListener('click', closeTutorial);
 
-document
-  .getElementById('tutorial-modal-content')
-  .addEventListener('click', e => e.stopPropagation());
-
 loadTutorials();
