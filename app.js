@@ -1951,11 +1951,15 @@ document.addEventListener('change', e => {
 });
 
 document
-  .getElementById('tutorial-modal-content')
-  .addEventListener('click', e => e.stopPropagation());
-
-document
   .getElementById('close-tutorial-modal-btn')
   .addEventListener('click', closeTutorial);
+
+document
+  .getElementById('tutorial-modal')
+  .addEventListener('click', closeTutorial);
+
+document
+  .getElementById('tutorial-modal-content')
+  .addEventListener('click', e => e.stopPropagation());
 
 loadTutorials();
