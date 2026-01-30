@@ -1218,9 +1218,10 @@ h3 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 32px;                   /* 👈 separación interna */
+  gap: 12px;                   /* 👈 separación interna */
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
+
 
 .tutorial-card:hover {
   transform: translateY(-6px);
@@ -1249,8 +1250,8 @@ h3 {
 .tutorial-actions {
   display: flex;
   align-items: center;
-  gap: 28px;        /* 👈 más espacio entre botones */
-  flex-shrink: 0;
+  gap: 8px;
+  flex-shrink: 0; /* 👈 evita que se vayan abajo */
 }
 
 .clear-btn {
