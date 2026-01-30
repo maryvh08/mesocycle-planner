@@ -1631,7 +1631,6 @@ function getCoachInsight(trend) {
 }
 
 // ---------- TUTORIAL ----------
-Quisiera adaptar el html a estas funciones
 async function loadTutorials() {
   const { data, error } = await supabase
     .from('exercises')
