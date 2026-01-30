@@ -541,6 +541,37 @@ section {
     text-align: center;
   }
 }
+
+@media (max-width: 600px) {
+  .trend-card {
+    padding: 1rem;
+  }
+
+  .trend-card h3,
+  .trend-card h4 {
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .trend-main {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .trend-value {
+    font-size: 1.5rem;
+  }
+
+  .trend-icon {
+    align-self: flex-end;
+    opacity: 0.1;
+  }
+
+  .trend-card small {
+    font-size: 0.65rem;
+  }
+}
+
 /* ======================
    LOGIN — VAMPIRO
 ====================== */
@@ -759,6 +790,10 @@ section {
 .avg {
   opacity: 0.8;
 }
+
+/* ======================
+   TENDENCIA
+====================== */
 
 .trend {
   font-size: 1.4rem;
