@@ -1110,10 +1110,10 @@ h3 {
 
 /* Consejos */
 #tutorial-cues {
-  color: #222;
-  font-size: 15px;
-  line-height: 1.5;
-  margin-top: 14px;
+  background: #f9f9f9;
+  border-left: 4px solid #f5c518; /* dorado */
+  padding: 10px 12px;
+  border-radius: 6px;
 }
 
 /* "Consejo:" en negrita */
