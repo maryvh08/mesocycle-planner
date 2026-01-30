@@ -543,25 +543,24 @@ section {
 }
 
 @media (max-width: 600px) {
-  .strength-list {
+  /* Asegura que la lista siga vertical */
+  #strength-trends {
     gap: 16px;
   }
 
-  .trend-card {
+  .strength-row {
     padding: 1rem 1.5rem;
   }
 
-  /* Ajusta tamaño texto */
-  .trend-card h3,
-  .trend-card h4 {
+  .strength-row .exercise {
     font-size: 1rem;
   }
 
-  .trend-value {
+  .strength-row .avg {
     font-size: 1.1rem;
   }
 
-  .trend-icon {
+  .strength-row .trend {
     font-size: 1.4rem;
   }
 }
