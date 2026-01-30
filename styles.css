@@ -1459,3 +1459,43 @@ h3 {
 .filter-option:hover {
   background: #f5f5f5;
 }
+
+/* ===== MODAL TUTORIAL ===== */
+#tutorial-modal .modal-content {
+  background: #fff;
+  color: #000;
+}
+
+/* Título */
+#tutorial-title {
+  color: #111;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+/* Consejos */
+#tutorial-cues {
+  color: #222;
+  font-size: 15px;
+  line-height: 1.5;
+  margin-top: 14px;
+}
+
+/* "Consejo:" en negrita */
+#tutorial-cues strong {
+  color: #000;
+  font-weight: 600;
+}
+
+#tutorial-cues {
+  background: #f9f9f9;
+  border-left: 4px solid #f5c518; /* dorado */
+  padding: 10px 12px;
+  border-radius: 6px;
+}
+
+#tutorial-modal iframe {
+  display: block;
+  margin: 0 auto;
+}
+
