@@ -1869,9 +1869,6 @@ document.addEventListener("click", e => {
   openExerciseChart(exercise, start, end);
 });
 
-document.getElementById("close-modal-btn")
-  .addEventListener("click", closeModal);
-
 document.getElementById("exercise-modal")
   .addEventListener("click", e => {
     if (e.target.id === "exercise-modal") {
@@ -1944,5 +1941,9 @@ document.addEventListener('change', e => {
 document
   .getElementById('tutorial-modal-content')
   .addEventListener('click', e => e.stopPropagation());
+
+document
+  .getElementById('close-tutorial-modal-btn')
+  .addEventListener('click', closeTutorial);
 
 loadTutorials();
