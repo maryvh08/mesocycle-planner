@@ -200,6 +200,10 @@ function setupTabs() {
 const menuToggle = document.getElementById("menu-toggle");
 const sideMenu = document.getElementById("side-menu");
 
+menuToggle.onclick = () => {
+  sideMenu.classList.toggle("hidden");
+};
+
 /* ======================
    DAY SELECTOR (CREAR)
 ====================== */
