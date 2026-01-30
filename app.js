@@ -1683,9 +1683,7 @@ function applyFilters() {
     filtered.sort((a, b) => {
       const aVal = (a[field] || '').toLowerCase();
       const bVal = (b[field] || '').toLowerCase();
-      return direction === 'asc'
-        ? aVal.localeCompare(bVal)
-        : bVal.localeCompare(aVal);
+      return direction === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
     });
   }
 
@@ -1715,7 +1713,12 @@ function populateFilters(exercises) {
     label.innerHTML = `<input type="checkbox" value="${subgroup}"> ${subgroup}`;
     subgroupContainer.appendChild(label);
   });
+
+  // Cada vez que cambie un checkbox, aplicar filtros
+  typeContainer.querySelectorAll('input').forEach(cb => cb.addEventListener('change', applyFilters));
+  subgroupContainer.querySelectorAll('input').forEach(cb => cb.addEventListener('change', applyFilters));
 }
+
 
 function getSelectedValues(containerId) {
   return Array.from(
