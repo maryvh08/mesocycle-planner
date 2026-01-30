@@ -1888,6 +1888,9 @@ document.getElementById("exercise-modal")
     }
   });
 
+document.getElementById("close-modal-btn") 
+   .addEventListener("click", closeModal); 
+
 // Cerrar modal al hacer click fuera
 document.getElementById('tutorial-modal')
   .addEventListener('click', e => {
