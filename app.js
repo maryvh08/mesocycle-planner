@@ -1631,7 +1631,7 @@ function getCoachInsight(trend) {
 }
 
 // =====================
-//TUTORIAL
+//TUTORIALES
 // =====================
 async function loadTutorials() {
   const { data, error } = await supabase
@@ -1806,24 +1806,35 @@ function toggleFavorite(id) {
 }
 
 function populateFilters(exercises) {
-  const typeSelect = document.getElementById('filter-type');
-  const subgroupSelect = document.getElementById('filter-subgroup');
+  const typeContainer = document.getElementById('type-options');
+  const subgroupContainer = document.getElementById('subgroup-options');
+
+  if (!typeContainer || !subgroupContainer) return;
+
+  typeContainer.innerHTML = '';
+  subgroupContainer.innerHTML = '';
 
   const types = [...new Set(exercises.map(e => e.type).filter(Boolean))];
   const subgroups = [...new Set(exercises.map(e => e.subgroup).filter(Boolean))];
 
   types.forEach(type => {
-    const option = document.createElement('option');
-    option.value = type;
-    option.textContent = type;
-    typeSelect.appendChild(option);
+    const label = document.createElement('label');
+    label.innerHTML = `
+      <input type="checkbox" value="${type}">
+      ${type}
+    `;
+    label.querySelector('input').addEventListener('change', applyFilters);
+    typeContainer.appendChild(label);
   });
 
   subgroups.forEach(subgroup => {
-    const option = document.createElement('option');
-    option.value = subgroup;
-    option.textContent = subgroup;
-    subgroupSelect.appendChild(option);
+    const label = document.createElement('label');
+    label.innerHTML = `
+      <input type="checkbox" value="${subgroup}">
+      ${subgroup}
+    `;
+    label.querySelector('input').addEventListener('change', applyFilters);
+    subgroupContainer.appendChild(label);
   });
 }
 
@@ -1846,12 +1857,6 @@ registroSelect.addEventListener("change", () => {
 
   openRegistro(mesocycleId);
 });
-
-document.getElementById('filter-type')
-  .addEventListener('change', applyFilters);
-
-document.getElementById('filter-subgroup')
-  .addEventListener('change', applyFilters);
 
 document.addEventListener("click", e => {
   const row = e.target.closest(".strength-row");
@@ -1901,10 +1906,13 @@ document.getElementById('filter-favorites')
 // ♻️ Borrar filtros
 document.getElementById('clear-filters')
   .addEventListener('click', () => {
+
     document.getElementById('tutorial-search').value = '';
-    document.getElementById('filter-type').value = '';
-    document.getElementById('filter-subgroup').value = '';
     document.getElementById('sort-by').value = '';
+    document.getElementById('filter-favorites').checked = false;
+
+    document.querySelectorAll('#type-options input, #subgroup-options input')
+      .forEach(cb => cb.checked = false);
 
     renderTutorials(tutorialsData);
   });
