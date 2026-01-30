@@ -16,6 +16,7 @@ let selectedDaysPerWeek = null;
 let editingMesocycleId = null;
 let statsChart = null;
 let generalStrengthData = null;
+let tutorialsData = [];
 
 /* ======================
    UI ELEMENTS
@@ -39,6 +40,8 @@ const registroEditor = document.getElementById("registro-editor");
 const tabs = document.querySelectorAll(".tab-btn");
 const statsView = document.getElementById("stats");
 
+const favorites_key = 'favorite_exercises';
+
 /* ======================
    DOM CONTENT LOADED
 ====================== */
@@ -47,6 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Login / Logout
   document.getElementById("login-btn")?.addEventListener("click", login);
   document.getElementById("logout-btn")?.addEventListener("click", logout);
+   createBtn?.addEventListener("click", saveMesocycle);
 
   // Signup
   const signupBtn = document.getElementById("signup-btn");
@@ -174,22 +178,32 @@ function showError(container, message) {
    TABS
 ====================== */
 function setupTabs() {
-  document.querySelectorAll(".tab-btn").forEach(btn => {
-     btn.onclick = () => {
-       const tab = btn.dataset.tab;
-   
-       document.querySelectorAll(".tab-content").forEach(t =>
-         t.classList.add("hidden")
-       );
-   
-       document.getElementById(tab).classList.remove("hidden");
-   
-       if (tab === "stats") {
-         renderStatsView(); // 👈 aquí y solo aquí
-       }
-     };
-   });
+  document.querySelectorAll("[data-tab]").forEach(btn => {
+    btn.onclick = () => {
+      const tab = btn.dataset.tab;
+
+      document.querySelectorAll(".tab-content").forEach(t =>
+        t.classList.add("hidden")
+      );
+
+      document.getElementById(tab)?.classList.remove("hidden");
+
+      // cerrar menú al seleccionar
+      document.getElementById("side-menu")?.classList.add("hidden");
+
+      if (tab === "stats") {
+        renderStatsView();
+      }
+    };
+  });
 }
+
+const menuToggle = document.getElementById("menu-toggle");
+const sideMenu = document.getElementById("side-menu");
+
+menuToggle.onclick = () => {
+  sideMenu.classList.toggle("hidden");
+};
 
 /* ======================
    DAY SELECTOR (CREAR)
@@ -229,11 +243,16 @@ async function saveMesocycle() {
   };
 
   const { error } = editingMesocycleId
-    ? await supabase.from("mesocycles").update(payload).eq("id", editingMesocycleId)
-    : await supabase.from("mesocycles").insert(payload);
+    ? await supabase
+        .from("mesocycles")
+        .update(payload)
+        .eq("id", editingMesocycleId)
+    : await supabase
+        .from("mesocycles")
+        .insert(payload);
 
   if (error) {
-    console.error(error);
+    console.error("❌ Error guardando mesociclo:", error);
     alert("Error al guardar");
     return;
   }
@@ -552,7 +571,12 @@ async function openRegistro(mesocycleId) {
 ====================== */
 async function renderRegistroEditor(mesocycleId) {
   console.log("🟢 renderRegistroEditor", mesocycleId);
+
+  const registroEditor = document.getElementById("registro-editor");
+  const registeredContainer = document.getElementById("registered-exercises");
+
   registroEditor.innerHTML = "";
+  registeredContainer.innerHTML = "";
 
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return;
@@ -573,43 +597,42 @@ async function renderRegistroEditor(mesocycleId) {
   }
 
   /* ======================
-     CARGAR EJERCICIOS DE PLANTILLA
+     CARGAR EJERCICIOS
   ====================== */
   const { data: templateExercises, error: eError } = await supabase
-     .from("template_exercises")
-     .select(`
-       exercise_id,
-       exercises:template_exercises_exercise_id_fkey (
-         id,
-         name,
-         subgroup
-       )
-     `)
-     .eq("template_id", mesocycle.template_id);
+    .from("template_exercises")
+    .select(`
+      exercise_id,
+      exercises:template_exercises_exercise_id_fkey (
+        id,
+        name,
+        subgroup
+      )
+    `)
+    .eq("template_id", mesocycle.template_id);
 
   if (eError) {
-    console.error("❌ Error cargando ejercicios de plantilla", eError);
+    console.error(eError);
     registroEditor.innerHTML = "<p class='error'>Error cargando ejercicios</p>";
     return;
   }
 
-  // Blindaje contra relaciones rotas
   const exercises = templateExercises
-     .map(te => te.exercises)
-     .filter(e => e && e.id && e.name);
+    .map(te => te.exercises)
+    .filter(e => e && e.id && e.name);
 
   if (!exercises.length) {
-     registroEditor.innerHTML = `
-       <p class="error">
-         ⚠ La plantilla existe pero no tiene ejercicios válidos.
-         Revisa la relación en Supabase.
-       </p>
-     `;
-     return;
-   }
+    registroEditor.innerHTML = `
+      <p class="error">
+        ⚠ La plantilla existe pero no tiene ejercicios válidos.
+      </p>
+    `;
+    return;
+  }
 
-  const exercisesById = {};
-  exercises.forEach(ex => exercisesById[ex.id] = ex);
+  const exercisesById = Object.fromEntries(
+    exercises.map(ex => [ex.id, ex])
+  );
 
   /* ======================
      UI
@@ -620,10 +643,7 @@ async function renderRegistroEditor(mesocycleId) {
 
   const weekSelect = document.createElement("select");
   for (let i = 1; i <= mesocycle.weeks; i++) {
-    const opt = document.createElement("option");
-    opt.value = i;
-    opt.textContent = `Semana ${i}`;
-    weekSelect.appendChild(opt);
+    weekSelect.append(new Option(`Semana ${i}`, i));
   }
   registroEditor.appendChild(weekSelect);
 
@@ -640,41 +660,38 @@ async function renderRegistroEditor(mesocycleId) {
       [...dayContainer.children].forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       selectedDay = i;
-      renderExercisesForDay(mesocycleId, Number(weekSelect.value), selectedDay);
+
+      renderExercisesForDay(
+        mesocycleId,
+        Number(weekSelect.value),
+        selectedDay
+      );
     };
     dayContainer.appendChild(btn);
   }
 
   const exerciseSelect = document.createElement("select");
   exerciseSelect.innerHTML = `<option value="">Selecciona ejercicio</option>`;
-
-  exercises.forEach(ex => {
-    const opt = document.createElement("option");
-    opt.value = ex.id;
-    opt.textContent = ex.name;
-    exerciseSelect.appendChild(opt);
-  });
+  exercises.forEach(ex =>
+    exerciseSelect.append(new Option(ex.name, ex.id))
+  );
 
   const weightInput = document.createElement("input");
-  weightInput.placeholder = "Peso (kg)";
   weightInput.type = "number";
+  weightInput.placeholder = "Peso (kg)";
 
   const repsInput = document.createElement("input");
-  repsInput.placeholder = "Reps";
   repsInput.type = "number";
+  repsInput.placeholder = "Reps";
 
   const saveBtn = document.createElement("button");
   saveBtn.textContent = "Guardar";
-
-  const registeredContainer = document.createElement("div");
-  registeredContainer.id = "registered-exercises";
 
   registroEditor.append(
     exerciseSelect,
     weightInput,
     repsInput,
-    saveBtn,
-    registeredContainer
+    saveBtn
   );
 
   /* ======================
@@ -685,50 +702,47 @@ async function renderRegistroEditor(mesocycleId) {
     if (!exerciseSelect.value) return alert("Selecciona un ejercicio");
 
     const exercise = exercisesById[exerciseSelect.value];
-      if (!exercise || !exercise.name) {
-        alert("Ejercicio inválido o mal vinculado");
-        return;
-      }
+    if (!exercise) return alert("Ejercicio inválido");
 
     const payload = {
       user_id: session.user.id,
       mesocycle_id: mesocycleId,
       exercise_id: exercise.id,
-      exercise_name: exercise.name, // 🔥 CLAVE para stats y vistas
+      exercise_name: exercise.name,
       week_number: Number(weekSelect.value),
       day_number: selectedDay,
       weight: Number(weightInput.value),
       reps: Number(repsInput.value)
     };
 
-   // 🚨 COMPROBAR DUPLICADO (mismo ejercicio, mismo día y semana)
-   const { data: existing, error: checkError } = await supabase
-     .from("exercise_records")
-     .select("id")
-     .eq("user_id", session.user.id)
-     .eq("mesocycle_id", mesocycleId)
-     .eq("exercise_id", exercise.id)
-     .eq("week_number", Number(weekSelect.value))
-     .eq("day_number", selectedDay)
-     .limit(1);
-   
-   if (checkError) {
-     console.error("❌ Error comprobando duplicado", checkError);
-     alert("Error al validar el ejercicio");
-     return;
-   }
-   
-   if (existing.length > 0) {
-     alert("Ya ha registrado este ejercicio para este día");
-     return;
-   }
+    // 🚨 comprobar duplicado
+    const { data: existing, error: checkError } = await supabase
+      .from("exercise_records")
+      .select("id")
+      .eq("user_id", session.user.id)
+      .eq("mesocycle_id", mesocycleId)
+      .eq("exercise_id", exercise.id)
+      .eq("week_number", payload.week_number)
+      .eq("day_number", selectedDay)
+      .limit(1);
+
+    if (checkError) {
+      console.error(checkError);
+      alert("Error validando el ejercicio");
+      return;
+    }
+
+    if (existing?.length) {
+      alert("Ya ha registrado este ejercicio para este día");
+      return;
+    }
 
     const { error } = await supabase
       .from("exercise_records")
       .insert(payload);
 
     if (error) {
-      console.error("❌ Error guardando", error);
+      console.error(error);
       alert("Error al guardar");
       return;
     }
@@ -736,28 +750,14 @@ async function renderRegistroEditor(mesocycleId) {
     weightInput.value = "";
     repsInput.value = "";
 
-      // 🏆 comprobar si fue PR
-      const { data: prRows } = await supabase
-        .from("exercise_prs")
-        .select("pr_weight")
-        .eq("user_id", session.user.id)
-        .eq("exercise_name", exercise.name)
-        .single();
-      
-      if (prRows && payload.weight >= prRows.pr_weight) {
-        showPRBadge(exercise.name, payload.weight);
-      }
-   // 🔄 refrescar stats si están visibles
-   if (!document.getElementById("stats").classList.contains("hidden")) {
-     const select = document.getElementById("stats-mesocycle");
-     const id = select?.value || null;
-     applyStatsFilter(id);
-     loadMesocycleComparison();
-   }
-    renderExercisesForDay(mesocycleId, Number(weekSelect.value), selectedDay);
+    renderExercisesForDay(
+      mesocycleId,
+      payload.week_number,
+      selectedDay
+    );
   };
 
-  console.log("✅ RegistroEditor listo y blindado");
+  console.log("✅ RegistroEditor renderizado correctamente");
 }
 
 /* ======================
@@ -1632,10 +1632,243 @@ function getCoachInsight(trend) {
 }
 
 // =====================
-// INIT
+//TUTORIALES
+// =====================
+async function loadTutorials() {
+  const { data, error } = await supabase
+    .from('exercises')
+    .select(`
+      id,
+      name,
+      type,
+      subgroup,
+      exercise_tutorials (
+        video_url,
+        cues
+      )
+    `);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  tutorialsData = data;
+  populateFilters(tutorialsData);
+  renderTutorials(data);
+}
+
+function applyFilters() {
+  const search = document.getElementById('tutorial-search').value.toLowerCase();
+  const selectedTypes = getSelectedValues('type-options');
+  const selectedSubgroups = getSelectedValues('subgroup-options');
+  const onlyFavorites = document.getElementById('filter-favorites')?.checked;
+  const sortBy = document.getElementById('sort-by').value;
+
+  let filtered = tutorialsData.filter(ex => {
+    if (!ex.exercise_tutorials?.length) return false;
+
+    // Solo favoritos
+    if (onlyFavorites && !isFavorite(ex.id)) return false;
+
+    // Coincidencias de búsqueda
+    const matchesSearch = ex.name.toLowerCase().includes(search);
+
+    // Coincidencias de tipo/subgrupo
+    const matchesType = !selectedTypes.length || selectedTypes.includes(ex.type);
+    const matchesSubgroup = !selectedSubgroups.length || selectedSubgroups.includes(ex.subgroup);
+
+    return matchesSearch && matchesType && matchesSubgroup;
+  });
+
+  // Ordenar si aplica
+  if (sortBy) {
+    const [field, direction] = sortBy.split('-');
+    filtered.sort((a, b) => {
+      const aVal = (a[field] || '').toLowerCase();
+      const bVal = (b[field] || '').toLowerCase();
+      return direction === 'asc'
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    });
+  }
+
+  renderTutorials(filtered);
+}
+
+function renderTutorials(exercises) {
+  const list = document.getElementById('tutorial-list');
+  list.innerHTML = '';
+
+  exercises.forEach(ex => {
+    if (!ex.exercise_tutorials || !ex.exercise_tutorials.length) return;
+
+    const favorite = isFavorite(ex.id);
+
+    const card = document.createElement('div');
+    card.className = 'tutorial-card';
+
+    card.innerHTML = `
+      <div class="tutorial-info">
+        <h4>${ex.name}</h4>
+        <span>${ex.subgroup} · ${ex.type}</span>
+      </div>
+
+      <div class="tutorial-actions">
+        <button class="fav-btn ${favorite ? 'active' : ''}" title="Favorito">
+          <span class="star">★</span>
+        </button>
+        <button class="play-btn">▶ Ver</button>
+      </div>
+    `;
+
+    // Abrir modal
+    card.querySelector('.play-btn').onclick = () =>
+      openTutorial(ex.name, ex.exercise_tutorials[0]);
+
+    // Toggle favorito
+    card.querySelector('.fav-btn').onclick = (e) => {
+      e.stopPropagation();
+      toggleFavorite(ex.id);
+      applyFilters(); // refresca la UI y mantiene filtros
+    };
+
+    list.appendChild(card);
+  });
+}
+
+function handleTutorialSelect(e) {
+  const exerciseId = e.target.value;
+  if (!exerciseId) return;
+
+  const exercise = tutorialsData.find(ex => ex.id === exerciseId);
+  if (!exercise || !exercise.exercise_tutorials.length) return;
+
+  openTutorial(exercise.name, exercise.exercise_tutorials[0]);
+}
+
+function openTutorial(name, tutorial) {
+  const embedUrl = toEmbedUrl(tutorial.video_url);
+  console.log('EMBED:', embedUrl);
+
+  if (!embedUrl) {
+    alert('URL de video inválida');
+    return;
+  }
+
+  document.getElementById('tutorial-title').textContent = name;
+  document.getElementById('tutorial-video').src = embedUrl;
+  document.getElementById('tutorial-cues').innerHTML =
+    `<strong>Consejo:</strong> ${tutorial.cues}`;
+
+  document.getElementById('tutorial-modal').classList.remove('hidden');
+}
+
+function closeTutorial() {
+  const modal = document.getElementById('tutorial-modal');
+  const iframe = document.getElementById('tutorial-video');
+
+  modal.classList.add('hidden');
+
+  // 🔴 Detiene el video y libera el iframe
+  iframe.src = '';
+}
+
+function toEmbedUrl(url) {
+  try {
+    const parsedUrl = new URL(url);
+
+    // https://www.youtube.com/watch?v=XXXX
+    if (parsedUrl.hostname.includes('youtube.com')) {
+      const videoId = parsedUrl.searchParams.get('v');
+      if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}`;
+      }
+    }
+
+    // https://youtu.be/XXXX
+    if (parsedUrl.hostname === 'youtu.be') {
+      const videoId = parsedUrl.pathname.slice(1);
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+  } catch (e) {
+    console.error('URL inválida:', url);
+  }
+
+  return '';
+}
+
+function getFavorites() {
+  return JSON.parse(localStorage.getItem(favorites_key)) || [];
+}
+
+function isFavorite(id) {
+  return getFavorites().includes(id);
+}
+
+function toggleFavorite(id) {
+  let favorites = getFavorites();
+
+  if (favorites.includes(id)) {
+    favorites = favorites.filter(favId => favId !== id);
+  } else {
+    favorites.push(id);
+  }
+
+  localStorage.setItem(favorites_key, JSON.stringify(favorites));
+}
+
+function populateFilters(exercises) {
+  const typeContainer = document.getElementById('type-options');
+  const subgroupContainer = document.getElementById('subgroup-options');
+
+  if (!typeContainer || !subgroupContainer) return;
+
+  typeContainer.innerHTML = '';
+  subgroupContainer.innerHTML = '';
+
+  const types = [...new Set(exercises.map(e => e.type).filter(Boolean))];
+  const subgroups = [...new Set(exercises.map(e => e.subgroup).filter(Boolean))];
+
+  types.forEach(type => {
+    const label = document.createElement('label');
+    label.className = 'filter-option';
+    label.innerHTML = `
+      <input type="checkbox" value="${type}">
+      ${type}
+    `;
+    typeContainer.appendChild(label);
+  });
+
+  subgroups.forEach(subgroup => {
+    const label = document.createElement('label');
+    label.className = 'filter-option';
+    label.innerHTML = `
+      <input type="checkbox" value="${subgroup}">
+      ${subgroup}
+    `;
+    subgroupContainer.appendChild(label);
+  });
+}
+
+function getSelectedValues(containerId) {
+  return Array.from(
+    document.querySelectorAll(`#${containerId} input:checked`)
+  ).map(input => input.value);
+}
+
+// =====================
+// LISTENERS
 // =====================
 supabase.auth.onAuthStateChange((_e, session) => {
   session ? showApp() : showLogin();
+});
+
+registroSelect.addEventListener("change", () => {
+  const mesocycleId = registroSelect.value;
+  if (!mesocycleId) return;
+
+  openRegistro(mesocycleId);
 });
 
 document.addEventListener("click", e => {
@@ -1649,12 +1882,81 @@ document.addEventListener("click", e => {
   openExerciseChart(exercise, start, end);
 });
 
-document.getElementById("close-modal-btn")
-  .addEventListener("click", closeModal);
-
 document.getElementById("exercise-modal")
   .addEventListener("click", e => {
     if (e.target.id === "exercise-modal") {
       closeModal();
     }
   });
+
+// Cerrar modal al hacer click fuera
+document.getElementById('tutorial-modal')
+  .addEventListener('click', e => {
+    if (e.target.id === 'tutorial-modal') {
+      closeTutorial();
+    }
+  });
+
+
+// 🔍 Buscador
+document.getElementById('tutorial-search')
+  ?.addEventListener('input', applyFilters);
+
+
+// 🔃 Orden
+document.getElementById('sort-by')
+  .addEventListener('change', applyFilters);
+
+
+// ⭐ Solo favoritos
+document.getElementById('filter-favorites')
+  .addEventListener('change', applyFilters);
+
+
+// ♻️ Borrar filtros
+document.getElementById('clear-filters')
+  .addEventListener('click', () => {
+
+    document.getElementById('tutorial-search').value = '';
+    document.getElementById('sort-by').value = '';
+    document.getElementById('filter-favorites').checked = false;
+
+    document.querySelectorAll('#type-options input, #subgroup-options input')
+      .forEach(cb => cb.checked = false);
+
+    renderTutorials(tutorialsData);
+  });
+
+
+// ⬇️ Abrir / cerrar dropdowns
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    btn.parentElement.classList.toggle('open');
+  });
+});
+
+
+// ⬆️ Cerrar dropdowns al clickear fuera
+document.addEventListener('click', () => {
+  document.querySelectorAll('.multi-filter')
+    .forEach(f => f.classList.remove('open'));
+});
+
+
+// ☑️ Re-filtrar al marcar checkboxes
+document.addEventListener('change', e => {
+  if (e.target.closest('.filter-dropdown')) {
+    applyFilters();
+  }
+});
+
+document
+  .getElementById('close-tutorial-modal-btn')
+  .addEventListener('click', closeTutorial);
+
+document
+  .getElementById('tutorial-modal')
+  .addEventListener('click', closeTutorial);
+
+loadTutorials();
