@@ -488,6 +488,31 @@ section {
   }
 }
 
+@media (max-width: 600px) {
+  #tutorial-title {
+    font-size: 16px;
+  }
+
+  #tutorial-cues {
+    font-size: 13px;
+  }
+
+  #tutorial-modal .modal-content {
+    width: 95%;   /* ocupa casi toda la pantalla en celular */
+    padding: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .tutorial-card {
+    padding: 0.3 rem;
+  }
+
+  .tutorial-actions {
+    gap: 8px;
+  }
+}
+
 @media (max-width: 900px) {
   #strength-trends {
     grid-template-columns: repeat(2, 1fr);
@@ -497,6 +522,47 @@ section {
 @media (max-width: 500px) {
   #strength-trends {
     grid-template-columns: 1fr;
+  }
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .cta-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Asegura que la lista siga vertical */
+  #strength-trends {
+    gap: 16px;
+  }
+
+  .strength-row {
+    padding: 1rem 1.5rem;
+  }
+
+  .strength-row .exercise {
+    font-size: 1rem;
+  }
+
+  .strength-row .avg {
+    font-size: 1.1rem;
+  }
+
+  .strength-row .trend {
+    font-size: 1.4rem;
   }
 }
 
@@ -719,81 +785,74 @@ section {
   opacity: 0.8;
 }
 
-.trend {
-  font-size: 1.4rem;
+/* ======================
+   TENDENCIA
+====================== */
+#strength-trends {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0;
+  margin: 0;
 }
 
-.trend.up { color: #4ade80; }
-.trend.down { color: #f87171; }
-.trend.flat { color: #9ca3af; }
-
-.trend-card {
-  background: linear-gradient(180deg, #1a0f13, #0b0608);
-  border-radius: 18px;
-  padding: 1.2rem 1.4rem;
-  box-shadow: 0 20px 50px rgba(0,0,0,.7);
-  border: 1px solid rgba(255,255,255,.05);
-  position: relative;
-  overflow: hidden;
-  transition: transform .2s, box-shadow .2s;
-}
-
-.trend-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 25px 60px rgba(177,18,38,.45);
-}
-
-.trend-card h4 {
-  font-size: 1rem;
-  margin-bottom: 0.6rem;
-  background: linear-gradient(90deg, #fff, var(--accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.trend-main {
+/* Cada fila - caja tipo card */
+.strength-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background-color: #1a0f13;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.3s ease;
 }
 
-.trend-value {
-  font-size: 1.8rem;
-  font-weight: 800;
+/* Hover (opcional) */
+.strength-row:hover {
+  background-color: #2a1a20;
 }
 
-.trend-card.up .trend-value {
+/* Nombre del ejercicio */
+.strength-row .exercise {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #fff;
+  flex-grow: 1;        /* para que tome todo el espacio posible */
+}
+
+/* Promedio de peso */
+.strength-row .avg {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #ccc;
+  margin-left: 1rem;
+  white-space: nowrap;
+}
+
+/* Icono tendencia */
+.strength-row .trend {
+  font-size: 1.4rem;
+  margin-left: 0.75rem;
+  color: #ccc;
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+/* Colores para las tendencias */
+.trend.up {
   color: #4ade80;
 }
 
-.trend-card.down .trend-value {
+.trend.down {
   color: #f87171;
 }
 
-.trend-card.flat .trend-value {
+.trend.flat {
   color: #9ca3af;
 }
 
-.trend-icon {
-  font-size: 2rem;
-  opacity: 0.15;
-}
-
-.trend-card::before {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  font-size: 1.6rem;
-  opacity: 0.08;
-}
-
-.trend-card small {
-  display: block;
-  margin-top: 0.4rem;
-  font-size: 0.7rem;
-  opacity: 0.5;
-  text-transform: uppercase;
-}
 
 /* ======================
    PR TABLE – HALL OF FAME
@@ -1072,6 +1131,308 @@ h3 {
   display: none;
 }
 
+/* ================= TUTORIALES ================= */
+
+.tutorial-list {
+  display: grid;
+  gap: 2rem;              /* separación entre cards */
+  margin-top: 1.5rem;
+}
+
+/* ================= MODAL ================= */
+
+#tutorial-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+#tutorial-modal.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+#tutorial-modal .modal-content {
+  background: #fff;
+  color: #000;
+  max-width: 900px;
+  width: 100%;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+/* ===== TÍTULO ===== */
+#tutorial-title {
+  color: #111;
+  font-weight: 600;
+  font-size: 18px;
+  margin-bottom: 24px;
+}
+
+/* ===== VIDEO ===== */
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin-bottom: 16px;
+}
+
+.video-wrapper iframe {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
+/* ===== CONSEJOS ===== */
+#tutorial-cues {
+  color: #000;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  background: #f9f9f9;
+  border-left: 4px solid #f5c518;
+  padding: 10px 12px;
+  border-radius: 6px;
+}
+
+/* ===== BOTÓN CERRAR ===== */
+#close-tutorial-modal-btn {
+  margin-top: 14px;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: #111;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  #tutorial-modal {
+    padding: 6px;
+  }
+
+  #tutorial-modal .modal-content {
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
+
+  #tutorial-title {
+    font-size: 16px;
+  }
+
+  #tutorial-cues {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 600px) {
+  .trend-main {
+    flex-direction: column;   /* 👈 apila verticalmente */
+    align-items: flex-start;  /* empieza desde la izquierda */
+    gap: 8px;                 /* un poco de espacio entre valor e icono */
+  }
+
+  /* Valor principal más grande y legible */
+  .trend-value {
+    font-size: 1.4rem;
+    font-weight: 800;
+  }
+
+  /* Icono decorativo más discreto y alineado a la derecha */
+  .trend-icon {
+    align-self: flex-end;
+    font-size: 1.6rem;
+    opacity: 0.12;
+  }
+}
+
+/* ================= CARDS ================= */
+
+.tutorial-card {
+  background: #120b0f;
+  border: 1px solid #2a0f14;
+  border-radius: 18px;
+  padding: 1.8rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.tutorial-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 50px rgba(177, 18, 38, 0.35);
+}
+
+.tutorial-card h4 {
+  margin-bottom: 0.75rem;
+  font-size: 1.05rem;
+}
+
+.tutorial-card span {
+  display: block;
+  font-size: 0.85rem;
+  color: #9a8a8f;
+  line-height: 1.4;
+}
+
+/* ================= ACCIONES ================= */
+
+.tutorial-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto; /* mantiene botones a la derecha */
+}
+
+.clear-btn {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  cursor: pointer;
+}
+
+.clear-btn:hover {
+  background: #ddd;
+}
+
+.play-btn {
+  background: linear-gradient(135deg, #b11226, #ff3b3b);
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 1.2rem;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+!-- ================= FAVORITOS ================= -->
+.fav-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fav-btn .star {
+  font-size: 18px;
+  color: #bbb;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+/* Hover */
+.fav-btn:hover {
+  border-color: #f5c518;
+  background: #fff8dc;
+}
+
+.fav-btn:hover .star {
+  color: #f5c518;
+  transform: scale(1.1);
+}
+
+/* Activo (favorito) */
+.fav-btn.active {
+  background: #f5c518;
+  border-color: #f5c518;
+}
+
+.fav-btn.active .star {
+  color: #fff;
+  transform: scale(1.15);
+}
+
+/* Click animation */
+.fav-btn:active .star {
+  transform: scale(0.9);
+}
+
+.favorites-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Oculta el checkbox nativo */
+.favorites-filter input {
+  display: none;
+}
+
+/* Cuadro custom */
+.checkmark {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid #ccc;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+/* Check */
+.checkmark::after {
+  content: '';
+  width: 10px;
+  height: 6px;
+  border-left: 2px solid white;
+  border-bottom: 2px solid white;
+  transform: rotate(-45deg);
+  opacity: 0;
+}
+
+/* Activo */
+.favorites-filter input:checked + .checkmark {
+  background: #f5c518;
+  border-color: #f5c518;
+}
+
+.favorites-filter input:checked + .checkmark::after {
+  opacity: 1;
+}
+
+/* Hover */
+.favorites-filter:hover .checkmark {
+  border-color: #f5c518;
+}
+
+.filter-options label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.filter-options label:hover {
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.filter-options input {
+  cursor: pointer;
+}
+
+
+!-- ================= WRAPPER Y MODAL ================= -->
 /* Animation */
 @keyframes slideDown {
   from {
@@ -1082,4 +1443,225 @@ h3 {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.video-wrapper iframe {
+  pointer-events: auto;
+}
+
+.modal {
+  pointer-events: all;
+}
+
+#tutorial-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;          /* 👈 MÁS separación entre tarjetas */
+  margin-top: 2rem;
+}
+
+.tutorial-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px;
+  border-radius: 10px;
+  background: #f5f5f5;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tutorial-item:hover {
+  background: #eaeaea;
+}
+
+.tutorial-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tutorial-info span {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.tutorial-play {
+  font-size: 1.2rem;
+}
+
+/* Modal fondo */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Contenido del modal */
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 90%; /* Ajusta al 90% del ancho de la pantalla */
+  width: 900px;    /* Tamaño máximo en escritorio */
+  box-sizing: border-box;
+}
+
+/* Video wrapper con proporción 16:9 */
+.video-wrapper {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 */
+  height: 0;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+
+.video-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Botón de cerrar */
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.subtitle {
+  font-weight: normal;
+  font-size: 1.2rem;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 8px 12px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+!-- ================= FILTRO ================= -->
+
+.multi-filter {
+  position: relative;
+}
+
+.filter-btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+}
+.multi-filter {
+  position: relative;
+}
+
+.filter-options {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  min-width: 180px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 8px;
+  display: none;
+  z-index: 100;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+/* 🔥 AQUÍ ESTÁ LA CLAVE */
+.multi-filter.open .filter-options {
+  display: block;
+}
+
+.filter-dropdown {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  min-width: 180px;
+  max-height: 220px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px;
+  display: none;
+  z-index: 20;
+}
+
+.multi-filter.open .filter-dropdown {
+  display: block;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.filter-option input {
+  accent-color: #f5c518;
+}
+
+.filter-option:hover {
+  background: #f5f5f5;
+}
+
+/* ===== MODAL TUTORIAL ===== */
+#tutorial-modal .modal-content {
+  background: #fff;
+  color: #000;
+}
+
+/* "Consejo:" en negrita */
+#tutorial-cues strong {
+  color: #000;
+  font-weight: 600;
+}
+
+#tutorial-cues {
+  color: #000 !important;      /* texto negro */
+  background: #f9f9f9;         /* fondo claro */
+  border-left: 4px solid #f5c518;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-top: 12px;
+}
+
+#tutorial-cues strong {
+  color: #000 !important;
+  font-weight: 600;
+}
+
+
+#tutorial-modal iframe {
+  display: block;
+  margin: 0 auto;
 }
