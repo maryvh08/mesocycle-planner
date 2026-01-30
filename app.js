@@ -1664,6 +1664,11 @@ function populateFilters(exercises) {
   const typeContainer = document.getElementById('type-options');
   const subgroupContainer = document.getElementById('subgroup-options');
 
+  if (!typeContainer || !subgroupContainer) {
+    console.warn("Contenedores de filtros no encontrados");
+    return;
+  }
+   
   typeContainer.innerHTML = '';
   subgroupContainer.innerHTML = '';
 
