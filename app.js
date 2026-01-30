@@ -1830,6 +1830,27 @@ supabase.auth.onAuthStateChange((_e, session) => {
   session ? showApp() : showLogin();
 });
 
+document.addEventListener("click", e => {
+  const row = e.target.closest(".strength-row");
+  if (!row) return;
+
+  const exercise = row.dataset.exercise;
+  const start = Number(row.dataset.start);
+  const end = Number(row.dataset.end);
+
+  openExerciseChart(exercise, start, end);
+});
+
+document.getElementById("close-modal-btn")
+  .addEventListener("click", closeModal);
+
+document.getElementById("exercise-modal")
+  .addEventListener("click", e => {
+    if (e.target.id === "exercise-modal") {
+      closeModal();
+    }
+  });
+
 document.getElementById('tutorial-search')
   ?.addEventListener('input', applyFilters);
 
