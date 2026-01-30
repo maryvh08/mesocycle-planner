@@ -1806,31 +1806,24 @@ function toggleFavorite(id) {
 }
 
 function populateFilters(exercises) {
-  const typeContainer = document.getElementById('type-options');
-  const subgroupContainer = document.getElementById('subgroup-options');
+  const typeSelect = document.getElementById('filter-type');
+  const subgroupSelect = document.getElementById('filter-subgroup');
 
-  // Obtener valores únicos
   const types = [...new Set(exercises.map(e => e.type).filter(Boolean))];
   const subgroups = [...new Set(exercises.map(e => e.subgroup).filter(Boolean))];
 
-  // Crear checkboxes para tipos
   types.forEach(type => {
-    typeContainer.innerHTML += `
-      <label class="filter-option">
-        <input type="checkbox" value="${type}" />
-        ${type}
-      </label>
-    `;
+    const option = document.createElement('option');
+    option.value = type;
+    option.textContent = type;
+    typeSelect.appendChild(option);
   });
 
-  // Crear checkboxes para subgrupos
   subgroups.forEach(subgroup => {
-    subgroupContainer.innerHTML += `
-      <label class="filter-option">
-        <input type="checkbox" value="${subgroup}" />
-        ${subgroup}
-      </label>
-    `;
+    const option = document.createElement('option');
+    option.value = subgroup;
+    option.textContent = subgroup;
+    subgroupSelect.appendChild(option);
   });
 }
 
