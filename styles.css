@@ -831,11 +831,17 @@ section {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
+  flex-wrap: wrap; /* 👈 permite apilar */
 }
 
 .trend-value {
-  font-size: 1.8rem;
+  font-size: clamp(1.4rem, 4vw, 1.8rem);
   font-weight: 800;
+}
+
+.trend-icon {
+  font-size: clamp(1.4rem, 5vw, 2rem);
 }
 
 .trend-card.up .trend-value {
