@@ -542,77 +542,36 @@ section {
   }
 }
 
+/* ===== MOBILE ===== */
 @media (max-width: 600px) {
-  .trend-card {
-    padding: 1rem;
+  /* Cada card ocupa todo el ancho y mantiene valor + icono alineados */
+  .strength-list {
+    display: flex;
+    flex-direction: column;  /* lista vertical */
+    gap: 12px;
   }
 
-  .trend-card h3,
-  .trend-card h4 {
-    font-size: 0.95rem;
-    margin-bottom: 0.5rem;
+  .trend-card {
+    width: 100%;  /* ocupa toda la fila */
   }
 
   .trend-main {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .trend-value {
-    font-size: 1.5rem;
-  }
-
-  .trend-icon {
-    align-self: flex-end;
-    opacity: 0.1;
-  }
-
-  .trend-card small {
-    font-size: 0.65rem;
-  }
-}
-@media (max-width: 400px) {
-  .trend-card {
-    border-radius: 14px;
-  }
-
-  .trend-value {
-    font-size: 1.3rem;
-  }
-}
-
-@media (max-width: 600px) {
-  .trend-card.up {
-    padding: 1rem;
-  }
-
-  .trend-card.up .trend-main {
-    flex-direction: column;      /* 👈 apila */
-    align-items: flex-start;
+    flex-direction: row;        /* mantener valor y icono en la misma fila */
+    justify-content: space-between;
+    align-items: center;
     gap: 6px;
   }
 
-  .trend-card.up .trend-value {
+  .trend-value {
     font-size: 1.4rem;
-    font-weight: 800;
   }
 
-  .trend-card.up .trend-icon {
-    align-self: flex-end;
+  .trend-icon {
     font-size: 1.6rem;
     opacity: 0.12;
   }
-
-  .trend-card.up small {
-    font-size: 0.65rem;
-  }
 }
 
-@media (max-width: 600px) {
-  .strength-list {
-    grid-template-columns: 1fr; /* 👈 UNA SOLA COLUMNA */
-  }
-}
 /* ======================
    LOGIN — VAMPIRO
 ====================== */
