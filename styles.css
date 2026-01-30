@@ -1113,17 +1113,20 @@ h3 {
   display: none;
 }
 
-!-- ================= TUTORIALES ================= -->
+/* ================= TUTORIALES ================= */
+
 .tutorial-list {
   display: grid;
-  gap: 3rem;
+  gap: 3rem;              /* separación entre cards */
   margin-top: 1.5rem;
 }
+
+/* ================= MODAL ================= */
 
 #tutorial-modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1136,34 +1139,29 @@ h3 {
   visibility: hidden;
 }
 
-/* ===== MODAL TUTORIAL ===== */
 #tutorial-modal .modal-content {
   background: #fff;
   color: #000;
+  max-width: 900px;
+  width: 100%;
+  border-radius: 12px;
+  padding: 20px;
 }
 
-/* Título */
+/* ===== TÍTULO ===== */
 #tutorial-title {
-  color: #111 !important;
+  color: #111;
   font-weight: 600;
-  margin-bottom: 12px;
   font-size: 18px;
+  margin-bottom: 24px;
 }
 
-/* Consejos */
-#tutorial-cues {
-  color: #000;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  margin-top: 12px;
-}
-
-/* "Consejo:" en negrita */
+/* ===== VIDEO ===== */
 .video-wrapper {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  flex-shrink: 0;
+  margin-bottom: 16px;
 }
 
 .video-wrapper iframe {
@@ -1172,15 +1170,20 @@ h3 {
   border-radius: 8px;
 }
 
-#tutorial-title {
-  color: #111 !important;
-  font-weight: 600;
-  margin-bottom: 24px;
-  font-size: 18px;
+/* ===== CONSEJOS ===== */
+#tutorial-cues {
+  color: #000;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  background: #f9f9f9;
+  border-left: 4px solid #f5c518;
+  padding: 10px 12px;
+  border-radius: 6px;
 }
 
+/* ===== BOTÓN CERRAR ===== */
 #close-tutorial-modal-btn {
-  margin-top: 10px;
+  margin-top: 14px;
   padding: 10px;
   border-radius: 8px;
   border: none;
@@ -1189,6 +1192,7 @@ h3 {
   cursor: pointer;
 }
 
+/* ===== RESPONSIVE ===== */
 @media (max-width: 600px) {
   #tutorial-modal {
     padding: 6px;
@@ -1203,29 +1207,29 @@ h3 {
   #tutorial-title {
     font-size: 16px;
   }
-}
 
   #tutorial-cues {
     font-size: 13px;
   }
 }
 
+/* ================= CARDS ================= */
+
 .tutorial-card {
   background: #120b0f;
   border: 1px solid #2a0f14;
   border-radius: 18px;
-  padding: 1.8rem 2rem;        /* 👈 más aire interno */
+  padding: 1.8rem 2rem;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 12px;                   /* 👈 separación interna */
+  justify-content: space-between;
+  gap: 12px;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-
 .tutorial-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 24px 50px rgba(177,18,38,0.35);
+  box-shadow: 0 24px 50px rgba(177, 18, 38, 0.35);
 }
 
 .tutorial-card h4 {
@@ -1240,19 +1244,14 @@ h3 {
   line-height: 1.4;
 }
 
-.tutorial-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 24px;
-}
+/* ================= ACCIONES ================= */
 
 .tutorial-actions {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
-  margin-left: auto; /* 👈 CLAVE */
+  margin-left: auto; /* mantiene botones a la derecha */
 }
 
 .clear-btn {
