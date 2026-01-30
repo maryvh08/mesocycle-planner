@@ -1714,12 +1714,11 @@ function renderTutorials(exercises) {
       </div>
 
       <div class="tutorial-actions">
-          <button class="fav-btn active">
-            <span class="star">★</span>
-          </button>
-          <button class="play-btn">▶ Ver</button>
-        </div>
-      </div>
+       <button class="fav-btn active">
+         <span class="star">★</span>
+       </button>
+       <button class="play-btn">▶ Ver</button>
+     </div>
     `;
 
     // Abrir modal
