@@ -571,6 +571,15 @@ section {
     font-size: 0.65rem;
   }
 }
+@media (max-width: 400px) {
+  .trend-card {
+    border-radius: 14px;
+  }
+
+  .trend-value {
+    font-size: 1.3rem;
+  }
+}
 
 /* ======================
    LOGIN — VAMPIRO
