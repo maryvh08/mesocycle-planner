@@ -1826,6 +1826,10 @@ function toEmbedUrl(url) {
 // =====================
 // LISTENERS
 // =====================
+supabase.auth.onAuthStateChange((_e, session) => {
+  session ? showApp() : showLogin();
+});
+
 document.getElementById('tutorial-search')
   ?.addEventListener('input', applyFilters);
 
