@@ -487,6 +487,21 @@ section {
   }
 }
 
+@media (max-width: 600px) {
+  #tutorial-title {
+    font-size: 16px;
+  }
+
+  #tutorial-cues {
+    font-size: 13px;
+  }
+
+  #tutorial-modal .modal-content {
+    width: 95%;   /* ocupa casi toda la pantalla en celular */
+    padding: 12px;
+  }
+}
+
 @media (max-width: 900px) {
   #strength-trends {
     grid-template-columns: repeat(2, 1fr);
@@ -1119,9 +1134,10 @@ h3 {
 
 /* Título */
 #tutorial-title {
-  color: #111;
+  color: #111 !important;
   font-weight: 600;
   margin-bottom: 12px;
+  font-size: 18px;
 }
 
 /* Consejos */
@@ -1133,11 +1149,6 @@ h3 {
 }
 
 /* "Consejo:" en negrita */
-#tutorial-cues strong {
-  color: #000;
-  font-weight: 600;
-}
-
 .video-wrapper {
   position: relative;
   width: 100%;
@@ -1152,18 +1163,11 @@ h3 {
 }
 
 #tutorial-title {
+  color: #111 !important;
+  font-weight: 600;
+  margin-bottom: 12px;
   font-size: 18px;
-  color: #111;
-  margin-bottom: 6px;
 }
-
-#tutorial-cues {
-  background: #f9f9f9;
-  border-left: 4px solid #f5c518; /* dorado */
-  padding: 10px 12px;
-  border-radius: 6px;
-}
-
 
 #close-tutorial-modal-btn {
   margin-top: 10px;
@@ -1572,13 +1576,6 @@ h3 {
   color: #000;
 }
 
-/* Título */
-#tutorial-title {
-  color: #111;
-  font-weight: 600;
-  margin-bottom: 12px;
-}
-
 /* "Consejo:" en negrita */
 #tutorial-cues strong {
   color: #000;
@@ -1586,11 +1583,21 @@ h3 {
 }
 
 #tutorial-cues {
-  background: #f9f9f9;
-  border-left: 4px solid #f5c518; /* dorado */
+  color: #000 !important;      /* texto negro */
+  background: #f9f9f9;         /* fondo claro */
+  border-left: 4px solid #f5c518;
   padding: 10px 12px;
   border-radius: 6px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-top: 12px;
 }
+
+#tutorial-cues strong {
+  color: #000 !important;
+  font-weight: 600;
+}
+
 
 #tutorial-modal iframe {
   display: block;
