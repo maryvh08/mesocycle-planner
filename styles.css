@@ -1082,16 +1082,17 @@ h3 {
 #tutorial-modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.65);
+  background: rgba(0,0,0,0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  padding: 12px;
 }
 
 #tutorial-modal.hidden {
-  display: none;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
 }
 
 /* ===== MODAL TUTORIAL ===== */
