@@ -1736,10 +1736,22 @@ function renderTutorials(exercises) {
   });
 }
 
+function handleTutorialSelect(e) {
+  const exerciseId = e.target.value;
+  if (!exerciseId) return;
+
+  const exercise = tutorialsData.find(ex => ex.id === exerciseId);
+  if (!exercise || !exercise.exercise_tutorials.length) return;
+
+  openTutorial(exercise.name, exercise.exercise_tutorials[0]);
+}
+
 function openTutorial(name, tutorial) {
   const embedUrl = toEmbedUrl(tutorial.video_url);
+  console.log('EMBED:', embedUrl);
+
   if (!embedUrl) {
-    console.error('No se pudo generar embed URL', tutorial.video_url);
+    alert('URL de video inválida');
     return;
   }
 
