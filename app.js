@@ -1845,6 +1845,12 @@ registroSelect.addEventListener("change", () => {
   openRegistro(mesocycleId);
 });
 
+document.getElementById('filter-type')
+  .addEventListener('change', applyFilters);
+
+document.getElementById('filter-subgroup')
+  .addEventListener('change', applyFilters);
+
 document.addEventListener("click", e => {
   const row = e.target.closest(".strength-row");
   if (!row) return;
