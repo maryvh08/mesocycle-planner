@@ -788,57 +788,71 @@ section {
 /* ======================
    TENDENCIA
 ====================== */
-
-.strength-list {
+#strength-trends {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
+  padding: 0;
+  margin: 0;
 }
 
-/* Cada ejercicio (trend-card) */
-.trend-card {
-  background-color: #1a0f13; /* fondo oscuro */
-  border-radius: 12px;
-  padding: 1rem 1.5rem;
-  border: none;
-  box-shadow: none;
+/* Cada fila - caja tipo card */
+.strength-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background-color: #1a0f13;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.3s ease;
 }
 
-/* Título del ejercicio */
-.trend-card h3,
-.trend-card h4 {
-  margin: 0;
+/* Hover (opcional) */
+.strength-row:hover {
+  background-color: #2a1a20;
+}
+
+/* Nombre del ejercicio */
+.strength-row .exercise {
   font-weight: 600;
-  color: #fff;
   font-size: 1rem;
-  flex: 1;
+  color: #fff;
+  flex-grow: 1;        /* para que tome todo el espacio posible */
 }
 
-/* Contenedor valor + icono */
-.trend-main {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Valor (peso) */
-.trend-value {
-  font-size: 1.1rem;
+/* Promedio de peso */
+.strength-row .avg {
   font-weight: 700;
+  font-size: 1.1rem;
   color: #ccc;
+  margin-left: 1rem;
   white-space: nowrap;
 }
 
-/* Icono */
-.trend-icon {
+/* Icono tendencia */
+.strength-row .trend {
   font-size: 1.4rem;
+  margin-left: 0.75rem;
   color: #ccc;
-  opacity: 0.7;
+  opacity: 0.8;
   white-space: nowrap;
 }
+
+/* Colores para las tendencias */
+.trend.up {
+  color: #4ade80;
+}
+
+.trend.down {
+  color: #f87171;
+}
+
+.trend.flat {
+  color: #9ca3af;
+}
+
 
 /* ======================
    PR TABLE – HALL OF FAME
