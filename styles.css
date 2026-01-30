@@ -1237,6 +1237,25 @@ h3 {
   border-color: #f5c518;
 }
 
+.filter-options label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.filter-options label:hover {
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.filter-options input {
+  cursor: pointer;
+}
+
+
 !-- ================= WRAPPER Y MODAL ================= -->
 /* Animation */
 @keyframes slideDown {
