@@ -1631,28 +1631,6 @@ function getCoachInsight(trend) {
 }
 
 // ---------- TUTORIAL ----------
-async function loadTutorials() {
-  const { data, error } = await supabase
-    .from('exercises')
-    .select(`
-      id,
-      name,
-      type,
-      subgroup,
-      exercise_tutorials (
-        video_url,
-        cues
-      )
-    `);
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  renderTutorials(data);
-}
-
 function closeTutorial() {
   document.getElementById('tutorial-modal').classList.add('hidden');
   document.getElementById('tutorial-video').src = '';
