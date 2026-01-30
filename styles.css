@@ -1419,7 +1419,7 @@ h3 {
 .tutorial-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 22 px;
 }
 
 .tutorial-item {
