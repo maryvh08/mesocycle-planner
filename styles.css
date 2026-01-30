@@ -1,4 +1,3 @@
-
 /* ======================
    VARIABLES DE COLOR
 ====================== */
@@ -500,6 +499,23 @@ section {
   }
 }
 
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .cta-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
 /* ======================
    LOGIN — VAMPIRO
 ====================== */
@@ -1159,7 +1175,7 @@ h3 {
   cursor: pointer;
 }
 
-@@media (max-width: 600px) {
+@media (max-width: 600px) {
   #tutorial-modal {
     padding: 6px;
   }
