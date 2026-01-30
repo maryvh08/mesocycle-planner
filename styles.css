@@ -1117,7 +1117,7 @@ h3 {
 
 .tutorial-list {
   display: grid;
-  gap: 3rem;              /* separación entre cards */
+  gap: 2rem;              /* separación entre cards */
   margin-top: 1.5rem;
 }
 
