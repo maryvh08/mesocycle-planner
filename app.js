@@ -1653,14 +1653,6 @@ async function loadTutorials() {
   renderTutorials(data);
 }
 
-function openTutorial(name, tutorial) {
-  document.getElementById('tutorial-title').textContent = name;
-  document.getElementById('tutorial-video').src = tutorial.video_url;
-  document.getElementById('tutorial-cues').textContent = tutorial.cues;
-
-  document.getElementById('tutorial-modal').classList.remove('hidden');
-}
-
 function closeTutorial() {
   document.getElementById('tutorial-modal').classList.add('hidden');
   document.getElementById('tutorial-video').src = '';
