@@ -1941,4 +1941,8 @@ document.addEventListener('change', e => {
   }
 });
 
+document
+  .getElementById('tutorial-modal-content')
+  .addEventListener('click', e => e.stopPropagation());
+
 loadTutorials();
