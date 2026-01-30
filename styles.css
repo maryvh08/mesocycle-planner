@@ -504,7 +504,7 @@ section {
 
 @media (max-width: 600px) {
   .tutorial-card {
-    padding: 1rem;
+    padding: 0.3 rem;
   }
 
   .tutorial-actions {
@@ -1116,7 +1116,7 @@ h3 {
 !-- ================= TUTORIALES ================= -->
 .tutorial-list {
   display: grid;
-  gap: 1.2rem;
+  gap: 3rem;
   margin-top: 1.5rem;
 }
 
