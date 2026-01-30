@@ -502,6 +502,16 @@ section {
   }
 }
 
+@media (max-width: 600px) {
+  .tutorial-card {
+    padding: 1rem;
+  }
+
+  .tutorial-actions {
+    gap: 8px;
+  }
+}
+
 @media (max-width: 900px) {
   #strength-trends {
     grid-template-columns: repeat(2, 1fr);
@@ -1211,6 +1221,13 @@ h3 {
   transition: all 0.25s ease;
 }
 
+.tutorial-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* 👈 separa info y botones */
+  gap: 12px;
+}
+
 .tutorial-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 20px 40px rgba(177,18,38,0.25);
@@ -1234,8 +1251,9 @@ h3 {
 
 .tutorial-actions {
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: 10px;
+  flex-shrink: 0; /* 👈 evita que se vayan abajo */
 }
 
 .clear-btn {
@@ -1417,6 +1435,12 @@ h3 {
 
 .tutorial-item:hover {
   background: #eaeaea;
+}
+
+.tutorial-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .tutorial-info span {
