@@ -1122,20 +1122,6 @@ h3 {
   font-weight: 600;
 }
 
-#tutorial-modal .modal-content {
-  background: #fff;
-  width: 100%;
-  max-width: 900px;
-
-  /* 👇 RESPONSIVE REAL */
-  max-height: 95vh;
-  display: flex;
-  flex-direction: column;
-
-  border-radius: 12px;
-  padding: 12px;
-}
-
 .video-wrapper {
   position: relative;
   width: 100%;
