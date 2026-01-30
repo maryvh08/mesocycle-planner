@@ -1831,21 +1831,21 @@ function populateFilters(exercises) {
 
   types.forEach(type => {
     const label = document.createElement('label');
+    label.className = 'filter-option';
     label.innerHTML = `
       <input type="checkbox" value="${type}">
       ${type}
     `;
-    label.querySelector('input').addEventListener('change', applyFilters);
     typeContainer.appendChild(label);
   });
 
   subgroups.forEach(subgroup => {
     const label = document.createElement('label');
+    label.className = 'filter-option';
     label.innerHTML = `
       <input type="checkbox" value="${subgroup}">
       ${subgroup}
     `;
-    label.querySelector('input').addEventListener('change', applyFilters);
     subgroupContainer.appendChild(label);
   });
 }
