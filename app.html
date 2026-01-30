@@ -216,59 +216,86 @@
         </div>
       </section>
 
-    <!-- ================= TUTORIALES ================= -->
+     <!-- ================= TUTORIALES ================= -->
       <section id="tutorials-view" class="tab-content screen hidden">
         <h2>Tutoriales de ejercicios</h2>
         <h3 class="subtitle">Aprende y mejora tu técnica</h3>
       
-        <!-- Buscador -->
-        <div class="tutorial-filters">
-          <input id="tutorial-search" class="search-input" placeholder="Buscar ejercicio..." />
-          <div class="filter-dropdown">
+        <!-- =========================
+             FILTROS Y BÚSQUEDA
+        ========================= -->
+        <div class="filters-container">
+      
+          <!-- Búsqueda -->
+          <div class="search-box">
+            <input type="text" id="tutorial-search" placeholder="Buscar tutorial...">
+          </div>
+      
+          <!-- Filtros tipo / subgrupo -->
+          <div class="multi-filter filter-dropdown">
             <button class="filter-btn">Tipo</button>
-            <div class="multi-filter" id="type-options"></div>
+            <div class="filter-options" id="type-options">
+              <!-- Checkboxes tipo se llenan desde JS -->
+            </div>
           </div>
-          
-          <div class="filter-dropdown">
+      
+          <div class="multi-filter filter-dropdown">
             <button class="filter-btn">Subgrupo</button>
-            <div class="multi-filter" id="subgroup-options"></div>
+            <div class="filter-options" id="subgroup-options">
+              <!-- Checkboxes subgrupo se llenan desde JS -->
+            </div>
           </div>
-          <select id="sort-by" class="search-input">
-            <option value="">Ordenar por</option>
-            <option value="name-asc">Nombre (A–Z)</option>
-            <option value="name-desc">Nombre (Z–A)</option>
-            <option value="subgroup-asc">Subgrupo (A–Z)</option>
-            <option value="subgroup-desc">Subgrupo (Z–A)</option>
-          </select>
+      
+          <!-- Solo favoritos -->
           <label class="favorites-filter">
-            <input type="checkbox" id="filter-favorites" />
+            <input type="checkbox" id="filter-favorites">
             <span class="checkmark"></span>
-            <span class="label-text">Solo favoritos</span>
+            Solo favoritos
           </label>
-          <button id="clear-filters" class="clear-btn">Borrar filtros</button>
+      
+          <!-- Ordenar -->
+          <select id="sort-by">
+            <option value="">Ordenar</option>
+            <option value="name-asc">Nombre ↑</option>
+            <option value="name-desc">Nombre ↓</option>
+            <option value="type-asc">Tipo ↑</option>
+            <option value="type-desc">Tipo ↓</option>
+          </select>
+      
+          <!-- Borrar filtros -->
+          <button id="clear-filters">Borrar filtros</button>
         </div>
-        <!-- Lista de ejercicios -->
-        <div id="tutorial-list" class="tutorial-list"></div>
-      </section>
       
-      <!-- Modal -->
-      <div id="tutorial-modal" class="modal hidden">
-        <div class="modal-content">
+        <!-- =========================
+             LISTA DE TUTORIALES
+        ========================= -->
+        <div id="tutorial-list">
+          <!-- Los cards se generan desde JS -->
+        </div>
       
-          <h3 id="tutorial-title"></h3>
-      
-          <div class="video-wrapper">
-            <iframe
-              id="tutorial-video"
-              src=""
-              frameborder="0"
-              allowfullscreen
-            ></iframe>
+        <!-- =========================
+             MODAL TUTORIAL
+        ========================= -->
+        <div id="tutorial-modal" class="hidden">
+          <div class="modal-content">
+            <h3 id="tutorial-title"></h3>
+            <iframe id="tutorial-video" src="" frameborder="0" allowfullscreen></iframe>
+            <div id="tutorial-cues"></div>
+            <button id="close-tutorial-modal-btn">Cerrar</button>
           </div>
-      
-          <p class="tutorial-cues" id="tutorial-cues"></p>
         </div>
-      </div>
+      
+        <!-- =========================
+             MODAL EXERCISE (Opcional)
+        ========================= -->
+        <div id="exercise-modal" class="hidden">
+          <div class="modal-content">
+            <!-- Contenido dinámico -->
+            <button id="close-exercise-modal-btn">Cerrar</button>
+          </div>
+        </div>
+      </section>
+
 </div>
 
 <!-- JS -->
