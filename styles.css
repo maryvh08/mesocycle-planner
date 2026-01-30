@@ -1175,7 +1175,7 @@ h3 {
 #tutorial-title {
   color: #111 !important;
   font-weight: 600;
-  margin-bottom: 12px;
+  margin-bottom: 24px;
   font-size: 18px;
 }
 
@@ -1234,7 +1234,7 @@ h3 {
 }
 
 .tutorial-card h4 {
-  margin-bottom: 0.3rem;
+  margin-bottom: 1rem;
 }
 
 .tutorial-card span {
@@ -1246,13 +1246,13 @@ h3 {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .tutorial-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 24px;
   flex-shrink: 0; /* 👈 evita que se vayan abajo */
 }
 
@@ -1419,7 +1419,7 @@ h3 {
 .tutorial-list {
   display: flex;
   flex-direction: column;
-  gap: 22 px;
+  gap: 34 px;
 }
 
 .tutorial-item {
