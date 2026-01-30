@@ -581,6 +581,11 @@ section {
   }
 }
 
+@media (max-width: 600px) {
+  .strength-list {
+    grid-template-columns: 1fr; /* 👈 UNA SOLA COLUMNA */
+  }
+}
 /* ======================
    LOGIN — VAMPIRO
 ====================== */
