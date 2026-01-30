@@ -1295,6 +1295,27 @@ h3 {
   }
 }
 
+@media (max-width: 600px) {
+  .trend-main {
+    flex-direction: column;   /* 👈 apila verticalmente */
+    align-items: flex-start;  /* empieza desde la izquierda */
+    gap: 8px;                 /* un poco de espacio entre valor e icono */
+  }
+
+  /* Valor principal más grande y legible */
+  .trend-value {
+    font-size: 1.4rem;
+    font-weight: 800;
+  }
+
+  /* Icono decorativo más discreto y alineado a la derecha */
+  .trend-icon {
+    align-self: flex-end;
+    font-size: 1.6rem;
+    opacity: 0.12;
+  }
+}
+
 /* ================= CARDS ================= */
 
 .tutorial-card {
