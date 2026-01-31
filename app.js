@@ -1016,6 +1016,13 @@ async function renderExercisesForDay(mesocycleId, week, day) {
 /* ======================
    RELOJ
 ====================== */
+function initTools() {
+  initClock();
+  initStopwatch();
+  initTimer();
+  renderTimeHistory();
+}
+
 function startClock() {
   const clockEl = document.getElementById("clock");
   if (!clockEl) return;
@@ -2358,6 +2365,10 @@ document.getElementById("clear-history").onclick = () => {
   localStorage.removeItem("timeHistory");
   renderTimeHistory();
 };
+
+document.addEventListener("DOMContentLoaded", () => {
+  initTools();
+});
 
 startClock();
 renderTimeHistory();
