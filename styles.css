@@ -1664,3 +1664,83 @@ h3 {
   display: block;
   margin: 0 auto;
 }
+
+/* =========================
+   COACH CARD
+========================= */
+
+.coach-section {
+  margin: 2rem 0 3rem;
+}
+
+.coach-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.2rem;
+  padding: 1.6rem 1.8rem;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #120b0f, #080406);
+  border: 1px solid #2a0f14;
+  box-shadow:
+    0 25px 60px rgba(0,0,0,0.6),
+    inset 0 0 0 1px rgba(255,255,255,0.04);
+  animation: fadeUp 0.5s ease;
+}
+
+.coach-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.coach-content h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.4rem;
+  color: #f2e9ec;
+  text-transform: uppercase;
+}
+
+.coach-content p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #9a8a8f;
+}
+
+/* STATES */
+
+.coach-card.success {
+  border-color: rgba(92, 255, 141, 0.35);
+}
+
+.coach-card.success .coach-icon {
+  color: #5cff8d;
+}
+
+.coach-card.warning {
+  border-color: rgba(255, 200, 87, 0.4);
+}
+
+.coach-card.warning .coach-icon {
+  color: #ffc857;
+}
+
+.coach-card.danger {
+  border-color: rgba(255, 77, 77, 0.4);
+}
+
+.coach-card.danger .coach-icon {
+  color: #ff4d4d;
+}
+
+/* Animation reuse */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
