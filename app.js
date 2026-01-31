@@ -1253,6 +1253,106 @@ function updateCoachFromVolume(data) {
   }
 }
 
+const RP_RANGES = {
+  Pecho: { MEV: 8, MAV: 12, MRV: 20 },
+  Espalda: { MEV: 10, MAV: 14, MRV: 22 },
+  Cuádriceps: { MEV: 8, MAV: 12, MRV: 18 },
+  Isquiotibiales: { MEV: 6, MAV: 10, MRV: 16 },
+  Deltoides: { MEV: 10, MAV: 16, MRV: 24 },
+  Bíceps: { MEV: 6, MAV: 10, MRV: 18 },
+  Tríceps: { MEV: 6, MAV: 10, MRV: 18 }
+};
+
+function evaluateMuscleVolume(records) {
+  const byMuscle = {};
+
+  records.forEach(r => {
+    if (!byMuscle[r.muscle_group]) {
+      byMuscle[r.muscle_group] = [];
+    }
+    byMuscle[r.muscle_group].push(r);
+  });
+
+  return Object.entries(byMuscle).map(([muscle, weeks]) => {
+    weeks.sort((a, b) => a.week_number - b.week_number);
+
+    const last = weeks.at(-1);
+    const ranges = RP_RANGES[muscle];
+
+    let status = 'unknown';
+
+    if (ranges) {
+      if (last.total_sets < ranges.MEV) status = 'below';
+      else if (last.total_sets <= ranges.MAV) status = 'optimal';
+      else if (last.total_sets <= ranges.MRV) status = 'high';
+      else status = 'over';
+    }
+
+    return {
+      muscle,
+      sets: last.total_sets,
+      status,
+      ranges
+    };
+  });
+}
+
+function renderMuscleTable(data) {
+  const container = document.getElementById('muscleTable');
+
+  container.innerHTML = `
+    <table class="muscle-table">
+      <thead>
+        <tr>
+          <th>Músculo</th>
+          <th>Sets</th>
+          <th>Estado</th>
+          <th>Rango RP</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.map(d => `
+          <tr>
+            <td>${d.muscle}</td>
+            <td>${d.sets}</td>
+            <td class="status ${d.status}">
+              ${statusLabel(d.status)}
+            </td>
+            <td>
+              ${d.ranges?.MEV ?? '-'}–${d.ranges?.MRV ?? '-'}
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function statusLabel(status) {
+  return {
+    below: '⬇ Bajo',
+    optimal: '🟢 Óptimo',
+    high: '🟡 Alto',
+    over: '🔴 Exceso'
+  }[status] || '—';
+}
+
+function muscleCoachFeedback(data) {
+  const over = data.filter(d => d.status === 'over');
+  const below = data.filter(d => d.status === 'below');
+
+  if (over.length >= 2) {
+    return 'Exceso de volumen detectado. Riesgo de fatiga acumulada.';
+  }
+
+  if (below.length >= 2) {
+    return 'Algunos músculos pueden estar subestimulados.';
+  }
+
+  return 'Distribución de volumen adecuada. Buen estímulo global.';
+}
+
+
 /* ======================
    CARGA STATS + GRAFICA
 ====================== */
@@ -2152,3 +2252,4 @@ document
   .addEventListener('click', closeTutorial);
 
 loadTutorials();
+
