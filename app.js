@@ -1131,6 +1131,34 @@ function renderStrengthTable(grouped) {
   });
 }
 
+function getRecommendation({ strengthTrend, volumeChange }) {
+  if (strengthTrend > 2 && volumeChange >= 0) {
+    return {
+      type: 'success',
+      msg: 'Buen progreso. Mantén volumen e intensidad.'
+    };
+  }
+
+  if (strengthTrend <= 2 && volumeChange > 10) {
+    return {
+      type: 'warning',
+      msg: 'Fatiga probable. Considera reducir volumen 15–20%.'
+    };
+  }
+
+  if (strengthTrend < -2 && volumeChange > 0) {
+    return {
+      type: 'danger',
+      msg: 'Sobreentrenamiento detectado. Reduce volumen o descarga.'
+    };
+  }
+
+  return {
+    type: 'neutral',
+    msg: 'Progreso estable. Evalúa cambiar estímulo si continúa.'
+  };
+}
+
 /* ======================
    CARGA STATS + GRAFICA
 ====================== */
