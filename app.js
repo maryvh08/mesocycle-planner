@@ -1050,6 +1050,88 @@ function renderStatsView() {
 }
 
 /* ======================
+   DASHBOARD
+====================== */
+function getTrend(weeks) {
+  if (weeks.length < 2) return '→';
+
+  const first = weeks[0].avg_force;
+  const last = weeks[weeks.length - 1].avg_force;
+
+  const change = ((last - first) / first) * 100;
+
+  return {
+    icon: change > 2 ? '↑' : change < -2 ? '↓' : '→',
+    percent: change.toFixed(1)
+  };
+}
+
+async function loadDashboard(mesocycleId) {
+  const { data, error } = await supabase
+    .from('exercise_records')
+    .select(`
+      exercise_id,
+      exercise_name,
+      week_number,
+      weight,
+      reps
+    `)
+    .eq('mesocycle_id', mesocycleId)
+    .order('week_number');
+
+  if (error) return console.error(error);
+
+  const grouped = {};
+
+  data.forEach(r => {
+    const key = r.exercise_id;
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push({
+      week: r.week_number,
+      force: r.weight * r.reps
+    });
+  });
+
+  renderStrengthTable(grouped);
+}
+
+function renderStrengthTable(grouped) {
+  const container = document.getElementById('strength-table');
+  container.innerHTML = '';
+
+  Object.entries(grouped).forEach(([id, records]) => {
+    const weeks = {};
+
+    records.forEach(r => {
+      if (!weeks[r.week]) weeks[r.week] = [];
+      weeks[r.week].push(r.force);
+    });
+
+    const weeklyAvg = Object.entries(weeks).map(([week, forces]) => ({
+      week,
+      avg_force: forces.reduce((a,b)=>a+b,0)/forces.length
+    }));
+
+    const trend = getTrend(weeklyAvg);
+
+    const row = document.createElement('div');
+    row.className = 'strength-row';
+
+    row.innerHTML = `
+      <span>${records[0].exercise_name}</span>
+      <span>${Math.round(weeklyAvg.at(-1).avg_force)} kg</span>
+      <span class="trend ${trend.icon}">
+        ${trend.icon} ${trend.percent}%
+      </span>
+    `;
+
+    row.onclick = () => openMiniChart(weeklyAvg);
+
+    container.appendChild(row);
+  });
+}
+
+/* ======================
    CARGA STATS + GRAFICA
 ====================== */
 async function loadStatsOverview(mesocycleId = null) {
