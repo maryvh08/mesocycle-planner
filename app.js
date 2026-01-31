@@ -1038,7 +1038,7 @@ function initStopwatch() {
   const stopBtn = document.getElementById("stop-stopwatch");
   const resetBtn = document.getElementById("reset-stopwatch");
 
-  if (!display || !startBtn) return;
+  if (!display || !startBtn || !stopBtn || !resetBtn) return;
 
   startBtn.onclick = () => {
     if (swInterval) return;
@@ -1067,7 +1067,7 @@ function initTimer() {
   const startBtn = document.getElementById("start-timer");
   const stopBtn = document.getElementById("stop-timer");
 
-  if (!input || !display) return;
+  if (!input || !display || !startBtn || !stopBtn) return;
 
   startBtn.onclick = () => {
     let seconds = parseInt(input.value);
@@ -1091,6 +1091,7 @@ function initTimer() {
     clearInterval(timerInterval);
   };
 }
+
 function startClock() {
   const clockEl = document.getElementById("clock");
   if (!clockEl) return;
