@@ -1526,6 +1526,132 @@ function muscleCoachFeedback(data) {
   return 'Distribución de volumen adecuada. Buen estímulo global.';
 }
 
+function buildMesocycleSummary(prs, strength, volume) {
+  const map = {};
+
+  prs.forEach(p => {
+    map[p.mesocycle_id] = {
+      mesocycle_id: p.mesocycle_id,
+      pr_count: p.pr_count,
+      exercises: {},
+      volume: 0,
+      sets: 0
+    };
+  });
+
+  strength.forEach(s => {
+    if (!map[s.mesocycle_id]) return;
+    map[s.mesocycle_id].exercises[s.exercise] = s.avg_1rm;
+  });
+
+  volume.forEach(v => {
+    if (!map[v.mesocycle_id]) return;
+    map[v.mesocycle_id].volume = v.total_volume;
+    map[v.mesocycle_id].sets = v.total_sets;
+  });
+
+  return Object.values(map);
+}
+function buildMesocycleSummary(prs, strength, volume) {
+  const map = {};
+
+  prs.forEach(p => {
+    map[p.mesocycle_id] = {
+      mesocycle_id: p.mesocycle_id,
+      pr_count: p.pr_count,
+      exercises: {},
+      volume: 0,
+      sets: 0
+    };
+  });
+
+  strength.forEach(s => {
+    if (!map[s.mesocycle_id]) return;
+    map[s.mesocycle_id].exercises[s.exercise] = s.avg_1rm;
+  });
+
+  volume.forEach(v => {
+    if (!map[v.mesocycle_id]) return;
+    map[v.mesocycle_id].volume = v.total_volume;
+    map[v.mesocycle_id].sets = v.total_sets;
+  });
+
+  return Object.values(map);
+}
+function buildMesocycleSummary(prs, strength, volume) {
+  const map = {};
+
+  prs.forEach(p => {
+    map[p.mesocycle_id] = {
+      mesocycle_id: p.mesocycle_id,
+      pr_count: p.pr_count,
+      exercises: {},
+      volume: 0,
+      sets: 0
+    };
+  });
+
+  strength.forEach(s => {
+    if (!map[s.mesocycle_id]) return;
+    map[s.mesocycle_id].exercises[s.exercise] = s.avg_1rm;
+  });
+
+  volume.forEach(v => {
+    if (!map[v.mesocycle_id]) return;
+    map[v.mesocycle_id].volume = v.total_volume;
+    map[v.mesocycle_id].sets = v.total_sets;
+  });
+
+  return Object.values(map);
+}
+
+function calculateEfficiency(mesocycles) {
+  return mesocycles.map(m => {
+    const strengthScore =
+      Object.values(m.exercises).reduce((a, b) => a + b, 0) /
+      Object.keys(m.exercises).length;
+
+    return {
+      ...m,
+      strengthScore,
+      efficiency: strengthScore / m.volume
+    };
+  });
+}
+
+function renderComparison(a, b) {
+  const container = document.getElementById('compareResult');
+
+  container.innerHTML = `
+    <div class="compare-grid">
+      <div class="compare-card ${a.efficiency > b.efficiency ? 'winner' : ''}">
+        <h4>${a.name}</h4>
+        <p>PRs: ${a.pr_count}</p>
+        <p>Volumen: ${Math.round(a.volume)}</p>
+        <p>Fuerza media: ${a.strengthScore.toFixed(1)}</p>
+      </div>
+
+      <div class="compare-card ${b.efficiency > a.efficiency ? 'winner' : ''}">
+        <h4>${b.name}</h4>
+        <p>PRs: ${b.pr_count}</p>
+        <p>Volumen: ${Math.round(b.volume)}</p>
+        <p>Fuerza media: ${b.strengthScore.toFixed(1)}</p>
+      </div>
+    </div>
+  `;
+}
+
+function mesocycleCoach(a, b) {
+  if (a.efficiency > b.efficiency * 1.1) {
+    return `${a.name} fue más eficiente. Mejor estímulo con menos fatiga.`;
+  }
+
+  if (b.efficiency > a.efficiency * 1.1) {
+    return `${b.name} fue más eficiente. Replicar estructura y volumen.`;
+  }
+
+  return 'Ambos mesociclos tuvieron rendimiento similar.';
+}
 
 /* ======================
    CARGA STATS + GRAFICA
