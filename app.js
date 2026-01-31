@@ -1526,32 +1526,7 @@ function muscleCoachFeedback(data) {
   return 'Distribución de volumen adecuada. Buen estímulo global.';
 }
 
-function buildMesocycleSummary(prs, strength, volume) {
-  const map = {};
 
-  prs.forEach(p => {
-    map[p.mesocycle_id] = {
-      mesocycle_id: p.mesocycle_id,
-      pr_count: p.pr_count,
-      exercises: {},
-      volume: 0,
-      sets: 0
-    };
-  });
-
-  strength.forEach(s => {
-    if (!map[s.mesocycle_id]) return;
-    map[s.mesocycle_id].exercises[s.exercise] = s.avg_1rm;
-  });
-
-  volume.forEach(v => {
-    if (!map[v.mesocycle_id]) return;
-    map[v.mesocycle_id].volume = v.total_volume;
-    map[v.mesocycle_id].sets = v.total_sets;
-  });
-
-  return Object.values(map);
-}
 function buildMesocycleSummary(prs, strength, volume) {
   const map = {};
 
