@@ -17,6 +17,9 @@ let statsChart = null;
 let generalStrengthData = null;
 let tutorialsData = [];
 let swTime = 0;
+let swInterval = null;
+let timerInterval = null;
+let swTime = 0;
 let swInterval;
 let timerInterval;
 
@@ -1023,6 +1026,74 @@ function initTools() {
   renderTimeHistory();
 }
 
+function initClock() {
+  const clockEl = document.getElementById("clock");
+  if (!clockEl) return;
+
+  setInterval(() => {
+    clockEl.textContent = new Date().toLocaleTimeString();
+  }, 1000);
+}
+
+function initStopwatch() {
+  const display = document.getElementById("stopwatch");
+  const startBtn = document.getElementById("start-stopwatch");
+  const stopBtn = document.getElementById("stop-stopwatch");
+  const resetBtn = document.getElementById("reset-stopwatch");
+
+  if (!display || !startBtn) return;
+
+  startBtn.onclick = () => {
+    if (swInterval) return;
+    swInterval = setInterval(() => {
+      swTime += 100;
+      display.textContent = (swTime / 1000).toFixed(1);
+    }, 100);
+  };
+
+  stopBtn.onclick = () => {
+    if (!swInterval) return;
+    clearInterval(swInterval);
+    swInterval = null;
+    saveTimeHistory("⏱️ Cronómetro", (swTime / 1000).toFixed(1) + " s");
+  };
+
+  resetBtn.onclick = () => {
+    swTime = 0;
+    display.textContent = "00:00.0";
+  };
+}
+
+function initTimer() {
+  const input = document.getElementById("timer-input");
+  const display = document.getElementById("timer-display");
+  const startBtn = document.getElementById("start-timer");
+  const stopBtn = document.getElementById("stop-timer");
+
+  if (!input || !display) return;
+
+  startBtn.onclick = () => {
+    let seconds = parseInt(input.value);
+    if (!seconds || seconds <= 0) return;
+
+    clearInterval(timerInterval);
+
+    timerInterval = setInterval(() => {
+      seconds--;
+      display.textContent = `00:${String(seconds).padStart(2, "0")}`;
+
+      if (seconds <= 0) {
+        clearInterval(timerInterval);
+        saveTimeHistory("⏲️ Temporizador", input.value + " s");
+        alert("⏰ Tiempo terminado");
+      }
+    }, 1000);
+  };
+
+  stopBtn.onclick = () => {
+    clearInterval(timerInterval);
+  };
+}
 function startClock() {
   const clockEl = document.getElementById("clock");
   if (!clockEl) return;
@@ -1036,15 +1107,21 @@ function getTimeHistory() {
   return JSON.parse(localStorage.getItem("timeHistory")) || [];
 }
 
-function saveTimeHistory(entry) {
+function saveTimeHistory(type, time) {
   const history = getTimeHistory();
-  history.unshift(entry); // último primero
+  history.unshift({
+    type,
+    time,
+    date: new Date().toLocaleString()
+  });
   localStorage.setItem("timeHistory", JSON.stringify(history));
   renderTimeHistory();
 }
 
 function renderTimeHistory() {
   const container = document.getElementById("time-history");
+  if (!container) return;
+
   const history = getTimeHistory();
 
   if (!history.length) {
@@ -1052,15 +1129,12 @@ function renderTimeHistory() {
     return;
   }
 
-  container.innerHTML = history
-    .slice(0, 10) // últimos 10
-    .map(h => `
-      <div class="time-entry">
-        <span>${h.type} – <strong>${h.time}</strong></span>
-        <small>${h.date}</small>
-      </div>
-    `)
-    .join("");
+  container.innerHTML = history.slice(0, 10).map(h => `
+    <div class="time-entry">
+      <span>${h.type} – <strong>${h.time}</strong></span>
+      <small>${h.date}</small>
+    </div>
+  `).join("");
 }
 
 /* ======================
@@ -2360,11 +2434,11 @@ document.getElementById("stop-timer").onclick = () => {
   clearInterval(timerInterval);
 };
 
-document.getElementById("clear-history").onclick = () => {
-  if (!confirm("¿Borrar todo el historial?")) return;
+document.getElementById("clear-history")?.addEventListener("click", () => {
+  if (!confirm("¿Borrar historial completo?")) return;
   localStorage.removeItem("timeHistory");
   renderTimeHistory();
-};
+});
 
 document.addEventListener("DOMContentLoaded", () => {
   initTools();
