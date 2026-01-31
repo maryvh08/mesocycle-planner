@@ -16,6 +16,9 @@ let editingMesocycleId = null;
 let statsChart = null;
 let generalStrengthData = null;
 let tutorialsData = [];
+let swTime = 0;
+let swInterval;
+let timerInterval;
 
 /* ======================
    UI ELEMENTS
@@ -1008,6 +1011,18 @@ async function renderExercisesForDay(mesocycleId, week, day) {
     chip.append(label, deleteBtn);
     container.appendChild(chip);
   });
+}
+
+
+/* ======================
+   RELOJ
+====================== */
+function startClock() {
+  setInterval(() => {
+    const now = new Date();
+    document.getElementById("clock").textContent =
+      now.toLocaleTimeString();
+  }, 1000);
 }
 
 /* ======================
@@ -2253,3 +2268,45 @@ document
 
 loadTutorials();
 
+document.getElementById("start-stopwatch").onclick = () => {
+  if (swInterval) return;
+  swInterval = setInterval(() => {
+    swTime += 100;
+    document.getElementById("stopwatch").textContent =
+      (swTime / 1000).toFixed(1);
+  }, 100);
+};
+
+document.getElementById("stop-stopwatch").onclick = () => {
+  clearInterval(swInterval);
+  swInterval = null;
+};
+
+document.getElementById("reset-stopwatch").onclick = () => {
+  swTime = 0;
+  document.getElementById("stopwatch").textContent = "00:00.0";
+};
+
+document.getElementById("start-timer").onclick = () => {
+  let seconds = parseInt(document.getElementById("timer-input").value);
+  if (!seconds || seconds <= 0) return;
+
+  clearInterval(timerInterval);
+
+  timerInterval = setInterval(() => {
+    seconds--;
+    document.getElementById("timer-display").textContent =
+      `00:${String(seconds).padStart(2, "0")}`;
+
+    if (seconds <= 0) {
+      clearInterval(timerInterval);
+      alert("⏰ Tiempo terminado");
+    }
+  }, 1000);
+};
+
+document.getElementById("stop-timer").onclick = () => {
+  clearInterval(timerInterval);
+};
+
+startClock();
