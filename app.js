@@ -1159,6 +1159,15 @@ function getRecommendation({ strengthTrend, volumeChange }) {
   };
 }
 
+function updateCoachCard({ type, message }) {
+  const card = document.getElementById('coachCard');
+  const text = document.getElementById('coachMessage');
+
+  card.classList.remove('success', 'warning', 'danger');
+  card.classList.add(type);
+  text.textContent = message;
+}
+
 /* ======================
    CARGA STATS + GRAFICA
 ====================== */
