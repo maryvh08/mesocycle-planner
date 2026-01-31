@@ -1017,10 +1017,11 @@ async function renderExercisesForDay(mesocycleId, week, day) {
    RELOJ
 ====================== */
 function startClock() {
+  const clockEl = document.getElementById("clock");
+  if (!clockEl) return;
+
   setInterval(() => {
-    const now = new Date();
-    document.getElementById("clock").textContent =
-      now.toLocaleTimeString();
+    clockEl.textContent = new Date().toLocaleTimeString();
   }, 1000);
 }
 
