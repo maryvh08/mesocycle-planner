@@ -1013,7 +1013,6 @@ async function renderExercisesForDay(mesocycleId, week, day) {
   });
 }
 
-
 /* ======================
    RELOJ
 ====================== */
@@ -1023,6 +1022,37 @@ function startClock() {
     document.getElementById("clock").textContent =
       now.toLocaleTimeString();
   }, 1000);
+}
+
+function getTimeHistory() {
+  return JSON.parse(localStorage.getItem("timeHistory")) || [];
+}
+
+function saveTimeHistory(entry) {
+  const history = getTimeHistory();
+  history.unshift(entry); // último primero
+  localStorage.setItem("timeHistory", JSON.stringify(history));
+  renderTimeHistory();
+}
+
+function renderTimeHistory() {
+  const container = document.getElementById("time-history");
+  const history = getTimeHistory();
+
+  if (!history.length) {
+    container.innerHTML = `<p class="placeholder">Aún no hay registros</p>`;
+    return;
+  }
+
+  container.innerHTML = history
+    .slice(0, 10) // últimos 10
+    .map(h => `
+      <div class="time-entry">
+        <span>${h.type} – <strong>${h.time}</strong></span>
+        <small>${h.date}</small>
+      </div>
+    `)
+    .join("");
 }
 
 /* ======================
@@ -2278,8 +2308,16 @@ document.getElementById("start-stopwatch").onclick = () => {
 };
 
 document.getElementById("stop-stopwatch").onclick = () => {
+  if (!swInterval) return;
+
   clearInterval(swInterval);
   swInterval = null;
+
+  saveTimeHistory({
+    type: "⏱️ Cronómetro",
+    time: (swTime / 1000).toFixed(1) + " s",
+    date: new Date().toLocaleString()
+  });
 };
 
 document.getElementById("reset-stopwatch").onclick = () => {
@@ -2301,6 +2339,11 @@ document.getElementById("start-timer").onclick = () => {
     if (seconds <= 0) {
       clearInterval(timerInterval);
       alert("⏰ Tiempo terminado");
+       saveTimeHistory({
+        type: "⏲️ Temporizador",
+        time: document.getElementById("timer-input").value + " s",
+        date: new Date().toLocaleString()
+      });
     }
   }, 1000);
 };
@@ -2309,4 +2352,11 @@ document.getElementById("stop-timer").onclick = () => {
   clearInterval(timerInterval);
 };
 
+document.getElementById("clear-history").onclick = () => {
+  if (!confirm("¿Borrar todo el historial?")) return;
+  localStorage.removeItem("timeHistory");
+  renderTimeHistory();
+};
+
 startClock();
+renderTimeHistory();
