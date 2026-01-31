@@ -19,9 +19,6 @@ let tutorialsData = [];
 let swTime = 0;
 let swInterval = null;
 let timerInterval = null;
-let swTime = 0;
-let swInterval;
-let timerInterval;
 
 /* ======================
    UI ELEMENTS
