@@ -1813,3 +1813,33 @@ h3 {
 .status.optimal { color: #5cff8d; font-weight: 700; }
 .status.high { color: #ffc857; }
 .status.over { color: #ff3b3b; font-weight: 700; }
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.tool-card h3 {
+  margin-bottom: 12px;
+}
+
+.tool-display {
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 12px 0;
+}
+
+.tool-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.tool-actions button {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
