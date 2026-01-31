@@ -1,5 +1,3 @@
-Refactor
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,14 +5,11 @@ Refactor
   <title>Workout Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- CSS -->
   <link rel="stylesheet" href="styles.css" />
-
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
 
+<body>
 <div id="app-shell">
 
   <!-- ================= LOGIN ================= -->
@@ -72,18 +67,17 @@ Refactor
       <button class="menu-item" data-tab="tools-tab">Herramientas</button>
     </nav>
 
-    <!-- Main content -->
+    <!-- ================= MAIN ================= -->
     <main id="app-content">
 
-      <!-- ================= CREAR ================= -->
+      <!-- CREAR -->
       <section id="crear-tab" class="tab-content screen">
-        <div class="screen-header">Crear Mesociclo</div>
+        <header class="screen-header">Crear Mesociclo</header>
 
         <div class="screen-content">
-
           <div class="card">
             <label>Nombre del mesociclo</label>
-            <input type="text" id="mesocycle-name" placeholder="Ej: Fuerza Enero" />
+            <input id="mesocycle-name" placeholder="Ej: Fuerza Enero" />
           </div>
 
           <div class="card">
@@ -101,37 +95,35 @@ Refactor
           <div class="card">
             <label>Días por semana</label>
             <div id="day-buttons-container" class="day-buttons">
-              <button class="day-btn" data-days="1">1</button>
-              <button class="day-btn" data-days="2">2</button>
-              <button class="day-btn" data-days="3">3</button>
-              <button class="day-btn" data-days="4">4</button>
-              <button class="day-btn" data-days="5">5</button>
-              <button class="day-btn" data-days="6">6</button>
-              <button class="day-btn" data-days="7">7</button>
+              <button data-days="1">1</button>
+              <button data-days="2">2</button>
+              <button data-days="3">3</button>
+              <button data-days="4">4</button>
+              <button data-days="5">5</button>
+              <button data-days="6">6</button>
+              <button data-days="7">7</button>
             </div>
           </div>
 
           <button id="create-mesocycle-btn" class="primary">
             Guardar mesociclo
           </button>
-
         </div>
       </section>
 
-      <!-- ================= HISTORIAL ================= -->
+      <!-- HISTORIAL -->
       <section id="historial-tab" class="tab-content screen hidden">
-        <div class="screen-header">Historial</div>
+        <header class="screen-header">Historial</header>
         <div class="screen-content">
           <div id="history-list"></div>
         </div>
       </section>
 
-      <!-- ================= REGISTRO ================= -->
+      <!-- REGISTRO -->
       <section id="registro-tab" class="tab-content screen hidden">
-        <div class="screen-header">Registro</div>
+        <header class="screen-header">Registro</header>
 
         <div class="screen-content">
-
           <div class="card">
             <label>Mesociclo</label>
             <select id="registro-select">
@@ -144,14 +136,12 @@ Refactor
           </div>
 
           <div id="registered-exercises"></div>
-
         </div>
       </section>
 
-      <!-- ================= STATS ================= -->
+      <!-- STATS -->
       <section id="stats" class="tab-content screen hidden">
-        <div class="screen-header">Estadísticas</div>
-      
+        <header class="screen-header">Estadísticas</header>
         <div class="screen-content">
 
           <div class="card">
@@ -163,8 +153,7 @@ Refactor
               Todos los mesociclos
             </div>
           </div>
-      
-          <!-- KPIs -->
+
           <div class="kpi-grid">
             <div id="kpi-volume" class="kpi-card"></div>
             <div id="kpi-prs" class="kpi-card"></div>
@@ -173,142 +162,81 @@ Refactor
 
           <div class="separator"></div>
 
-          <section class="volume-section">
+          <section>
             <h3>Volumen semanal por ejercicio</h3>
             <div id="volumeTable"></div>
           </section>
 
           <section class="coach-section">
-            <div class="coach-card success" id="coachCard">
+            <div id="coachCard" class="coach-card success">
               <div class="coach-icon">🧠</div>
-              <div class="coach-content">
+              <div>
                 <h4>Recomendación del coach</h4>
-                <p id="coachMessage">
-                  Buen progreso. Mantén el volumen e intensidad esta semana.
-                </p>
+                <p id="coachMessage"></p>
               </div>
             </div>
           </section>
 
-          <section class="muscle-volume">
+          <section>
             <h3>Volumen por grupo muscular</h3>
             <div id="muscleTable"></div>
           </section>
 
-          <h3>
-            Evolución de fuerza
-            <span id="strength-exercise-label" class="exercise-label hidden"></span>
-          </h3>
-          <div class="chart-container" style="position: relative;">
-            <canvas id="strength-chart"></canvas>
-            <button id="back-to-general" class="back-badge hidden">
-              ← Volver a evolución general
-            </button>
-          </div>
-          
-          <div class="spacer"></div>
+          <section>
+            <h3>
+              Evolución de fuerza
+              <span id="strength-exercise-label" class="exercise-label hidden"></span>
+            </h3>
 
-          <div class="trend-card up">
-            <h3>Tendencias por ejercicio</h3> 
-            <div class="trend-main">
-              <div id="strength-trends" class="strength-list"></div>
+            <div class="chart-container">
+              <canvas id="strength-chart"></canvas>
+              <button id="back-to-general" class="back-badge hidden">
+                ← Volver
+              </button>
             </div>
-          </div>
-          
-          <div id="exercise-modal" class="modal hidden">
-            <div class="modal-card">
-              <h4 id="modal-title"></h4>
-              <canvas id="mini-chart"></canvas>
-              <button id="close-modal-btn">Cerrar</button>
-            </div>
-          </div>
+          </section>
 
-          <div class="spacer"></div>
-
-          <h3>Volumen por ejercicio (peso*reps)</h3>
-          <div id="exercise-volume-list"></div>
-      
-          <h3>Mejores marcas</h3>
-          <div id="pr-table"></div>
-      
-          <h3>Comparación de mesociclos</h3>
-          <div id="mesocycle-comparison"></div>
-      
         </div>
       </section>
 
-      <!-- ================= TUTORIALES ================= -->
+      <!-- TUTORIALES -->
       <section id="tutorials-view" class="tab-content screen hidden">
-        <h2>Tutoriales de ejercicios</h2>
-        <h3 class="subtitle">Aprende y mejora tu técnica</h3>
-      
-        <!-- FILTROS Y BÚSQUEDA -->
+        <header>
+          <h2>Tutoriales de ejercicios</h2>
+          <p class="subtitle">Aprende y mejora tu técnica</p>
+        </header>
+
         <div class="filters-container">
-      
-          <!-- Búsqueda -->
-          <div class="search-box">
-            <input type="text" id="tutorial-search" placeholder="Buscar tutorial...">
+          <input id="tutorial-search" placeholder="Buscar tutorial..." />
+
+          <div class="filter-dropdown">
+            <button>Tipo</button>
+            <div id="type-options"></div>
           </div>
-      
-          <!-- Filtros tipo / subgrupo -->
-          <div class="multi-filter filter-dropdown">
-            <button class="filter-btn">Tipo</button>
-            <div class="filter-options" id="type-options">
-              <!-- JS llenará checkboxes -->
-            </div>
+
+          <div class="filter-dropdown">
+            <button>Subgrupo</button>
+            <div id="subgroup-options"></div>
           </div>
-      
-          <div class="multi-filter filter-dropdown">
-            <button class="filter-btn">Subgrupo</button>
-            <div class="filter-options" id="subgroup-options">
-              <!-- JS llenará checkboxes -->
-            </div>
-          </div>
-      
-          <!-- Solo favoritos -->
-          <label class="favorites-filter">
-            <input type="checkbox" id="filter-favorites">
-            <span class="checkmark"></span>
+
+          <label>
+            <input type="checkbox" id="filter-favorites" />
             Solo favoritos
           </label>
-      
-          <!-- Ordenar -->
+
           <select id="sort-by">
             <option value="">Ordenar</option>
             <option value="name-asc">Nombre ↑</option>
             <option value="name-desc">Nombre ↓</option>
-            <option value="type-asc">Tipo ↑</option>
-            <option value="type-desc">Tipo ↓</option>
           </select>
-      
-          <!-- Borrar filtros -->
+
           <button id="clear-filters">Borrar filtros</button>
         </div>
-      
-        <!-- LISTA DE TUTORIALES -->
+
         <div id="tutorial-list"></div>
-      
-        <!-- MODAL TUTORIAL -->
-        <div id="tutorial-modal" class="hidden">
-          <div class="modal-content">
-            <h3 id="tutorial-title"></h3>
-        
-            <div class="video-wrapper">
-              <iframe
-                id="tutorial-video"
-                src=""
-                frameborder="0"
-                allowfullscreen
-              ></iframe>
-            </div>
-        
-            <div id="tutorial-cues"></div>
-        
-            <button id="close-tutorial-modal-btn">Cerrar</button>
-          </div>
-        </div>
-      
-      <!-- HERRAMIENTAS -->
+      </section>
+
+      <!-- TOOLS -->
       <section id="tools-tab" class="tab-content screen hidden">
         <header class="screen-header">Herramientas</header>
         <div class="screen-content tools-grid">
@@ -334,9 +262,6 @@ Refactor
   </section>
 </div>
 
-<!-- JS -->
 <script type="module" src="app.js"></script>
-
 </body>
 </html>
-
