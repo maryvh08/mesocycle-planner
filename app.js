@@ -1016,6 +1016,14 @@ async function renderExercisesForDay(mesocycleId, week, day) {
 /* ======================
    RELOJ
 ====================== */
+function formatTime(ms) {
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, "0");
+  const seconds = (totalSeconds % 60).toString().padStart(2, "0");
+  const centiseconds = Math.floor((ms % 1000) / 10).toString().padStart(2, "0");
+  return `${minutes}:${seconds}.${centiseconds}`;
+}
+
 function initTools() {
   initClock();
   initStopwatch();
@@ -1040,11 +1048,13 @@ function initStopwatch() {
 
   if (!display || !startBtn || !stopBtn || !resetBtn) return;
 
+  display.textContent = formatTime(swTime);
+
   startBtn.onclick = () => {
-    if (swInterval) return;
+    if (swInterval) return; // ya está corriendo
     swInterval = setInterval(() => {
       swTime += 100;
-      display.textContent = (swTime / 1000).toFixed(1);
+      display.textContent = formatTime(swTime);
     }, 100);
   };
 
@@ -1052,12 +1062,14 @@ function initStopwatch() {
     if (!swInterval) return;
     clearInterval(swInterval);
     swInterval = null;
-    saveTimeHistory("⏱️ Cronómetro", (swTime / 1000).toFixed(1) + " s");
+    saveTimeHistory("⏱️ Cronómetro", formatTime(swTime));
   };
 
   resetBtn.onclick = () => {
+    clearInterval(swInterval);
+    swInterval = null;
     swTime = 0;
-    display.textContent = "00:00.0";
+    display.textContent = "00:00.00";
   };
 }
 
@@ -1069,27 +1081,62 @@ function initTimer() {
 
   if (!input || !display || !startBtn || !stopBtn) return;
 
+  display.textContent = "00:00.00";
+
   startBtn.onclick = () => {
     let seconds = parseInt(input.value);
-    if (!seconds || seconds <= 0) return;
+    
+    // si es primera vez, inicializamos
+    if (!timerRunning) {
+      if (!seconds || seconds <= 0) return;
+      timerTime = seconds * 1000;
+    }
 
     clearInterval(timerInterval);
 
     timerInterval = setInterval(() => {
-      seconds--;
-      display.textContent = `00:${String(seconds).padStart(2, "0")}`;
-
-      if (seconds <= 0) {
+      timerTime -= 100;
+      if (timerTime <= 0) {
         clearInterval(timerInterval);
-        saveTimeHistory("⏲️ Temporizador", input.value + " s");
+        timerTime = 0;
+        timerRunning = false;
+        display.textContent = "00:00.00";
+        saveTimeHistory("⏲️ Temporizador", formatTime(0));
+        startBtn.textContent = "Iniciar";
         alert("⏰ Tiempo terminado");
+      } else {
+        display.textContent = formatTime(timerTime);
       }
-    }, 1000);
+    }, 100);
+
+    timerRunning = true;
+    startBtn.textContent = "Pausar";
   };
 
   stopBtn.onclick = () => {
+    if (!timerRunning) return;
     clearInterval(timerInterval);
+    timerRunning = false;
+    startBtn.textContent = "Reanudar";
   };
+
+  // Agregamos botón de reset
+  const resetBtn = document.createElement("button");
+  resetBtn.textContent = "Restablecer";
+  resetBtn.onclick = () => {
+    clearInterval(timerInterval);
+    timerTime = 0;
+    timerRunning = false;
+    display.textContent = "00:00.00";
+    startBtn.textContent = "Iniciar";
+  };
+
+  // Añadimos reset al contenedor de botones
+  const parent = startBtn.parentNode;
+  if (parent && !parent.querySelector(".timer-reset")) {
+    resetBtn.classList.add("timer-reset");
+    parent.appendChild(resetBtn);
+  }
 }
 
 function startClock() {
