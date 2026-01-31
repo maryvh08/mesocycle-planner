@@ -67,6 +67,7 @@
       <button class="menu-item" data-tab="registro-tab">Registro</button>
       <button class="menu-item" data-tab="stats">Estadísticas</button>
       <button class="menu-item" data-tab="tutorials-view">Tutoriales</button>
+      <button class="menu-item" data-tab="tools-tab">Herramientas</button>
     </nav>
 
     <!-- Main content -->
@@ -234,7 +235,7 @@
         </div>
       </section>
 
-     <!-- ================= TUTORIALES ================= -->
+      <!-- ================= TUTORIALES ================= -->
       <section id="tutorials-view" class="tab-content screen hidden">
         <h2>Tutoriales de ejercicios</h2>
         <h3 class="subtitle">Aprende y mejora tu técnica</h3>
@@ -304,7 +305,51 @@
             <button id="close-tutorial-modal-btn">Cerrar</button>
           </div>
         </div>
-
+        
+      <!-- ================= HERRAMIENTAS ================= -->
+      <section id="tools-tab" class="tab-content screen hidden">
+        <div class="screen-header">Herramientas</div>
+      
+        <div class="screen-content tools-grid">
+      
+          <!-- ===== RELOJ ===== -->
+          <div class="card tool-card">
+            <h3>🕒 Reloj</h3>
+            <div id="clock" class="tool-display">00:00:00</div>
+          </div>
+      
+          <!-- ===== CRONÓMETRO ===== -->
+          <div class="card tool-card">
+            <h3>⏱️ Cronómetro</h3>
+            <div id="stopwatch" class="tool-display">00:00.0</div>
+            <div class="tool-actions">
+              <button id="start-stopwatch">Iniciar</button>
+              <button id="stop-stopwatch">Detener</button>
+              <button id="reset-stopwatch">Reset</button>
+            </div>
+          </div>
+      
+          <!-- ===== TEMPORIZADOR ===== -->
+          <div class="card tool-card">
+            <h3>⏲️ Temporizador</h3>
+      
+            <input
+              type="number"
+              id="timer-input"
+              placeholder="Segundos"
+              min="1"
+            />
+      
+            <div id="timer-display" class="tool-display">00:00</div>
+      
+            <div class="tool-actions">
+              <button id="start-timer">Iniciar</button>
+              <button id="stop-timer">Detener</button>
+            </div>
+          </div>
+      
+        </div>
+      </section>
 </div>
 
 <!-- JS -->
