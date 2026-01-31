@@ -1,3 +1,5 @@
+Refactor
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,11 +7,14 @@
   <title>Workout Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <!-- CSS -->
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
+
 <div id="app-shell">
 
   <!-- ================= LOGIN ================= -->
@@ -303,31 +308,59 @@
           </div>
         </div>
         
-      <!-- TOOLS -->
+      <!-- ================= HERRAMIENTAS ================= -->
       <section id="tools-tab" class="tab-content screen hidden">
-        <header class="screen-header">Herramientas</header>
+        <div class="screen-header">Herramientas</div>
+      
         <div class="screen-content tools-grid">
+      
+          <!-- ===== RELOJ ===== -->
           <div class="card tool-card">
             <h3>🕒 Reloj</h3>
-            <div id="clock">00:00:00</div>
+            <div id="clock" class="tool-display">00:00:00</div>
           </div>
-
+      
+          <!-- ===== CRONÓMETRO ===== -->
           <div class="card tool-card">
             <h3>⏱️ Cronómetro</h3>
-            <div id="stopwatch">00:00.0</div>
+            <div id="stopwatch" class="tool-display">00:00.0</div>
+            <div class="tool-actions">
+              <button id="start-stopwatch">Iniciar</button>
+              <button id="stop-stopwatch">Detener</button>
+              <button id="reset-stopwatch">Reset</button>
+            </div>
           </div>
-
+      
+          <!-- ===== TEMPORIZADOR ===== -->
           <div class="card tool-card">
             <h3>⏲️ Temporizador</h3>
-            <input id="timer-input" type="number" min="1" />
-            <div id="timer-display">00:00</div>
+      
+            <input
+              type="number"
+              id="timer-input"
+              placeholder="Segundos"
+              min="1"
+            />
+      
+            <div id="timer-display" class="tool-display">00:00</div>
+      
+            <div class="tool-actions">
+              <button id="start-timer">Iniciar</button>
+              <button id="stop-timer">Detener</button>
+            </div>
           </div>
+      
+        </div>
+        <div class="card tool-card">
+          <h3>📜 Historial de tiempos</h3>
+          <div id="time-history" class="time-history">
+            <p class="placeholder">Aún no hay registros</p>
+          </div>
+          <button id="clear-history">Borrar historial</button>
         </div>
       </section>
-
-    </main>
-  </section>
 </div>
+
 <!-- JS -->
 <script type="module" src="app.js"></script>
 
