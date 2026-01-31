@@ -303,59 +303,31 @@
           </div>
         </div>
         
-      <!-- ================= HERRAMIENTAS ================= -->
+      <!-- TOOLS -->
       <section id="tools-tab" class="tab-content screen hidden">
-        <div class="screen-header">Herramientas</div>
-      
+        <header class="screen-header">Herramientas</header>
         <div class="screen-content tools-grid">
-      
-          <!-- ===== RELOJ ===== -->
           <div class="card tool-card">
             <h3>🕒 Reloj</h3>
-            <div id="clock" class="tool-display">00:00:00</div>
+            <div id="clock">00:00:00</div>
           </div>
-      
-          <!-- ===== CRONÓMETRO ===== -->
+
           <div class="card tool-card">
             <h3>⏱️ Cronómetro</h3>
-            <div id="stopwatch" class="tool-display">00:00.0</div>
-            <div class="tool-actions">
-              <button id="start-stopwatch">Iniciar</button>
-              <button id="stop-stopwatch">Detener</button>
-              <button id="reset-stopwatch">Reset</button>
-            </div>
+            <div id="stopwatch">00:00.0</div>
           </div>
-      
-          <!-- ===== TEMPORIZADOR ===== -->
+
           <div class="card tool-card">
             <h3>⏲️ Temporizador</h3>
-      
-            <input
-              type="number"
-              id="timer-input"
-              placeholder="Segundos"
-              min="1"
-            />
-      
-            <div id="timer-display" class="tool-display">00:00</div>
-      
-            <div class="tool-actions">
-              <button id="start-timer">Iniciar</button>
-              <button id="stop-timer">Detener</button>
-            </div>
+            <input id="timer-input" type="number" min="1" />
+            <div id="timer-display">00:00</div>
           </div>
-      
-        </div>
-        <div class="card tool-card">
-          <h3>📜 Historial de tiempos</h3>
-          <div id="time-history" class="time-history">
-            <p class="placeholder">Aún no hay registros</p>
-          </div>
-          <button id="clear-history">Borrar historial</button>
         </div>
       </section>
-</div>
 
+    </main>
+  </section>
+</div>
 <!-- JS -->
 <script type="module" src="app.js"></script>
 
