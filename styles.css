@@ -1843,3 +1843,24 @@ h3 {
   border: none;
   cursor: pointer;
 }
+
+.time-history {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.time-entry {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  opacity: 0.9;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.05);
+}
+
+.time-entry small {
+  opacity: 0.6;
+}
