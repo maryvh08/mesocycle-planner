@@ -20,7 +20,6 @@ let swTime = 0;
 let swInterval = null;
 let timerInterval = null;
 let timerTime = 0;      
-let timerInterval = null; 
 let timerRunning = false; 
 
 /* ======================
