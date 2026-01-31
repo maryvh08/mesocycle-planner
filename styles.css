@@ -1793,3 +1793,23 @@ h3 {
   color: #ffc857;
   font-weight: 700;
 }
+
+.muscle-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #120b0f;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.muscle-table th,
+.muscle-table td {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid #2a0f14;
+  font-size: 0.9rem;
+}
+
+.status.below { color: #ff6b6b; }
+.status.optimal { color: #5cff8d; font-weight: 700; }
+.status.high { color: #ffc857; }
+.status.over { color: #ff3b3b; font-weight: 700; }
