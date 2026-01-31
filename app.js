@@ -1168,6 +1168,91 @@ function updateCoachCard({ type, message }) {
   text.textContent = message;
 }
 
+function calculateVolumeTrend(records) {
+  const byExercise = {};
+
+  records.forEach(r => {
+    if (!byExercise[r.exercise_name]) {
+      byExercise[r.exercise_name] = [];
+    }
+    byExercise[r.exercise_name].push(r);
+  });
+
+  return Object.entries(byExercise).map(([exercise, weeks]) => {
+    weeks.sort((a, b) => a.week_number - b.week_number);
+
+    const last = weeks.at(-1);
+    const prev = weeks.at(-2);
+
+    let trend = '→';
+    let percent = 0;
+
+    if (prev) {
+      percent = ((last.total_volume - prev.total_volume) / prev.total_volume) * 100;
+      trend = percent > 3 ? '↑' : percent < -3 ? '↓' : '→';
+    }
+
+    return {
+      exercise,
+      volume: Math.round(last.total_volume),
+      sets: last.total_sets,
+      trend,
+      percent: percent.toFixed(1)
+    };
+  });
+}
+
+function renderVolumeTable(data) {
+  const container = document.getElementById('volumeTable');
+
+  container.innerHTML = `
+    <table class="volume-table">
+      <thead>
+        <tr>
+          <th>Ejercicio</th>
+          <th>Volumen</th>
+          <th>Sets</th>
+          <th>Tendencia</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.map(d => `
+          <tr>
+            <td>${d.exercise}</td>
+            <td>${d.volume}</td>
+            <td>${d.sets}</td>
+            <td class="trend ${trendClass(d.trend)}">
+              ${d.trend} ${Math.abs(d.percent)}%
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function trendClass(trend) {
+  if (trend === '↑') return 'up';
+  if (trend === '↓') return 'down';
+  return 'flat';
+}
+
+function updateCoachFromVolume(data) {
+  const downs = data.filter(d => d.trend === '↓').length;
+
+  if (downs >= 3) {
+    updateCoachCard({
+      type: 'warning',
+      message: 'Caída de volumen detectada en varios ejercicios. Considera reducir fatiga o ajustar cargas.'
+    });
+  } else {
+    updateCoachCard({
+      type: 'success',
+      message: 'Volumen estable o en progreso. Buen manejo del estímulo.'
+    });
+  }
+}
+
 /* ======================
    CARGA STATS + GRAFICA
 ====================== */
