@@ -21,6 +21,7 @@ let swInterval = null;
 let timerInterval = null;
 let timerTime = 0;      
 let timerRunning = false; 
+let miniChartInstance = null;
 
 /* ======================
    UI ELEMENTS
@@ -1325,6 +1326,57 @@ function renderStrengthTable(grouped) {
 
     container.appendChild(row);
   });
+}
+
+function openMiniChart(weeklyData) {
+  const modal = document.getElementById("exercise-modal");
+  const ctx = document.getElementById("mini-chart");
+
+  if (!modal || !ctx) return;
+
+  const labels = weeklyData.map(w => `Sem ${w.week}`);
+  const values = weeklyData.map(w => w.avg_force);
+
+  // destruir gráfico anterior si existe
+  if (miniChartInstance) {
+    miniChartInstance.destroy();
+  }
+
+  miniChartInstance = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Fuerza promedio",
+          data: values,
+          borderColor: "#4ade80",
+          backgroundColor: "rgba(74,222,128,0.15)",
+          tension: 0.35,
+          fill: true,
+          pointRadius: 4,
+          pointBackgroundColor: "#4ade80"
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: false
+        }
+      }
+    }
+  });
+
+  // mostrar modal
+  modal.classList.remove("hidden");
 }
 
 function getRecommendation({ strengthTrend, volumeChange }) {
