@@ -1086,13 +1086,15 @@ function initTimer() {
   display.textContent = "00:00.00";
 
   startBtn.onclick = () => {
-    let seconds = parseInt(input.value);
-    
-    // si es primera vez, inicializamos
-    if (!timerRunning) {
-      if (!seconds || seconds <= 0) return;
-      timerTime = seconds * 1000;
-    }
+      const timeParts = input.value.split(":");
+      if (timeParts.length !== 2) return; // no válido
+      
+      const minutes = parseInt(timeParts[0]);
+      const seconds = parseInt(timeParts[1]);
+      
+      if (isNaN(minutes) || isNaN(seconds)) return;
+      
+      timerTime = (minutes * 60 + seconds) * 1000;
 
     clearInterval(timerInterval);
 
