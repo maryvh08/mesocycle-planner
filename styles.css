@@ -1814,6 +1814,9 @@ h3 {
 .status.high { color: #ffc857; }
 .status.over { color: #ff3b3b; font-weight: 700; }
 
+/* =========================
+   RELOJ
+========================= */
 .tools-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -1863,4 +1866,29 @@ h3 {
 
 .time-entry small {
   opacity: 0.6;
+}
+
+.time-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.time-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.delete-time {
+  background: transparent;
+  border: none;
+  color: #f87171;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.delete-time:hover {
+  color: #ef4444;
 }
