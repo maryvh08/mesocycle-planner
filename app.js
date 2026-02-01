@@ -1729,6 +1729,18 @@ function deloadAmount(ex) {
   return 0.15;
 }
 
+function nextWeekSets(currentSets, range) {
+  if (currentSets < range.mav) {
+    return currentSets + 1; // overload
+  }
+
+  if (currentSets >= range.mav && currentSets < range.mrv) {
+    return currentSets; // mantener
+  }
+
+  return range.mav - 2; // deload preventivo
+}
+
 /* ======================
    CARGA STATS + GRAFICA
 ====================== */
