@@ -1741,6 +1741,14 @@ function nextWeekSets(currentSets, range) {
   return range.mav - 2; // deload preventivo
 }
 
+function muscleStatus(vol, mev, mav, mrv, strengthTrend) {
+  if (vol < mev) return "under";
+  if (vol <= mav && strengthTrend >= 0) return "productive";
+  if (vol <= mav + 1 && strengthTrend > 0) return "optimal";
+  if (vol < mrv && strengthTrend <= 0) return "fatigued";
+  return "overreached";
+}
+
 /* ======================
    CARGA STATS + GRAFICA
 ====================== */
