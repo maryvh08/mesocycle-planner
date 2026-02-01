@@ -1178,12 +1178,32 @@ function renderTimeHistory() {
     return;
   }
 
-  container.innerHTML = history.slice(0, 10).map(h => `
-    <div class="time-entry">
-      <span>${h.type} – <strong>${h.time}</strong></span>
-      <small>${h.date}</small>
-    </div>
-  `).join("");
+  container.innerHTML = history
+    .slice(0, 10)
+    .map((h, index) => `
+      <div class="time-entry">
+        <div class="time-info">
+          <span>${h.type} – <strong>${h.time}</strong></span>
+          <small>${h.date}</small>
+        </div>
+        <button class="delete-time" data-index="${index}">✕</button>
+      </div>
+    `)
+    .join("");
+
+  // listeners para borrar individualmente
+  container.querySelectorAll(".delete-time").forEach(btn => {
+    btn.onclick = () => {
+      deleteTimeEntry(btn.dataset.index);
+    };
+  });
+}
+
+function deleteTimeEntry(index) {
+  const history = getTimeHistory();
+  history.splice(index, 1); // elimina solo ese elemento
+  localStorage.setItem("timeHistory", JSON.stringify(history));
+  renderTimeHistory();
 }
 
 /* ======================
