@@ -46,6 +46,7 @@ const tabs = document.querySelectorAll(".tab-btn");
 const statsView = document.getElementById("stats");
 
 const favorites_key = 'favorite_exercises';
+const volume = weight * reps;
 
 /* ======================
    DOM CONTENT LOADED
@@ -1250,16 +1251,19 @@ function renderStatsView() {
    DASHBOARD
 ====================== */
 function getTrend(weeks) {
-  if (weeks.length < 2) return '→';
+  if (weeks.length < 2) {
+    return { icon: '→', percent: '0.0' };
+  }
 
   const first = weeks[0].avg_force;
-  const last = weeks[weeks.length - 1].avg_force;
+  const last = weeks.at(-1).avg_force;
 
   const change = ((last - first) / first) * 100;
 
   return {
     icon: change > 2 ? '↑' : change < -2 ? '↓' : '→',
-    percent: change.toFixed(1)
+    percent: change.toFixed(1),
+    value: change
   };
 }
 
@@ -1285,7 +1289,7 @@ async function loadDashboard(mesocycleId) {
     if (!grouped[key]) grouped[key] = [];
     grouped[key].push({
       week: r.week_number,
-      force: r.weight * r.reps
+      force: r.weight * (1 + r.reps / 30)
     });
   });
 
@@ -1317,7 +1321,7 @@ function renderStrengthTable(grouped) {
     row.innerHTML = `
       <span>${records[0].exercise_name}</span>
       <span>${Math.round(weeklyAvg.at(-1).avg_force)} kg</span>
-      <span class="trend ${trend.icon}">
+      <span class="trend ${trend.icon === '↑' ? 'up' : trend.icon === '↓' ? 'down' : 'flat'}">
         ${trend.icon} ${trend.percent}%
       </span>
     `;
@@ -1379,32 +1383,20 @@ function openMiniChart(weeklyData) {
   modal.classList.remove("hidden");
 }
 
-function getRecommendation({ strengthTrend, volumeChange }) {
-  if (strengthTrend > 2 && volumeChange >= 0) {
-    return {
-      type: 'success',
-      msg: 'Buen progreso. Mantén volumen e intensidad.'
-    };
+function getRecommendation({ trend, volumeChange }) {
+  if (trend.value > 2 && volumeChange >= 0) {
+    return { type: 'success', msg: 'Buen progreso. Mantén estímulo.' };
   }
 
-  if (strengthTrend <= 2 && volumeChange > 10) {
-    return {
-      type: 'warning',
-      msg: 'Fatiga probable. Considera reducir volumen 15–20%.'
-    };
+  if (trend.value < 0 && volumeChange > 10) {
+    return { type: 'warning', msg: 'Fatiga probable. Reduce volumen 15–20%.' };
   }
 
-  if (strengthTrend < -2 && volumeChange > 0) {
-    return {
-      type: 'danger',
-      msg: 'Sobreentrenamiento detectado. Reduce volumen o descarga.'
-    };
+  if (trend.value < -3) {
+    return { type: 'danger', msg: 'Sobreentrenamiento detectado. Deload recomendado.' };
   }
 
-  return {
-    type: 'neutral',
-    msg: 'Progreso estable. Evalúa cambiar estímulo si continúa.'
-  };
+  return { type: 'neutral', msg: 'Progreso estable. Observa 1 semana más.' };
 }
 
 function updateCoachCard({ type, message }) {
