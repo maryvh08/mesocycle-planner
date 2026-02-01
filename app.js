@@ -46,7 +46,6 @@ const tabs = document.querySelectorAll(".tab-btn");
 const statsView = document.getElementById("stats");
 
 const favorites_key = 'favorite_exercises';
-const volume = weight * reps;
 
 /* ======================
    DOM CONTENT LOADED
