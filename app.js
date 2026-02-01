@@ -1601,6 +1601,45 @@ function mesocycleCoach(a, b) {
   return 'Ambos mesociclos tuvieron rendimiento similar.';
 }
 
+function overallProgress(exercises) {
+  const up = exercises.filter(e => e.trend === 'up').length;
+  const total = exercises.length;
+  const ratio = up / total;
+
+  if (ratio >= 0.6) return 'green';
+  if (ratio >= 0.35) return 'yellow';
+  return 'red';
+}
+
+function classifyExercise(e) {
+  if (e.trend === 'up' && e.change > 3) return 'strong';
+  if (e.trend === 'flat') return 'stalled';
+  if (e.trend === 'down') return 'regressing';
+}
+
+function volumeResponse(ex) {
+  return ex.strengthChange / ex.volume;
+}
+
+function fatigueAlerts(exercises) {
+  return exercises.filter(e =>
+    e.trend === 'down' && e.volume > e.prevVolume
+  );
+}
+
+function coachAdvice(summary) {
+  if (summary.fatigueZones.length > 0) {
+    return 'Reduce volumen 10–20% o considera un deload.';
+  }
+
+  if (summary.greenExercises.length > summary.stalled.length) {
+    return 'Buen momento para progresar cargas o añadir 1 set.';
+  }
+
+  return 'Mantén volumen y busca mejorar ejecución.';
+}
+
+
 /* ======================
    CARGA STATS + GRAFICA
 ====================== */
