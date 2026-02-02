@@ -2200,39 +2200,42 @@ async function loadStrengthChart(mesocycleId = null, exerciseName = "") {
 }
 
 // Evento para volver a la evolución general
-document.getElementById("back-to-general").addEventListener("click", () => {
-  if (!generalStrengthData) return;
+document.addEventListener("click", (e) => {
+  if (e.target.id === "back-to-general") {
+    if (!generalStrengthData) return;
 
-  const ctx = document.getElementById("strength-chart");
-  if (window.statsChart) window.statsChart.destroy();
+    const ctx = document.getElementById("strength-chart");
+    if (window.statsChart) window.statsChart.destroy();
 
-  const labels = generalStrengthData.map(r => r.day);
-  const values = generalStrengthData.map(r => r.total_volume);
+    const labels = generalStrengthData.map(r => r.day);
+    const values = generalStrengthData.map(r => r.total_volume);
 
-  window.statsChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels,
-      datasets: [{
-        label: "Volumen total",
-        data: values,
-        tension: 0.35,
-        fill: true,
-        borderColor: "#b11226",
-        backgroundColor: "rgba(177,18,38,0.25)",
-        pointBackgroundColor: "#ff3b3b",
-        pointBorderColor: "#120b0f",
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        borderWidth: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: true, position: "top" } },
-      scales: { y: { beginAtZero: true } }
-    }
-  });
+    window.statsChart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          label: "Volumen total",
+          data: values,
+          tension: 0.35,
+          fill: true,
+          borderColor: "#b11226",
+          backgroundColor: "rgba(177,18,38,0.25)",
+          pointBackgroundColor: "#ff3b3b",
+          pointBorderColor: "#120b0f",
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: true, position: "top" } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  }
+});
 
   const exerciseLabel = document.getElementById("strength-exercise-label");
   const backBtn = document.getElementById("back-to-general");
