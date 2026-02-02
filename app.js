@@ -1293,6 +1293,12 @@ async function loadDashboard(mesocycleId) {
 
   const coachMsg = muscleCoachFeedback(muscleData);
   updateCoachCard({ type: 'neutral', message: coachMsg });
+
+   await loadStrength(mesocycleId);
+   await loadVolume(mesocycleId);
+   
+   // 👉 AÑADE ESTO
+   await loadMuscleVolumeRP(mesocycleId);
 }
 
 function calculateMuscleVolume(records) {
@@ -2103,19 +2109,30 @@ function compareMesocycles(idA, idB, data) {
   });
 }
 
-async function loadMuscleVolume(mesocycleId) {
-  const { data } = await supabase
-    .from('muscle_weekly_volume')
+async function loadMuscleVolumeRP(mesocycleId) {
+  const {
+    data,
+    error
+  } = await supabase
+    .from('v_muscle_rp_status')
     .select('*')
-    .eq('mesocycle_id', mesocycleId);
+    .eq('mesocycle_id', mesocycleId)
+    .eq('user_id', user.id);
 
-  const evaluation = evaluateMuscleVolume(data);
-  renderMuscleTable(evaluation);
+  if (error) {
+    console.error('RP volume error:', error);
+    return;
+  }
 
-  const feedback = muscleCoachFeedback(evaluation);
+  const normalized = normalizeMuscleVolume(data);
+  const evaluated = evaluateMuscleVolume(normalized);
+
+  renderMuscleTable(evaluated);
+
+  const coachMsg = muscleCoachFeedback(evaluated);
   updateCoachCard({
-    type: 'warning',
-    message: feedback
+    type: 'neutral',
+    message: coachMsg
   });
 }
 
