@@ -1266,10 +1266,6 @@ function getTrend(weeks) {
   };
 }
 
-const normalized = normalizeMuscleVolume(data);
-const evaluated = evaluateMuscleVolume(normalized);
-renderMuscleTable(evaluated);
-
 async function loadDashboard(mesocycleId) {
   // 1️⃣ Fuerza (tabla + mini charts)
   await loadStrength(mesocycleId);
