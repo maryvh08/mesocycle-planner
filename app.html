@@ -191,50 +191,53 @@
           </section>
           
           <section class="coach-dashboard">
-            <h2>🧠 Coach View</h2>
+            <h2>🧠 Coach</h2>
           
-            <!-- Resumen rápido -->
-            <div class="coach-grid">
-              <div class="coach-card green">📈 Progreso sólido</div>
-              <div class="coach-card yellow">⚠️ Algunos estancamientos</div>
-              <div class="coach-card red">🚨 Señales de fatiga</div>
-            </div>
+            <!-- ESTADO GLOBAL -->
+            <div class="coach-section">
+              <h3>Estado global</h3>
           
-            <!-- Progreso general -->
-            <div class="coach-card green">
-              <h3>📈 Progreso general</h3>
-              <p>La mayoría de tus ejercicios están mejorando.</p>
-            </div>
+              <div class="coach-grid">
+                <div class="coach-card green">📈 Progreso sólido</div>
+                <div class="coach-card yellow">⚠️ Algunos estancamientos</div>
+                <div class="coach-card red">🚨 Señales de fatiga</div>
+              </div>
           
-            <!-- Alertas -->
-            <div class="alert-card">
-              ⚠️ Posible fatiga acumulada en:
-              <strong>Cuádriceps</strong>
-            </div>
-          
-            <div class="coach-alert red">
-              🔴 Deload recomendado — Espalda baja
-              <p>Caída de fuerza + alto volumen detectados.</p>
-            </div>
-          
-            <!-- Recomendación principal -->
-            <div class="coach-card success" id="coachCard">
-              <div class="coach-icon">🧠</div>
-              <div class="coach-content">
-                <h4>Recomendación del coach</h4>
-                <p id="coachMessage">
-                  Buen progreso. Mantén el volumen e intensidad esta semana.
-                </p>
+              <div class="coach-card green">
+                <p>La mayoría de tus ejercicios están mejorando.</p>
               </div>
             </div>
           
-            <!-- Acción sugerida -->
-            <div class="coach-recommendation">
+            <!-- ALERTAS CRÍTICAS -->
+            <div class="coach-section">
+              <h3>Alertas críticas</h3>
+          
+              <div class="alert-card">
+                ⚠️ Posible fatiga acumulada en
+                <strong>Cuádriceps</strong>
+              </div>
+          
+              <div class="coach-alert red">
+                🔴 Deload recomendado — Espalda baja
+                <p>Caída de fuerza + alto volumen detectados.</p>
+              </div>
+            </div>
+          
+            <!-- RECOMENDACIÓN ÚNICA -->
+            <div class="coach-section">
               <h3>Recomendación</h3>
-              <p>Reduce volumen en espalda baja un 15%.</p>
+          
+              <div class="coach-card success" id="coachCard">
+                <div class="coach-icon">🧠</div>
+                <div class="coach-content">
+                  <p id="coachMessage">
+                    Mantén volumen e intensidad esta semana.
+                    Reduce un 15% el volumen en espalda baja.
+                  </p>
+                </div>
+              </div>
             </div>
           </section>
-
 
           <h3>
             Evolución de fuerza
