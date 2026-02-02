@@ -2853,3 +2853,9 @@ document.addEventListener('DOMContentLoaded', () => {
     loadDashboard(mesocycleId);
   }
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  menuToggle.onclick = () => {
+    sideMenu.classList.toggle("hidden");
+  };
+});
