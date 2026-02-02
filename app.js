@@ -1698,7 +1698,7 @@ function calculateEfficiency(mesocycles) {
     return {
       ...m,
       strengthScore,
-      efficiency: strengthScore / m.volume
+      efficiency: strengthScore / m.totalvolume
     };
   });
 }
