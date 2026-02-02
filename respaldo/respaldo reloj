@@ -2138,3 +2138,70 @@ document
   .addEventListener('click', closeTutorial);
 
 loadTutorials();
+
+document.getElementById("start-stopwatch").onclick = () => {
+  if (swInterval) return;
+  swInterval = setInterval(() => {
+    swTime += 100;
+    document.getElementById("stopwatch").textContent =
+      (swTime / 1000).toFixed(1);
+  }, 100);
+};
+
+document.getElementById("stop-stopwatch").onclick = () => {
+  if (!swInterval) return;
+
+  clearInterval(swInterval);
+  swInterval = null;
+
+  saveTimeHistory({
+    type: "⏱️ Cronómetro",
+    time: (swTime / 1000).toFixed(1) + " s",
+    date: new Date().toLocaleString()
+  });
+};
+
+document.getElementById("reset-stopwatch").onclick = () => {
+  swTime = 0;
+  document.getElementById("stopwatch").textContent = "00:00.0";
+};
+
+document.getElementById("start-timer").onclick = () => {
+  let seconds = parseInt(document.getElementById("timer-input").value);
+  if (!seconds || seconds <= 0) return;
+
+  clearInterval(timerInterval);
+
+  timerInterval = setInterval(() => {
+    seconds--;
+    document.getElementById("timer-display").textContent =
+      `00:${String(seconds).padStart(2, "0")}`;
+
+    if (seconds <= 0) {
+      clearInterval(timerInterval);
+      alert("⏰ Tiempo terminado");
+       saveTimeHistory({
+        type: "⏲️ Temporizador",
+        time: document.getElementById("timer-input").value + " s",
+        date: new Date().toLocaleString()
+      });
+    }
+  }, 1000);
+};
+
+document.getElementById("stop-timer").onclick = () => {
+  clearInterval(timerInterval);
+};
+
+document.getElementById("clear-history")?.addEventListener("click", () => {
+  if (!confirm("¿Borrar historial completo?")) return;
+  localStorage.removeItem("timeHistory");
+  renderTimeHistory();
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  initTools();
+});
+
+startClock();
+renderTimeHistory();
