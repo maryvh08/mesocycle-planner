@@ -2433,7 +2433,7 @@ function updateCoachDashboard(exercises) {
   `;
 }
 
-function renderFatigueAlerts(exercises) {
+function renderAlerts(exercises) {
   const alerts = fatigueAlerts(exercises);
 
   if (!alerts.length) return;
