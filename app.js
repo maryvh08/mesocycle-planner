@@ -2234,18 +2234,19 @@ document.addEventListener("click", (e) => {
         scales: { y: { beginAtZero: true } }
       }
     });
+
+    // Ocultar label y botón al volver
+    const exerciseLabel = document.getElementById("strength-exercise-label");
+    const backBtn = document.getElementById("back-to-general");
+
+    if (exerciseLabel) exerciseLabel.classList.add("hidden");
+    if (backBtn) {
+      backBtn.classList.remove("visible");
+      backBtn.classList.add("hidden");
+    }
   }
 });
 
-  const exerciseLabel = document.getElementById("strength-exercise-label");
-  const backBtn = document.getElementById("back-to-general");
-
-  if (exerciseLabel) exerciseLabel.classList.add("hidden");
-  if (backBtn) {
-    backBtn.classList.remove("visible");
-    backBtn.classList.add("hidden");
-  }
-});
 async function loadExerciseVolumeList(mesocycleId = null) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
