@@ -1462,13 +1462,6 @@ function updateCoachCard({ type, message }) {
 }
 
 function calculateVolumeTrend(records) {
-   const { data } = await supabase
-     .from('v_exercise_volume_trend')
-     .select('*')
-     .eq('mesocycle_id', mesocycleId)
-     .eq('user_id', user.id)
-     .order('week_number');
-
   const byExercise = {};
 
   records.forEach(r => {
