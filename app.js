@@ -1,4 +1,4 @@
-console.log("🔥 app.js cargado");
+console.log("🔥 app.js cargado  exitosamente");
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 /* ======================
