@@ -1740,6 +1740,19 @@ function muscleStatus(vol, mev, mav, mrv, strengthTrend) {
   return "overreached";
 }
 
+async function loadVolumeSection(mesocycleId) {
+  const { data, error } = await supabase
+    .from('exercise_weekly_volume')
+    .select('*')
+    .eq('mesocycle_id', mesocycleId);
+
+  if (error) return console.error(error);
+
+  const volumeTrend = calculateVolumeTrend(data);
+  renderVolumeTable(volumeTrend);
+  updateCoachFromVolume(volumeTrend);
+}
+
 /* ======================
    CARGA STATS + GRAFICA
 ====================== */
@@ -1980,12 +1993,31 @@ async function loadMesocycleComparison() {
   });
 }
 
-function compareMesocycles(a, b) {
-  return {
-    strengthDiff: ((b.avgStrength - a.avgStrength) / a.avgStrength) * 100,
-    volumeDiff: ((b.volume - a.volume) / a.volume) * 100,
-    prsDiff: b.prs - a.prs
-  };
+function compareMesocycles(idA, idB, data) {
+  const a = data.find(m => m.mesocycle_id === idA);
+  const b = data.find(m => m.mesocycle_id === idB);
+
+  renderComparison(a, b);
+  updateCoachCard({
+    type: 'neutral',
+    message: mesocycleCoach(a, b)
+  });
+}
+
+async function loadMuscleVolume(mesocycleId) {
+  const { data } = await supabase
+    .from('muscle_weekly_volume')
+    .select('*')
+    .eq('mesocycle_id', mesocycleId);
+
+  const evaluation = evaluateMuscleVolume(data);
+  renderMuscleTable(evaluation);
+
+  const feedback = muscleCoachFeedback(evaluation);
+  updateCoachCard({
+    type: 'warning',
+    message: feedback
+  });
 }
 
 function mesocycleInsight(a, b) {
@@ -2313,6 +2345,38 @@ async function loadStatsMesocycles() {
     opt.textContent = m.name;
     select.appendChild(opt);
   });
+}
+
+function updateCoachDashboard(exercises) {
+  const status = overallProgress(exercises);
+
+  document.querySelector('.coach-grid').innerHTML = `
+    <div class="coach-card ${status === 'green' ? 'green' : ''}">📈 Progreso sólido</div>
+    <div class="coach-card ${status === 'yellow' ? 'yellow' : ''}">⚠️ Estancamientos</div>
+    <div class="coach-card ${status === 'red' ? 'red' : ''}">🚨 Fatiga</div>
+  `;
+}
+
+function renderFatigueAlerts(exercises) {
+  const alerts = fatigueAlerts(exercises);
+
+  if (!alerts.length) return;
+
+  document.querySelector('.alert-card').innerHTML = `
+    ⚠️ Posible fatiga en:
+    <strong>${alerts.map(a => a.exercise).join(', ')}</strong>
+  `;
+}
+
+function renderDeloadAdvice(exercises) {
+  const deloads = exercises.filter(needsDeload);
+
+  if (!deloads.length) return;
+
+  document.querySelector('.coach-alert').innerHTML = `
+    🔴 Deload recomendado
+    <p>${deloads.map(e => e.exercise).join(', ')}</p>
+  `;
 }
 
 function getCoachInsight(trend) {
