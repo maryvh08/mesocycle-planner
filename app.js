@@ -1601,12 +1601,6 @@ const RP_RANGES = {
 
 function evaluateMuscleVolume(records) {
   const byMuscle = {};
-
-   const { data, error } = await supabase
-     .from('v_muscle_rp_status')
-     .select('*')
-     .eq('mesocycle_id', activeMesocycleId)
-     .eq('user_id', user.id);
    
    if (error) console.error(error);
 
