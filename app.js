@@ -47,10 +47,6 @@ const statsView = document.getElementById("stats");
 
 const favorites_key = 'favorite_exercises';
 
-const normalized = normalizeMuscleVolume(data);
-const evaluated = evaluateMuscleVolume(normalized);
-renderMuscleTable(evaluated);
-
 /* ======================
    DOM CONTENT LOADED
 ====================== */
@@ -2876,3 +2872,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadDashboard(mesocycleId);
   }
 });
+
+const normalized = normalizeMuscleVolume(data);
+const evaluated = evaluateMuscleVolume(normalized);
+renderMuscleTable(evaluated);
