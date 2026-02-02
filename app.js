@@ -1271,34 +1271,17 @@ const evaluated = evaluateMuscleVolume(normalized);
 renderMuscleTable(evaluated);
 
 async function loadDashboard(mesocycleId) {
-  const records = await fetchExerciseRecords(mesocycleId);
+  // 1️⃣ Fuerza (tabla + mini charts)
+  await loadStrength(mesocycleId);
 
-  if (!records.length) {
-    console.warn('No hay datos para este mesociclo');
-    return;
-  }
+  // 2️⃣ Volumen por ejercicio (VIEW)
+  await loadVolume(mesocycleId);
 
-  // 1. Volumen por ejercicio
-  const volumeData = calculateVolumeTrend(records);
-  renderVolumeTable(volumeData);
-  updateCoachFromVolume(volumeData);
+  // 3️⃣ Volumen RP por músculo (VIEW)
+  await loadMuscleVolumeRP(mesocycleId);
 
-  // 2. Volumen por grupo muscular
-  const muscleData = calculateMuscleVolume(records);
-  renderMuscleTable(muscleData);
-
-  // 3. Alertas y coach
-  const fatigue = fatigueAlerts(volumeData);
-  renderFatigueAlerts(fatigue);
-
-  const coachMsg = muscleCoachFeedback(muscleData);
-  updateCoachCard({ type: 'neutral', message: coachMsg });
-
-   await loadStrength(mesocycleId);
-   await loadVolume(mesocycleId);
-   
-   // 👉 AÑADE ESTO
-   await loadMuscleVolumeRP(mesocycleId);
+  // 4️⃣ Comparación de mesociclos (opcional)
+  await loadMesocycleComparison();
 }
 
 function calculateMuscleVolume(records) {
@@ -2110,43 +2093,24 @@ function compareMesocycles(idA, idB, data) {
 }
 
 async function loadMuscleVolumeRP(mesocycleId) {
-  const {
-    data,
-    error
-  } = await supabase
+  const { data, error } = await supabase
     .from('v_muscle_rp_status')
     .select('*')
     .eq('mesocycle_id', mesocycleId)
     .eq('user_id', user.id);
 
   if (error) {
-    console.error('RP volume error:', error);
+    console.error(error);
     return;
   }
 
-  const normalized = normalizeMuscleVolume(data);
-  const evaluated = evaluateMuscleVolume(normalized);
+  renderMuscleTable(data);
 
-  renderMuscleTable(evaluated);
-
-  const coachMsg = muscleCoachFeedback(evaluated);
+  const coachMsg = muscleCoachFeedback(data);
   updateCoachCard({
-    type: 'neutral',
+    type: coachSeverity(data),
     message: coachMsg
   });
-}
-
-function mesocycleInsight(a, b) {
-  if (b.strength > a.strength && b.volume < a.volume)
-    return "Mejor eficiencia de fuerza";
-
-  if (b.volume > a.volume && b.prs === 0)
-    return "Mucho volumen, poco progreso";
-
-  if (b.prs > a.prs)
-    return "Ciclo óptimo para PRs";
-
-  return "Resultados similares";
 }
 
 function showPRBadge(exercise, weight) {
