@@ -1266,6 +1266,10 @@ function getTrend(weeks) {
   };
 }
 
+const normalized = normalizeMuscleVolume(data);
+const evaluated = evaluateMuscleVolume(normalized);
+renderMuscleTable(evaluated);
+
 async function loadDashboard(mesocycleId) {
   const records = await fetchExerciseRecords(mesocycleId);
 
@@ -2872,7 +2876,3 @@ document.addEventListener('DOMContentLoaded', () => {
     loadDashboard(mesocycleId);
   }
 });
-
-const normalized = normalizeMuscleVolume(data);
-const evaluated = evaluateMuscleVolume(normalized);
-renderMuscleTable(evaluated);
