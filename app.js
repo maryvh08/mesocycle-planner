@@ -47,6 +47,10 @@ const statsView = document.getElementById("stats");
 
 const favorites_key = 'favorite_exercises';
 
+const normalized = normalizeMuscleVolume(data);
+const evaluated = evaluateMuscleVolume(normalized);
+renderMuscleTable(evaluated);
+
 /* ======================
    DOM CONTENT LOADED
 ====================== */
@@ -1385,6 +1389,28 @@ function renderStrengthTable(grouped) {
   });
 }
 
+function normalizeMuscleVolume(rows) {
+  const byMuscle = {};
+
+  rows.forEach(r => {
+    if (!byMuscle[r.muscle_group]) {
+      byMuscle[r.muscle_group] = [];
+    }
+    byMuscle[r.muscle_group].push(r);
+  });
+
+  return Object.entries(byMuscle).map(([muscle, weeks]) => {
+    weeks.sort((a, b) => b.week_number - a.week_number);
+    const last = weeks[0];
+
+    return {
+      muscle,
+      total_sets: last.total_sets,
+      total_volume: last.total_volume
+    };
+  });
+}
+
 function openMiniChart(weeklyData) {
   const modal = document.getElementById("exercise-modal");
   const ctx = document.getElementById("mini-chart");
@@ -1575,6 +1601,14 @@ const RP_RANGES = {
 
 function evaluateMuscleVolume(records) {
   const byMuscle = {};
+
+   const { data, error } = await supabase
+     .from('v_muscle_rp_status')
+     .select('*')
+     .eq('mesocycle_id', activeMesocycleId)
+     .eq('user_id', user.id);
+   
+   if (error) console.error(error);
 
   records.forEach(r => {
     if (!byMuscle[r.muscle_group]) {
