@@ -1267,32 +1267,86 @@ function getTrend(weeks) {
 }
 
 async function loadDashboard(mesocycleId) {
+  const records = await fetchExerciseRecords(mesocycleId);
+
+  if (!records.length) {
+    console.warn('No hay datos para este mesociclo');
+    return;
+  }
+
+  // 1. Volumen por ejercicio
+  const volumeData = calculateVolumeTrend(records);
+  renderVolumeTable(volumeData);
+  updateCoachFromVolume(volumeData);
+
+  // 2. Volumen por grupo muscular
+  const muscleData = calculateMuscleVolume(records);
+  renderMuscleTable(muscleData);
+
+  // 3. Alertas y coach
+  const fatigue = fatigueAlerts(volumeData);
+  renderFatigueAlerts(fatigue);
+
+  const coachMsg = muscleCoachFeedback(muscleData);
+  updateCoachCard({ type: 'neutral', message: coachMsg });
+}
+
+function calculateMuscleVolume(records) {
+  const byMuscle = {};
+
+  records.forEach(r => {
+    const key = `${r.muscle_group}-${r.week}`;
+
+    if (!byMuscle[key]) {
+      byMuscle[key] = {
+        muscle: r.muscle_group,
+        week: r.week,
+        total_sets: 0
+      };
+    }
+
+    byMuscle[key].total_sets += 1;
+  });
+
+  const grouped = {};
+  Object.values(byMuscle).forEach(r => {
+    if (!grouped[r.muscle]) grouped[r.muscle] = [];
+    grouped[r.muscle].push(r);
+  });
+
+  return Object.entries(grouped).map(([muscle, weeks]) => {
+    weeks.sort((a, b) => a.week - b.week);
+    const last = weeks.at(-1);
+    return { muscle, sets: last.total_sets };
+  });
+}
+
+async function fetchExerciseRecords(mesocycleId) {
   const { data, error } = await supabase
     .from('exercise_records')
     .select(`
-      exercise_id,
       exercise_name,
       week_number,
       weight,
-      reps
+      reps,
+      exercises (
+        subgroup
+      )
     `)
     .eq('mesocycle_id', mesocycleId)
     .order('week_number');
 
-  if (error) return console.error(error);
+  if (error) {
+    console.error(error);
+    return [];
+  }
 
-  const grouped = {};
-
-  data.forEach(r => {
-    const key = r.exercise_id;
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push({
-      week: r.week_number,
-      force: r.weight * (1 + r.reps / 30)
-    });
-  });
-
-  renderStrengthTable(grouped);
+  return data.map(r => ({
+    exercise: r.exercise_name,
+    week: r.week_number,
+    volume: r.weight * r.reps,
+    muscle_group: r.exercises?.subgroup ?? 'Otros'
+  }));
 }
 
 function renderStrengthTable(grouped) {
@@ -1411,20 +1465,37 @@ function calculateVolumeTrend(records) {
   const byExercise = {};
 
   records.forEach(r => {
-    if (!byExercise[r.exercise_name]) {
-      byExercise[r.exercise_name] = [];
+    const key = `${r.exercise}-${r.week}`;
+
+    if (!byExercise[key]) {
+      byExercise[key] = {
+        exercise: r.exercise,
+        week: r.week,
+        total_volume: 0,
+        total_sets: 0
+      };
     }
-    byExercise[r.exercise_name].push(r);
+
+    byExercise[key].total_volume += r.volume;
+    byExercise[key].total_sets += 1;
   });
 
-  return Object.entries(byExercise).map(([exercise, weeks]) => {
-    weeks.sort((a, b) => a.week_number - b.week_number);
+  // Agrupar por ejercicio
+  const grouped = {};
+  Object.values(byExercise).forEach(r => {
+    if (!grouped[r.exercise]) grouped[r.exercise] = [];
+    grouped[r.exercise].push(r);
+  });
+
+  // Tendencia real
+  return Object.entries(grouped).map(([exercise, weeks]) => {
+    weeks.sort((a, b) => a.week - b.week);
 
     const last = weeks.at(-1);
     const prev = weeks.at(-2);
 
-    let trend = '→';
     let percent = 0;
+    let trend = '→';
 
     if (prev) {
       percent = ((last.total_volume - prev.total_volume) / prev.total_volume) * 100;
@@ -2770,3 +2841,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 startClock();
 renderTimeHistory();
+
+document.addEventListener('DOMContentLoaded', () => {
+  const mesocycleId = localStorage.getItem('active_mesocycle');
+  if (mesocycleId) {
+    loadDashboard(mesocycleId);
+  }
+});
