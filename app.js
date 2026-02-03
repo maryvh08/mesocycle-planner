@@ -1264,17 +1264,27 @@ function getTrend(weeks) {
 }
 
 async function loadDashboard(mesocycleId) {
-  // 1️⃣ Fuerza (tabla + mini charts)
+  const records = await fetchExerciseRecords(mesocycleId);
+  if (!records.length) return;
+
+  // 1. Volumen por ejercicio
+  const volumeData = calculateVolumeTrend(records);
+  renderVolumeTable(volumeData);
+
+  // 2. Volumen muscular (RP)
+  const muscleVolume = calculateMuscleVolume(records);
+  const muscleStatus = evaluateMuscleVolume(muscleVolume);
+  renderMuscleTable(muscleStatus);
+
+  // 3. Fuerza
   await loadStrength(mesocycleId);
 
-  // 2️⃣ Volumen por ejercicio (VIEW)
-  await loadVolume(mesocycleId);
-
-  // 3️⃣ Volumen RP por músculo (VIEW)
-  await loadMuscleVolumeRP(mesocycleId);
-
-  // 4️⃣ Comparación de mesociclos (opcional)
-  await loadMesocycleComparison();
+  // 4. Coach
+  const coachDecision = buildCoachDecision({
+    volumeData,
+    muscleStatus
+  });
+  updateCoachCard(coachDecision);
 }
 
 function calculateMuscleVolume(records) {
@@ -2819,3 +2829,27 @@ document.addEventListener("DOMContentLoaded", () => {
    });
 });
 
+const summary = buildMesocycleSummary(prs, strength, volume);
+const efficiency = calculateEfficiency(summary);
+renderComparison(mesoA, mesoB);
+
+const fatigueMuscles = muscleStatus.filter(m => m.status === 'over');
+const weakMuscles = muscleStatus.filter(m => m.status === 'below');
+
+if (fatigueMuscles.length >= 2) {
+  coach = {
+    type: 'danger',
+    message: 'Fatiga acumulada detectada. Deload recomendado (15–25%).'
+  };
+} else if (weakMuscles.length >= 2) {
+  coach = {
+    type: 'warning',
+    message: 'Algunos músculos subestimulados. Considera añadir 1–2 sets.'
+  };
+} else {
+  coach = {
+    type: 'success',
+    message: 'Distribución óptima. Mantén volumen e intensidad.'
+  };
+}
+updateCoachCard(coach);
