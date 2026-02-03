@@ -207,9 +207,8 @@ const menuToggle = document.getElementById("menu-toggle");
 const sideMenu = document.getElementById("side-menu");
 
 menuToggle.onclick = () => {
-  sideMenu.classList.toggle("hidden");
+  sideMenu.classList.toggle("open");
 };
-
 
 /* ======================
    DAY SELECTOR (CREAR)
