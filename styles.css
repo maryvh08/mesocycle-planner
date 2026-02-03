@@ -1121,6 +1121,7 @@ h3 {
 
 /* Menu items */
 .menu-item {
+  position: relative; /* para ::before si quieres indicador */
   width: 100%;
   background: none;
   border: none;
@@ -1132,13 +1133,17 @@ h3 {
   cursor: pointer;
   margin-bottom: 4px;
   transition: background 0.2s ease, color 0.2s ease;
-   position: relative;
-   border-bottom: none !important;
 }
 
 .menu-item:hover {
-  background: rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.06); /* gris plano */
   color: #fff;
+}
+
+.menu-item.active {
+  background: rgba(177, 18, 38, 0.2); /* rojo suave */
+  color: #fff;
+  font-weight: 600;
 }
 
 .menu-item.active::before {
@@ -1150,12 +1155,6 @@ h3 {
   width: 4px;
   background: var(--accent);
   border-radius: 4px;
-}
-
-..menu-item.active {
-  background: rgba(177, 18, 38, 0.2); /* rojo suave */
-  color: #fff;
-  font-weight: 600;
 }
 
 /* Contenido principal */
