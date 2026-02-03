@@ -49,7 +49,7 @@ body {
 }
 
 .hero h1 {
-  font-size: 4rem;
+  font-size: clamp(2.6rem, 6vw, 4.2rem);
   font-weight: 900;
   line-height: 1.1;
   margin-bottom: 1.5rem;
@@ -66,6 +66,7 @@ body {
   color: #aaa;
   max-width: 620px;
   margin: 0 auto 2.5rem;
+  line-height: 1.7;
 }
 
 /* ================== BUTTONS ================== */
@@ -81,12 +82,14 @@ body {
 .cta-btn.primary {
   background: linear-gradient(135deg, var(--accent), var(--accent-light));
   color: #fff;
+  box-shadow: 0 20px 60px var(--accent-glow);
 }
 
 .cta-btn.ghost {
   border: 1px solid #333;
   color: #ccc;
   background: rgba(255,255,255,0.03);
+  opacity: 0.7;
 }
 
 .cta-btn.small {
@@ -97,6 +100,11 @@ body {
 .cta-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 40px var(--accent-glow);
+}
+
+.cta-btn.ghost:hover {
+  opacity: 1;
+  box-shadow: none;
 }
 
 /* ================== VISUAL PROOF ================== */
@@ -111,6 +119,7 @@ body {
 .visual-content h2 {
   font-size: 2.4rem;
   margin-bottom: 1rem;
+  max-width: 480px;
 }
 
 .visual-content p {
@@ -124,6 +133,7 @@ body {
   border-radius: 20px;
   border: 1px solid #1c1c28;
   box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+  transform: scale(1.02);
 }
 
 /* ================== FEATURES ================== */
@@ -140,12 +150,16 @@ body {
   padding: 2rem;
   border-radius: 18px;
   transition: all 0.3s ease;
+  background: #0c0c11;
+  border-color: #161620;
 }
 
 .feature:hover {
   transform: translateY(-6px);
   border-color: var(--accent);
   box-shadow: 0 20px 50px var(--accent-glow);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px var(--accent-glow);
 }
 
 .feature h3 {
@@ -188,6 +202,8 @@ body {
   background: linear-gradient(135deg, var(--accent), var(--accent-light));
   font-weight: 900;
   margin-bottom: 1rem;
+  font-size: 1.2rem;
+  box-shadow: 0 0 30px var(--accent-glow);
 }
 
 /* ================== OUTCOMES ================== */
@@ -209,11 +225,21 @@ body {
   padding: 2.6rem;
   border: 1px solid #2a0f14;
   transition: all 0.35s ease;
+  display: block;
+  margin-top: 1.2rem;
+  font-weight: 700;
+  color: var(--accent-light);
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
 }
 
 .outcome-card:hover {
   transform: translateY(-10px);
   box-shadow: 0 0 40px rgba(177,18,38,0.3);
+}
+
+.outcome-card p {
+  color: #b5aeb2;
 }
 
 /* ================== PRICING ================== */
@@ -255,6 +281,20 @@ body {
   transform: translateY(-8px);
 }
 
+.pricing-card.pro::before {
+  content: "RECOMENDADO";
+  display: inline-block;
+  margin-bottom: 1rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+  color: var(--accent-light);
+}
+
+.pricing-card.free {
+  opacity: 0.85;
+}
+
 .pricing-card h3 {
   font-size: 1.6rem;
   margin-bottom: 0.5rem;
@@ -291,6 +331,7 @@ body {
 .site-footer {
   padding: 4rem 8% 2rem;
   border-top: 1px solid #2a0f14;
+  background: #030305;
 }
 
 .footer-content {
@@ -326,6 +367,22 @@ body {
 
   .pricing-card.pro {
     transform: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero {
+    padding: 6rem 1.5rem;
+  }
+
+  .hero h1 {
+    font-size: 2.6rem;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
 }
 
