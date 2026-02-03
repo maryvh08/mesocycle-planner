@@ -312,6 +312,21 @@
             <input type="text" id="tutorial-search" placeholder="Buscar tutorial...">
           </div>
       
+          <!-- Filtro por tipo -->
+          <div class="multi-filter filter-dropdown">
+            <button class="filter-btn">Tipo</button>
+            <div class="filter-options" id="type-options">
+              <!-- JS llenará checkboxes desde populateFilters() -->
+            </div>
+          </div>
+      
+          <!-- Filtro por subgrupo -->
+          <div class="multi-filter filter-dropdown">
+            <button class="filter-btn">Subgrupo</button>
+            <div class="filter-options" id="subgroup-options">
+              <!-- JS llenará checkboxes desde populateFilters() -->
+            </div>
+          </div>
       
           <!-- Solo favoritos -->
           <label class="favorites-filter">
@@ -340,7 +355,7 @@
         <div id="tutorial-modal" class="hidden">
           <div class="modal-content">
             <h3 id="tutorial-title"></h3>
-        
+      
             <div class="video-wrapper">
               <iframe
                 id="tutorial-video"
@@ -349,13 +364,14 @@
                 allowfullscreen
               ></iframe>
             </div>
-        
+      
             <div id="tutorial-cues"></div>
-        
+      
             <button id="close-tutorial-modal-btn">Cerrar</button>
           </div>
         </div>
       </section>
+
       
       <!-- ================= HERRAMIENTAS ================= -->
       <section id="tools-tab" class="tab-content screen hidden">
