@@ -5,20 +5,19 @@
     <title>Planes | Mesocycle Tracker</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background: #111; /* negro de fondo */
-            color: #fff; /* texto blanco */
-            margin: 0;
-            padding: 0;
-        }
-        
-        .container {
-            max-width: 1100px;
-            margin: 40px auto;
-            background: #1a1a1a; /* caja ligeramente más clara que fondo */
-            padding: 30px;
-            border-radius: 8px;
-        }
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 1100px;
+        margin: 40px auto;
+        background: #fff;
+        padding: 30px;
+        border-radius: 8px;
+    }
     
         h1, h2 {
             margin-bottom: 10px;
@@ -85,24 +84,31 @@
             display: none;
         }
     
+        /* Botones */
         button {
             margin-top: 25px;
             padding: 14px;
             width: 100%;
-            background: #111;
+            background: #e53935; /* rojo */
             color: #fff;
             border: none;
             font-size: 16px;
             cursor: pointer;
             border-radius: 5px;
+            transition: background 0.2s ease;
         }
-    
-        button.secondary {
-            background: #666;
-        }
-    
+        
         button:hover {
+            background: #c62828; /* rojo más oscuro en hover */
+        }
+        
+        button.secondary {
             background: #333;
+            color: #fff;
+        }
+        
+        button.secondary:hover {
+            background: #555;
         }
     </style>
 </head>
