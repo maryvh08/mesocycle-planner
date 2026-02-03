@@ -1096,16 +1096,20 @@ h3 {
 
 /* Menu container */
 .side-menu {
-  position: absolute;
-  top: 56px;
-  left: 12px;
+  position: fixed; /* fijo a la pantalla */
+  top: 0;
+  left: 0;
+  height: 100vh; /* ocupa toda la altura */
+  width: 220px; /* ancho del sidebar */
+  padding: 20px 8px;
+  border-radius: 0; /* opcional: sin bordes redondeados */
+  box-shadow: none; /* opcional: si quieres quitar la sombra flotante */
   background: #141418;
-  border-radius: 14px;
-  padding: 8px;
-  width: 220px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-  animation: slideDown 0.25s ease;
+  display: flex;
+  flex-direction: column;
   z-index: 100;
+  transition: transform 0.3s ease;
+  transform: translateX(-100%); /* oculto al inicio */
 }
 
 /* Menu items */
