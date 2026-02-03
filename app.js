@@ -1838,51 +1838,6 @@ async function loadVolumeSection(mesocycleId) {
   updateCoachFromVolume(volumeTrend);
 }
 
-// PLANES PAGO
-
-// Obtener botones de los planes
-const freePlanBtn = document.querySelector('.pricing-card.free .cta-btn');
-const proPlanBtn = document.querySelector('.pricing-card.pro .cta-btn');
-
-// Contenedores de vistas
-const freePlanView = document.getElementById('free-plan-view');
-const proPlanView = document.getElementById('pro-plan-view');
-
-// Botones de volver
-const backFromFree = document.getElementById('back-from-free');
-const backFromPro = document.getElementById('back-from-pro');
-
-// Función para ocultar todas las vistas
-function hideAllViews() {
-  freePlanView.classList.add('hidden');
-  proPlanView.classList.add('hidden');
-}
-
-// Mostrar vista del plan gratuito
-freePlanBtn.addEventListener('click', (e) => {
-  e.preventDefault(); // evita redirigir a signup.html
-  hideAllViews();
-  freePlanView.classList.remove('hidden');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
-
-// Mostrar vista del plan Pro
-proPlanBtn.addEventListener('click', (e) => {
-  e.preventDefault();
-  hideAllViews();
-  proPlanView.classList.remove('hidden');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
-
-// Botones para volver a la landing
-backFromFree.addEventListener('click', () => {
-  hideAllViews();
-});
-
-backFromPro.addEventListener('click', () => {
-  hideAllViews();
-});
-
 /* ======================
    CARGA STATS + GRAFICA
 ====================== */
