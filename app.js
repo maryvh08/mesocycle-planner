@@ -2878,11 +2878,6 @@ function openModal() {
   modal.classList.add('visible');
 }
 
-function closeModal() {
-  modal.classList.add('hidden');
-  modal.classList.remove('visible');
-}
-
 // Event listeners
 btnOpen.addEventListener('click', openModal);
 btnClose.addEventListener('click', closeModal);
