@@ -2876,5 +2876,27 @@ document.addEventListener("DOMContentLoaded", () => {
       sideMenu.classList.remove("open");
     }
   });
+   // Selección de tab y estado activo
+   const menuItems = document.querySelectorAll(".menu-item");
+   
+   menuItems.forEach(item => {
+     item.addEventListener("click", () => {
+       // Quitar active de todos
+       menuItems.forEach(i => i.classList.remove("active"));
+       
+       // Marcar el clickeado como activo
+       item.classList.add("active");
+   
+       // Mostrar el tab correspondiente
+       const tabId = item.getAttribute("data-tab");
+       document.querySelectorAll(".tab-content").forEach(tab => {
+         tab.classList.add("hidden");
+       });
+       document.getElementById(tabId).classList.remove("hidden");
+   
+       // Opcional: cerrar sidebar en mobile
+       sideMenu.classList.remove("open");
+     });
+   });
 });
 
