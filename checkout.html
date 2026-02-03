@@ -165,8 +165,8 @@
 
             <p id="selectedPlanText"><strong>Plan seleccionado:</strong> Pro (€9 / mes)</p>
 
+            <!-- Pago para Pro/Anual -->
             <div id="paymentSection">
-
                 <label>Método de pago</label>
                 <select onchange="togglePaymentFields(this.value)">
                     <option value="">-- Selecciona --</option>
@@ -195,6 +195,7 @@
                 <button>Confirmar suscripción</button>
             </div>
 
+            <!-- Gratis -->
             <div id="freeSection" class="hidden">
                 <p>Este plan no requiere pago.</p>
                 <button class="secondary" onclick="window.location.href='signup.html'">Empezar gratis</button>
@@ -208,34 +209,31 @@
     let currentPlan = "pro";
 
     function selectPlan(plan) {
-        if (plan === "gratis") {
-            // Redirección directa al registro
-            window.location.href = "signup.html";
-            return;
-        }
-
         currentPlan = plan;
 
+        // Resaltar plan seleccionado
         document.querySelectorAll(".plan-card").forEach(card => {
             card.classList.remove("active");
         });
-
         document.getElementById(`plan-${plan}`).classList.add("active");
 
         const planText = document.getElementById("selectedPlanText");
         const paymentSection = document.getElementById("paymentSection");
         const freeSection = document.getElementById("freeSection");
 
-        if (plan === "pro") {
+        if (plan === "gratis") {
+            planText.innerHTML = "<strong>Plan seleccionado:</strong> Gratis (€0)";
+            paymentSection.classList.add("hidden");
+            freeSection.classList.remove("hidden");
+        } else if (plan === "pro") {
             planText.innerHTML = "<strong>Plan seleccionado:</strong> Pro (€9 / mes)";
-        }
-
-        if (plan === "anual") {
+            paymentSection.classList.remove("hidden");
+            freeSection.classList.add("hidden");
+        } else if (plan === "anual") {
             planText.innerHTML = "<strong>Plan seleccionado:</strong> Anual (€99 / año)";
+            paymentSection.classList.remove("hidden");
+            freeSection.classList.add("hidden");
         }
-
-        paymentSection.classList.remove("hidden");
-        freeSection.classList.add("hidden");
     }
 
     function togglePaymentFields(method) {
