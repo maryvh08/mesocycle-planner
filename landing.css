@@ -457,3 +457,13 @@ body {
     padding: 2rem 1.5rem;
   }
 }
+
+/* Variante anual */
+.modal-card.annual .modal-microcopy {
+  color: #ffb84d;
+  font-weight: 600;
+}
+
+.modal-card.annual .modal-cta .cta-btn.primary {
+  background: linear-gradient(135deg, #ffb84d, #ff9a1f);
+}
