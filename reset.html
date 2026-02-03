@@ -2,20 +2,31 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Restablecer contraseña</title>
+  <title>Restablecer contraseña — Workout Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="landing.css" />
+  <link rel="stylesheet" href="auth.css" />
 </head>
-<body class="auth-bg">
+<body>
 
-<section class="auth-card">
-  <h2>Restablecer contraseña</h2>
-  <p>Ingresa tu email y te enviaremos un enlace.</p>
+<section class="auth-page">
+  <div class="auth-card">
 
-  <input type="email" id="reset-email" placeholder="Email" />
-  <button id="reset-btn">Enviar enlace</button>
+    <h1>Restablecer contraseña</h1>
+    <p class="muted">
+      Ingresa tu email y te enviaremos un enlace para restablecer tu contraseña.
+    </p>
 
-  <p id="reset-msg"></p>
+    <input type="email" id="reset-email" placeholder="Email" />
+    <button id="reset-btn">Enviar enlace</button>
+
+    <p id="reset-msg" class="auth-message"></p>
+
+    <p class="auth-footer">
+      ¿Recordaste tu contraseña?
+      <a href="app.html">Inicia sesión</a>
+    </p>
+
+  </div>
 </section>
 
 <script type="module" src="app.js"></script>
