@@ -2858,4 +2858,20 @@ document.addEventListener("DOMContentLoaded", () => {
   menuToggle.onclick = () => {
     sideMenu.classList.toggle("open");
   };
+
+  // Manejo de pestañas (opcional)
+  document.querySelectorAll("[data-tab]").forEach(btn => {
+    btn.onclick = () => {
+      const tab = btn.dataset.tab;
+      document.querySelectorAll(".tab-content").forEach(t =>
+        t.classList.add("hidden")
+      );
+      document.getElementById(tab)?.classList.remove("hidden");
+
+      // Cerrar menú en mobile al seleccionar
+      if (window.innerWidth < 768) {
+        sideMenu.classList.remove("open");
+      }
+    };
+  });
 });
