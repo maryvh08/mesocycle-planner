@@ -2859,30 +2859,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const menuToggle = document.getElementById("menu-toggle");
   const sideMenu = document.getElementById("side-menu");
 
-  // Toggle sidebar
-  menuToggle.addEventListener("click", () => {
+  // Abrir / cerrar con botón
+  menuToggle.addEventListener("click", (e) => {
+    e.stopPropagation(); // evita que el click cierre el menú
     sideMenu.classList.toggle("open");
   });
 
-  // Manejo de tabs
-  document.querySelectorAll("[data-tab]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const tab = btn.dataset.tab;
+  // Evitar cierre al hacer click dentro del sidebar
+  sideMenu.addEventListener("click", (e) => {
+    e.stopPropagation();
+  });
 
-      // Ocultar todos los tabs
-      document.querySelectorAll(".tab-content").forEach(t => 
-        t.classList.add("hidden")
-      );
-
-      // Mostrar tab seleccionado
-      const tabElement = document.getElementById(tab);
-      if (tabElement) tabElement.classList.remove("hidden");
-
-      // Cerrar sidebar en mobile después de seleccionar
-      if (window.innerWidth < 768) {
-        sideMenu.classList.remove("open");
-      }
-    });
+  // Cerrar al hacer click fuera
+  document.addEventListener("click", () => {
+    if (sideMenu.classList.contains("open")) {
+      sideMenu.classList.remove("open");
+    }
   });
 });
 
