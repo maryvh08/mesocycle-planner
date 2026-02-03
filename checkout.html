@@ -216,6 +216,8 @@
             planText.innerHTML = "<strong>Plan seleccionado:</strong> Gratis (€0)";
             paymentSection.classList.add("hidden");
             freeSection.classList.remove("hidden");
+            window.location.href = "signup.html";
+            return;
         }
 
         if (plan === "pro") {
