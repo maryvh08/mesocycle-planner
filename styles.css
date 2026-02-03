@@ -1129,9 +1129,36 @@ h3 {
   background: rgba(255,255,255,0.06);
 }
 
+.side-menu.open {
+  transform: translateX(0); /* mostrar sidebar */
+}
+
+#main-content {
+  transition: margin-left 0.3s ease;
+  margin-left: 0;
+}
+
+.side-menu.open ~ #main-content {
+  margin-left: 220px; /* igual al ancho del sidebar */
+}
+
 /* Hide */
 .hidden {
   display: none;
+}
+
+@media (min-width: 768px) {
+  .menu-toggle {
+    display: none;
+  }
+
+  .side-menu {
+    transform: translateX(0); /* siempre visible */
+  }
+
+  #main-content {
+    margin-left: 220px;
+  }
 }
 
 /* ================= TUTORIALES ================= */
