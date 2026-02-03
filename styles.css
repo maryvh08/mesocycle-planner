@@ -1149,6 +1149,11 @@ h3 {
   margin-left: 220px;
 }
 
+/* Tabs ocultos por defecto */
+.tab-content.hidden {
+  display: none;
+}
+
 /* ================= TUTORIALES ================= */
 
 .tutorial-list {
