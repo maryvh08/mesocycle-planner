@@ -1112,7 +1112,7 @@ h3 {
   flex-direction: column;
   transform: translateX(-100%);
   transition: transform 0.3s ease;
-  z-index: 100;
+  z-index: 120; /* más que el botón */
 }
 
 .side-menu.open {
