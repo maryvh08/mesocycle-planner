@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pagar Plan Pro | Workout Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="landing.css">
+  <link rel="icon" type="image/png" href="mcp-logo.png" />
+  <!-- Stripe.js -->
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-content fade-up">
+    <h1>Paga tu plan <span>Pro</span></h1>
+    <p class="hero-sub">
+      Desbloquea análisis avanzado, mesociclos ilimitados y comparación entre ciclos.
+    </p>
+  </div>
+</header>
+
+<section class="pricing">
+  <h2>Confirma tu suscripción</h2>
+  <p class="pricing-sub">Solo €9 al mes. Cancela cuando quieras.</p>
+
+  <div class="pricing-grid">
+    <div class="pricing-card pro">
+      <h3>Plan Pro</h3>
+      <p class="price">€9 / mes</p>
+      <ul>
+        <li>✔ Mesociclos ilimitados</li>
+        <li>✔ Comparación entre ciclos</li>
+        <li>✔ Gráficas avanzadas</li>
+        <li>✔ Historial completo</li>
+        <li>✔ Exportación de datos</li>
+      </ul>
+
+      <!-- Formulario de Stripe Checkout -->
+      <button id="checkout-button" class="cta-btn primary">Pagar con tarjeta</button>
+
+      <span class="microcopy">Tus datos son tuyos · Cancelación flexible</span>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer fade-in">
+  <div class="footer-content">
+    <div class="footer-brand">
+      <h3>Workout Tracker</h3>
+      <p>Entrena con datos. Progresa con intención.</p>
+    </div>
+    <div class="footer-links">
+      <a href="app.html">Acceder</a>
+      <a href="signup.html">Crear cuenta</a>
+      <a href="pro.html">Volver</a>
+    </div>
+  </div>
+  <p class="footer-copy">© 2026 Workout Tracker. Todos los derechos reservados.</p>
+</footer>
+
+<script>
+  // Reemplaza con tu clave pública de Stripe
+  const stripe = Stripe("pk_test_XXXXXXXXXXXXXXXXXXXX");
+
+  const checkoutButton = document.getElementById("checkout-button");
+  checkoutButton.addEventListener("click", () => {
+    fetch("/create-checkout-session", { method: "POST" }) // backend que crea la sesión
+      .then(response => response.json())
+      .then(session => {
+        return stripe.redirectToCheckout({ sessionId: session.id });
+      })
+      .then(result => {
+        if (result.error) {
+          alert(result.error.message);
+        }
+      })
+      .catch(error => console.error("Error:", error));
+  });
+</script>
+
+</body>
+</html>
