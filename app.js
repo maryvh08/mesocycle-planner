@@ -300,6 +300,7 @@ async function loadMesocycles() {
       name,
       weeks,
       days_per_week,
+      created_at,
       templates (
         name,
         emphasis
@@ -313,15 +314,28 @@ async function loadMesocycles() {
     return;
   }
 
-  // 🔥 Limpiar UI
+  /* ===============================
+     LIMPIAR UI EXISTENTE
+  =============================== */
+
   historyList.innerHTML = "";
   registroSelect.innerHTML = `<option value="">Selecciona mesociclo</option>`;
 
-  data.forEach(m => {
+  if (mesoSelectA) {
+    mesoSelectA.innerHTML = `<option value="">Mesociclo A</option>`;
+    mesoSelectB.innerHTML = `<option value="">Mesociclo B</option>`;
+  }
+
+  /* ===============================
+     RENDER
+  =============================== */
+
+  data.forEach((m, index) => {
     const template = Array.isArray(m.templates)
       ? m.templates[0]
       : m.templates;
 
+    /* ===== HISTORIAL ===== */
     const li = document.createElement("li");
     li.className = "mesocycle-history-card";
 
@@ -364,11 +378,28 @@ async function loadMesocycles() {
 
     historyList.appendChild(li);
 
-    // 🔥 También al selector de registro
-    const opt = document.createElement("option");
-    opt.value = m.id;
-    opt.textContent = m.name;
-    registroSelect.appendChild(opt);
+    /* ===== SELECT REGISTRO ===== */
+    const optRegistro = document.createElement("option");
+    optRegistro.value = m.id;
+    optRegistro.textContent = m.name;
+    registroSelect.appendChild(optRegistro);
+
+    /* ===== SELECT DASHBOARD ===== */
+    if (mesoSelectA && mesoSelectB) {
+      const optA = document.createElement("option");
+      optA.value = m.id;
+      optA.textContent = m.name;
+
+      const optB = optA.cloneNode(true);
+
+      mesoSelectA.appendChild(optA);
+      mesoSelectB.appendChild(optB);
+    }
+
+    /* ===== AUTOLOAD DASHBOARD (último mesociclo) ===== */
+    if (index === 0) {
+      loadDashboard(m.id);
+    }
   });
 }
 
@@ -2012,6 +2043,37 @@ async function loadSessionsKPI(mesocycleId) {
   `;
 }
 
+async function loadInitialDashboard() {
+  const { data, error } = await supabase
+    .from('mesocycles')
+    .select('id')
+    .order('start_date', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error || !data) {
+    console.warn('No hay mesociclos');
+    return;
+  }
+
+  await loadDashboard(data.id);
+}
+
+function setupMesocycleComparison() {
+  const selectA = document.getElementById('mesoA');
+  const selectB = document.getElementById('mesoB');
+
+  async function compareIfReady() {
+    if (!selectA.value || !selectB.value) return;
+    if (selectA.value === selectB.value) return;
+
+    await compareMesocycles(selectA.value, selectB.value);
+  }
+
+  selectA.addEventListener('change', compareIfReady);
+  selectB.addEventListener('change', compareIfReady);
+}
+
 async function loadMesocycleComparison() {
   const container = document.getElementById("mesocycle-comparison");
   if (!container) return;
@@ -2084,15 +2146,23 @@ async function loadMesocycleComparison() {
   });
 }
 
-function compareMesocycles(idA, idB, data) {
-  const a = data.find(m => m.mesocycle_id === idA);
-  const b = data.find(m => m.mesocycle_id === idB);
+async function compareMesocycles(mesoA, mesoB) {
+  const { data, error } = await supabase
+    .from('v_mesocycle_summary') // view que ya hablamos
+    .select('*')
+    .in('mesocycle_id', [mesoA, mesoB]);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const a = data.find(d => d.mesocycle_id === mesoA);
+  const b = data.find(d => d.mesocycle_id === mesoB);
+
+  if (!a || !b) return;
 
   renderComparison(a, b);
-  updateCoachCard({
-    type: 'neutral',
-    message: mesocycleCoach(a, b)
-  });
 }
 
 async function loadMuscleVolumeRP(mesocycleId) {
@@ -2853,3 +2923,9 @@ if (fatigueMuscles.length >= 2) {
   };
 }
 updateCoachCard(coach);
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadMesocycles();
+  setupMesocycleComparison();
+  await loadInitialDashboard();
+});
