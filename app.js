@@ -555,31 +555,6 @@ async function deleteMesocycle(mesocycleId) {
   registroEditor.innerHTML = "";
 }
 
-// PAYWALL A/B LOGIC
-// Modal elements
-const modal = document.getElementById('paywall-modal');
-const btnOpen = document.getElementById('view-data-btn');
-const btnClose = document.getElementById('paywall-close');
-const overlay = document.getElementById('paywall-overlay');
-const btnDismiss = document.getElementById('paywall-dismiss');
-
-// Funciones
-function openModal() {
-  modal.classList.remove('hidden');
-  modal.classList.add('visible');
-}
-
-function closeModal() {
-  modal.classList.add('hidden');
-  modal.classList.remove('visible');
-}
-
-// Event listeners
-btnOpen.addEventListener('click', openModal);
-btnClose.addEventListener('click', closeModal);
-overlay.addEventListener('click', closeModal);
-btnDismiss.addEventListener('click', closeModal);
-
 /* ======================
    REGISTRO
 ====================== */
