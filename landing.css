@@ -150,6 +150,13 @@ body {
   display: block;       /* elimina espacios raros */
 }
 
+.step img {
+  width: 100%;
+  max-width: 200px;
+  height: 140px;
+  object-fit: contain; /* o cover si prefieres */
+}
+
 /* ================== FEATURES ================== */
 .features {
   padding: 6rem 10%;
