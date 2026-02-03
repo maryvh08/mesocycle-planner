@@ -225,6 +225,45 @@ body {
   margin-bottom: 1rem;
   font-size: 1.2rem;
   box-shadow: 0 0 30px var(--accent-glow);
+}.how-it-works {
+  background: radial-gradient(circle at top, #1a1a1a, #000);
+  padding: 5rem 2rem;
+  color: #fff;
+}
+
+.how-it-works h2 {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.step {
+  text-align: center;
+}
+
+.step img {
+  width: 100%;
+  max-width: 260px;   /* tamaño del mockup */
+  height: auto;
+  margin-bottom: 2rem;
+}
+
+.step h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
+.step p {
+  font-size: 0.95rem;
+  color: #ccc;
+  line-height: 1.6;
 }
 
 /* ================== OUTCOMES ================== */
