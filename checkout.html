@@ -2,34 +2,48 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mesocycle Tracker - Planes</title>
+    <title>Planes | Mesocycle Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             background: #f4f6f8;
             margin: 0;
             padding: 0;
         }
 
-        h1 {
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
             text-align: center;
-            margin: 30px 0;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            color: #555;
+            margin-bottom: 40px;
         }
 
         .plans {
             display: flex;
-            justify-content: center;
             gap: 20px;
             flex-wrap: wrap;
+            justify-content: center;
         }
 
         .plan {
-            background: white;
+            background: #fff;
             border-radius: 10px;
-            padding: 20px;
-            width: 260px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            text-align: center;
+            padding: 30px;
+            width: 300px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
         }
 
         .plan h2 {
@@ -37,136 +51,108 @@
         }
 
         .price {
-            font-size: 24px;
+            font-size: 32px;
+            font-weight: bold;
             margin: 15px 0;
         }
 
-        .plan ul {
-            list-style: none;
-            padding: 0;
+        .price span {
+            font-size: 16px;
+            color: #777;
         }
 
-        .plan ul li {
-            margin: 8px 0;
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        ul li {
+            margin-bottom: 10px;
         }
 
         button {
-            background: #4CAF50;
-            color: white;
+            margin-top: auto;
+            padding: 12px;
+            font-size: 16px;
             border: none;
-            padding: 12px 20px;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
-            margin-top: 15px;
-            width: 100%;
+        }
+
+        .free {
+            background: #e0e0e0;
+        }
+
+        .monthly {
+            background: #007bff;
+            color: #fff;
+        }
+
+        .annual {
+            background: #28a745;
+            color: #fff;
         }
 
         button:hover {
-            background: #43a047;
+            opacity: 0.9;
         }
 
-        /* Pago simulado */
-        .payment {
-            display: none;
-            max-width: 400px;
-            margin: 40px auto;
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        .payment h2 {
-            text-align: center;
-        }
-
-        .payment input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-        }
-
-        .success {
-            text-align: center;
-            color: green;
-            font-weight: bold;
-            margin-top: 20px;
+        .highlight {
+            border: 2px solid #28a745;
         }
     </style>
 </head>
 <body>
 
-<h1>Planes de Mesocycle Tracker</h1>
+<div class="container">
+    <h1>Planes de Membresía</h1>
+    <p class="subtitle">Elige el plan que mejor se adapte a tu entrenamiento</p>
 
-<div class="plans">
-    <div class="plan">
-        <h2>Gratis</h2>
-        <p class="price">$0</p>
-        <ul>
-            <li>✔ Registro básico</li>
-            <li>✔ 1 mesociclo</li>
-            <li>✖ Estadísticas avanzadas</li>
-        </ul>
-        <button onclick="selectPlan('Gratis', 0)">Elegir plan</button>
-    </div>
+    <div class="plans">
 
-    <div class="plan">
-        <h2>Mensual</h2>
-        <p class="price">$9.99 / mes</p>
-        <ul>
-            <li>✔ Mesociclos ilimitados</li>
-            <li>✔ Estadísticas</li>
-            <li>✔ Exportación</li>
-        </ul>
-        <button onclick="selectPlan('Mensual', 9.99)">Elegir plan</button>
-    </div>
+        <!-- Plan Gratuito -->
+        <div class="plan">
+            <h2>Plan Gratuito</h2>
+            <div class="price">$0 <span>/ siempre</span></div>
+            <ul>
+                <li>✔ Seguimiento básico</li>
+                <li>✔ Rutinas limitadas</li>
+                <li>✔ Historial de entrenamientos</li>
+                <li>✖ Análisis avanzado</li>
+            </ul>
+            <button class="free">Comenzar gratis</button>
+        </div>
 
-    <div class="plan">
-        <h2>Anual</h2>
-        <p class="price">$99.99 / año</p>
-        <ul>
-            <li>✔ Todo lo del mensual</li>
-            <li>✔ Ahorro del 20%</li>
-            <li>✔ Soporte prioritario</li>
-        </ul>
-        <button onclick="selectPlan('Anual', 99.99)">Elegir plan</button>
+        <!-- Plan Mensual -->
+        <div class="plan">
+            <h2>Plan Mensual</h2>
+            <div class="price">$9.99 <span>/ mes</span></div>
+            <ul>
+                <li>✔ Todo lo del plan gratuito</li>
+                <li>✔ Rutinas ilimitadas</li>
+                <li>✔ Análisis de progreso</li>
+                <li>✔ Soporte prioritario</li>
+            </ul>
+            <button class="monthly">Suscribirse</button>
+        </div>
+
+        <!-- Plan Anual -->
+        <div class="plan highlight">
+            <h2>Plan Anual</h2>
+            <div class="price">$99.99 <span>/ año</span></div>
+            <ul>
+                <li>✔ Todo lo del plan mensual</li>
+                <li>✔ Ahorra 2 meses</li>
+                <li>✔ Funciones premium</li>
+                <li>✔ Acceso anticipado a novedades</li>
+            </ul>
+            <button class="annual">Suscribirse</button>
+        </div>
+
     </div>
 </div>
-
-<div class="payment" id="paymentSection">
-    <h2>Pago simulado</h2>
-    <p id="selectedPlan"></p>
-
-    <input type="text" placeholder="Nombre en la tarjeta">
-    <input type="text" placeholder="Número de tarjeta">
-    <input type="text" placeholder="MM/AA">
-    <input type="text" placeholder="CVV">
-
-    <button onclick="confirmPayment()">Confirmar pago</button>
-
-    <div class="success" id="successMessage"></div>
-</div>
-
-<script>
-    function selectPlan(plan, price) {
-        document.getElementById("paymentSection").style.display = "block";
-
-        if (price === 0) {
-            document.getElementById("selectedPlan").innerText =
-                "Has seleccionado el plan GRATIS. No se requiere pago.";
-        } else {
-            document.getElementById("selectedPlan").innerText =
-                `Plan seleccionado: ${plan} - $${price}`;
-        }
-
-        document.getElementById("successMessage").innerText = "";
-    }
-
-    function confirmPayment() {
-        document.getElementById("successMessage").innerText =
-            "✅ Pago simulado exitoso. Plan activado.";
-    }
-</script>
 
 </body>
 </html>
