@@ -26,10 +26,12 @@
         .layout {
             display: flex;
             gap: 40px;
+            flex-wrap: wrap;
         }
 
         .plans, .checkout {
             flex: 1;
+            min-width: 300px;
         }
 
         .plan-card {
@@ -38,6 +40,11 @@
             padding: 20px;
             margin-bottom: 15px;
             cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .plan-card:hover {
+            border-color: #111;
         }
 
         .plan-card.active {
@@ -70,6 +77,7 @@
             width: 100%;
             padding: 8px;
             margin-top: 5px;
+            box-sizing: border-box;
         }
 
         .hidden {
@@ -168,16 +176,16 @@
 
                 <div id="cardFields" class="hidden">
                     <label>Número de tarjeta</label>
-                    <input type="text">
+                    <input type="text" placeholder="1234 5678 9012 3456">
 
                     <label>Nombre en la tarjeta</label>
-                    <input type="text">
+                    <input type="text" placeholder="Nombre completo">
 
                     <label>Expiración</label>
-                    <input type="text">
+                    <input type="text" placeholder="MM/AA">
 
                     <label>CVV</label>
-                    <input type="text">
+                    <input type="text" placeholder="123">
                 </div>
 
                 <div id="paypalFields" class="hidden">
@@ -189,7 +197,7 @@
 
             <div id="freeSection" class="hidden">
                 <p>Este plan no requiere pago.</p>
-                <button class="secondary">Empezar gratis</button>
+                <button class="secondary" onclick="window.location.href='signup.html'">Empezar gratis</button>
             </div>
         </div>
 
@@ -200,6 +208,12 @@
     let currentPlan = "pro";
 
     function selectPlan(plan) {
+        if (plan === "gratis") {
+            // Redirección directa al registro
+            window.location.href = "signup.html";
+            return;
+        }
+
         currentPlan = plan;
 
         document.querySelectorAll(".plan-card").forEach(card => {
@@ -212,25 +226,16 @@
         const paymentSection = document.getElementById("paymentSection");
         const freeSection = document.getElementById("freeSection");
 
-        if (plan === "gratis") {
-            planText.innerHTML = "<strong>Plan seleccionado:</strong> Gratis (€0)";
-            paymentSection.classList.add("hidden");
-            freeSection.classList.remove("hidden");
-            window.location.href = "signup.html";
-            return;
-        }
-
         if (plan === "pro") {
             planText.innerHTML = "<strong>Plan seleccionado:</strong> Pro (€9 / mes)";
-            paymentSection.classList.remove("hidden");
-            freeSection.classList.add("hidden");
         }
 
         if (plan === "anual") {
             planText.innerHTML = "<strong>Plan seleccionado:</strong> Anual (€99 / año)";
-            paymentSection.classList.remove("hidden");
-            freeSection.classList.add("hidden");
         }
+
+        paymentSection.classList.remove("hidden");
+        freeSection.classList.add("hidden");
     }
 
     function togglePaymentFields(method) {
