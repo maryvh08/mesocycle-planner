@@ -5,81 +5,105 @@
     <title>Planes | Mesocycle Tracker</title>
     <style>
         body {
-        font-family: Arial, sans-serif;
-        background: #111; /* negro de fondo */
-        color: #fff; /* texto blanco */
-        margin: 0;
-        padding: 0;
-    }
+            font-family: Arial, sans-serif;
+            background: #111; /* negro de fondo */
+            color: #fff; /* texto blanco */
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            background: #1a1a1a; /* caja ligeramente más clara que fondo */
+            padding: 30px;
+            border-radius: 8px;
+        }
     
-    .container {
-        max-width: 1100px;
-        margin: 40px auto;
-        background: #1a1a1a; /* caja ligeramente más clara que fondo */
-        padding: 30px;
-        border-radius: 8px;
-    }
+        h1, h2 {
+            margin-bottom: 10px;
+        }
     
-    /* Título principal en rojo */
-    h1 {
-        color: #e53935; /* rojo vibrante */
-        margin-bottom: 20px;
-    }
+        .layout {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
     
-    /* Plan cards */
-    .plan-card {
-        border: 1px solid #333;
-        border-radius: 6px;
-        padding: 20px;
-        margin-bottom: 15px;
-        cursor: pointer;
-        background: #1a1a1a;
-        transition: all 0.2s ease;
-    }
+        .plans, .checkout {
+            flex: 1;
+            min-width: 300px;
+        }
     
-    .plan-card:hover {
-        border-color: #e53935;
-        background: #222;
-    }
+        .plan-card {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
     
-    .plan-card.active {
-        border: 2px solid #e53935;
-        background: #222;
-    }
+        .plan-card:hover {
+            border-color: #111;
+        }
     
-    .price {
-        font-size: 22px;
-        font-weight: bold;
-        margin: 8px 0;
-    }
+        .plan-card.active {
+            border: 2px solid #111;
+            background: #fafafa;
+        }
     
-    /* Botones */
-    button {
-        margin-top: 25px;
-        padding: 14px;
-        width: 100%;
-        background: #e53935; /* rojo */
-        color: #fff;
-        border: none;
-        font-size: 16px;
-        cursor: pointer;
-        border-radius: 5px;
-        transition: background 0.2s ease;
-    }
+        .price {
+            font-size: 22px;
+            font-weight: bold;
+            margin: 8px 0;
+        }
     
-    button:hover {
-        background: #c62828; /* rojo más oscuro en hover */
-    }
+        ul {
+            padding-left: 20px;
+        }
     
-    button.secondary {
-        background: #333;
-        color: #fff;
-    }
+        .note {
+            font-size: 13px;
+            color: #555;
+            margin-top: 10px;
+        }
     
-    button.secondary:hover {
-        background: #555;
-    }
-
+        label {
+            display: block;
+            margin-top: 15px;
+        }
+    
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+    
+        .hidden {
+            display: none;
+        }
+    
+        button {
+            margin-top: 25px;
+            padding: 14px;
+            width: 100%;
+            background: #111;
+            color: #fff;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    
+        button.secondary {
+            background: #666;
+        }
+    
+        button:hover {
+            background: #333;
+        }
     </style>
 </head>
 <body>
