@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Checkout | Mesocycle Tracker</title>
+    <title>Planes | Mesocycle Tracker</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,7 +12,7 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 40px auto;
             background: #fff;
             padding: 30px;
@@ -23,25 +23,32 @@
             margin-bottom: 10px;
         }
 
-        .checkout {
+        .layout {
             display: flex;
             gap: 40px;
         }
 
-        .cart, .payment {
+        .plans, .checkout {
             flex: 1;
         }
 
-        .plan-box {
+        .plan-card {
             border: 1px solid #ddd;
             border-radius: 6px;
             padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        .plan-card.active {
+            border: 2px solid #111;
+            background: #fafafa;
         }
 
         .price {
             font-size: 22px;
             font-weight: bold;
-            margin: 10px 0;
+            margin: 8px 0;
         }
 
         ul {
@@ -81,6 +88,10 @@
             border-radius: 5px;
         }
 
+        button.secondary {
+            background: #666;
+        }
+
         button:hover {
             background: #333;
         }
@@ -89,122 +100,146 @@
 <body>
 
 <div class="container">
-    <h1>Finalizar suscripción</h1>
+    <h1>Elige tu plan</h1>
 
-    <div class="checkout">
+    <div class="layout">
 
-        <!-- 🛒 RESUMEN DEL PLAN -->
-        <div class="cart">
-            <h2>Tu plan</h2>
+        <!-- 🔹 SELECTOR DE PLANES -->
+        <div class="plans">
 
-            <div class="plan-box">
-                <h3 id="planName"></h3>
-                <p id="planDescription"></p>
-
-                <div class="price" id="planPrice"></div>
-
-                <ul id="planFeatures"></ul>
-
-                <p class="note" id="planNote"></p>
+            <div class="plan-card" onclick="selectPlan('gratis')" id="plan-gratis">
+                <h3>Gratis</h3>
+                <p>Todo lo necesario para ejecutar un mesociclo sólido.</p>
+                <div class="price">€0</div>
+                <ul>
+                    <li>1 mesociclo activo</li>
+                    <li>Registro de entrenamientos</li>
+                    <li>PRs automáticos</li>
+                    <li>Seguimiento básico de fuerza</li>
+                </ul>
+                <p class="note">Empieza gratis · Sin tarjeta</p>
             </div>
+
+            <div class="plan-card active" onclick="selectPlan('pro')" id="plan-pro">
+                <h3>Pro</h3>
+                <p>Para lifters que quieren entender por qué progresan (o no).</p>
+                <div class="price">€9 / mes</div>
+                <ul>
+                    <li>Mesociclos ilimitados</li>
+                    <li>Comparación entre ciclos</li>
+                    <li>Gráficas avanzadas</li>
+                    <li>Historial completo</li>
+                    <li>Exportación de datos</li>
+                </ul>
+                <p class="note">Cancela cuando quieras · Tus datos son tuyos</p>
+            </div>
+
+            <div class="plan-card" onclick="selectPlan('anual')" id="plan-anual">
+                <h3>Anual</h3>
+                <p>Análisis completo todo el año con ahorro.</p>
+                <div class="price">€99 / año</div>
+                <ul>
+                    <li>Mesociclos ilimitados</li>
+                    <li>Comparación entre ciclos</li>
+                    <li>Gráficas avanzadas</li>
+                    <li>Historial completo</li>
+                    <li>Exportación de datos</li>
+                    <li>Soporte prioritario</li>
+                </ul>
+                <p class="note">Ahorra comparado con mensual · Tus datos son tuyos</p>
+            </div>
+
         </div>
 
-        <!-- 💳 PAGO -->
-        <div class="payment">
-            <h2>Método de pago</h2>
+        <!-- 💳 CHECKOUT -->
+        <div class="checkout">
+            <h2>Finalizar</h2>
 
-            <label for="paymentMethod">Selecciona un método</label>
-            <select id="paymentMethod" onchange="togglePaymentFields()">
-                <option value="">-- Selecciona --</option>
-                <option value="card">Tarjeta de crédito / débito</option>
-                <option value="paypal">PayPal</option>
-            </select>
+            <p id="selectedPlanText"><strong>Plan seleccionado:</strong> Pro (€9 / mes)</p>
 
-            <!-- TARJETA -->
-            <div id="cardFields" class="hidden">
-                <label>Número de tarjeta</label>
-                <input type="text" placeholder="1234 5678 9012 3456">
+            <div id="paymentSection">
 
-                <label>Nombre en la tarjeta</label>
-                <input type="text" placeholder="Nombre completo">
+                <label>Método de pago</label>
+                <select onchange="togglePaymentFields(this.value)">
+                    <option value="">-- Selecciona --</option>
+                    <option value="card">Tarjeta</option>
+                    <option value="paypal">PayPal</option>
+                </select>
 
-                <label>Fecha de expiración</label>
-                <input type="text" placeholder="MM/AA">
+                <div id="cardFields" class="hidden">
+                    <label>Número de tarjeta</label>
+                    <input type="text">
 
-                <label>CVV</label>
-                <input type="text" placeholder="123">
+                    <label>Nombre en la tarjeta</label>
+                    <input type="text">
+
+                    <label>Expiración</label>
+                    <input type="text">
+
+                    <label>CVV</label>
+                    <input type="text">
+                </div>
+
+                <div id="paypalFields" class="hidden">
+                    <p>Serás redirigido a PayPal para completar el pago.</p>
+                </div>
+
+                <button>Confirmar suscripción</button>
             </div>
 
-            <!-- PAYPAL -->
-            <div id="paypalFields" class="hidden">
-                <p>Serás redirigido a PayPal para completar el pago de forma segura.</p>
+            <div id="freeSection" class="hidden">
+                <p>Este plan no requiere pago.</p>
+                <button class="secondary">Empezar gratis</button>
             </div>
-
-            <button>Confirmar suscripción</button>
         </div>
 
     </div>
 </div>
 
 <script>
-    const plans = {
-        pro: {
-            name: "Mesocycle Tracker Pro",
-            description: "Para lifters que quieren entender por qué progresan (o no).",
-            price: "€9 / mes",
-            features: [
-                "Mesociclos ilimitados",
-                "Comparación entre ciclos",
-                "Gráficas avanzadas",
-                "Historial completo",
-                "Exportación de datos"
-            ],
-            note: "Cancela cuando quieras · Tus datos son tuyos"
-        },
-        anual: {
-            name: "Mesocycle Tracker Anual",
-            description: "Análisis completo todo el año con ahorro frente al mensual.",
-            price: "€99 / año",
-            features: [
-                "Mesociclos ilimitados",
-                "Comparación entre ciclos",
-                "Gráficas avanzadas",
-                "Historial completo",
-                "Exportación de datos",
-                "Soporte prioritario"
-            ],
-            note: "Ahorra comparado con mensual · Tus datos son tuyos"
-        }
-    };
+    let currentPlan = "pro";
 
-    const params = new URLSearchParams(window.location.search);
-    const selectedPlan = params.get("plan");
+    function selectPlan(plan) {
+        currentPlan = plan;
 
-    if (!plans[selectedPlan]) {
-        alert("Plan no válido");
-    } else {
-        const plan = plans[selectedPlan];
-        document.getElementById("planName").innerText = plan.name;
-        document.getElementById("planDescription").innerText = plan.description;
-        document.getElementById("planPrice").innerText = plan.price;
-        document.getElementById("planNote").innerText = plan.note;
-
-        const featuresList = document.getElementById("planFeatures");
-        plan.features.forEach(feature => {
-            const li = document.createElement("li");
-            li.innerText = feature;
-            featuresList.appendChild(li);
+        document.querySelectorAll(".plan-card").forEach(card => {
+            card.classList.remove("active");
         });
+
+        document.getElementById(`plan-${plan}`).classList.add("active");
+
+        const planText = document.getElementById("selectedPlanText");
+        const paymentSection = document.getElementById("paymentSection");
+        const freeSection = document.getElementById("freeSection");
+
+        if (plan === "gratis") {
+            planText.innerHTML = "<strong>Plan seleccionado:</strong> Gratis (€0)";
+            paymentSection.classList.add("hidden");
+            freeSection.classList.remove("hidden");
+        }
+
+        if (plan === "pro") {
+            planText.innerHTML = "<strong>Plan seleccionado:</strong> Pro (€9 / mes)";
+            paymentSection.classList.remove("hidden");
+            freeSection.classList.add("hidden");
+        }
+
+        if (plan === "anual") {
+            planText.innerHTML = "<strong>Plan seleccionado:</strong> Anual (€99 / año)";
+            paymentSection.classList.remove("hidden");
+            freeSection.classList.add("hidden");
+        }
     }
 
-    function togglePaymentFields() {
-        const method = document.getElementById("paymentMethod").value;
+    function togglePaymentFields(method) {
         document.getElementById("cardFields").classList.add("hidden");
         document.getElementById("paypalFields").classList.add("hidden");
 
         if (method === "card") {
             document.getElementById("cardFields").classList.remove("hidden");
-        } else if (method === "paypal") {
+        }
+
+        if (method === "paypal") {
             document.getElementById("paypalFields").classList.remove("hidden");
         }
     }
