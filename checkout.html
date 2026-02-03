@@ -6,8 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="landing.css">
   <link rel="icon" type="image/png" href="mcp-logo.png" />
-  <!-- Stripe.js -->
-  <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 
@@ -36,8 +34,10 @@
         <li>✔ Exportación de datos</li>
       </ul>
 
-      <!-- Formulario de Stripe Checkout -->
-      <button id="checkout-button" class="cta-btn primary">Pagar con tarjeta</button>
+      <!-- Botón visual que simula pago -->
+      <button onclick="alert('¡Simulación de pago completada!')" class="cta-btn primary">
+        Pagar con tarjeta
+      </button>
 
       <span class="microcopy">Tus datos son tuyos · Cancelación flexible</span>
     </div>
@@ -58,26 +58,6 @@
   </div>
   <p class="footer-copy">© 2026 Workout Tracker. Todos los derechos reservados.</p>
 </footer>
-
-<script>
-  // Reemplaza con tu clave pública de Stripe
-  const stripe = Stripe("pk_test_XXXXXXXXXXXXXXXXXXXX");
-
-  const checkoutButton = document.getElementById("checkout-button");
-  checkoutButton.addEventListener("click", () => {
-    fetch("/create-checkout-session", { method: "POST" }) // backend que crea la sesión
-      .then(response => response.json())
-      .then(session => {
-        return stripe.redirectToCheckout({ sessionId: session.id });
-      })
-      .then(result => {
-        if (result.error) {
-          alert(result.error.message);
-        }
-      })
-      .catch(error => console.error("Error:", error));
-  });
-</script>
 
 </body>
 </html>
