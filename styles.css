@@ -1149,19 +1149,6 @@ h3 {
   margin-left: 220px;
 }
 
-/* Desktop: sidebar siempre visible, sin toggle */
-@media (min-width: 768px) {
-  .menu-toggle {
-    display: none;
-  }
-  .side-menu {
-    transform: translateX(0);
-  }
-  #main-content {
-    margin-left: 220px;
-  }
-}
-
 /* ================= TUTORIALES ================= */
 
 .tutorial-list {
