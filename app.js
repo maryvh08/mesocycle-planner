@@ -555,12 +555,27 @@ async function deleteMesocycle(mesocycleId) {
   registroEditor.innerHTML = "";
 }
 
-// PAYWALL MODAL LOGIC
+// PAYWALL A/B LOGIC
 const paywallModal = document.getElementById('paywall-modal');
 const paywallClose = document.getElementById('paywall-close');
 const paywallDismiss = document.getElementById('paywall-dismiss');
 const paywallOverlay = document.getElementById('paywall-overlay');
 const paywallBuy = document.getElementById('paywall-buy');
+const modalPrice = document.getElementById('modal-price');
+const modalCard = document.querySelector('.modal-card');
+
+// === A/B Variant ===
+// 50% usuarios: 'monthly', 50%: 'annual'
+const variant = Math.random() < 0.5 ? 'monthly' : 'annual';
+console.log('Paywall variant:', variant);
+
+// Ajuste dinámico según variante
+if (variant === 'monthly') {
+  modalPrice.textContent = '€9 / mes · Cancela cuando quieras';
+} else {
+  modalCard.classList.add('annual');
+  modalPrice.textContent = '€99 / año · Ahorra 9€ · Cancela cuando quieras';
+}
 
 // Función para abrir modal
 function openPaywall() {
@@ -581,12 +596,12 @@ paywallOverlay.addEventListener('click', closePaywall);
 
 // CTA principal
 paywallBuy.addEventListener('click', () => {
-  console.log('Usuario clicó en "Desbloquear Pro"'); // Aquí va la integración con el sistema de pagos
-  // Simulación: redirigir a checkout
-  window.location.href = '/checkout.html';
+  console.log('Usuario clicó en "Desbloquear Pro" variante:', variant);
+  // Aquí va la integración con checkout
+  window.location.href = variant === 'monthly' ? '/checkout-monthly.html' : '/checkout-annual.html';
 });
 
-// Ejemplo: abrir modal automáticamente tras 5 segundos
+// Abrir modal automáticamente tras 5s (o disparador por acción)
 setTimeout(openPaywall, 5000);
 
 /* ======================
