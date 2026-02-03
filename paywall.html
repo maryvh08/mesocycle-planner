@@ -6,42 +6,81 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="landing.css" />
 </head>
-<body class="auth-bg">
+<body>
 
-  <!-- PAYWALL MODAL A/B -->
-  <div id="paywall-modal" class="modal hidden" role="dialog" aria-labelledby="modal-title" aria-describedby="modal-subtitle">
-    <div class="modal-overlay" id="paywall-overlay" tabindex="-1"></div>
-    <div class="modal-card">
-
-      <!-- Close button -->
-      <button class="modal-close" id="paywall-close" aria-label="Cerrar modal">&times;</button>
-
-      <!-- Header -->
-      <header class="modal-header">
-        <h2 id="modal-title">Desbloquea tu progreso completo</h2>
-        <p id="modal-subtitle">Comparar mesociclos, ver gráficas avanzadas y acceder a tu historial completo.</p>
-      </header>
-
-      <!-- Features / Benefits -->
-      <ul class="modal-features">
-        <li><span aria-hidden="true">📈</span> Curvas de fuerza y volumen por ciclo</li>
-        <li><span aria-hidden="true">🗓</span> Historial completo de tus entrenamientos</li>
-        <li><span aria-hidden="true">🔎</span> Análisis automático de PRs y estancamientos</li>
-        <li><span aria-hidden="true">📤</span> Exporta tus datos cuando quieras</li>
-      </ul>
-
-      <!-- CTA -->
-      <div class="modal-cta">
-        <button class="cta-btn primary" id="paywall-buy">Desbloquear Pro</button>
-        <button class="cta-btn ghost" id="paywall-dismiss">Seguir con el plan gratuito</button>
-      </div>
-
-      <!-- Microcopy -->
-      <p class="modal-microcopy" id="modal-price">€9 / mes · Cancela cuando quieras</p>
-
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Desbloquea tu <span>progreso completo</span></h1>
+      <p class="hero-sub">Compara mesociclos, analiza tus entrenamientos y lleva tu rendimiento al siguiente nivel.</p>
+      <a href="#pricing" class="cta-btn primary">Empieza Ahora</a>
     </div>
-  </div>
+  </section>
 
-  <script type="module" src="app.js"></script>
+  <!-- FEATURES -->
+  <section class="features">
+    <div class="feature">
+      <h3>📈 Curvas de fuerza</h3>
+      <p>Visualiza tu progreso ciclo a ciclo y optimiza tu entrenamiento.</p>
+    </div>
+    <div class="feature">
+      <h3>🗓 Historial completo</h3>
+      <p>Accede a todos tus entrenamientos y comparaciones históricas.</p>
+    </div>
+    <div class="feature">
+      <h3>🔎 Análisis de PRs</h3>
+      <p>Detecta estancamientos y mejora tus récords personales automáticamente.</p>
+    </div>
+    <div class="feature">
+      <h3>📤 Exporta tus datos</h3>
+      <p>Descarga y utiliza tus datos en cualquier momento.</p>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing" class="pricing">
+    <h2>Elige tu plan</h2>
+    <p class="pricing-sub">Comienza con la versión gratuita o desbloquea todas las funciones con Pro</p>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <h3>Gratis</h3>
+        <p class="price">€0</p>
+        <p class="plan-desc">Funciones básicas para empezar a entrenar.</p>
+        <ul>
+          <li>📈 Seguimiento básico</li>
+          <li>🗓 Historial limitado</li>
+          <li>🔎 Estadísticas simples</li>
+        </ul>
+        <a href="#" class="cta-btn ghost">Empezar gratis</a>
+      </div>
+      <div class="pricing-card pro">
+        <h3>Pro</h3>
+        <p class="price">€9 / mes</p>
+        <p class="plan-desc">Desbloquea todas las funciones avanzadas.</p>
+        <ul>
+          <li>📈 Curvas avanzadas</li>
+          <li>🗓 Historial completo</li>
+          <li>🔎 Análisis de PRs y estancamientos</li>
+          <li>📤 Exportación ilimitada</li>
+        </ul>
+        <a href="#" class="cta-btn primary">Desbloquear Pro</a>
+        <span class="microcopy">Cancela cuando quieras</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-content">
+      <div>© 2026 TuAppFitness</div>
+      <div class="footer-links">
+        <a href="#">Términos</a>
+        <a href="#">Privacidad</a>
+        <a href="#">Contacto</a>
+      </div>
+    </div>
+    <div class="footer-copy">Todos los derechos reservados.</div>
+  </footer>
+
 </body>
 </html>
