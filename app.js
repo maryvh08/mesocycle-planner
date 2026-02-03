@@ -557,26 +557,44 @@ async function deleteMesocycle(mesocycleId) {
 
 // PAYWALL A/B LOGIC
 document.addEventListener("DOMContentLoaded", () => {
-  const buyBtn = document.querySelector(".pricing-card.pro .cta-btn.primary");
-  const freeBtn = document.querySelector(".pricing-card .cta-btn.ghost");
+  const modal = document.getElementById("paywall-modal");
+  const overlay = document.getElementById("paywall-overlay");
+  const closeBtn = document.getElementById("paywall-close");
+  const dismissBtn = document.getElementById("paywall-dismiss");
+  const buyBtn = document.getElementById("paywall-buy");
+  const viewDataBtn = document.getElementById("view-data-btn");
 
-  // Evento de compra
-  if (buyBtn) {
-    buyBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      alert("¡Has desbloqueado Pro! Redirigiendo a checkout...");
-      // Aquí podrías hacer window.location.href = "/checkout" o similar
-    });
-  }
+  // Función para abrir modal
+  const openModal = () => {
+    modal.classList.remove("hidden");
+    modal.classList.add("visible");
+    modal.querySelector(".modal-card").classList.add("fade-up");
+  };
 
-  // Evento del botón gratuito
-  if (freeBtn) {
-    freeBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      alert("Has elegido el plan gratuito. ¡A entrenar!");
-      // Aquí podrías navegar a la sección de la app o dashboard
-    });
-  }
+  // Función para cerrar modal
+  const closeModal = () => {
+    modal.classList.add("hidden");
+    modal.classList.remove("visible");
+    modal.querySelector(".modal-card").classList.remove("fade-up");
+  };
+
+  // Eventos de cierre
+  closeBtn.addEventListener("click", closeModal);
+  overlay.addEventListener("click", closeModal);
+  dismissBtn.addEventListener("click", closeModal);
+
+  // Evento de compra (simulado)
+  buyBtn.addEventListener("click", () => {
+    alert("¡Has desbloqueado Pro! Redirigiendo a checkout...");
+    closeModal();
+    // Aquí iría tu redirección real al pago
+  });
+
+  // === Evento para abrir modal al hacer clic en “Quiero ver mis datos” ===
+  viewDataBtn.addEventListener("click", (e) => {
+    e.preventDefault(); // Previene la navegación
+    openModal();
+  });
 });
 
 /* ======================
