@@ -187,14 +187,18 @@ function setupTabs() {
     btn.onclick = () => {
       const tab = btn.dataset.tab;
 
+      // Ocultar todos los tabs
       document.querySelectorAll(".tab-content").forEach(t =>
         t.classList.add("hidden")
       );
 
+      // Mostrar el tab seleccionado
       document.getElementById(tab)?.classList.remove("hidden");
 
-      // cerrar menú al seleccionar
-      document.getElementById("side-menu")?.classList.add("hidden");
+      // Cerrar menú en mobile después de seleccionar
+      if (window.innerWidth < 768) {
+        document.getElementById("side-menu")?.classList.remove("open");
+      }
 
       if (tab === "stats") {
         renderStatsView();
@@ -2855,8 +2859,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const menuToggle = document.getElementById("menu-toggle");
   const sideMenu = document.getElementById("side-menu");
 
+  // Toggle sidebar
   menuToggle.addEventListener("click", () => {
     sideMenu.classList.toggle("open");
+  });
+
+  // Manejo de tabs
+  document.querySelectorAll("[data-tab]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const tab = btn.dataset.tab;
+
+      // Ocultar todos los tabs
+      document.querySelectorAll(".tab-content").forEach(t => 
+        t.classList.add("hidden")
+      );
+
+      // Mostrar tab seleccionado
+      const tabElement = document.getElementById(tab);
+      if (tabElement) tabElement.classList.remove("hidden");
+
+      // Cerrar sidebar en mobile después de seleccionar
+      if (window.innerWidth < 768) {
+        sideMenu.classList.remove("open");
+      }
+    });
   });
 });
 
