@@ -556,7 +556,7 @@ async function deleteMesocycle(mesocycleId) {
 }
 
 // PAYWALL A/B LOGIC
-// Selección de elementos
+// Modal elements
 const modal = document.getElementById('paywall-modal');
 const btnOpen = document.getElementById('view-data-btn');
 const btnClose = document.getElementById('paywall-close');
@@ -574,7 +574,7 @@ function closeModal() {
   modal.classList.remove('visible');
 }
 
-// Eventos
+// Event listeners
 btnOpen.addEventListener('click', openModal);
 btnClose.addEventListener('click', closeModal);
 overlay.addEventListener('click', closeModal);
