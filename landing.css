@@ -136,6 +136,18 @@ body {
   transform: scale(1.02);
 }
 
+.imagen-seccion {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.imagen-seccion img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* llena la sección sin deformar */
+}
+
 /* ================== FEATURES ================== */
 .features {
   padding: 6rem 10%;
