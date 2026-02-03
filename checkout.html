@@ -118,7 +118,7 @@
             <div class="plan-card" onclick="selectPlan('gratis')" id="plan-gratis">
                 <h3>Gratis</h3>
                 <p>Todo lo necesario para ejecutar un mesociclo sólido.</p>
-                <div class="price">€0</div>
+                <div class="price">$0</div>
                 <ul>
                     <li>1 mesociclo activo</li>
                     <li>Registro de entrenamientos</li>
@@ -163,7 +163,7 @@
         <div class="checkout">
             <h2>Finalizar</h2>
 
-            <p id="selectedPlanText"><strong>Plan seleccionado:</strong> Pro (€9 / mes)</p>
+            <p id="selectedPlanText"><strong>Plan seleccionado:</strong> Pro ($9 / mes)</p>
 
             <!-- Pago para Pro/Anual -->
             <div id="paymentSection">
@@ -303,15 +303,15 @@
       const freeSection = document.getElementById("freeSection");
     
       if (plan === "gratis") {
-          planText.innerHTML = "<strong>Plan seleccionado:</strong> Gratis (€0)";
+          planText.innerHTML = "<strong>Plan seleccionado:</strong> Gratis ($0)";
           paymentSection.classList.add("hidden");
           freeSection.classList.remove("hidden");
       } else if (plan === "pro") {
-          planText.innerHTML = "<strong>Plan seleccionado:</strong> Pro (€9 / mes)";
+          planText.innerHTML = "<strong>Plan seleccionado:</strong> Pro ($9 / mes)";
           paymentSection.classList.remove("hidden");
           freeSection.classList.add("hidden");
       } else if (plan === "anual") {
-          planText.innerHTML = "<strong>Plan seleccionado:</strong> Anual (€99 / año)";
+          planText.innerHTML = "<strong>Plan seleccionado:</strong> Anual ($99 / año)";
           paymentSection.classList.remove("hidden");
           freeSection.classList.add("hidden");
       }
