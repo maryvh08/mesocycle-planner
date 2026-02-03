@@ -1174,14 +1174,6 @@ h3 {
   display: none;
 }
 
-/* ================= TUTORIALES ================= */
-
-.tutorial-list {
-  display: grid;
-  gap: 2rem;              /* separación entre cards */
-  margin-top: 1.5rem;
-}
-
 /* ================= MODAL ================= */
 
 #tutorial-modal {
@@ -1209,7 +1201,14 @@ h3 {
   padding: 20px;
 }
 
-/* ===== TÍTULO ===== */
+/* ================= TUTORIALES ================= */
+
+.tutorial-list {
+  display: grid;
+  gap: 2rem;              /* separación entre cards */
+  margin-top: 1.5rem;
+}
+
 #tutorial-title {
   color: #111;
   font-weight: 600;
