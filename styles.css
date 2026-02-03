@@ -1608,10 +1608,6 @@ h3 {
   margin-left: 5px;
 }
 
-.tutorial-actions .fav-btn.active .star {
-  color: gold;
-}
-
 /* Contenido del modal */
 .modal-content {
   background: #fff;
