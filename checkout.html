@@ -2,47 +2,112 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Pagar Plan Pro | Workout Tracker</title>
+  <title>Pasarela de pago | Workout Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="landing.css">
   <link rel="icon" type="image/png" href="mcp-logo.png" />
+  <style>
+    /* Estilos extra para la pasarela visual */
+    .checkout-container {
+      max-width: 420px;
+      margin: 4rem auto 6rem;
+      background: var(--bg-card);
+      padding: 2.5rem;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      text-align: center;
+    }
+
+    .checkout-container h2 {
+      margin-bottom: 1rem;
+    }
+
+    .checkout-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      text-align: left;
+    }
+
+    .checkout-form label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+
+    .checkout-form input {
+      padding: 0.9rem;
+      border-radius: 12px;
+      border: 1px solid #333;
+      background: var(--bg-soft);
+      color: #fff;
+      font-size: 1rem;
+    }
+
+    .checkout-form input::placeholder {
+      color: #888;
+    }
+
+    .cta-pay {
+      margin-top: 1.5rem;
+      width: 100%;
+      text-align: center;
+      padding: 1rem;
+      font-size: 1.1rem;
+    }
+
+    /* Loader */
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--accent);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      animation: spin 1s linear infinite;
+      display: none;
+      margin: 1.5rem auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
 
 <header class="hero">
   <div class="hero-content fade-up">
-    <h1>Paga tu plan <span>Pro</span></h1>
-    <p class="hero-sub">
-      Desbloquea análisis avanzado, mesociclos ilimitados y comparación entre ciclos.
-    </p>
+    <h1>Pasarela de pago <span>Plan Pro</span></h1>
+    <p class="hero-sub">Introduce tus datos para simular el pago del plan Pro.</p>
   </div>
 </header>
 
-<section class="pricing">
-  <h2>Confirma tu suscripción</h2>
-  <p class="pricing-sub">Solo €9 al mes. Cancela cuando quieras.</p>
+<div class="checkout-container fade-up">
+  <h2>Detalles de pago</h2>
+  <form class="checkout-form" id="checkoutForm">
+    <label for="name">Nombre completo</label>
+    <input type="text" id="name" placeholder="Juan Pérez" required>
 
-  <div class="pricing-grid">
-    <div class="pricing-card pro">
-      <h3>Plan Pro</h3>
-      <p class="price">€9 / mes</p>
-      <ul>
-        <li>✔ Mesociclos ilimitados</li>
-        <li>✔ Comparación entre ciclos</li>
-        <li>✔ Gráficas avanzadas</li>
-        <li>✔ Historial completo</li>
-        <li>✔ Exportación de datos</li>
-      </ul>
+    <label for="email">Correo electrónico</label>
+    <input type="email" id="email" placeholder="correo@ejemplo.com" required>
 
-      <!-- Botón visual que simula pago -->
-      <button onclick="alert('¡Simulación de pago completada!')" class="cta-btn primary">
-        Pagar con tarjeta
-      </button>
+    <label for="card">Número de tarjeta</label>
+    <input type="text" id="card" placeholder="4242 4242 4242 4242" required maxlength="19">
 
-      <span class="microcopy">Tus datos son tuyos · Cancelación flexible</span>
-    </div>
-  </div>
-</section>
+    <label for="expiry">Fecha de expiración</label>
+    <input type="text" id="expiry" placeholder="MM/AA" required maxlength="5">
+
+    <label for="cvc">CVC</label>
+    <input type="text" id="cvc" placeholder="123" required maxlength="4">
+
+    <button type="submit" class="cta-btn primary cta-pay">Pagar €9 / mes</button>
+  </form>
+
+  <div class="loader" id="loader"></div>
+  <p id="message" style="text-align:center; margin-top:1rem; color:#ccc;"></p>
+</div>
 
 <footer class="site-footer fade-in">
   <div class="footer-content">
@@ -58,6 +123,32 @@
   </div>
   <p class="footer-copy">© 2026 Workout Tracker. Todos los derechos reservados.</p>
 </footer>
+
+<script>
+  const form = document.getElementById('checkoutForm');
+  const loader = document.getElementById('loader');
+  const message = document.getElementById('message');
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // Mostrar loader
+    loader.style.display = 'block';
+    message.textContent = '';
+
+    // Simular procesamiento
+    setTimeout(() => {
+      loader.style.display = 'none';
+      message.style.color = 'lightgreen';
+      message.textContent = '¡Pago simulado exitosamente! Redirigiendo...';
+
+      // Redirigir a success.html después de 2 segundos
+      setTimeout(() => {
+        window.location.href = 'success.html';
+      }, 2000);
+    }, 2000);
+  });
+</script>
 
 </body>
 </html>
