@@ -2499,20 +2499,15 @@ function applyFilters() {
   let filtered = tutorialsData.filter(ex => {
     if (!ex.exercise_tutorials?.length) return false;
 
-    // Solo favoritos
     if (onlyFavorites && !isFavorite(ex.id)) return false;
 
-    // Coincidencias de búsqueda
     const matchesSearch = ex.name.toLowerCase().includes(search);
-
-    // Coincidencias de tipo/subgrupo
     const matchesType = !selectedTypes.length || selectedTypes.includes(ex.type);
     const matchesSubgroup = !selectedSubgroups.length || selectedSubgroups.includes(ex.subgroup);
 
     return matchesSearch && matchesType && matchesSubgroup;
   });
 
-  // Ordenar si aplica
   if (sortBy) {
     const [field, direction] = sortBy.split('-');
     filtered.sort((a, b) => {
@@ -2566,8 +2561,6 @@ function handleTutorialSelect(e) {
 
 function openTutorial(name, tutorial) {
   const embedUrl = toEmbedUrl(tutorial.video_url);
-  console.log('EMBED:', embedUrl);
-
   if (!embedUrl) {
     alert('URL de video inválida');
     return;
@@ -2584,61 +2577,36 @@ function openTutorial(name, tutorial) {
 function closeTutorial() {
   const modal = document.getElementById('tutorial-modal');
   const iframe = document.getElementById('tutorial-video');
-
   modal.classList.add('hidden');
-
-  // 🔴 Detiene el video y libera el iframe
   iframe.src = '';
 }
 
 function toEmbedUrl(url) {
   try {
     const parsedUrl = new URL(url);
-
-    // https://www.youtube.com/watch?v=XXXX
     if (parsedUrl.hostname.includes('youtube.com')) {
       const videoId = parsedUrl.searchParams.get('v');
-      if (videoId) {
-        return `https://www.youtube.com/embed/${videoId}`;
-      }
+      if (videoId) return `https://www.youtube.com/embed/${videoId}`;
     }
-
-    // https://youtu.be/XXXX
     if (parsedUrl.hostname === 'youtu.be') {
       const videoId = parsedUrl.pathname.slice(1);
       return `https://www.youtube.com/embed/${videoId}`;
     }
-  } catch (e) {
-    console.error('URL inválida:', url);
-  }
-
+  } catch(e){ console.error('URL inválida:', url); }
   return '';
 }
 
-function getFavorites() {
-  return JSON.parse(localStorage.getItem(favorites_key)) || [];
-}
-
-function isFavorite(id) {
-  return getFavorites().includes(id);
-}
-
+function getFavorites() { return JSON.parse(localStorage.getItem(favorites_key)) || []; }
+function isFavorite(id) { return getFavorites().includes(id); }
 function toggleFavorite(id) {
   let favorites = getFavorites();
-
-  if (favorites.includes(id)) {
-    favorites = favorites.filter(favId => favId !== id);
-  } else {
-    favorites.push(id);
-  }
-
+  favorites = favorites.includes(id) ? favorites.filter(f=>f!==id) : [...favorites, id];
   localStorage.setItem(favorites_key, JSON.stringify(favorites));
 }
 
 function populateFilters(exercises) {
   const typeContainer = document.getElementById('type-options');
   const subgroupContainer = document.getElementById('subgroup-options');
-
   if (!typeContainer || !subgroupContainer) return;
 
   typeContainer.innerHTML = '';
@@ -2650,28 +2618,20 @@ function populateFilters(exercises) {
   types.forEach(type => {
     const label = document.createElement('label');
     label.className = 'filter-option';
-    label.innerHTML = `
-      <input type="checkbox" value="${type}">
-      ${type}
-    `;
+    label.innerHTML = `<input type="checkbox" value="${type}"> ${type}`;
     typeContainer.appendChild(label);
   });
 
   subgroups.forEach(subgroup => {
     const label = document.createElement('label');
     label.className = 'filter-option';
-    label.innerHTML = `
-      <input type="checkbox" value="${subgroup}">
-      ${subgroup}
-    `;
+    label.innerHTML = `<input type="checkbox" value="${subgroup}"> ${subgroup}`;
     subgroupContainer.appendChild(label);
   });
 }
 
 function getSelectedValues(containerId) {
-  return Array.from(
-    document.querySelectorAll(`#${containerId} input:checked`)
-  ).map(input => input.value);
+  return Array.from(document.querySelectorAll(`#${containerId} input:checked`)).map(i=>i.value);
 }
 
 // =====================
@@ -2706,79 +2666,38 @@ document.getElementById("exercise-modal")
     }
   });
 
-document.getElementById("close-modal-btn") 
-   .addEventListener("click", closeModal); 
+document.getElementById('tutorial-search')?.addEventListener('input', applyFilters);
+document.getElementById('sort-by')?.addEventListener('change', applyFilters);
+document.getElementById('filter-favorites')?.addEventListener('change', applyFilters);
+document.getElementById('clear-filters')?.addEventListener('click', () => {
+  document.getElementById('tutorial-search').value = '';
+  document.getElementById('sort-by').value = '';
+  document.getElementById('filter-favorites').checked = false;
+  document.querySelectorAll('#type-options input, #subgroup-options input').forEach(cb=>cb.checked=false);
+  renderTutorials(tutorialsData);
+});
 
-// Cerrar modal al hacer click fuera
-document.getElementById('tutorial-modal')
-  .addEventListener('click', e => {
-    if (e.target.id === 'tutorial-modal') {
-      closeTutorial();
-    }
-  });
-
-
-// 🔍 Buscador
-document.getElementById('tutorial-search')
-  ?.addEventListener('input', applyFilters);
-
-
-// 🔃 Orden
-document.getElementById('sort-by')
-  .addEventListener('change', applyFilters);
-
-
-// ⭐ Solo favoritos
-document.getElementById('filter-favorites')
-  .addEventListener('change', applyFilters);
-
-
-// ♻️ Borrar filtros
-document.getElementById('clear-filters')
-  .addEventListener('click', () => {
-
-    document.getElementById('tutorial-search').value = '';
-    document.getElementById('sort-by').value = '';
-    document.getElementById('filter-favorites').checked = false;
-
-    document.querySelectorAll('#type-options input, #subgroup-options input')
-      .forEach(cb => cb.checked = false);
-
-    renderTutorials(tutorialsData);
-  });
-
-
-// ⬇️ Abrir / cerrar dropdowns
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', e => {
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click', e=>{
     e.stopPropagation();
     btn.parentElement.classList.toggle('open');
   });
 });
 
-
-// ⬆️ Cerrar dropdowns al clickear fuera
-document.addEventListener('click', () => {
-  document.querySelectorAll('.multi-filter')
-    .forEach(f => f.classList.remove('open'));
+document.addEventListener('click', ()=>{
+  document.querySelectorAll('.multi-filter').forEach(f=>f.classList.remove('open'));
 });
 
-
-// ☑️ Re-filtrar al marcar checkboxes
-document.addEventListener('change', e => {
-  if (e.target.closest('.filter-dropdown')) {
-    applyFilters();
-  }
+document.addEventListener('change', e=>{
+  if(e.target.closest('.filter-dropdown')) applyFilters();
 });
 
-document
-  .getElementById('close-tutorial-modal-btn')
-  .addEventListener('click', closeTutorial);
+document.getElementById('close-tutorial-modal-btn').addEventListener('click', closeTutorial);
+document.getElementById('tutorial-modal').addEventListener('click', e=>{
+  if(e.target.id==='tutorial-modal') closeTutorial();
+});
 
-document
-  .getElementById('tutorial-modal')
-  .addEventListener('click', closeTutorial);
-
+// Cargar tutoriales al inicio
 loadTutorials();
 
 document.getElementById("start-stopwatch").onclick = () => {
