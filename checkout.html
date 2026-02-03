@@ -1,188 +1,175 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Mesocycle Tracker | Carrito</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>Checkout | Mesocycle Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f6f6f6;
+            margin: 0;
+            padding: 0;
+        }
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      margin: 0;
-      padding: 0;
-    }
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+        }
 
-    .container {
-      max-width: 900px;
-      margin: 40px auto;
-      background: #fff;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
+        h1, h2 {
+            margin-bottom: 15px;
+        }
 
-    h1, h2 {
-      text-align: center;
-      color: #333;
-    }
+        .checkout {
+            display: flex;
+            gap: 40px;
+        }
 
-    .plans {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      margin-top: 30px;
-    }
+        .cart, .payment {
+            flex: 1;
+        }
 
-    .plan {
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 20px;
-      text-align: center;
-    }
+        .cart-item {
+            border-bottom: 1px solid #ddd;
+            padding: 15px 0;
+        }
 
-    .plan h3 {
-      margin-bottom: 10px;
-    }
+        .cart-item span {
+            display: block;
+        }
 
-    .price {
-      font-size: 24px;
-      font-weight: bold;
-      margin: 15px 0;
-    }
+        .price {
+            font-weight: bold;
+            margin-top: 5px;
+        }
 
-    .plan button {
-      padding: 10px 15px;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+        .total {
+            font-size: 18px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
 
-    .plan button:hover {
-      background: #0056b3;
-    }
+        label {
+            display: block;
+            margin-top: 15px;
+        }
 
-    .cart {
-      margin-top: 40px;
-    }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
 
-    .cart-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid #ddd;
-    }
+        .payment-methods {
+            margin-top: 20px;
+        }
 
-    .total {
-      text-align: right;
-      font-size: 20px;
-      font-weight: bold;
-      margin-top: 20px;
-    }
+        .hidden {
+            display: none;
+        }
 
-    .checkout {
-      text-align: right;
-      margin-top: 20px;
-    }
+        button {
+            margin-top: 25px;
+            padding: 12px;
+            width: 100%;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
 
-    .checkout button {
-      padding: 12px 20px;
-      font-size: 16px;
-      background: #28a745;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .checkout button:hover {
-      background: #1e7e34;
-    }
-  </style>
+        button:hover {
+            background: #43a047;
+        }
+    </style>
 </head>
-
 <body>
 
-  <div class="container">
-    <h1>Mesocycle Tracker</h1>
-    <h2>Selecciona tu plan</h2>
+<div class="container">
+    <h1>Finalizar compra</h1>
 
-    <!-- PLANES -->
-    <div class="plans">
-      <div class="plan">
-        <h3>Plan Gratuito</h3>
-        <p>Acceso básico al seguimiento</p>
-        <div class="price">$0</div>
-        <button disabled>Incluido</button>
-      </div>
+    <div class="checkout">
 
-      <div class="plan">
-        <h3>Plan Mensual</h3>
-        <p>Seguimiento avanzado y estadísticas</p>
-        <div class="price">$9.99</div>
-        <button onclick="addToCart('Plan Mensual', 9.99)">Agregar al carrito</button>
-      </div>
+        <!-- 🛒 CARRITO -->
+        <div class="cart">
+            <h2>Tu carrito</h2>
 
-      <div class="plan">
-        <h3>Plan Anual</h3>
-        <p>Acceso completo con descuento anual</p>
-        <div class="price">$99.99</div>
-        <button onclick="addToCart('Plan Anual', 99.99)">Agregar al carrito</button>
-      </div>
+            <div class="cart-item">
+                <span><strong>Plan:</strong> Mesocycle Tracker Pro (Mensual)</span>
+                <span><strong>Duración:</strong> 1 mes</span>
+                <span class="price">$9.99 USD</span>
+            </div>
+
+            <div class="total">
+                Total: $9.99 USD
+            </div>
+        </div>
+
+        <!-- 💳 PAGO -->
+        <div class="payment">
+            <h2>Método de pago</h2>
+
+            <label for="paymentMethod">Selecciona un método</label>
+            <select id="paymentMethod" onchange="togglePaymentFields()">
+                <option value="">-- Selecciona --</option>
+                <option value="card">Tarjeta de crédito / débito</option>
+                <option value="transfer">Transferencia bancaria</option>
+            </select>
+
+            <!-- 💳 TARJETA -->
+            <div id="cardFields" class="payment-methods hidden">
+                <label>Número de tarjeta</label>
+                <input type="text" placeholder="1234 5678 9012 3456">
+
+                <label>Nombre en la tarjeta</label>
+                <input type="text" placeholder="Nombre completo">
+
+                <label>Fecha de expiración</label>
+                <input type="text" placeholder="MM/AA">
+
+                <label>CVV</label>
+                <input type="text" placeholder="123">
+            </div>
+
+            <!-- 🏦 TRANSFERENCIA -->
+            <div id="transferFields" class="payment-methods hidden">
+                <p>
+                    Realiza la transferencia a la siguiente cuenta:
+                </p>
+                <ul>
+                    <li><strong>Banco:</strong> Banco Ejemplo</li>
+                    <li><strong>Cuenta:</strong> 123456789</li>
+                    <li><strong>Nombre:</strong> Mesocycle Tracker</li>
+                </ul>
+
+                <label>Comprobante de pago</label>
+                <input type="file">
+            </div>
+
+            <button>Confirmar y pagar</button>
+        </div>
+
     </div>
+</div>
 
-    <!-- CARRITO -->
-    <div class="cart">
-      <h2>Carrito</h2>
-      <div id="cartItems"></div>
-      <div class="total" id="total">Total: $0.00</div>
+<script>
+    function togglePaymentFields() {
+        const method = document.getElementById("paymentMethod").value;
+        document.getElementById("cardFields").classList.add("hidden");
+        document.getElementById("transferFields").classList.add("hidden");
 
-      <div class="checkout">
-        <button onclick="checkout()">Proceder al pago</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    let cart = [];
-    let total = 0;
-
-    function addToCart(name, price) {
-      cart = [{ name, price }]; // Solo un plan a la vez
-      renderCart();
+        if (method === "card") {
+            document.getElementById("cardFields").classList.remove("hidden");
+        } else if (method === "transfer") {
+            document.getElementById("transferFields").classList.remove("hidden");
+        }
     }
-
-    function renderCart() {
-      const cartItems = document.getElementById("cartItems");
-      cartItems.innerHTML = "";
-      total = 0;
-
-      cart.forEach(item => {
-        total += item.price;
-        cartItems.innerHTML += `
-          <div class="cart-item">
-            <span>${item.name}</span>
-            <span>$${item.price.toFixed(2)}</span>
-          </div>
-        `;
-      });
-
-      document.getElementById("total").innerText = `Total: $${total.toFixed(2)}`;
-    }
-
-    function checkout() {
-      if (cart.length === 0) {
-        alert("Selecciona un plan antes de continuar.");
-        return;
-      }
-
-      alert("Aquí se redirige a la pasarela de pagos.");
-      // Ejemplo:
-      // window.location.href = "pago-stripe.html";
-    }
-  </script>
+</script>
 
 </body>
 </html>
