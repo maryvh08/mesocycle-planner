@@ -1081,20 +1081,25 @@ h3 {
 /* =====================
    HAMBURGER MENU
 ===================== */
-
 .menu-toggle {
   font-size: 1.6rem;
   cursor: pointer;
   padding: 8px 12px;
   border-radius: 8px;
   user-select: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 110;
+  background: #141418;
+  color: #fff;
 }
 
 .menu-toggle:hover {
   background: rgba(255,255,255,0.05);
 }
 
-/* Menu container */
+/* Sidebar */
 .side-menu {
   position: fixed;
   top: 0;
@@ -1102,6 +1107,9 @@ h3 {
   height: 100vh;
   width: 220px;
   background: #141418;
+  padding: 20px 8px;
+  display: flex;
+  flex-direction: column;
   transform: translateX(-100%);
   transition: transform 0.3s ease;
   z-index: 100;
@@ -1122,25 +1130,36 @@ h3 {
   font-size: 0.95rem;
   border-radius: 10px;
   cursor: pointer;
+  margin-bottom: 4px;
 }
 
 .menu-item:hover {
   background: rgba(255,255,255,0.06);
 }
 
-.side-menu.open {
-  transform: translateX(0); /* mostrar sidebar */
-  margin-left: 220px; /* igual al ancho del sidebar */
-}
-
+/* Contenido principal */
 #main-content {
   transition: margin-left 0.3s ease;
   margin-left: 0;
+  padding: 20px;
 }
 
-/* Hide */
-.hidden {
-  display: none;
+/* Empujar contenido cuando sidebar abierto */
+.side-menu.open ~ #main-content {
+  margin-left: 220px;
+}
+
+/* Desktop: sidebar siempre visible, sin toggle */
+@media (min-width: 768px) {
+  .menu-toggle {
+    display: none;
+  }
+  .side-menu {
+    transform: translateX(0);
+  }
+  #main-content {
+    margin-left: 220px;
+  }
 }
 
 /* ================= TUTORIALES ================= */
