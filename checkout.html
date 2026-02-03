@@ -286,6 +286,40 @@
         input.addEventListener("input", validatePayment);
     });
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedPlan = urlParams.get("plan") || "pro"; // default pro
+    
+    function selectPlan(plan) {
+      currentPlan = plan;
+    
+      // Resaltar plan
+      document.querySelectorAll(".plan-card").forEach(card => {
+          card.classList.remove("active");
+      });
+      document.getElementById(`plan-${plan}`).classList.add("active");
+    
+      const planText = document.getElementById("selectedPlanText");
+      const paymentSection = document.getElementById("paymentSection");
+      const freeSection = document.getElementById("freeSection");
+    
+      if (plan === "gratis") {
+          planText.innerHTML = "<strong>Plan seleccionado:</strong> Gratis (€0)";
+          paymentSection.classList.add("hidden");
+          freeSection.classList.remove("hidden");
+      } else if (plan === "pro") {
+          planText.innerHTML = "<strong>Plan seleccionado:</strong> Pro (€9 / mes)";
+          paymentSection.classList.remove("hidden");
+          freeSection.classList.add("hidden");
+      } else if (plan === "anual") {
+          planText.innerHTML = "<strong>Plan seleccionado:</strong> Anual (€99 / año)";
+          paymentSection.classList.remove("hidden");
+          freeSection.classList.add("hidden");
+      }
+    }
+    
+    // Inicializar plan al cargar la página
+    selectPlan(selectedPlan);
+
 </script>
 
 </body>
