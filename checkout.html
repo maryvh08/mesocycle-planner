@@ -131,7 +131,7 @@
             <div class="plan-card active" onclick="selectPlan('pro')" id="plan-pro">
                 <h3>Pro</h3>
                 <p>Para lifters que quieren entender por qué progresan (o no).</p>
-                <div class="price">€9 / mes</div>
+                <div class="price">$9 / mes</div>
                 <ul>
                     <li>Mesociclos ilimitados</li>
                     <li>Comparación entre ciclos</li>
@@ -145,7 +145,7 @@
             <div class="plan-card" onclick="selectPlan('anual')" id="plan-anual">
                 <h3>Anual</h3>
                 <p>Análisis completo todo el año con ahorro.</p>
-                <div class="price">€99 / año</div>
+                <div class="price">$99 / año</div>
                 <ul>
                     <li>Mesociclos ilimitados</li>
                     <li>Comparación entre ciclos</li>
@@ -224,15 +224,15 @@
         const freeSection = document.getElementById("freeSection");
 
         if (plan === "gratis") {
-            planText.innerHTML = "<strong>Plan seleccionado:</strong> Gratis (€0)";
+            planText.innerHTML = "<strong>Plan seleccionado:</strong> Gratis ($0)";
             paymentSection.classList.add("hidden");
             freeSection.classList.remove("hidden");
         } else if (plan === "pro") {
-            planText.innerHTML = "<strong>Plan seleccionado:</strong> Pro (€9 / mes)";
+            planText.innerHTML = "<strong>Plan seleccionado:</strong> Pro ($9 / mes)";
             paymentSection.classList.remove("hidden");
             freeSection.classList.add("hidden");
         } else if (plan === "anual") {
-            planText.innerHTML = "<strong>Plan seleccionado:</strong> Anual (€99 / año)";
+            planText.innerHTML = "<strong>Plan seleccionado:</strong> Anual ($99 / año)";
             paymentSection.classList.remove("hidden");
             freeSection.classList.add("hidden");
         }
