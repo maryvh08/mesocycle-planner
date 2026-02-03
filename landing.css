@@ -236,8 +236,8 @@ body {
 .pricing-grid {
   display: grid;
   gap: 3rem;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  max-width: 900px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  max-width: 1200px; /* antes era 900px */
   margin: auto;
 }
 
