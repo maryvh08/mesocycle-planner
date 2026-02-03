@@ -1096,20 +1096,19 @@ h3 {
 
 /* Menu container */
 .side-menu {
-  position: fixed; /* fijo a la pantalla */
+  position: fixed;
   top: 0;
   left: 0;
-  height: 100vh; /* ocupa toda la altura */
-  width: 220px; /* ancho del sidebar */
-  padding: 20px 8px;
-  border-radius: 0; /* opcional: sin bordes redondeados */
-  box-shadow: none; /* opcional: si quieres quitar la sombra flotante */
+  height: 100vh;
+  width: 220px;
   background: #141418;
-  display: flex;
-  flex-direction: column;
-  z-index: 100;
+  transform: translateX(-100%);
   transition: transform 0.3s ease;
-  transform: translateX(-100%); /* oculto al inicio */
+  z-index: 100;
+}
+
+.side-menu.open {
+  transform: translateX(0);
 }
 
 /* Menu items */
@@ -1131,15 +1130,12 @@ h3 {
 
 .side-menu.open {
   transform: translateX(0); /* mostrar sidebar */
+  margin-left: 220px; /* igual al ancho del sidebar */
 }
 
 #main-content {
   transition: margin-left 0.3s ease;
   margin-left: 0;
-}
-
-.side-menu.open ~ #main-content {
-  margin-left: 220px; /* igual al ancho del sidebar */
 }
 
 /* Hide */
