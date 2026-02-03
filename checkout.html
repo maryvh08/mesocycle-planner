@@ -1,158 +1,188 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Planes | Mesocycle Tracker</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>Mesocycle Tracker | Carrito</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f4f6f8;
-            margin: 0;
-            padding: 0;
-        }
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            text-align: center;
-        }
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
 
-        h1 {
-            margin-bottom: 10px;
-        }
+    h1, h2 {
+      text-align: center;
+      color: #333;
+    }
 
-        p.subtitle {
-            color: #555;
-            margin-bottom: 40px;
-        }
+    .plans {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
 
-        .plans {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
+    .plan {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+    }
 
-        .plan {
-            background: #fff;
-            border-radius: 10px;
-            padding: 30px;
-            width: 300px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-            display: flex;
-            flex-direction: column;
-        }
+    .plan h3 {
+      margin-bottom: 10px;
+    }
 
-        .plan h2 {
-            margin-bottom: 10px;
-        }
+    .price {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 15px 0;
+    }
 
-        .price {
-            font-size: 32px;
-            font-weight: bold;
-            margin: 15px 0;
-        }
+    .plan button {
+      padding: 10px 15px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
-        .price span {
-            font-size: 16px;
-            color: #777;
-        }
+    .plan button:hover {
+      background: #0056b3;
+    }
 
-        ul {
-            list-style: none;
-            padding: 0;
-            margin: 20px 0;
-            text-align: left;
-        }
+    .cart {
+      margin-top: 40px;
+    }
 
-        ul li {
-            margin-bottom: 10px;
-        }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #ddd;
+    }
 
-        button {
-            margin-top: auto;
-            padding: 12px;
-            font-size: 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
+    .total {
+      text-align: right;
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
 
-        .free {
-            background: #e0e0e0;
-        }
+    .checkout {
+      text-align: right;
+      margin-top: 20px;
+    }
 
-        .monthly {
-            background: #007bff;
-            color: #fff;
-        }
+    .checkout button {
+      padding: 12px 20px;
+      font-size: 16px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
-        .annual {
-            background: #28a745;
-            color: #fff;
-        }
-
-        button:hover {
-            opacity: 0.9;
-        }
-
-        .highlight {
-            border: 2px solid #28a745;
-        }
-    </style>
+    .checkout button:hover {
+      background: #1e7e34;
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="container">
-    <h1>Planes de Membresía</h1>
-    <p class="subtitle">Elige el plan que mejor se adapte a tu entrenamiento</p>
+  <div class="container">
+    <h1>Mesocycle Tracker</h1>
+    <h2>Selecciona tu plan</h2>
 
+    <!-- PLANES -->
     <div class="plans">
+      <div class="plan">
+        <h3>Plan Gratuito</h3>
+        <p>Acceso básico al seguimiento</p>
+        <div class="price">$0</div>
+        <button disabled>Incluido</button>
+      </div>
 
-        <!-- Plan Gratuito -->
-        <div class="plan">
-            <h2>Plan Gratuito</h2>
-            <div class="price">$0 <span>/ siempre</span></div>
-            <ul>
-                <li>✔ Seguimiento básico</li>
-                <li>✔ Rutinas limitadas</li>
-                <li>✔ Historial de entrenamientos</li>
-                <li>✖ Análisis avanzado</li>
-            </ul>
-            <button class="free">Comenzar gratis</button>
-        </div>
+      <div class="plan">
+        <h3>Plan Mensual</h3>
+        <p>Seguimiento avanzado y estadísticas</p>
+        <div class="price">$9.99</div>
+        <button onclick="addToCart('Plan Mensual', 9.99)">Agregar al carrito</button>
+      </div>
 
-        <!-- Plan Mensual -->
-        <div class="plan">
-            <h2>Plan Mensual</h2>
-            <div class="price">$9.99 <span>/ mes</span></div>
-            <ul>
-                <li>✔ Todo lo del plan gratuito</li>
-                <li>✔ Rutinas ilimitadas</li>
-                <li>✔ Análisis de progreso</li>
-                <li>✔ Soporte prioritario</li>
-            </ul>
-            <button class="monthly">Suscribirse</button>
-        </div>
-
-        <!-- Plan Anual -->
-        <div class="plan highlight">
-            <h2>Plan Anual</h2>
-            <div class="price">$99.99 <span>/ año</span></div>
-            <ul>
-                <li>✔ Todo lo del plan mensual</li>
-                <li>✔ Ahorra 2 meses</li>
-                <li>✔ Funciones premium</li>
-                <li>✔ Acceso anticipado a novedades</li>
-            </ul>
-            <button class="annual">Suscribirse</button>
-        </div>
-
+      <div class="plan">
+        <h3>Plan Anual</h3>
+        <p>Acceso completo con descuento anual</p>
+        <div class="price">$99.99</div>
+        <button onclick="addToCart('Plan Anual', 99.99)">Agregar al carrito</button>
+      </div>
     </div>
-</div>
+
+    <!-- CARRITO -->
+    <div class="cart">
+      <h2>Carrito</h2>
+      <div id="cartItems"></div>
+      <div class="total" id="total">Total: $0.00</div>
+
+      <div class="checkout">
+        <button onclick="checkout()">Proceder al pago</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let cart = [];
+    let total = 0;
+
+    function addToCart(name, price) {
+      cart = [{ name, price }]; // Solo un plan a la vez
+      renderCart();
+    }
+
+    function renderCart() {
+      const cartItems = document.getElementById("cartItems");
+      cartItems.innerHTML = "";
+      total = 0;
+
+      cart.forEach(item => {
+        total += item.price;
+        cartItems.innerHTML += `
+          <div class="cart-item">
+            <span>${item.name}</span>
+            <span>$${item.price.toFixed(2)}</span>
+          </div>
+        `;
+      });
+
+      document.getElementById("total").innerText = `Total: $${total.toFixed(2)}`;
+    }
+
+    function checkout() {
+      if (cart.length === 0) {
+        alert("Selecciona un plan antes de continuar.");
+        return;
+      }
+
+      alert("Aquí se redirige a la pasarela de pagos.");
+      // Ejemplo:
+      // window.location.href = "pago-stripe.html";
+    }
+  </script>
 
 </body>
 </html>
