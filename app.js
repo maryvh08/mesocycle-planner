@@ -555,6 +555,40 @@ async function deleteMesocycle(mesocycleId) {
   registroEditor.innerHTML = "";
 }
 
+// PAYWALL MODAL LOGIC
+const paywallModal = document.getElementById('paywall-modal');
+const paywallClose = document.getElementById('paywall-close');
+const paywallDismiss = document.getElementById('paywall-dismiss');
+const paywallOverlay = document.getElementById('paywall-overlay');
+const paywallBuy = document.getElementById('paywall-buy');
+
+// Función para abrir modal
+function openPaywall() {
+  paywallModal.classList.add('visible');
+  paywallModal.classList.remove('hidden');
+}
+
+// Función para cerrar modal
+function closePaywall() {
+  paywallModal.classList.remove('visible');
+  paywallModal.classList.add('hidden');
+}
+
+// Cerrar modal con botón o overlay
+paywallClose.addEventListener('click', closePaywall);
+paywallDismiss.addEventListener('click', closePaywall);
+paywallOverlay.addEventListener('click', closePaywall);
+
+// CTA principal
+paywallBuy.addEventListener('click', () => {
+  console.log('Usuario clicó en "Desbloquear Pro"'); // Aquí va la integración con el sistema de pagos
+  // Simulación: redirigir a checkout
+  window.location.href = '/checkout.html';
+});
+
+// Ejemplo: abrir modal automáticamente tras 5 segundos
+setTimeout(openPaywall, 5000);
+
 /* ======================
    REGISTRO
 ====================== */
