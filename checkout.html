@@ -192,7 +192,9 @@
                     <p>Serás redirigido a PayPal para completar el pago.</p>
                 </div>
 
-                <button class="secondary" onclick="window.location.href='signup.html'">Confirmar suscripción</button>
+                <button id="confirmBtn" class="secondary" disabled onclick="window.location.href='signup.html'">
+                  Confirmar suscripción
+                </button>
             </div>
 
             <!-- Gratis -->
@@ -239,15 +241,51 @@
     function togglePaymentFields(method) {
         document.getElementById("cardFields").classList.add("hidden");
         document.getElementById("paypalFields").classList.add("hidden");
-
+    
         if (method === "card") {
             document.getElementById("cardFields").classList.remove("hidden");
         }
-
+    
         if (method === "paypal") {
             document.getElementById("paypalFields").classList.remove("hidden");
         }
+    
+        validatePayment();
     }
+
+    const confirmBtn = document.getElementById("confirmBtn");
+    const paymentSelect = document.querySelector("#paymentSection select");
+    
+    function validatePayment() {
+        const method = paymentSelect.value;
+    
+        if (!method) {
+            confirmBtn.disabled = true;
+            return;
+        }
+    
+        if (method === "card") {
+            // Revisar que todos los campos estén llenos
+            const cardNumber = document.querySelector("#cardFields input:nth-child(2)").value.trim();
+            const cardName = document.querySelector("#cardFields input:nth-child(4)").value.trim();
+            const exp = document.querySelector("#cardFields input:nth-child(6)").value.trim();
+            const cvv = document.querySelector("#cardFields input:nth-child(8)").value.trim();
+    
+            confirmBtn.disabled = !(cardNumber && cardName && exp && cvv);
+        } else if (method === "paypal") {
+            // PayPal solo necesita selección
+            confirmBtn.disabled = false;
+        }
+    }
+    
+    // Revisar cambios en el select de método de pago
+    paymentSelect.addEventListener("change", validatePayment);
+    
+    // Revisar cambios en los campos de tarjeta
+    document.querySelectorAll("#cardFields input").forEach(input => {
+        input.addEventListener("input", validatePayment);
+    });
+
 </script>
 
 </body>
