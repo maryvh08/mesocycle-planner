@@ -1324,9 +1324,6 @@ async function loadDashboard(mesocycleId) {
   const muscleEvaluated = evaluateMuscleVolume(muscleRaw);
   renderMuscleTable(muscleEvaluated);
 
-  // PRs
-  const prs = await loadMesocyclePRs(mesocycleId);
-
   // Coach
   const coachMsg = muscleCoachFeedback(muscleEvaluated);
   updateCoachCard({ type: "neutral", message: coachMsg });
@@ -2901,6 +2898,7 @@ document.addEventListener("DOMContentLoaded", () => {
    });
 });
 
+const prs = await loadMesocyclePRs(mesocycleId);
 const summary = buildMesocycleSummary(prs, strength, volume);
 const efficiency = calculateEfficiency(summary);
 renderComparison(mesoA, mesoB);
