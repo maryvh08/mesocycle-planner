@@ -202,6 +202,7 @@ body {
   border: 1px solid #1a1a24;
   transition: all 0.3s ease;
   text-align: center;
+  width: auto;
 }
 
 .step:hover {
