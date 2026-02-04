@@ -1628,42 +1628,6 @@ const RP_RANGES = {
   Tríceps: { MEV: 6, MAV: 10, MRV: 18 }
 };
 
-function evaluateMuscleVolume(records) {
-  const byMuscle = {};
-   
-   if (error) console.error(error);
-
-  records.forEach(r => {
-    if (!byMuscle[r.muscle_group]) {
-      byMuscle[r.muscle_group] = [];
-    }
-    byMuscle[r.muscle_group].push(r);
-  });
-
-  return Object.entries(byMuscle).map(([muscle, weeks]) => {
-    weeks.sort((a, b) => a.week_number - b.week_number);
-
-    const last = weeks.at(-1);
-    const ranges = RP_RANGES[muscle];
-
-    let status = 'unknown';
-
-    if (ranges) {
-      if (last.total_sets < ranges.MEV) status = 'below';
-      else if (last.total_sets <= ranges.MAV) status = 'optimal';
-      else if (last.total_sets <= ranges.MRV) status = 'high';
-      else status = 'over';
-    }
-
-    return {
-      muscle,
-      sets: last.total_sets,
-      status,
-      ranges
-    };
-  });
-}
-
 function renderMuscleTable(data) {
   const container = document.getElementById('muscleTable');
 
