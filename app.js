@@ -1327,7 +1327,6 @@ async function loadDashboard(mesocycleId) {
     muscleData
   );
 
-   renderSummary(summary);
    const efficiency = calculateEfficiency(summary);
    renderComparison(mesoA, mesoB);
 }
