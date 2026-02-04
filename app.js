@@ -1778,6 +1778,9 @@ function calculateEfficiency(mesocycles) {
   });
 }
 
+const processed = calculateEfficiency([mesoA, mesoB]);
+renderComparison(processed[0], processed[1]);
+
 function renderComparison(a, b) {
   const container = document.getElementById("compareResult");
 
