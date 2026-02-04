@@ -473,7 +473,8 @@ body {
 
 @media (max-width: 768px) {
   .imagen-seccion {
-    height: 60vh;
+    height: auto;
+    min-height: 70svh;
   }
 }
 
