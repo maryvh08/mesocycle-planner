@@ -2937,6 +2937,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.faq-question').forEach(btn => {
     btn.addEventListener('click', () => {
+      console.log('CLICK');
       btn.parentElement.classList.toggle('faq-open');
     });
   });
