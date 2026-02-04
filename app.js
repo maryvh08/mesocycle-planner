@@ -1332,6 +1332,36 @@ async function loadDashboard(mesocycleId) {
   updateCoachCard({ type: "neutral", message: coachMsg });
 }
 
+function calculateMuscleVolume(records) {
+  const byMuscle = {};
+
+  records.forEach(r => {
+    const key = `${r.muscle_group}-${r.week}`;
+
+    if (!byMuscle[key]) {
+      byMuscle[key] = {
+        muscle: r.muscle_group,
+        week: r.week,
+        total_sets: 0
+      };
+    }
+
+    byMuscle[key].total_sets += 1;
+  });
+
+  const grouped = {};
+  Object.values(byMuscle).forEach(r => {
+    if (!grouped[r.muscle]) grouped[r.muscle] = [];
+    grouped[r.muscle].push(r);
+  });
+
+  return Object.entries(grouped).map(([muscle, weeks]) => {
+    weeks.sort((a, b) => a.week - b.week);
+    const last = weeks.at(-1);
+    return { muscle, sets: last.total_sets };
+  });
+}
+
 function evaluateMuscleVolume(data) {
   if (!Array.isArray(data)) return [];
 
