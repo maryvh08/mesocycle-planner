@@ -1330,7 +1330,6 @@ async function loadDashboard(mesocycleId) {
    const efficiency = calculateEfficiency(summary);
    renderComparison(mesoA, mesoB);
 
-   const muscleData = calculateMuscleVolume(records);
    const fatigueMuscles = muscleData.filter(
      m => m.status === "fatigued" || m.status === "overreached"
    );
