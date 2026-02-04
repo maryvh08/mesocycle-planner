@@ -137,9 +137,10 @@ body {
 }
 
 .imagen-seccion {
-  width: 100%;
-  min-height: 100svh        /* ocupa toda la pantalla */
-  overflow: hidden;
+  padding: 2rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .imagen-seccion img {
