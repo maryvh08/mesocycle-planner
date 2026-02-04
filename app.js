@@ -2060,18 +2060,20 @@ async function loadInitialDashboard() {
 }
 
 function setupMesocycleComparison() {
-  const selectA = document.getElementById('mesoA');
-  const selectB = document.getElementById('mesoB');
+  const a = document.getElementById("mesoA");
+  const b = document.getElementById("mesoB");
 
-  async function compareIfReady() {
-    if (!selectA.value || !selectB.value) return;
-    if (selectA.value === selectB.value) return;
+  if (!a || !b) return;
 
-    await compareMesocycles(selectA.value, selectB.value);
-  }
+  const handler = async () => {
+    if (!a.value || !b.value) return;
+    if (a.value === b.value) return;
 
-  selectA.addEventListener('change', compareIfReady);
-  selectB.addEventListener('change', compareIfReady);
+    await compareMesocycles(a.value, b.value);
+  };
+
+  a.addEventListener("change", handler);
+  b.addEventListener("change", handler);
 }
 
 async function loadMesocycleComparison() {
