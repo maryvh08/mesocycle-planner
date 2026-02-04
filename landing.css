@@ -499,6 +499,25 @@ body {
   transition: transform 0.2s;
 }
 
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+
+.faq-card.faq-open .faq-answer {
+  max-height: 300px; /* suficiente para el contenido */
+}
+
+.faq-toggle {
+  font-size: 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+.faq-card.faq-open .faq-toggle {
+  transform: rotate(45deg);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .faq-grid {
