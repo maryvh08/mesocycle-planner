@@ -1353,6 +1353,11 @@ async function loadDashboard(mesocycleId) {
      };
    }
    updateCoachCard(coach);
+
+   const processed = calculateEfficiency(summary);
+   if (processed.length >= 2) {
+     renderComparison(processed[0], processed[1]);
+   }
 }
 
 function calculateMuscleVolume(records) {
@@ -1389,19 +1394,19 @@ function evaluateMuscleVolume(data) {
   if (!Array.isArray(data)) return [];
 
   return data.map(d => {
-    const { muscle, sets, ranges } = d;
-
+    const ranges = RP_RANGES[d.muscle];
     let status = "unknown";
 
     if (ranges) {
-      if (sets < ranges.MEV) status = "below";
-      else if (sets <= ranges.MAV) status = "optimal";
-      else if (sets <= ranges.MRV) status = "high";
-      else status = "over";
+      if (d.sets < ranges.MEV) status = "below";
+      else if (d.sets <= ranges.MAV) status = "optimal";
+      else if (d.sets <= ranges.MRV) status = "high";
+      else status = "overreached";
     }
 
     return {
       ...d,
+      ranges,
       status
     };
   });
@@ -1772,13 +1777,10 @@ function calculateEfficiency(mesocycles) {
     return {
       ...m,
       strengthScore,
-      efficiency: strengthScore / m.totalvolume
+      efficiency: m.volume ? strengthScore / m.volume : 0
     };
   });
 }
-
-const processed = calculateEfficiency([mesoA, mesoB]);
-renderComparison(processed[0], processed[1]);
 
 function renderComparison(a, b) {
   const container = document.getElementById("compareResult");
@@ -1786,14 +1788,14 @@ function renderComparison(a, b) {
   container.innerHTML = `
     <div class="compare-grid">
       <div class="compare-card ${a.efficiency > b.efficiency ? 'winner' : ''}">
-        <h4>${a.name}</h4>
+        <h4>Mesociclo ${a.mesocycle_id}</h4>
         <p>PRs: ${a.pr_count}</p>
         <p>Volumen: ${Math.round(a.volume)}</p>
         <p>Fuerza media: ${a.strengthScore.toFixed(1)}</p>
       </div>
 
       <div class="compare-card ${b.efficiency > a.efficiency ? 'winner' : ''}">
-        <h4>${b.name}</h4>
+         <h4>Mesociclo ${a.mesocycle_id}</h4>
         <p>PRs: ${b.pr_count}</p>
         <p>Volumen: ${Math.round(b.volume)}</p>
         <p>Fuerza media: ${b.strengthScore.toFixed(1)}</p>
