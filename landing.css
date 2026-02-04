@@ -439,6 +439,7 @@ body {
   font-size: 0.8rem;
   color: #6f5a60;
 }
+
 /* ================== FAQ ================== */
 .faq {
   padding: 4rem 2rem;
@@ -448,13 +449,8 @@ body {
 
 .faq h2 {
   font-size: 2.2rem;
-  margin-bottom: 0.5rem;
-  color: #ffff;
-}
-
-.faq-sub {
   margin-bottom: 2rem;
-  color: #ffff;
+  color: #ffffff;
 }
 
 .faq-grid {
@@ -464,14 +460,20 @@ body {
   margin: 0 auto;
 }
 
+/* Card */
 .faq-card {
   background: #ffffff;
   border-radius: 14px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-  text-align: left;
   overflow: hidden;
+  transition: box-shadow 0.3s ease;
 }
 
+.faq-card:hover {
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+}
+
+/* Question */
 .faq-question {
   width: 100%;
   padding: 1.25rem 1.5rem;
@@ -486,35 +488,24 @@ body {
   color: #080808;
 }
 
+/* Answer (collapsed by default) */
 .faq-answer {
-  padding: 0 1.5rem 1.25rem;
+  padding: 0 1.5rem;
   font-size: 0.95rem;
   line-height: 1.6;
   color: #2a2a2a;
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.35s ease;
+  transition: max-height 0.35s ease, padding 0.3s ease;
 }
 
-.hidden {
-  display: none;
-}
-
-.faq-toggle {
-  font-size: 1.5rem;
-  transition: transform 0.2s;
-}
-
-.faq-answer {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.35s ease;
-}
-
+/* Open state */
 .faq-card.faq-open .faq-answer {
-  max-height: 200px;
+  max-height: 400px; /* ajusta si alguna respuesta es más larga */
+  padding: 0 1.5rem 1.25rem;
 }
 
+/* Toggle icon */
 .faq-toggle {
   font-size: 1.5rem;
   transition: transform 0.3s ease;
