@@ -465,31 +465,35 @@ body {
 }
 
 .faq-card {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
   text-align: left;
   overflow: hidden;
 }
 
 .faq-question {
   width: 100%;
-  padding: 1rem 1rem;
+  padding: 1.25rem 1.5rem;
   font-size: 1rem;
   font-weight: 600;
-  background: none;
+  background: transparent;
   border: none;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: #080808;
 }
 
 .faq-answer {
-  padding: 1rem 1.5rem;
+  padding: 0 1.5rem 1.25rem;
   font-size: 0.95rem;
-  line-height: 1.4;
-  color: #080808;
+  line-height: 1.6;
+  color: #2a2a2a;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
 }
 
 .hidden {
@@ -508,7 +512,7 @@ body {
 }
 
 .faq-card.faq-open .faq-answer {
-  max-height: 300px; /* suficiente para el contenido */
+  max-height: 200px;
 }
 
 .faq-toggle {
