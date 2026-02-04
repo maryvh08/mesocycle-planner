@@ -406,6 +406,20 @@ async function loadMesocycles() {
   });
 }
 
+async function loadMesocyclePRs(mesocycleId) {
+  const { data, error } = await supabase
+    .from("mesocycle_prs")
+    .select("*")
+    .eq("mesocycle_id", mesocycleId);
+
+  if (error) {
+    console.error("Error cargando PRs", error);
+    return [];
+  }
+
+  return data;
+}
+
 async function loadExerciseHistory(mesocycleId, container) {
   container.innerHTML = "<p>Cargando historial...</p>";
 
@@ -1301,53 +1315,42 @@ async function loadDashboard(mesocycleId) {
   const records = await fetchExerciseRecords(mesocycleId);
   if (!records.length) return;
 
-  // 1. Volumen por ejercicio
+  // Volumen por ejercicio
   const volumeData = calculateVolumeTrend(records);
   renderVolumeTable(volumeData);
 
-  // 2. Volumen muscular (RP)
-  const muscleVolume = calculateMuscleVolume(records);
-  const muscleStatus = evaluateMuscleVolume(muscleVolume);
-  renderMuscleTable(muscleStatus);
+  // Volumen por músculo (RP)
+  const muscleRaw = calculateMuscleVolume(records);
+  const muscleEvaluated = evaluateMuscleVolume(muscleRaw);
+  renderMuscleTable(muscleEvaluated);
 
-  // 3. Fuerza
-  await loadStrength(mesocycleId);
+  // PRs
+  const prs = await loadMesocyclePRs(mesocycleId);
 
-  // 4. Coach
-  const coachDecision = buildCoachDecision({
-    volumeData,
-    muscleStatus
-  });
-  updateCoachCard(coachDecision);
+  // Coach
+  const coachMsg = muscleCoachFeedback(muscleEvaluated);
+  updateCoachCard({ type: "neutral", message: coachMsg });
 }
 
-function calculateMuscleVolume(records) {
-  const byMuscle = {};
+function evaluateMuscleVolume(data) {
+  if (!Array.isArray(data)) return [];
 
-  records.forEach(r => {
-    const key = `${r.muscle_group}-${r.week}`;
+  return data.map(d => {
+    const { muscle, sets, ranges } = d;
 
-    if (!byMuscle[key]) {
-      byMuscle[key] = {
-        muscle: r.muscle_group,
-        week: r.week,
-        total_sets: 0
-      };
+    let status = "unknown";
+
+    if (ranges) {
+      if (sets < ranges.MEV) status = "below";
+      else if (sets <= ranges.MAV) status = "optimal";
+      else if (sets <= ranges.MRV) status = "high";
+      else status = "over";
     }
 
-    byMuscle[key].total_sets += 1;
-  });
-
-  const grouped = {};
-  Object.values(byMuscle).forEach(r => {
-    if (!grouped[r.muscle]) grouped[r.muscle] = [];
-    grouped[r.muscle].push(r);
-  });
-
-  return Object.entries(grouped).map(([muscle, weeks]) => {
-    weeks.sort((a, b) => a.week - b.week);
-    const last = weeks.at(-1);
-    return { muscle, sets: last.total_sets };
+    return {
+      ...d,
+      status
+    };
   });
 }
 
