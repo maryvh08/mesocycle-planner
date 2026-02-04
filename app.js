@@ -1754,7 +1754,12 @@ function calculateEfficiency(mesocycles) {
 }
 
 function renderComparison(a, b) {
-  const container = document.getElementById('compareResult');
+  if (!a || !b || a.strengthScore == null || b.strengthScore == null) {
+    console.warn("Datos incompletos para comparación");
+    return;
+  }
+
+  const container = document.getElementById("compareResult");
 
   container.innerHTML = `
     <div class="compare-grid">
@@ -2900,8 +2905,13 @@ document.addEventListener("DOMContentLoaded", () => {
    });
 });
 
-const fatigueMuscles = muscleStatus.filter(m => m.status === 'over');
-const weakMuscles = muscleStatus.filter(m => m.status === 'below');
+const muscleData = calculateMuscleVolume(records);
+
+const fatigueMuscles = muscleData.filter(
+  m => m.status === "fatigued" || m.status === "overreached"
+);
+
+const weakMuscles = muscleData.filter(m => m.status === 'below');
 
 if (fatigueMuscles.length >= 2) {
   coach = {
