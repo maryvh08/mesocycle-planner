@@ -2934,11 +2934,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupMesocycleComparison();
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.faq-question').forEach(btn => {
-    btn.addEventListener('click', () => {
-      console.log('CLICK');
-      btn.parentElement.classList.toggle('faq-open');
-    });
+console.log('JS CARGADO');
+
+document.querySelectorAll('.faq-question').forEach(btn => {
+  btn.addEventListener('click', () => {
+    console.log('CLICK');
+    btn.parentElement.classList.toggle('faq-open');
   });
 });
+
