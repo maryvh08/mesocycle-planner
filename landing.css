@@ -481,7 +481,7 @@ body {
 .faq-card h3 {
   font-size: 1.2rem;
   margin-bottom: 0.8rem;
-  color: #870f0f; /* resalta la pregunta */
+  color: #ff3b3b; /* resalta la pregunta */
 }
 
 .faq-card p {
