@@ -2935,10 +2935,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 document.querySelectorAll('.faq-question').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const answer = btn.nextElementSibling;
-      const toggle = btn.querySelector('.faq-toggle');
-      answer.classList.toggle('hidden');
-      toggle.textContent = answer.classList.contains('hidden') ? '+' : '−';
-    });
-   });
+ btn.addEventListener('click', () => {
+   const card = btn.parentElement;
+   card.classList.toggle('faq-open');
+ });
+});
+
