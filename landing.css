@@ -249,7 +249,7 @@ body {
   line-height: 1.6;
 }/* ================== HOW IT WORKS ================== */
 .how-it-works {
-  background: radial-gradient(circle at top, #1a1a1a, #000);
+  background: radial-gradient(circle at top, #240202, #000);
   padding: 6rem 2rem;
   color: #fff;
   text-align: center;
