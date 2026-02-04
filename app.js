@@ -47,6 +47,9 @@ const statsView = document.getElementById("stats");
 
 const favorites_key = 'favorite_exercises';
 
+const mesoSelectA = document.getElementById("mesoA");
+const mesoSelectB = document.getElementById("mesoB");
+
 /* ======================
    DOM CONTENT LOADED
 ====================== */
