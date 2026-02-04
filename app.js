@@ -2933,3 +2933,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadMesocycles();
   setupMesocycleComparison();
 });
+
+document.querySelectorAll('.faq-question').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const answer = btn.nextElementSibling;
+      const toggle = btn.querySelector('.faq-toggle');
+      answer.classList.toggle('hidden');
+      toggle.textContent = answer.classList.contains('hidden') ? '+' : '−';
+    });
+   });
