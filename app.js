@@ -1754,11 +1754,6 @@ function calculateEfficiency(mesocycles) {
 }
 
 function renderComparison(a, b) {
-  if (!a || !b || a.strengthScore == null || b.strengthScore == null) {
-    console.warn("Datos incompletos para comparación");
-    return;
-  }
-
   const container = document.getElementById("compareResult");
 
   container.innerHTML = `
