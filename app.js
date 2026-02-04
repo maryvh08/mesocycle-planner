@@ -1783,6 +1783,8 @@ function calculateEfficiency(mesocycles) {
 }
 
 function renderComparison(a, b) {
+  if (!a || !b) return;
+
   const container = document.getElementById("compareResult");
 
   container.innerHTML = `
@@ -1791,14 +1793,14 @@ function renderComparison(a, b) {
         <h4>Mesociclo ${a.mesocycle_id}</h4>
         <p>PRs: ${a.pr_count}</p>
         <p>Volumen: ${Math.round(a.volume)}</p>
-        <p>Fuerza media: ${a.strengthScore.toFixed(1)}</p>
+        <p>Fuerza media: ${safe(a.strengthScore)}</p>
       </div>
 
       <div class="compare-card ${b.efficiency > a.efficiency ? 'winner' : ''}">
-         <h4>Mesociclo ${a.mesocycle_id}</h4>
+        <h4>Mesociclo ${b.mesocycle_id}</h4>
         <p>PRs: ${b.pr_count}</p>
         <p>Volumen: ${Math.round(b.volume)}</p>
-        <p>Fuerza media: ${b.strengthScore.toFixed(1)}</p>
+        <p>Fuerza media: ${safe(b.strengthScore)}</p>
       </div>
     </div>
   `;
