@@ -226,11 +226,6 @@ body {
   box-shadow: 0 0 30px var(--accent-glow);
 }
 
-.how-it-works h2 {
-  text-align: center;
-  margin-bottom: 4rem;
-}
-
 .step img {
   width: 100%;
   max-width: 260px;   /* tamaño del mockup */
@@ -258,6 +253,8 @@ body {
 .how-it-works h2 {
   margin-bottom: 4rem;
   font-size: 2.3rem;
+  text-align: center;
+  margin-bottom: 4rem;
 }
 
 .steps {
