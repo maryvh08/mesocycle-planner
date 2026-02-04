@@ -1321,14 +1321,15 @@ async function loadDashboard(mesocycleId) {
   );
 
   const prs = await loadMesocyclePRs(mesocycleId);
-
   const summary = buildMesocycleSummary(
     prs,
     volumeData,
     muscleData
   );
 
-  renderSummary(summary);
+   renderSummary(summary);
+   const efficiency = calculateEfficiency(summary);
+   renderComparison(mesoA, mesoB);
 }
 
 function calculateMuscleVolume(records) {
@@ -2899,9 +2900,6 @@ document.addEventListener("DOMContentLoaded", () => {
      });
    });
 });
-
-const efficiency = calculateEfficiency(summary);
-renderComparison(mesoA, mesoB);
 
 const fatigueMuscles = muscleStatus.filter(m => m.status === 'over');
 const weakMuscles = muscleStatus.filter(m => m.status === 'below');
