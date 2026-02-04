@@ -138,14 +138,14 @@ body {
 
 .imagen-seccion {
   width: 100%;
-  height: 100vh;        /* ocupa toda la pantalla */
+  min-height: 100svh        /* ocupa toda la pantalla */
   overflow: hidden;
 }
 
 .imagen-seccion img {
   width: 100%;
   height: 100%;
-  object-fit: cover;    /* clave para responsive */
+  object-fit: contain;    /* clave para responsive */
   object-position: center;
   display: block;       /* elimina espacios raros */
 }
