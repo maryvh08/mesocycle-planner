@@ -1782,6 +1782,10 @@ function calculateEfficiency(mesocycles) {
   });
 }
 
+function safe(n, decimals = 1) {
+  return Number.isFinite(n) ? n.toFixed(decimals) : "—";
+}
+
 function renderComparison(a, b) {
   if (!a || !b) return;
 
