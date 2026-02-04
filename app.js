@@ -1315,21 +1315,20 @@ async function loadDashboard(mesocycleId) {
   const records = await fetchExerciseRecords(mesocycleId);
   if (!records.length) return;
 
-  // Volumen por ejercicio
   const volumeData = calculateVolumeTrend(records);
-  renderVolumeTable(volumeData);
+  const muscleData = evaluateMuscleVolume(
+    calculateMuscleVolume(records)
+  );
 
-  // Volumen por músculo (RP)
-  const muscleRaw = calculateMuscleVolume(records);
-  const muscleEvaluated = evaluateMuscleVolume(muscleRaw);
-  renderMuscleTable(muscleEvaluated);
-   
-  // Constantes resumen (RP)
-   const prs = await loadMesocyclePRs(mesocycleId);
-   
-  // Coach
-  const coachMsg = muscleCoachFeedback(muscleEvaluated);
-  updateCoachCard({ type: "neutral", message: coachMsg });
+  const prs = await loadMesocyclePRs(mesocycleId);
+
+  const summary = buildMesocycleSummary(
+    prs,
+    volumeData,
+    muscleData
+  );
+
+  renderSummary(summary);
 }
 
 function calculateMuscleVolume(records) {
@@ -2901,7 +2900,6 @@ document.addEventListener("DOMContentLoaded", () => {
    });
 });
 
-const summary = buildMesocycleSummary(prs, strength, volume);
 const efficiency = calculateEfficiency(summary);
 renderComparison(mesoA, mesoB);
 
