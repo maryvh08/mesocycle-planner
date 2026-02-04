@@ -197,7 +197,6 @@ body {
   gap: 3rem;
   max-width: 1200px;
   margin: 0 auto;
-  grid-template-columns: repeat(3, 1fr);
 }
 
 .step {
@@ -481,14 +480,15 @@ body {
 
 @media (max-width: 900px) {
   .steps {
-    grid-template-columns: 1fr;
-    gap: 3.5rem;
+    grid-template-columns: 1fr; /* apila los pasos verticalmente */
+    gap: 3.5rem;                /* espacio entre pasos */
   }
 
   .step img {
-    max-width: 220px;
+    max-width: 220px;           /* ajusta tamaño de imagen si hace falta */
   }
 }
+
 .plan-view {
   padding: 4rem 10%;
   text-align: center;
