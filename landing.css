@@ -189,11 +189,7 @@ body {
 
 .steps {
   display: grid;
-  gap: 3rem;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  margin-bottom: 3rem;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, 1fr); /* desktop: 3 columnas */
   gap: 3rem;
   max-width: 1200px;
   margin: 0 auto;
@@ -485,7 +481,8 @@ body {
   }
 
   .step img {
-    max-width: 220px;           /* ajusta tamaño de imagen si hace falta */
+    max-width: 220px;           /* tamaño más pequeño para móvil */
+    margin: 0 auto;             /* centrado */
   }
 }
 
