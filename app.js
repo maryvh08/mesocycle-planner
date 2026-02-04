@@ -2929,8 +2929,7 @@ if (fatigueMuscles.length >= 2) {
 }
 updateCoachCard(coach);
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener("DOMContentLoaded", async () => {
   await loadMesocycles();
   setupMesocycleComparison();
-  await loadInitialDashboard();
 });
