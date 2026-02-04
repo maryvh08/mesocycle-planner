@@ -478,6 +478,16 @@ body {
   }
 }
 
+@media (max-width: 900px) {
+  .steps {
+    grid-template-columns: 1fr;
+    gap: 3.5rem;
+  }
+
+  .step img {
+    max-width: 220px;
+  }
+}
 .plan-view {
   padding: 4rem 10%;
   text-align: center;
