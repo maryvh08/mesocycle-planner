@@ -1326,9 +1326,7 @@ async function loadDashboard(mesocycleId) {
    
   // Constantes resumen (RP)
    const prs = await loadMesocyclePRs(mesocycleId);
-   const summary = buildMesocycleSummary(prs, strength, volume);
-   const efficiency = calculateEfficiency(summary);
-
+   
   // Coach
   const coachMsg = muscleCoachFeedback(muscleEvaluated);
   updateCoachCard({ type: "neutral", message: coachMsg });
@@ -2903,6 +2901,8 @@ document.addEventListener("DOMContentLoaded", () => {
    });
 });
 
+const summary = buildMesocycleSummary(prs, strength, volume);
+const efficiency = calculateEfficiency(summary);
 renderComparison(mesoA, mesoB);
 
 const fatigueMuscles = muscleStatus.filter(m => m.status === 'over');
