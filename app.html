@@ -187,6 +187,10 @@
           <section class="deloadSection">
             <h3>🧯 Deload recomendado</h3>
             <div id="deloadTable"></div>
+            <div id="deloadCTA" class="coach-card danger hidden">
+              <p>Se recomienda un deload automático.</p>
+              <button id="applyDeloadBtn">Aplicar deload</button>
+            </div>
           </section>
           
           <!-- ===============================
@@ -223,7 +227,7 @@
              COACH DASHBOARD
           ================================ -->
           <section class="coach-dashboard">
-            <h2>🧠 Coach</h2>
+            <h2>Coach</h2>
           
             <!-- ===== ESTADO GLOBAL ===== -->
             <div class="coach-section">
@@ -256,7 +260,6 @@
               <h3>Recomendación</h3>
           
               <div class="coach-card success" id="coachCard">
-                <div class="coach-icon">🧠</div>
                 <div class="coach-content">
                   <p id="coachMessage"></p>
                 </div>
