@@ -3192,9 +3192,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Selecciona el botón de logout
 const sidebarLogoutBtn = document.getElementById('sidebar-logout-btn');
-const appView = document.getElementById('app-view');
-const loginView = document.getElementById('login-view');
-
 sidebarLogoutBtn.addEventListener('click', async () => {
   // 1️⃣ Cerrar sesión en Supabase
   const { error } = await supabase.auth.signOut();
