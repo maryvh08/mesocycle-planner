@@ -2996,6 +2996,14 @@ function openTab(tabId) {
   if (tab) tab.classList.remove("hidden");
 }
 
+function showTab(tabId) {
+  const tabs = document.querySelectorAll(".tab-content");
+  tabs.forEach(tab => tab.classList.add("hidden"));
+
+  const activeTab = document.getElementById(tabId);
+  if (activeTab) activeTab.classList.remove("hidden");
+}
+
 // Selecciona el botón de logout
 async function handleLogout() {
   // Cierra sesión en Supabase
@@ -3222,18 +3230,20 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-  const sidebarLogoutBtn = document.getElementById('sidebar-logout-btn');
-  if (sidebarLogoutBtn) {
-    sidebarLogoutBtn.addEventListener('click', async () => {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Error al cerrar sesión:', error.message);
-        return;
-      }
-      appView.classList.add('hidden');
-      loginView.classList.remove('hidden');
-    });
+document.addEventListener("DOMContentLoaded", async () => {
+  // 1️⃣ Revisar sesión activa
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (session) {
+    // Usuario logueado -> mostrar app
+    loginView.classList.add("hidden");
+    appView.classList.remove("hidden");
+
+    // Opcional: mostrar alguna pestaña por defecto
+    showTab('crear-tab'); // o la que quieras abrir por defecto
+  } else {
+    // No hay sesión -> mostrar login
+    loginView.classList.remove("hidden");
+    appView.classList.add("hidden");
   }
 });
-
