@@ -30,6 +30,27 @@
 }
 
 /* ======================
+   LOGOUT
+====================== */
+#app-header {
+  display: flex;
+  justify-content: flex-end; /* 👉 lo manda a la derecha */
+  align-items: center;
+  padding: 1rem;
+}
+
+#logout-btn {
+  font-size: 1.2rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#logout-btn:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* ======================
    RESET
 ====================== */
 * {
@@ -1316,6 +1337,12 @@ h3 {
   #tutorial-title {
     font-size: 1.1rem;
   }
+}
+
+#app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 /* ================= CARDS ================= */
