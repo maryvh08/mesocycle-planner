@@ -1315,8 +1315,6 @@ async function loadDashboard(mesocycleId) {
   const records = await fetchExerciseRecords(mesocycleId);
   if (!records.length) return;
 
-   const status = overallProgress(volumeData);
-
    document.getElementById("globalProgressText").textContent =
      status === 'green'
        ? 'Progreso global positivo'
@@ -1336,10 +1334,11 @@ async function loadDashboard(mesocycleId) {
   // VOLUMEN
   // ======================
   const volumeData = calculateVolumeTrend(records);
+   const status = overallProgress(volumeData);
   renderVolumeTable(volumeData);
   updateCoachFromVolume(volumeData);
 
-  // ======================
+   // ======================
   // MÚSCULOS (RP)
   // ======================
   const rawMuscle = calculateMuscleVolume(records);
