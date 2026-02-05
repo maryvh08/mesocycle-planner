@@ -1958,6 +1958,111 @@ function deloadAmount(ex) {
   return 0.15;
 }
 
+async function getLastDeload(userId) {
+  const { data } = await supabase
+    .from('mesocycles')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('is_deload', true)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  return data;
+}
+
+function rebuildTargetVolume({ muscle, prevSets, ranges }) {
+  const mav = ranges.MAV;
+
+  // si el músculo estaba fatigado → volver conservador
+  if (prevSets > ranges.MAV) {
+    return Math.round(mav * 0.85);
+  }
+
+  // si estaba bien → MAV limpio
+  return mav;
+}
+
+function distributeSets(exercises, targetSets) {
+  const total = exercises.reduce((a, e) => a + e.sets, 0);
+
+  return exercises.map(e => ({
+    ...e,
+    newSets: Math.max(
+      1,
+      Math.round((e.sets / total) * targetSets)
+    )
+  }));
+}
+
+async function createPostDeloadMesocycle({
+  deloadMesocycleId,
+  userId
+}) {
+  const { data: deload } = await supabase
+    .from('mesocycles')
+    .select('*')
+    .eq('id', deloadMesocycleId)
+    .single();
+
+  // 🔁 crear nuevo mesociclo
+  const { data: newMeso } = await supabase
+    .from('mesocycles')
+    .insert({
+      user_id: userId,
+      name: deload.name.replace('(Deload)', '(Rebuild)'),
+      weeks: 4,
+      days_per_week: deload.days_per_week,
+      template_id: deload.template_id,
+      is_deload: false
+    })
+    .select()
+    .single();
+
+  // 🔍 obtener ejercicios del deload
+  const { data: exercises } = await supabase
+    .from('mesocycle_exercises')
+    .select('*')
+    .eq('mesocycle_id', deloadMesocycleId);
+
+  // 🔧 agrupar por músculo
+  const byMuscle = {};
+  exercises.forEach(e => {
+    if (!byMuscle[e.muscle_group]) byMuscle[e.muscle_group] = [];
+    byMuscle[e.muscle_group].push(e);
+  });
+
+  const inserts = [];
+
+  Object.entries(byMuscle).forEach(([muscle, exs]) => {
+    const ranges = RP_RANGES[muscle];
+    if (!ranges) return;
+
+    const prevSets = exs.reduce((a, e) => a + e.sets, 0);
+    const target = rebuildTargetVolume({
+      muscle,
+      prevSets,
+      ranges
+    });
+
+    const distributed = distributeSets(exs, target);
+
+    distributed.forEach(e => {
+      inserts.push({
+        ...e,
+        mesocycle_id: newMeso.id,
+        sets: e.newSets
+      });
+    });
+  });
+
+  await supabase
+    .from('mesocycle_exercises')
+    .insert(inserts);
+
+  return newMeso.id;
+}
+
 function nextWeekSets(currentSets, range) {
   if (currentSets < range.mav) {
     return currentSets + 1; // overload
@@ -2877,6 +2982,20 @@ function updateCoachDashboard(exercises) {
     <div class="coach-card ${status === 'yellow' ? 'yellow' : ''}">⚠️ Estancamientos</div>
     <div class="coach-card ${status === 'red' ? 'red' : ''}">🚨 Fatiga</div>
   `;
+
+   if (lastMesocycle.is_deload) {
+     showRebuildCTA(async () => {
+       const { data: { user } } = await supabase.auth.getUser();
+   
+       await createPostDeloadMesocycle({
+         deloadMesocycleId: lastMesocycle.id,
+         userId: user.id
+       });
+   
+       alert('Mesociclo de rebuild creado');
+       loadMesocycles();
+     });
+   }
 }
 
 function renderFatigueAlerts(alerts) {
