@@ -3222,11 +3222,18 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const user = await supabase.auth.getUser();
-  if (user) {
-    appView.classList.remove("hidden");
-    loginView.classList.add("hidden");
-    openTab("crear-tab"); // pestaña inicial
+document.addEventListener("DOMContentLoaded", () => {
+  const sidebarLogoutBtn = document.getElementById('sidebar-logout-btn');
+  if (sidebarLogoutBtn) {
+    sidebarLogoutBtn.addEventListener('click', async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error al cerrar sesión:', error.message);
+        return;
+      }
+      appView.classList.add('hidden');
+      loginView.classList.remove('hidden');
+    });
   }
 });
+
