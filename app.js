@@ -1315,30 +1315,34 @@ async function loadDashboard(mesocycleId) {
   const records = await fetchExerciseRecords(mesocycleId);
   if (!records.length) return;
 
-   document.getElementById("globalProgressText").textContent =
-     status === 'green'
-       ? 'Progreso global positivo'
-       : status === 'yellow'
-       ? 'Progreso irregular'
-       : 'Riesgo de estancamiento';
-   
-   ['statusGreen', 'statusYellow', 'statusRed'].forEach(id => {
-     document.getElementById(id).classList.remove('active');
-   });
-   
-   if (status === 'green') document.getElementById('statusGreen').classList.add('active');
-   if (status === 'yellow') document.getElementById('statusYellow').classList.add('active');
-   if (status === 'red') document.getElementById('statusRed').classList.add('active');
-
   // ======================
   // VOLUMEN
   // ======================
   const volumeData = calculateVolumeTrend(records);
-   const status = overallProgress(volumeData);
   renderVolumeTable(volumeData);
   updateCoachFromVolume(volumeData);
 
-   // ======================
+  // ======================
+  // ESTADO GLOBAL (COACH)
+  // ======================
+  const status = overallProgress(volumeData);
+
+  document.getElementById("globalProgressText").textContent =
+    status === 'green'
+      ? 'Progreso global positivo'
+      : status === 'yellow'
+      ? 'Progreso irregular'
+      : 'Riesgo de estancamiento';
+
+  ['statusGreen', 'statusYellow', 'statusRed'].forEach(id => {
+    document.getElementById(id)?.classList.remove('active');
+  });
+
+  if (status === 'green') document.getElementById('statusGreen')?.classList.add('active');
+  if (status === 'yellow') document.getElementById('statusYellow')?.classList.add('active');
+  if (status === 'red') document.getElementById('statusRed')?.classList.add('active');
+
+  // ======================
   // MÚSCULOS (RP)
   // ======================
   const rawMuscle = calculateMuscleVolume(records);
@@ -1346,7 +1350,13 @@ async function loadDashboard(mesocycleId) {
   renderMuscleTable(muscleData);
 
   // ======================
-  // COACH – DELoad
+  // ALERTAS DE FATIGA
+  // ======================
+  const fatigue = fatigueAlerts(volumeData);
+  renderFatigueAlerts(fatigue);
+
+  // ======================
+  // COACH – DELOAD / AJUSTE
   // ======================
   const fatigueMuscles = muscleData.filter(
     m => m.status === "high" || m.status === "over"
@@ -1374,9 +1384,6 @@ async function loadDashboard(mesocycleId) {
       message: 'Distribución óptima. Mantén volumen e intensidad.'
     };
   }
-
-   const fatigue = fatigueAlerts(volumeData);
-   renderFatigueAlerts(fatigue);
 
   updateCoachCard(coach);
 }
