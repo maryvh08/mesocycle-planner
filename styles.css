@@ -501,6 +501,12 @@ section {
     padding: 12px;
   }
 }
+@media (max-width: 768px) {
+  .search-box input {
+    max-width: 100%;
+    font-size: 1rem;
+  }
+}
 
 @media (max-width: 600px) {
   .tutorial-card {
@@ -1574,9 +1580,12 @@ h3 {
 }
 
 .search-box input {
-  padding: 5px 10px;
-  width: 600px;
+  padding: 8px 12px;
+  width: 100%;
+  max-width: 600px;
+  box-sizing: border-box;
 }
+
 
 .favorites-filter {
   display: flex;
