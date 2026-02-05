@@ -1315,6 +1315,23 @@ async function loadDashboard(mesocycleId) {
   const records = await fetchExerciseRecords(mesocycleId);
   if (!records.length) return;
 
+   const status = overallProgress(volumeData);
+
+   document.getElementById("globalProgressText").textContent =
+     status === 'green'
+       ? 'Progreso global positivo'
+       : status === 'yellow'
+       ? 'Progreso irregular'
+       : 'Riesgo de estancamiento';
+   
+   ['statusGreen', 'statusYellow', 'statusRed'].forEach(id => {
+     document.getElementById(id).classList.remove('active');
+   });
+   
+   if (status === 'green') document.getElementById('statusGreen').classList.add('active');
+   if (status === 'yellow') document.getElementById('statusYellow').classList.add('active');
+   if (status === 'red') document.getElementById('statusRed').classList.add('active');
+
   // ======================
   // VOLUMEN
   // ======================
@@ -1358,6 +1375,9 @@ async function loadDashboard(mesocycleId) {
       message: 'Distribución óptima. Mantén volumen e intensidad.'
     };
   }
+
+   const fatigue = fatigueAlerts(volumeData);
+   renderFatigueAlerts(fatigue);
 
   updateCoachCard(coach);
 }
@@ -1846,7 +1866,7 @@ function volumeResponse(ex) {
 
 function fatigueAlerts(exercises) {
   return exercises.filter(e =>
-    e.trend === 'down' && e.volume > e.prevVolume
+    e.trend === '↓' && Number(e.percent) < -3
   );
 }
 
@@ -2206,9 +2226,11 @@ async function compareMesocycles(mesoA, mesoB) {
   const idB = Number(mesoB);
 
   const { data, error } = await supabase
-    .from('v_mesocycle_summary')
-    .select('*')
-    .in('mesocycle_id', [idA, idB]);
+     .from('v_mesocycle_summary')
+     .select('*')
+     .or(
+       `mesocycle_id.eq.${mesoA},mesocycle_id.eq.${mesoB}`
+     );
 
   if (error) {
     console.error(error);
@@ -2219,6 +2241,11 @@ async function compareMesocycles(mesoA, mesoB) {
   const b = data.find(d => d.mesocycle_id === idB);
 
   if (!a || !b) return;
+
+   if (!Array.isArray(data) || data.length < 2) {
+     console.warn("No hay suficientes datos para comparar");
+     return;
+   }
 
   renderComparison(a, b);
 }
@@ -2572,15 +2599,22 @@ function updateCoachDashboard(exercises) {
   `;
 }
 
-function renderFatigueAlerts(exercises) {
-  const alerts = fatigueAlerts(exercises);
+function renderFatigueAlerts(alerts) {
+  const container = document.getElementById("fatigueAlerts");
+  container.innerHTML = "";
 
-  if (!alerts.length) return;
+  if (!alerts.length) {
+    container.innerHTML = `<p class="muted">Sin alertas críticas</p>`;
+    return;
+  }
 
-  document.querySelector('.alert-card').innerHTML = `
-    ⚠️ Posible fatiga en:
-    <strong>${alerts.map(a => a.exercise).join(', ')}</strong>
-  `;
+  alerts.forEach(a => {
+    const div = document.createElement("div");
+    div.className = "coach-alert danger";
+    div.textContent = `${a.exercise}: caída de ${Math.abs(a.percent)}%`;
+
+    container.appendChild(div);
+  });
 }
 
 function renderDeloadAdvice(exercises) {
