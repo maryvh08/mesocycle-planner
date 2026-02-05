@@ -3035,10 +3035,11 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", async () => {
    await loadMesocycles();
    await loadMesocycleComparison();
-   populateMesocycleSelectors();
-   setupMesocycleComparison();
-   initCoachStatusCards();
 });
+
+populateMesocycleSelectors();
+setupMesocycleComparison();
+initCoachStatusCards();
 
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.faq-question').forEach(btn => {
