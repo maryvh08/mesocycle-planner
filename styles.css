@@ -42,7 +42,16 @@
    display: flex;
    justify-content: flex-end; /* 👉 lo manda a la derecha */
    align-items: center;
-   padding: 1rem;
+   padding: 1rem 1.5rem;
+}
+
+#app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;      /* ocupa todo el ancho */
+  z-index: 1000;
+  background: #050507;
 }
 
 #logout-btn {
