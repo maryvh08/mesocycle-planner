@@ -2127,11 +2127,11 @@ function setupMesocycleComparison() {
 
   if (!a || !b) return;
 
-  const handler = async () => {
+  const handler = () => {
     if (!a.value || !b.value) return;
     if (a.value === b.value) return;
 
-    await compareMesocycles(a.value, b.value);
+    compareMesocycles(a.value, b.value);
   };
 
   a.addEventListener("change", handler);
@@ -2254,6 +2254,40 @@ async function compareMesocycles(mesoA, mesoB) {
    }
 
   renderComparison(a, b);
+}
+
+async function populateMesocycleSelectors() {
+  const a = document.getElementById("mesoA");
+  const b = document.getElementById("mesoB");
+  if (!a || !b) return;
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data, error } = await supabase
+    .from("mesocycles")
+    .select("id, name")
+    .eq("user_id", user.id)
+    .order("created_at");
+
+  if (error) return console.error(error);
+
+  a.innerHTML = `<option value="">Mesociclo A</option>`;
+  b.innerHTML = `<option value="">Mesociclo B</option>`;
+
+  data.forEach(m => {
+    a.innerHTML += `<option value="${m.id}">${m.name}</option>`;
+    b.innerHTML += `<option value="${m.id}">${m.name}</option>`;
+  });
+}
+
+function initCoachStatusCards() {
+  document.getElementById("statusGreen").innerHTML =
+    "🟢 Progreso sólido";
+  document.getElementById("statusYellow").innerHTML =
+    "🟡 Progreso irregular";
+  document.getElementById("statusRed").innerHTML =
+    "🔴 Riesgo de estancamiento";
 }
 
 async function loadMuscleVolumeRP(mesocycleId) {
@@ -3001,7 +3035,9 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", async () => {
    await loadMesocycles();
    await loadMesocycleComparison();
+   populateMesocycleSelectors();
    setupMesocycleComparison();
+   initCoachStatusCards();
 });
 
 document.addEventListener('DOMContentLoaded', () => {
