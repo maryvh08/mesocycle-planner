@@ -2987,46 +2987,6 @@ function getSelectedValues(containerId) {
   return Array.from(document.querySelectorAll(`#${containerId} input:checked`)).map(i=>i.value);
 }
 
-function openTab(tabId) {
-  // Oculta todas las pestañas
-  document.querySelectorAll(".tab-content").forEach(tab => tab.classList.add("hidden"));
-  
-  // Muestra la pestaña deseada
-  const tab = document.getElementById(tabId);
-  if (tab) tab.classList.remove("hidden");
-}
-
-function showTab(tabId) {
-  const tabs = document.querySelectorAll(".tab-content");
-  tabs.forEach(tab => tab.classList.add("hidden"));
-
-  const activeTab = document.getElementById(tabId);
-  if (activeTab) activeTab.classList.remove("hidden");
-}
-
-// Selecciona el botón de logout
-async function handleLogout() {
-  // Cierra sesión en Supabase
-  const { error } = await supabase.auth.signOut();
-  if (error) {
-    console.error("Error al cerrar sesión:", error.message);
-    return;
-  }
-
-  // Muestra la app y oculta el login
-  loginView.classList.add("hidden");
-  appView.classList.remove("hidden");
-
-  // Abre la pestaña por defecto
-  openTab("crear-tab"); // aquí puedes cambiar "crear-tab" por la que quieras
-}
-
-// Header logout
-document.getElementById("logout-btn")?.addEventListener("click", handleLogout);
-
-// Sidebar logout
-document.getElementById("sidebar-logout-btn")?.addEventListener("click", handleLogout);
-
 // =====================
 // LISTENERS
 // =====================
@@ -3228,29 +3188,4 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.parentElement.classList.toggle('faq-open');
     });
   });
-});
-
-document.addEventListener("DOMContentLoaded", async () => {
-  const loginView = document.getElementById("login-view");
-  const appView = document.getElementById("app-view");
-
-  // 1️⃣ Revisar sesión
-  const { data: { session } } = await supabase.auth.getSession();
-
-  if (session) {
-    loginView.classList.add("hidden");
-    appView.classList.remove("hidden");
-
-    // Mostrar pestaña por defecto
-    showTab('crear-tab');
-  } else {
-    loginView.classList.remove("hidden");
-    appView.classList.add("hidden");
-  }
-
-  // 2️⃣ Listeners
-  document.getElementById("login-btn")?.addEventListener("click", login);
-  document.getElementById("logout-btn")?.addEventListener("click", handleLogout);
-  document.getElementById("sidebar-logout-btn")?.addEventListener("click", handleLogout);
-
 });
