@@ -1815,27 +1815,54 @@ function safe(n, decimals = 1) {
 }
 
 function renderComparison(a, b) {
-  if (!a || !b) return;
-
   const container = document.getElementById("compareResult");
+
+  const result = evaluateMesocycles(a, b);
 
   container.innerHTML = `
     <div class="compare-grid">
-      <div class="compare-card ${a.efficiency > b.efficiency ? 'winner' : ''}">
-        <h4>Mesociclo ${a.mesocycle_id}</h4>
+
+      <div class="compare-card ${result.winner === 'A' ? 'winner' : ''}">
+        <h4>${a.name ?? 'Mesociclo A'}</h4>
+        <p>Score: <strong>${result.a.score.toFixed(1)}</strong></p>
         <p>PRs: ${a.pr_count}</p>
         <p>Volumen: ${Math.round(a.volume)}</p>
-        <p>Fuerza media: ${safe(a.strengthScore)}</p>
+        <p>Fuerza media: ${a.strengthScore.toFixed(1)}</p>
       </div>
 
-      <div class="compare-card ${b.efficiency > a.efficiency ? 'winner' : ''}">
-        <h4>Mesociclo ${b.mesocycle_id}</h4>
+      <div class="compare-card ${result.winner === 'B' ? 'winner' : ''}">
+        <h4>${b.name ?? 'Mesociclo B'}</h4>
+        <p>Score: <strong>${result.b.score.toFixed(1)}</strong></p>
         <p>PRs: ${b.pr_count}</p>
         <p>Volumen: ${Math.round(b.volume)}</p>
-        <p>Fuerza media: ${safe(b.strengthScore)}</p>
+        <p>Fuerza media: ${b.strengthScore.toFixed(1)}</p>
       </div>
+
     </div>
   `;
+
+  renderMesocycleRecommendation(result);
+}
+
+function renderMesocycleRecommendation(result) {
+  let msg;
+  let type = 'neutral';
+
+  if (result.winner === 'A') {
+    msg = 'El Mesociclo A fue más eficiente. Repite su estructura y progresiones.';
+    type = 'success';
+  } else if (result.winner === 'B') {
+    msg = 'El Mesociclo B mostró mejor adaptación. Usa este como base.';
+    type = 'success';
+  } else {
+    msg = 'Ambos mesociclos rindieron similar. Decide según fatiga percibida.';
+    type = 'warning';
+  }
+
+  updateCoachCard({
+    type,
+    message: msg
+  });
 }
 
 function mesocycleCoach(a, b) {
@@ -2288,6 +2315,34 @@ function initCoachStatusCards() {
     "🟡 Progreso irregular";
   document.getElementById("statusRed").innerHTML =
     "🔴 Riesgo de estancamiento";
+}
+
+function calculateMesocycleScore(m) {
+  const strength = m.strengthScore || 0;
+  const prs = m.pr_count || 0;
+  const efficiency = m.efficiency || 0;
+
+  return (
+    strength * 0.4 +
+    prs * 5 * 0.3 +      // PRs pesan más
+    efficiency * 100 * 0.3
+  );
+}
+
+function evaluateMesocycles(a, b) {
+  const scoreA = calculateMesocycleScore(a);
+  const scoreB = calculateMesocycleScore(b);
+
+  return {
+    a: { ...a, score: scoreA },
+    b: { ...b, score: scoreB },
+    winner:
+      scoreA > scoreB * 1.05
+        ? 'A'
+        : scoreB > scoreA * 1.05
+        ? 'B'
+        : 'tie'
+  };
 }
 
 async function loadMuscleVolumeRP(mesocycleId) {
