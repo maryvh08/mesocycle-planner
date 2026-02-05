@@ -3189,3 +3189,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+// Selecciona el botón de logout
+const sidebarLogoutBtn = document.getElementById('sidebar-logout-btn');
+const appView = document.getElementById('app-view');
+const loginView = document.getElementById('login-view');
+
+sidebarLogoutBtn.addEventListener('click', async () => {
+  // 1️⃣ Cerrar sesión en Supabase
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    console.error('Error al cerrar sesión:', error.message);
+    return;
+  }
+
+  // 2️⃣ Ocultar la app y mostrar el login
+  appView.classList.add('hidden');
+  loginView.classList.remove('hidden');
+});
