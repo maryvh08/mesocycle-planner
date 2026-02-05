@@ -1312,117 +1312,172 @@ function getTrend(weeks) {
 }
 
 async function loadDashboard(mesocycleId) {
+  // ======================
+  // DATOS BASE
+  // ======================
   const records = await fetchExerciseRecords(mesocycleId);
-  if (!records.length) return;
+  if (!records || !records.length) return;
+
+  const prs = await loadMesocyclePRs(mesocycleId);
 
   // ======================
   // VOLUMEN
   // ======================
-  const prs = await loadMesocyclePRs(mesocycleId);
   const volumeData = calculateVolumeTrend(records);
   renderVolumeTable(volumeData);
   updateCoachFromVolume(volumeData);
 
   // ======================
-  // ESTADO GLOBAL (COACH)
+  // ESTADO GLOBAL
   // ======================
   const status = overallProgress(volumeData);
 
-  document.getElementById("globalProgressText").textContent =
-    status === 'green'
-      ? 'Progreso global positivo'
-      : status === 'yellow'
-      ? 'Progreso irregular'
-      : 'Riesgo de estancamiento';
+  const progressText = document.getElementById("globalProgressText");
+  if (progressText) {
+    progressText.textContent =
+      status === 'green'
+        ? 'Progreso global positivo'
+        : status === 'yellow'
+        ? 'Progreso irregular'
+        : 'Riesgo de estancamiento';
+  }
 
-  ['statusGreen', 'statusYellow', 'statusRed'].forEach(id => {
-    document.getElementById(id)?.classList.remove('active');
-  });
-
-  if (status === 'green') document.getElementById('statusGreen')?.classList.add('active');
-  if (status === 'yellow') document.getElementById('statusYellow')?.classList.add('active');
-  if (status === 'red') document.getElementById('statusRed')?.classList.add('active');
+  renderGlobalStatusCards(status);
 
   // ======================
-  // MÚSCULOS (RP)
+  // MÚSCULOS (VOLUMEN RP)
   // ======================
   const rawMuscle = calculateMuscleVolume(records);
   const muscleData = evaluateMuscleVolume(rawMuscle);
   renderMuscleTable(muscleData);
 
   // ======================
-  // ALERTAS DE FATIGA
+  // FATIGA POR MÚSCULO (REAL)
   // ======================
-  const fatigue = fatigueAlerts(volumeData);
-  renderFatigueAlerts(fatigue);
+  const fatigueByMuscle = muscleData.map(m => {
+    const score = evaluateMuscleFatigue({
+      muscle: m.muscle,
+      weekly: m,
+      ranges: RP_RANGES[m.muscle],
+      prevScore: m.prev_fatigue ?? 0,
+      isDeload: currentMesocycle?.is_deload ?? false
+    });
+
+    return {
+      ...m,
+      fatigueScore: score,
+      fatigueStatus: fatigueStatus(score)
+    };
+  });
+
+  renderMuscleFatigue(fatigueByMuscle);
 
   // ======================
-  // COACH – DELOAD / AJUSTE
+  // ALERTAS DE FATIGA (VOLUMEN)
   // ======================
-  const fatigueMuscles = muscleData.filter(
-    m => m.status === "high" || m.status === "over"
-  );
+  const fatigueAlertsData = fatigueAlerts(volumeData);
+  renderFatigueAlerts(fatigueAlertsData);
 
-  const weakMuscles = muscleData.filter(
-    m => m.status === "below"
-  );
+  // ======================
+  // DECISIÓN DELOAD AUTOMÁTICO
+  // ======================
+  const shouldDeload = needsDeload({
+    volumeData,
+    muscleData: fatigueByMuscle,
+    prs: prs?.length ?? 0
+  });
 
-  let coach;
+  let coach = null;
 
-  if (fatigueMuscles.length >= 2) {
+  if (shouldDeload) {
+    const pct = deloadPercentage({
+      volumeData,
+      muscleData: fatigueByMuscle
+    });
+
+    const plan = generateDeloadPlan(records, pct);
+    renderDeloadPlan(plan);
+
     coach = {
       type: 'danger',
-      message: 'Fatiga acumulada detectada. Deload recomendado (15–25%).'
+      message: `Deload automático recomendado. Reduce volumen ${Math.round(pct * 100)}%.`
     };
-  } else if (weakMuscles.length >= 2) {
-    coach = {
-      type: 'warning',
-      message: 'Algunos músculos subestimulados. Considera añadir 1–2 sets.'
-    };
+
+    showDeloadCTA(async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      await createDeloadMesocycle({
+        baseMesocycleId: mesocycleId,
+        deloadPlan: plan,
+        userId: user.id
+      });
+
+      alert('Mesociclo Deload creado automáticamente');
+      loadMesocycles();
+    });
+
   } else {
-    coach = {
-      type: 'success',
-      message: 'Distribución óptima. Mantén volumen e intensidad.'
-    };
+    // ======================
+    // COACH MANUAL
+    // ======================
+    const fatigued = fatigueByMuscle.filter(
+      m => m.fatigueStatus === 'overreached' || m.fatigueStatus === 'critical'
+    );
+
+    const weak = fatigueByMuscle.filter(
+      m => m.status === 'below'
+    );
+
+    if (fatigued.length >= 2) {
+      coach = {
+        type: 'warning',
+        message: 'Fatiga localizada detectada. Considera reducir sets en músculos críticos.'
+      };
+    } else if (weak.length >= 2) {
+      coach = {
+        type: 'info',
+        message: 'Músculos subestimulados. Añadir 1–2 sets podría mejorar el progreso.'
+      };
+    } else {
+      coach = {
+        type: 'success',
+        message: 'Mesociclo bien balanceado. Continúa con la planificación.'
+      };
+    }
   }
-   // ======================
-   // DELOAD AUTOMÁTICO
-   // ======================
-   const shouldDeload = needsDeload({
-     volumeData,
-     muscleData,
-     prs: prs?.length ?? 0
-   });
-   
-   if (shouldDeload) {
-     const pct = deloadPercentage({ volumeData, muscleData });
-     const plan = generateDeloadPlan(records, pct);
-   
-     updateCoachCard({
-       type: 'danger',
-       message: `Deload automático recomendado. Reduce sets ${Math.round(pct*100)}%.`
-     });
-   
-     renderDeloadPlan(plan);
-   }
-   if (shouldDeload) {
-     const pct = deloadPercentage({ volumeData, muscleData });
-     const plan = generateDeloadPlan(records, pct);
-   
-     showDeloadCTA(async () => {
-       const { data: { user } } = await supabase.auth.getUser();
-   
-       await createDeloadMesocycle({
-         baseMesocycleId: mesocycleId,
-         deloadPlan: plan,
-         userId: user.id
-       });
-   
-       alert('Mesociclo Deload creado automáticamente');
-       loadMesocycles(); // refresca historial
-     });
-   }
+
+  // ======================
+  // OUTPUT FINAL COACH
+  // ======================
   updateCoachCard(coach);
+}
+
+function renderGlobalStatusCards(status) {
+  const cards = {
+    green: {
+      el: 'statusGreen',
+      text: 'Volumen y progreso bien distribuidos'
+    },
+    yellow: {
+      el: 'statusYellow',
+      text: 'Progreso irregular. Vigila recuperación'
+    },
+    red: {
+      el: 'statusRed',
+      text: 'Alta fatiga o estancamiento detectado'
+    }
+  };
+
+  Object.values(cards).forEach(c => {
+    const el = document.getElementById(c.el);
+    if (!el) return;
+    el.classList.remove('active');
+    el.textContent = c.text;
+  });
+
+  if (cards[status]) {
+    document.getElementById(cards[status].el).classList.add('active');
+  }
 }
 
 function calculateMuscleVolume(records) {
@@ -2074,6 +2129,73 @@ function nextWeekSets(currentSets, range) {
 
   return range.mav - 2; // deload preventivo
 }
+
+function muscleFatigueScore({
+  sets,
+  ranges,
+  strengthTrend,
+  weeksWithoutPR,
+  volumeChange
+}) {
+  let score = 0;
+
+  // 📦 Volumen relativo
+  if (sets > ranges.MAV) score += 20;
+  if (sets > ranges.MRV) score += 35;
+
+  // 📉 Fuerza vs volumen
+  if (strengthTrend < 0 && volumeChange > 0) score += 25;
+
+  // 🧠 Tendencia de fuerza
+  if (strengthTrend < -2) score += 20;
+  if (strengthTrend < 0) score += 10;
+
+  // ⏳ Estancamiento
+  if (weeksWithoutPR >= 3) score += 10;
+  if (weeksWithoutPR >= 5) score += 20;
+
+  return Math.min(score, 100);
+}
+
+function accumulateFatigue(prev, current) {
+  // se arrastra el 70% de la fatiga previa
+  return Math.min(100, Math.round(prev * 0.7 + current));
+}
+
+function deloadRecovery(prevScore) {
+  return Math.max(0, Math.round(prevScore * 0.4));
+}
+
+function evaluateMuscleFatigue({
+  muscle,
+  weekly,
+  ranges,
+  prevScore = 0,
+  isDeload = false
+}) {
+  if (isDeload) {
+    return deloadRecovery(prevScore);
+  }
+
+  const raw = muscleFatigueScore({
+    sets: weekly.sets,
+    ranges,
+    strengthTrend: weekly.strengthTrend,
+    weeksWithoutPR: weekly.weeksWithoutPR,
+    volumeChange: weekly.volumeChange
+  });
+
+  return accumulateFatigue(prevScore, raw);
+}
+
+function fatigueStatus(score) {
+  if (score >= 86) return 'critical';
+  if (score >= 66) return 'overreached';
+  if (score >= 46) return 'fatigued';
+  if (score >= 26) return 'working';
+  return 'fresh';
+}
+
 
 function muscleStatus(vol, mev, mav, mrv, strengthTrend) {
   if (vol < mev) return "under";
@@ -3407,3 +3529,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+const critical = fatigueByMuscle.filter(
+  m => m.fatigueScore >= 86
+);
+
+if (critical.length > 0) {
+  updateCoachCard({
+    type: 'danger',
+    message: `Deload urgente recomendado (${critical.map(m=>m.muscle).join(', ')})`
+  });
+}
