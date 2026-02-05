@@ -1384,7 +1384,26 @@ async function loadDashboard(mesocycleId) {
       message: 'Distribución óptima. Mantén volumen e intensidad.'
     };
   }
-
+   // ======================
+   // DELOAD AUTOMÁTICO
+   // ======================
+   const shouldDeload = needsDeload({
+     volumeData,
+     muscleData,
+     prs: prs?.length ?? 0
+   });
+   
+   if (shouldDeload) {
+     const pct = deloadPercentage({ volumeData, muscleData });
+     const plan = generateDeloadPlan(records, pct);
+   
+     updateCoachCard({
+       type: 'danger',
+       message: `Deload automático recomendado. Reduce sets ${Math.round(pct*100)}%.`
+     });
+   
+     renderDeloadPlan(plan);
+   }
   updateCoachCard(coach);
 }
 
@@ -2343,6 +2362,82 @@ function evaluateMesocycles(a, b) {
         ? 'B'
         : 'tie'
   };
+}
+
+function needsDeload({ volumeData, muscleData, prs }) {
+  let score = 0;
+
+  // 1️⃣ Fuerza cayendo
+  const downs = volumeData.filter(v => v.trend === '↓').length;
+  if (downs >= 2) score++;
+
+  // 2️⃣ Fatiga muscular RP
+  const fatigued = muscleData.filter(
+    m => m.status === 'high' || m.status === 'over'
+  ).length;
+  if (fatigued >= 2) score++;
+
+  // 3️⃣ Estancamiento PRs
+  if (prs === 0) score++;
+
+  return score >= 2;
+}
+
+function deloadPercentage({ volumeData, muscleData }) {
+  const downs = volumeData.filter(v => v.trend === '↓').length;
+  const over = muscleData.filter(m => m.status === 'over').length;
+
+  if (downs >= 3 || over >= 2) return 0.35; // severo
+  if (downs >= 2) return 0.25;              // medio
+  return 0.15;                              // preventivo
+}
+
+function generateDeloadPlan(records, deloadPct) {
+  const plan = {};
+
+  records.forEach(r => {
+    if (!plan[r.exercise]) {
+      plan[r.exercise] = {
+        exercise: r.exercise,
+        originalSets: 0
+      };
+    }
+    plan[r.exercise].originalSets += 1;
+  });
+
+  return Object.values(plan).map(p => ({
+    exercise: p.exercise,
+    originalSets: p.originalSets,
+    deloadSets: Math.max(1, Math.round(p.originalSets * (1 - deloadPct)))
+  }));
+}
+
+function renderDeloadPlan(plan) {
+  const section = document.getElementById('deloadSection');
+  const container = document.getElementById('deloadTable');
+
+  section.classList.remove('hidden');
+
+  container.innerHTML = `
+    <table class="deload-table">
+      <thead>
+        <tr>
+          <th>Ejercicio</th>
+          <th>Sets actuales</th>
+          <th>Sets deload</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${plan.map(p => `
+          <tr>
+            <td>${p.exercise}</td>
+            <td>${p.originalSets}</td>
+            <td><strong>${p.deloadSets}</strong></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
 }
 
 async function loadMuscleVolumeRP(mesocycleId) {
