@@ -1315,49 +1315,51 @@ async function loadDashboard(mesocycleId) {
   const records = await fetchExerciseRecords(mesocycleId);
   if (!records.length) return;
 
+  // ======================
+  // VOLUMEN
+  // ======================
   const volumeData = calculateVolumeTrend(records);
-  const muscleData = evaluateMuscleVolume(
-    calculateMuscleVolume(records)
+  renderVolumeTable(volumeData);
+  updateCoachFromVolume(volumeData);
+
+  // ======================
+  // MÚSCULOS (RP)
+  // ======================
+  const rawMuscle = calculateMuscleVolume(records);
+  const muscleData = evaluateMuscleVolume(rawMuscle);
+  renderMuscleTable(muscleData);
+
+  // ======================
+  // COACH – DELoad
+  // ======================
+  const fatigueMuscles = muscleData.filter(
+    m => m.status === "high" || m.status === "over"
   );
 
-  const prs = await loadMesocyclePRs(mesocycleId);
-  const summary = buildMesocycleSummary(
-    prs,
-    volumeData,
-    muscleData
+  const weakMuscles = muscleData.filter(
+    m => m.status === "below"
   );
 
-   const efficiency = calculateEfficiency(summary);
-   renderComparison(mesoA, mesoB);
+  let coach;
 
-   const fatigueMuscles = muscleData.filter(
-     m => m.status === "fatigued" || m.status === "overreached"
-   );
-   
-   const weakMuscles = muscleData.filter(m => m.status === 'below');
-   
-   if (fatigueMuscles.length >= 2) {
-     coach = {
-       type: 'danger',
-       message: 'Fatiga acumulada detectada. Deload recomendado (15–25%).'
-     };
-   } else if (weakMuscles.length >= 2) {
-     coach = {
-       type: 'warning',
-       message: 'Algunos músculos subestimulados. Considera añadir 1–2 sets.'
-     };
-   } else {
-     coach = {
-       type: 'success',
-       message: 'Distribución óptima. Mantén volumen e intensidad.'
-     };
-   }
-   updateCoachCard(coach);
+  if (fatigueMuscles.length >= 2) {
+    coach = {
+      type: 'danger',
+      message: 'Fatiga acumulada detectada. Deload recomendado (15–25%).'
+    };
+  } else if (weakMuscles.length >= 2) {
+    coach = {
+      type: 'warning',
+      message: 'Algunos músculos subestimulados. Considera añadir 1–2 sets.'
+    };
+  } else {
+    coach = {
+      type: 'success',
+      message: 'Distribución óptima. Mantén volumen e intensidad.'
+    };
+  }
 
-   const processed = calculateEfficiency(summary);
-   if (processed.length >= 2) {
-     renderComparison(processed[0], processed[1]);
-   }
+  updateCoachCard(coach);
 }
 
 function calculateMuscleVolume(records) {
@@ -2180,21 +2182,41 @@ async function loadMesocycleComparison() {
 
     container.appendChild(div);
   });
+   
+   const selectA = document.getElementById("mesoA");
+   const selectB = document.getElementById("mesoB");
+   
+   selectA.innerHTML = `<option value="">Selecciona mesociclo A</option>`;
+   selectB.innerHTML = `<option value="">Selecciona mesociclo B</option>`;
+   
+   mesocycles.forEach(m => {
+     const optA = document.createElement("option");
+     optA.value = m.id;
+     optA.textContent = m.name;
+   
+     const optB = optA.cloneNode(true);
+   
+     selectA.appendChild(optA);
+     selectB.appendChild(optB);
+   });
 }
 
 async function compareMesocycles(mesoA, mesoB) {
+  const idA = Number(mesoA);
+  const idB = Number(mesoB);
+
   const { data, error } = await supabase
-    .from('v_mesocycle_summary') // view que ya hablamos
+    .from('v_mesocycle_summary')
     .select('*')
-    .in('mesocycle_id', [mesoA, mesoB]);
+    .in('mesocycle_id', [idA, idB]);
 
   if (error) {
     console.error(error);
     return;
   }
 
-  const a = data.find(d => d.mesocycle_id === mesoA);
-  const b = data.find(d => d.mesocycle_id === mesoB);
+  const a = data.find(d => d.mesocycle_id === idA);
+  const b = data.find(d => d.mesocycle_id === idB);
 
   if (!a || !b) return;
 
@@ -2937,8 +2959,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await loadMesocycles();
-  setupMesocycleComparison();
+   await loadMesocycles();
+   await loadMesocycleComparison();
+   setupMesocycleComparison();
 });
 
 document.addEventListener('DOMContentLoaded', () => {
