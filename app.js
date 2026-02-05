@@ -2987,6 +2987,26 @@ function getSelectedValues(containerId) {
   return Array.from(document.querySelectorAll(`#${containerId} input:checked`)).map(i=>i.value);
 }
 
+// Selecciona el botón de logout
+async function handleLogout() {
+  // Cierra sesión en Supabase
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    console.error("Error al cerrar sesión:", error.message);
+    return;
+  }
+
+  // Oculta la app y muestra el login
+  appView.classList.add("hidden");
+  loginView.classList.remove("hidden");
+}
+
+// Header logout
+document.getElementById("logout-btn")?.addEventListener("click", handleLogout);
+
+// Sidebar logout
+document.getElementById("sidebar-logout-btn")?.addEventListener("click", handleLogout);
+
 // =====================
 // LISTENERS
 // =====================
@@ -3188,19 +3208,4 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.parentElement.classList.toggle('faq-open');
     });
   });
-});
-
-// Selecciona el botón de logout
-const sidebarLogoutBtn = document.getElementById('sidebar-logout-btn');
-sidebarLogoutBtn.addEventListener('click', async () => {
-  // 1️⃣ Cerrar sesión en Supabase
-  const { error } = await supabase.auth.signOut();
-  if (error) {
-    console.error('Error al cerrar sesión:', error.message);
-    return;
-  }
-
-  // 2️⃣ Ocultar la app y mostrar el login
-  appView.classList.add('hidden');
-  loginView.classList.remove('hidden');
 });
