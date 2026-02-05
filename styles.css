@@ -2018,3 +2018,56 @@ h3 {
 .delete-time:hover {
   color: #ef4444;
 }
+
+/* ================== DELOAD SECTION ================== */
+#deloadSection {
+  margin-top: 2rem;
+  padding: 1.25rem 1.5rem;
+  background: #fff3cd;                /* fondo tipo alerta */
+  border-left: 5px solid #f5c518;     /* énfasis */
+  border-radius: 10px;
+  color: #111;
+  max-width: 100%;
+}
+
+/* Título */
+#deloadSection h3 {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Contenedor de tabla / contenido dinámico */
+#deloadTable {
+  width: 100%;
+  overflow-x: auto;        /* 👈 clave para móvil */
+}
+
+/* Si el JS inyecta una tabla */
+#deloadTable table {
+  width: 100%;
+  min-width: 480px;        /* evita que se aplaste */
+  border-collapse: collapse;
+}
+
+/* Celdas */
+#deloadTable th,
+#deloadTable td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Encabezados */
+#deloadTable th {
+  background: #f5c518;
+  color: #111;
+  font-weight: 600;
+}
+
+/* Filas alternas */
+#deloadTable tr:nth-child(even) {
+  background: #fff8dc;
+}
+
