@@ -1318,6 +1318,7 @@ async function loadDashboard(mesocycleId) {
   // ======================
   // VOLUMEN
   // ======================
+  const prs = await loadMesocyclePRs(mesocycleId);
   const volumeData = calculateVolumeTrend(records);
   renderVolumeTable(volumeData);
   updateCoachFromVolume(volumeData);
