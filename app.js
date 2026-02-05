@@ -3189,5 +3189,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
-
-document.getElementById("deloadSection").classList.remove("hidden");
