@@ -2987,6 +2987,15 @@ function getSelectedValues(containerId) {
   return Array.from(document.querySelectorAll(`#${containerId} input:checked`)).map(i=>i.value);
 }
 
+function openTab(tabId) {
+  // Oculta todas las pestañas
+  document.querySelectorAll(".tab-content").forEach(tab => tab.classList.add("hidden"));
+  
+  // Muestra la pestaña deseada
+  const tab = document.getElementById(tabId);
+  if (tab) tab.classList.remove("hidden");
+}
+
 // Selecciona el botón de logout
 async function handleLogout() {
   // Cierra sesión en Supabase
@@ -2996,9 +3005,12 @@ async function handleLogout() {
     return;
   }
 
-  // Oculta la app y muestra el login
-  appView.classList.add("hidden");
-  loginView.classList.remove("hidden");
+  // Muestra la app y oculta el login
+  loginView.classList.add("hidden");
+  appView.classList.remove("hidden");
+
+  // Abre la pestaña por defecto
+  openTab("crear-tab"); // aquí puedes cambiar "crear-tab" por la que quieras
 }
 
 // Header logout
@@ -3208,4 +3220,13 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.parentElement.classList.toggle('faq-open');
     });
   });
+});
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const user = await supabase.auth.getUser();
+  if (user) {
+    appView.classList.remove("hidden");
+    loginView.classList.add("hidden");
+    openTab("crear-tab"); // pestaña inicial
+  }
 });
