@@ -32,7 +32,6 @@
 /* ======================
    LOGOUT
 ====================== */
-
 #app-header {
    position: fixed;
    top: 0;
@@ -66,6 +65,17 @@
   background: rgba(255,255,255,0.1);
 }
 
+/* Empuja el botón de logout al final */
+.logout-item {
+  margin-top: auto;  /* 🔑 empuja hacia abajo */
+  background-color: #b50000;
+  color: #fff;
+  border-radius: 0 8px 8px 0;
+}
+
+.logout-item:hover {
+  background-color: #ff0000;
+}
 /* ======================
    RESET
 ====================== */
