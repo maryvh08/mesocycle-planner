@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
     <title>Planes | Mesocycle Tracker</title>
     <style>
@@ -109,6 +110,51 @@
         
         button.secondary:hover {
             background: #c62828;
+        }
+
+        /* 📱 Mobile (hasta 768px) */
+        @media (max-width: 768px) {
+        
+            .container {
+                margin: 15px;
+                padding: 20px;
+            }
+        
+            h1 {
+                font-size: 22px;
+                text-align: center;
+            }
+        
+            h2 {
+                font-size: 20px;
+                text-align: center;
+            }
+        
+            .layout {
+                flex-direction: column;
+                gap: 25px;
+            }
+        
+            .plans, .checkout {
+                min-width: 100%;
+            }
+        
+            .plan-card {
+                padding: 16px;
+            }
+        
+            .price {
+                font-size: 20px;
+            }
+        
+            ul {
+                padding-left: 16px;
+            }
+        
+            button {
+                font-size: 15px;
+                padding: 12px;
+            }
         }
     </style>
 </head>
