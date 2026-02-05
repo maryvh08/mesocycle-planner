@@ -1405,6 +1405,23 @@ async function loadDashboard(mesocycleId) {
    
      renderDeloadPlan(plan);
    }
+   if (shouldDeload) {
+     const pct = deloadPercentage({ volumeData, muscleData });
+     const plan = generateDeloadPlan(records, pct);
+   
+     showDeloadCTA(async () => {
+       const { data: { user } } = await supabase.auth.getUser();
+   
+       await createDeloadMesocycle({
+         baseMesocycleId: mesocycleId,
+         deloadPlan: plan,
+         userId: user.id
+       });
+   
+       alert('Mesociclo Deload creado automáticamente');
+       loadMesocycles(); // refresca historial
+     });
+   }
   updateCoachCard(coach);
 }
 
@@ -2429,6 +2446,88 @@ function renderDeloadPlan(plan) {
       </tbody>
     </table>
   `;
+}
+
+async function createDeloadMesocycle({
+  baseMesocycleId,
+  deloadPlan,
+  userId
+}) {
+  // 1️⃣ Obtener mesociclo base
+  const { data: base } = await supabase
+    .from('mesocycles')
+    .select('*')
+    .eq('id', baseMesocycleId)
+    .single();
+
+  if (!base) return;
+
+  // 2️⃣ Crear nuevo mesociclo
+  const { data: newMeso } = await supabase
+    .from('mesocycles')
+    .insert({
+      user_id: userId,
+      name: `${base.name} (Deload)`,
+      weeks: 1,
+      days_per_week: base.days_per_week,
+      template_id: base.template_id,
+      is_deload: true
+    })
+    .select()
+    .single();
+
+  // 3️⃣ Copiar estructura con sets reducidos
+  await applyDeloadToExercises(
+    baseMesocycleId,
+    newMeso.id,
+    deloadPlan
+  );
+
+  return newMeso.id;
+}
+
+async function applyDeloadToExercises(
+  baseMesocycleId,
+  newMesocycleId,
+  deloadPlan
+) {
+  const { data: exercises } = await supabase
+    .from('mesocycle_exercises')
+    .select('*')
+    .eq('mesocycle_id', baseMesocycleId);
+
+  const planMap = {};
+  deloadPlan.forEach(p => {
+    planMap[p.exercise] = p.deloadSets;
+  });
+
+  const inserts = [];
+
+  exercises.forEach(ex => {
+    const targetSets = planMap[ex.exercise_name] ?? ex.sets;
+
+    inserts.push({
+      mesocycle_id: newMesocycleId,
+      exercise_id: ex.exercise_id,
+      exercise_name: ex.exercise_name,
+      sets: Math.max(1, targetSets),
+      reps: ex.reps,
+      rir: ex.rir,
+      day: ex.day
+    });
+  });
+
+  await supabase
+    .from('mesocycle_exercises')
+    .insert(inserts);
+}
+
+function showDeloadCTA(onConfirm) {
+  const cta = document.getElementById('deloadCTA');
+  const btn = document.getElementById('applyDeloadBtn');
+
+  cta.classList.remove('hidden');
+  btn.onclick = onConfirm;
 }
 
 async function loadMuscleVolumeRP(mesocycleId) {
