@@ -3253,5 +3253,4 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("logout-btn")?.addEventListener("click", handleLogout);
   document.getElementById("sidebar-logout-btn")?.addEventListener("click", handleLogout);
 
-  // ...otros listeners
 });
