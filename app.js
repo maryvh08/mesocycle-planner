@@ -1934,16 +1934,6 @@ function coachAdvice(summary) {
   return 'Mantén volumen y busca mejorar ejecución.';
 }
 
-function needsDeload(ex) {
-  let score = 0;
-
-  if (ex.weeksDown >= 2) score++;
-  if (ex.volume > ex.prevVolume && ex.strengthChange <= 0) score++;
-  if (ex.weeksWithoutPR >= 3) score++;
-
-  return score >= 2;
-}
-
 function deloadAmount(ex) {
   if (ex.weeksDown >= 3 && ex.volumeSpike) return 0.35;
   if (ex.weeksDown >= 2) return 0.25;
