@@ -3231,19 +3231,27 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // 1️⃣ Revisar sesión activa
+  const loginView = document.getElementById("login-view");
+  const appView = document.getElementById("app-view");
+
+  // 1️⃣ Revisar sesión
   const { data: { session } } = await supabase.auth.getSession();
 
   if (session) {
-    // Usuario logueado -> mostrar app
     loginView.classList.add("hidden");
     appView.classList.remove("hidden");
 
-    // Opcional: mostrar alguna pestaña por defecto
-    showTab('crear-tab'); // o la que quieras abrir por defecto
+    // Mostrar pestaña por defecto
+    showTab('crear-tab');
   } else {
-    // No hay sesión -> mostrar login
     loginView.classList.remove("hidden");
     appView.classList.add("hidden");
   }
+
+  // 2️⃣ Listeners
+  document.getElementById("login-btn")?.addEventListener("click", login);
+  document.getElementById("logout-btn")?.addEventListener("click", handleLogout);
+  document.getElementById("sidebar-logout-btn")?.addEventListener("click", handleLogout);
+
+  // ...otros listeners
 });
