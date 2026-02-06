@@ -1353,16 +1353,6 @@ async function loadDashboard(mesocycleId) {
   // ======================
   const fatigueByMuscle = muscleData.map(m => {
     const ranges = RP_RANGES[m.muscle];
-
-    if (!ranges) {
-      console.warn(`⚠️ RP_RANGES no definido para: ${m.muscle}`);
-      return {
-        ...m,
-        fatigueScore: 0,
-        fatigueStatus: 'unknown'
-      };
-    }
-
     const score = evaluateMuscleFatigue({
       muscle: m.muscle,
       weekly: m,
