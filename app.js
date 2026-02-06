@@ -2153,9 +2153,6 @@ const MUSCLE_MAP = {
   'Espalda baja': 'lower_back'
 };
 
-const key = MUSCLE_MAP[m.muscle] ?? m.muscle;
-const ranges = RP_RANGES[key];
-
 function fatigueStatus(score) {
   if (score >= 86) return 'critical';
   if (score >= 66) return 'overreached';
