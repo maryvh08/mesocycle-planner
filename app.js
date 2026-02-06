@@ -1376,18 +1376,6 @@ async function loadDashboard(mesocycleId) {
   if (status === 'yellow') statusYellow?.classList.add('active');
   if (status === 'red') statusRed?.classList.add('active');
 
-   if (coach.type === 'danger') {
-     const container = document.getElementById('deloadPlan');
-     if (container) {
-       container.innerHTML = `
-         <p>Reducir volumen total 15–25%</p>
-         <ul>
-           ${fatigued.map(m => `<li>${m.muscle}</li>`).join('')}
-         </ul>
-       `;
-     }
-   }
-
   // ======================
   // 5️⃣ MÚSCULOS (RP)
   // ======================
@@ -1454,6 +1442,18 @@ async function loadDashboard(mesocycleId) {
   }
 
   updateCoachCard(coach);
+
+   if (coach.type === 'danger') {
+     const container = document.getElementById('deloadPlan');
+     if (container) {
+       container.innerHTML = `
+         <p>Reducir volumen total 15–25%</p>
+         <ul>
+           ${fatigued.map(m => `<li>${m.muscle}</li>`).join('')}
+         </ul>
+       `;
+     }
+   }
 }
 
 function safePercentChange(current, previous) {
