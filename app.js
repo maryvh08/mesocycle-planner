@@ -1361,22 +1361,11 @@ async function loadDashboard(mesocycleId) {
   const statusGreen = document.getElementById('statusGreen');
   const statusYellow = document.getElementById('statusYellow');
   const statusRed = document.getElementById('statusRed');
-   let finalStatus = status;
+
+  document.getElementById('statusGreen').textContent = '🟢 Progreso sólido';
+  document.getElementById('statusYellow').textContent = '🟡 Progreso irregular';
+  document.getElementById('statusRed').textContent = '🔴 Riesgo de estancamiento';
    
-   // ⚠️ Si hay peligro real, forzar rojo
-   if (fatigued.length >= 2) {
-     finalStatus = 'red';
-   }
-
-  ['statusGreen', 'statusYellow', 'statusRed'].forEach(id =>
-     document.getElementById(id)?.classList.remove('active')
-   );
-   
-   if (finalStatus === 'green') statusGreen.classList.add('active');
-   if (finalStatus === 'yellow') statusYellow.classList.add('active');
-   if (finalStatus === 'red') statusRed.classList.add('active');
-
-
   // ======================
   // 2️⃣ DATA BASE
   // ======================
