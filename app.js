@@ -1,4 +1,11 @@
 console.log("🔥 app.js cargado  exitosamente");
+console.log(
+  muscleData.map(m => ({
+    muscle: m.muscle,
+    hasRP: !!RP_RANGES[m.muscle]
+  }))
+);
+
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 /* ======================
