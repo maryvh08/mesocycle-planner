@@ -3173,22 +3173,27 @@ function updateCoachDashboard(exercises) {
    }
 }
 
-function renderFatigueAlerts(alerts) {
-   const pct = Number(v.percent);
-   
-   if (isNaN(pct)) return null;
+function renderFatigueAlerts(data) {
   const container = document.getElementById('fatigueAlerts');
+  if (!container) return;
+
   container.innerHTML = '';
 
-  if (!alerts.length) {
-    container.innerHTML = '<p class="muted">Sin alertas críticas</p>';
+  if (!Array.isArray(data) || data.length === 0) {
+    container.innerHTML = `<p class="muted">Sin alertas críticas</p>`;
     return;
   }
 
-  alerts.forEach(a => {
+  data.forEach(v => {
+    const pct = Number(v.percent);
+
+    if (isNaN(pct)) return;
+
     const div = document.createElement('div');
     div.className = 'alert-card';
-    div.textContent = `⚠️ ${a.exercise}: caída de ${a.drop}%`;
+
+    div.textContent = `⚠️ ${v.exercise}: caída de ${Math.abs(pct)}%`;
+
     container.appendChild(div);
   });
 }
