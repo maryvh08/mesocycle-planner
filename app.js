@@ -1987,18 +1987,10 @@ function volumeResponse(ex) {
   return ex.strengthChange / ex.volume;
 }
 
-function fatigueAlerts(volumeData) {
-  if (!Array.isArray(volumeData)) return [];
-
-  return volumeData
-    .filter(v =>
-      typeof v.percent === 'number' &&
-      v.percent < -10
-    )
-    .map(v => ({
-      exercise: v.exercise,
-      drop: Math.abs(v.percent).toFixed(1)
-    }));
+function fatigueAlerts(exercises) {
+  return exercises.filter(e =>
+    e.trend === '↓' && Number(e.percent) < -3
+  );
 }
 
 function coachAdvice(summary) {
