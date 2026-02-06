@@ -1,3 +1,4 @@
+
 console.log("🔥 app.js cargado  exitosamente");
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
@@ -1320,6 +1321,7 @@ async function loadDashboard(mesocycleId) {
   // ======================
   const volumeData = calculateVolumeTrend(records);
   renderVolumeTable(volumeData);
+  updateCoachFromVolume(volumeData);
 
   // ======================
   // ESTADO GLOBAL (COACH)
@@ -1333,9 +1335,9 @@ async function loadDashboard(mesocycleId) {
       ? 'Progreso irregular'
       : 'Riesgo de estancamiento';
 
-  ['statusGreen', 'statusYellow', 'statusRed'].forEach(id =>
-    document.getElementById(id)?.classList.remove('active')
-  );
+  ['statusGreen', 'statusYellow', 'statusRed'].forEach(id => {
+    document.getElementById(id)?.classList.remove('active');
+  });
 
   if (status === 'green') document.getElementById('statusGreen')?.classList.add('active');
   if (status === 'yellow') document.getElementById('statusYellow')?.classList.add('active');
@@ -1349,47 +1351,30 @@ async function loadDashboard(mesocycleId) {
   renderMuscleTable(muscleData);
 
   // ======================
-  // FATIGA POR MÚSCULO (RP)
-  // ======================
-  const fatigueByMuscle = muscleData.map(m => {
-    const ranges = RP_RANGES[m.muscle];
-    const score = evaluateMuscleFatigue({
-      muscle: m.muscle,
-      weekly: m,
-      ranges,
-      prevScore: m.prev_fatigue ?? 0,
-      isDeload: false
-    });
-
-    return {
-      ...m,
-      fatigueScore: score,
-      fatigueStatus: fatigueStatus(score)
-    };
-  });
-
-  // ======================
   // ALERTAS DE FATIGA
   // ======================
-  renderFatigueAlerts(fatigueByMuscle);
+  const fatigue = fatigueAlerts(volumeData);
+  renderFatigueAlerts(fatigue);
 
   // ======================
-  // COACH (DELOAD / AJUSTE)
+  // COACH – DELOAD / AJUSTE
   // ======================
-  const fatigued = fatigueByMuscle.filter(m =>
-    m.fatigueStatus === 'high' || m.fatigueStatus === 'over'
+  const fatigueMuscles = muscleData.filter(
+    m => m.status === "high" || m.status === "over"
   );
 
-  const weak = fatigueByMuscle.filter(m => m.status === 'below');
+  const weakMuscles = muscleData.filter(
+    m => m.status === "below"
+  );
 
   let coach;
 
-  if (fatigued.length >= 2) {
+  if (fatigueMuscles.length >= 2) {
     coach = {
       type: 'danger',
       message: 'Fatiga acumulada detectada. Deload recomendado (15–25%).'
     };
-  } else if (weak.length >= 2) {
+  } else if (weakMuscles.length >= 2) {
     coach = {
       type: 'warning',
       message: 'Algunos músculos subestimulados. Considera añadir 1–2 sets.'
@@ -1402,34 +1387,6 @@ async function loadDashboard(mesocycleId) {
   }
 
   updateCoachCard(coach);
-}
-
-function renderGlobalStatusCards(status) {
-  const cards = {
-    green: {
-      el: 'statusGreen',
-      text: 'Volumen y progreso bien distribuidos'
-    },
-    yellow: {
-      el: 'statusYellow',
-      text: 'Progreso irregular. Vigila recuperación'
-    },
-    red: {
-      el: 'statusRed',
-      text: 'Alta fatiga o estancamiento detectado'
-    }
-  };
-
-  Object.values(cards).forEach(c => {
-    const el = document.getElementById(c.el);
-    if (!el) return;
-    el.classList.remove('active');
-    el.textContent = c.text;
-  });
-
-  if (cards[status]) {
-    document.getElementById(cards[status].el).classList.add('active');
-  }
 }
 
 function calculateMuscleVolume(records) {
@@ -1749,14 +1706,13 @@ function updateCoachFromVolume(data) {
 }
 
 const RP_RANGES = {
-  chest: { MEV: 10, MAV: 14, MRV: 20 },
-  back: { MEV: 12, MAV: 16, MRV: 22 },
-  shoulders: { MEV: 8, MAV: 12, MRV: 18 },
-  quads: { MEV: 10, MAV: 14, MRV: 20 },
-  hamstrings: { MEV: 8, MAV: 12, MRV: 16 },
-  calves: { MEV: 6, MAV: 10, MRV: 14 },
-  biceps: { MEV: 6, MAV: 10, MRV: 14 },
-  triceps: { MEV: 6, MAV: 10, MRV: 14 }
+  Pecho: { MEV: 8, MAV: 12, MRV: 20 },
+  Espalda: { MEV: 10, MAV: 14, MRV: 22 },
+  Cuádriceps: { MEV: 8, MAV: 12, MRV: 18 },
+  Isquiotibiales: { MEV: 6, MAV: 10, MRV: 16 },
+  Deltoides: { MEV: 10, MAV: 16, MRV: 24 },
+  Bíceps: { MEV: 6, MAV: 10, MRV: 18 },
+  Tríceps: { MEV: 6, MAV: 10, MRV: 18 }
 };
 
 function renderMuscleTable(data) {
@@ -1860,54 +1816,27 @@ function safe(n, decimals = 1) {
 }
 
 function renderComparison(a, b) {
-  const container = document.getElementById("compareResult");
+  if (!a || !b) return;
 
-  const result = evaluateMesocycles(a, b);
+  const container = document.getElementById("compareResult");
 
   container.innerHTML = `
     <div class="compare-grid">
-
-      <div class="compare-card ${result.winner === 'A' ? 'winner' : ''}">
-        <h4>${a.name ?? 'Mesociclo A'}</h4>
-        <p>Score: <strong>${result.a.score.toFixed(1)}</strong></p>
+      <div class="compare-card ${a.efficiency > b.efficiency ? 'winner' : ''}">
+        <h4>Mesociclo ${a.mesocycle_id}</h4>
         <p>PRs: ${a.pr_count}</p>
         <p>Volumen: ${Math.round(a.volume)}</p>
-        <p>Fuerza media: ${a.strengthScore.toFixed(1)}</p>
+        <p>Fuerza media: ${safe(a.strengthScore)}</p>
       </div>
 
-      <div class="compare-card ${result.winner === 'B' ? 'winner' : ''}">
-        <h4>${b.name ?? 'Mesociclo B'}</h4>
-        <p>Score: <strong>${result.b.score.toFixed(1)}</strong></p>
+      <div class="compare-card ${b.efficiency > a.efficiency ? 'winner' : ''}">
+        <h4>Mesociclo ${b.mesocycle_id}</h4>
         <p>PRs: ${b.pr_count}</p>
         <p>Volumen: ${Math.round(b.volume)}</p>
-        <p>Fuerza media: ${b.strengthScore.toFixed(1)}</p>
+        <p>Fuerza media: ${safe(b.strengthScore)}</p>
       </div>
-
     </div>
   `;
-
-  renderMesocycleRecommendation(result);
-}
-
-function renderMesocycleRecommendation(result) {
-  let msg;
-  let type = 'neutral';
-
-  if (result.winner === 'A') {
-    msg = 'El Mesociclo A fue más eficiente. Repite su estructura y progresiones.';
-    type = 'success';
-  } else if (result.winner === 'B') {
-    msg = 'El Mesociclo B mostró mejor adaptación. Usa este como base.';
-    type = 'success';
-  } else {
-    msg = 'Ambos mesociclos rindieron similar. Decide según fatiga percibida.';
-    type = 'warning';
-  }
-
-  updateCoachCard({
-    type,
-    message: msg
-  });
 }
 
 function mesocycleCoach(a, b) {
@@ -1960,115 +1889,20 @@ function coachAdvice(summary) {
   return 'Mantén volumen y busca mejorar ejecución.';
 }
 
+function needsDeload(ex) {
+  let score = 0;
+
+  if (ex.weeksDown >= 2) score++;
+  if (ex.volume > ex.prevVolume && ex.strengthChange <= 0) score++;
+  if (ex.weeksWithoutPR >= 3) score++;
+
+  return score >= 2;
+}
+
 function deloadAmount(ex) {
   if (ex.weeksDown >= 3 && ex.volumeSpike) return 0.35;
   if (ex.weeksDown >= 2) return 0.25;
   return 0.15;
-}
-
-async function getLastDeload(userId) {
-  const { data } = await supabase
-    .from('mesocycles')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('is_deload', true)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
-
-  return data;
-}
-
-function rebuildTargetVolume({ muscle, prevSets, ranges }) {
-  const mav = ranges.MAV;
-
-  // si el músculo estaba fatigado → volver conservador
-  if (prevSets > ranges.MAV) {
-    return Math.round(mav * 0.85);
-  }
-
-  // si estaba bien → MAV limpio
-  return mav;
-}
-
-function distributeSets(exercises, targetSets) {
-  const total = exercises.reduce((a, e) => a + e.sets, 0);
-
-  return exercises.map(e => ({
-    ...e,
-    newSets: Math.max(
-      1,
-      Math.round((e.sets / total) * targetSets)
-    )
-  }));
-}
-
-async function createPostDeloadMesocycle({
-  deloadMesocycleId,
-  userId
-}) {
-  const { data: deload } = await supabase
-    .from('mesocycles')
-    .select('*')
-    .eq('id', deloadMesocycleId)
-    .single();
-
-  // 🔁 crear nuevo mesociclo
-  const { data: newMeso } = await supabase
-    .from('mesocycles')
-    .insert({
-      user_id: userId,
-      name: deload.name.replace('(Deload)', '(Rebuild)'),
-      weeks: 4,
-      days_per_week: deload.days_per_week,
-      template_id: deload.template_id,
-      is_deload: false
-    })
-    .select()
-    .single();
-
-  // 🔍 obtener ejercicios del deload
-  const { data: exercises } = await supabase
-    .from('mesocycle_exercises')
-    .select('*')
-    .eq('mesocycle_id', deloadMesocycleId);
-
-  // 🔧 agrupar por músculo
-  const byMuscle = {};
-  exercises.forEach(e => {
-    if (!byMuscle[e.muscle_group]) byMuscle[e.muscle_group] = [];
-    byMuscle[e.muscle_group].push(e);
-  });
-
-  const inserts = [];
-
-  Object.entries(byMuscle).forEach(([muscle, exs]) => {
-    const ranges = RP_RANGES[muscle];
-    if (!ranges) return;
-
-    const prevSets = exs.reduce((a, e) => a + e.sets, 0);
-    const target = rebuildTargetVolume({
-      muscle,
-      prevSets,
-      ranges
-    });
-
-    const distributed = distributeSets(exs, target);
-
-    distributed.forEach(e => {
-      inserts.push({
-        ...e,
-        mesocycle_id: newMeso.id,
-        sets: e.newSets
-      });
-    });
-  });
-
-  await supabase
-    .from('mesocycle_exercises')
-    .insert(inserts);
-
-  return newMeso.id;
 }
 
 function nextWeekSets(currentSets, range) {
@@ -2082,73 +1916,6 @@ function nextWeekSets(currentSets, range) {
 
   return range.mav - 2; // deload preventivo
 }
-
-function muscleFatigueScore({
-  sets,
-  ranges,
-  strengthTrend,
-  weeksWithoutPR,
-  volumeChange
-}) {
-  let score = 0;
-
-  // 📦 Volumen relativo
-  if (sets > ranges.MAV) score += 20;
-  if (sets > ranges.MRV) score += 35;
-
-  // 📉 Fuerza vs volumen
-  if (strengthTrend < 0 && volumeChange > 0) score += 25;
-
-  // 🧠 Tendencia de fuerza
-  if (strengthTrend < -2) score += 20;
-  if (strengthTrend < 0) score += 10;
-
-  // ⏳ Estancamiento
-  if (weeksWithoutPR >= 3) score += 10;
-  if (weeksWithoutPR >= 5) score += 20;
-
-  return Math.min(score, 100);
-}
-
-function accumulateFatigue(prev, current) {
-  // se arrastra el 70% de la fatiga previa
-  return Math.min(100, Math.round(prev * 0.7 + current));
-}
-
-function deloadRecovery(prevScore) {
-  return Math.max(0, Math.round(prevScore * 0.4));
-}
-
-function evaluateMuscleFatigue({
-  muscle,
-  weekly,
-  ranges,
-  prevScore = 0,
-  isDeload = false
-}) {
-  if (isDeload) {
-    return deloadRecovery(prevScore);
-  }
-
-  const raw = muscleFatigueScore({
-    sets: weekly.sets,
-    ranges,
-    strengthTrend: weekly.strengthTrend,
-    weeksWithoutPR: weekly.weeksWithoutPR,
-    volumeChange: weekly.volumeChange
-  });
-
-  return accumulateFatigue(prevScore, raw);
-}
-
-function fatigueStatus(score) {
-  if (score >= 86) return 'critical';
-  if (score >= 66) return 'overreached';
-  if (score >= 46) return 'fatigued';
-  if (score >= 26) return 'working';
-  return 'fresh';
-}
-
 
 function muscleStatus(vol, mev, mav, mrv, strengthTrend) {
   if (vol < mev) return "under";
@@ -2524,192 +2291,6 @@ function initCoachStatusCards() {
     "🔴 Riesgo de estancamiento";
 }
 
-function calculateMesocycleScore(m) {
-  const strength = m.strengthScore || 0;
-  const prs = m.pr_count || 0;
-  const efficiency = m.efficiency || 0;
-
-  return (
-    strength * 0.4 +
-    prs * 5 * 0.3 +      // PRs pesan más
-    efficiency * 100 * 0.3
-  );
-}
-
-function evaluateMesocycles(a, b) {
-  const scoreA = calculateMesocycleScore(a);
-  const scoreB = calculateMesocycleScore(b);
-
-  return {
-    a: { ...a, score: scoreA },
-    b: { ...b, score: scoreB },
-    winner:
-      scoreA > scoreB * 1.05
-        ? 'A'
-        : scoreB > scoreA * 1.05
-        ? 'B'
-        : 'tie'
-  };
-}
-
-function needsDeload({ volumeData, muscleData, prs }) {
-  let score = 0;
-
-  // 1️⃣ Fuerza cayendo
-  const downs = volumeData.filter(v => v.trend === '↓').length;
-  if (downs >= 2) score++;
-
-  // 2️⃣ Fatiga muscular RP
-  const fatigued = muscleData.filter(
-    m => m.status === 'high' || m.status === 'over'
-  ).length;
-  if (fatigued >= 2) score++;
-
-  // 3️⃣ Estancamiento PRs
-  if (prs === 0) score++;
-
-  return score >= 2;
-}
-
-function deloadPercentage({ volumeData, muscleData }) {
-  const downs = volumeData.filter(v => v.trend === '↓').length;
-  const over = muscleData.filter(m => m.status === 'over').length;
-
-  if (downs >= 3 || over >= 2) return 0.35; // severo
-  if (downs >= 2) return 0.25;              // medio
-  return 0.15;                              // preventivo
-}
-
-function generateDeloadPlan(records, deloadPct) {
-  const plan = {};
-
-  records.forEach(r => {
-    if (!plan[r.exercise]) {
-      plan[r.exercise] = {
-        exercise: r.exercise,
-        originalSets: 0
-      };
-    }
-    plan[r.exercise].originalSets += 1;
-  });
-
-  return Object.values(plan).map(p => ({
-    exercise: p.exercise,
-    originalSets: p.originalSets,
-    deloadSets: Math.max(1, Math.round(p.originalSets * (1 - deloadPct)))
-  }));
-}
-
-function renderDeloadPlan(plan) {
-  const section = document.getElementById('deloadSection');
-  const container = document.getElementById('deloadTable');
-
-  section.classList.remove('hidden');
-
-  container.innerHTML = `
-    <table class="deload-table">
-      <thead>
-        <tr>
-          <th>Ejercicio</th>
-          <th>Sets actuales</th>
-          <th>Sets deload</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${plan.map(p => `
-          <tr>
-            <td>${p.exercise}</td>
-            <td>${p.originalSets}</td>
-            <td><strong>${p.deloadSets}</strong></td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-  `;
-}
-
-async function createDeloadMesocycle({
-  baseMesocycleId,
-  deloadPlan,
-  userId
-}) {
-  // 1️⃣ Obtener mesociclo base
-  const { data: base } = await supabase
-    .from('mesocycles')
-    .select('*')
-    .eq('id', baseMesocycleId)
-    .single();
-
-  if (!base) return;
-
-  // 2️⃣ Crear nuevo mesociclo
-  const { data: newMeso } = await supabase
-    .from('mesocycles')
-    .insert({
-      user_id: userId,
-      name: `${base.name} (Deload)`,
-      weeks: 1,
-      days_per_week: base.days_per_week,
-      template_id: base.template_id,
-      is_deload: true
-    })
-    .select()
-    .single();
-
-  // 3️⃣ Copiar estructura con sets reducidos
-  await applyDeloadToExercises(
-    baseMesocycleId,
-    newMeso.id,
-    deloadPlan
-  );
-
-  return newMeso.id;
-}
-
-async function applyDeloadToExercises(
-  baseMesocycleId,
-  newMesocycleId,
-  deloadPlan
-) {
-  const { data: exercises } = await supabase
-    .from('mesocycle_exercises')
-    .select('*')
-    .eq('mesocycle_id', baseMesocycleId);
-
-  const planMap = {};
-  deloadPlan.forEach(p => {
-    planMap[p.exercise] = p.deloadSets;
-  });
-
-  const inserts = [];
-
-  exercises.forEach(ex => {
-    const targetSets = planMap[ex.exercise_name] ?? ex.sets;
-
-    inserts.push({
-      mesocycle_id: newMesocycleId,
-      exercise_id: ex.exercise_id,
-      exercise_name: ex.exercise_name,
-      sets: Math.max(1, targetSets),
-      reps: ex.reps,
-      rir: ex.rir,
-      day: ex.day
-    });
-  });
-
-  await supabase
-    .from('mesocycle_exercises')
-    .insert(inserts);
-}
-
-function showDeloadCTA(onConfirm) {
-  const cta = document.getElementById('deloadCTA');
-  const btn = document.getElementById('applyDeloadBtn');
-
-  cta.classList.remove('hidden');
-  btn.onclick = onConfirm;
-}
-
 async function loadMuscleVolumeRP(mesocycleId) {
   const { data, error } = await supabase
     .from('v_muscle_rp_status')
@@ -3057,20 +2638,6 @@ function updateCoachDashboard(exercises) {
     <div class="coach-card ${status === 'yellow' ? 'yellow' : ''}">⚠️ Estancamientos</div>
     <div class="coach-card ${status === 'red' ? 'red' : ''}">🚨 Fatiga</div>
   `;
-
-   if (lastMesocycle.is_deload) {
-     showRebuildCTA(async () => {
-       const { data: { user } } = await supabase.auth.getUser();
-   
-       await createPostDeloadMesocycle({
-         deloadMesocycleId: lastMesocycle.id,
-         userId: user.id
-       });
-   
-       alert('Mesociclo de rebuild creado');
-       loadMesocycles();
-     });
-   }
 }
 
 function renderFatigueAlerts(alerts) {
