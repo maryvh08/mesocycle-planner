@@ -1930,16 +1930,16 @@ function renderComparison(a, b) {
     <div class="compare-grid">
       <div class="compare-card ${a.efficiency > b.efficiency ? 'winner' : ''}">
         <h4>${a.name}</h4>
-        <p>PRs: ${a.pr_count ?? 0}</p>
-        <p>Volumen: ${Math.round(a.total_volume ?? 0)}</p>
-        <p>Fuerza media: ${(a.avg_strength ?? 0).toFixed(1)}</p>
+        <p>PRs: ${a.pr_count}</p>
+        <p>Volumen: ${Math.round(a.total_volume)}</p>
+        <p>Fuerza media: ${a.avg_strength.toFixed(1)}</p>
       </div>
 
       <div class="compare-card ${b.efficiency > a.efficiency ? 'winner' : ''}">
         <h4>${b.name}</h4>
-        <p>PRs: ${b.pr_count ?? 0}</p>
-        <p>Volumen: ${Math.round(b.total_volume ?? 0)}</p>
-        <p>Fuerza media: ${(b.avg_strength ?? 0).toFixed(1)}</p>
+        <p>PRs: ${b.pr_count}</p>
+        <p>Volumen: ${Math.round(b.total_volume)}</p>
+        <p>Fuerza media: ${b.avg_strength.toFixed(1)}</p>
       </div>
     </div>
   `;
@@ -2548,30 +2548,25 @@ async function loadMesocycleComparison() {
 }
 
 async function compareMesocycles(mesoA, mesoB) {
-  const idA = Number(mesoA);
-  const idB = Number(mesoB);
-
   const { data, error } = await supabase
-     .from('v_mesocycle_summary')
-     .select('*')
-     .or(
-       `mesocycle_id.eq.${mesoA},mesocycle_id.eq.${mesoB}`
-     );
+    .from('v_mesocycle_summary')
+    .select('*')
+    .in('mesocycle_id', [mesoA, mesoB]);
 
   if (error) {
     console.error(error);
     return;
   }
 
-  const a = data.find(d => d.mesocycle_id === idA);
-  const b = data.find(d => d.mesocycle_id === idB);
+  console.log('COMPARE DATA', data); // 👈 DEBUG CLAVE
+
+  const a = data.find(d => d.mesocycle_id == mesoA);
+  const b = data.find(d => d.mesocycle_id == mesoB);
+
+  console.log('A', a);
+  console.log('B', b);
 
   if (!a || !b) return;
-
-   if (!Array.isArray(data) || data.length < 2) {
-     console.warn("No hay suficientes datos para comparar");
-     return;
-   }
 
   renderComparison(a, b);
 }
@@ -3568,5 +3563,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-await loadMesocycles();
-setupMesocycleComparison();
+document.addEventListener('DOMContentLoaded', () => {
+  setupMesocycleComparison();
+});
