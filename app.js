@@ -1311,7 +1311,7 @@ function getTrend(weeks) {
   };
 }
 
-async function loadDashboard(mesocycleId) {
+async function loadDashboard(mesocycleId, currentMesocycle = {}) {
   // ======================
   // DATOS BASE
   // ======================
@@ -1355,20 +1355,20 @@ async function loadDashboard(mesocycleId) {
   // FATIGA POR MÚSCULO (REAL)
   // ======================
   const fatigueByMuscle = muscleData.map(m => {
-    const score = evaluateMuscleFatigue({
-      muscle: m.muscle,
-      weekly: m,
-      ranges: RP_RANGES[m.muscle],
-      prevScore: m.prev_fatigue ?? 0,
-      isDeload: currentMesocycle?.is_deload ?? false
-    });
-
-    return {
-      ...m,
-      fatigueScore: score,
-      fatigueStatus: fatigueStatus(score)
-    };
-  });
+     const score = evaluateMuscleFatigue({
+       muscle: m.muscle,
+       weekly: m,
+       ranges: RP_RANGES[m.muscle],
+       prevScore: m.prev_fatigue ?? 0,
+       isDeload: currentMesocycle?.is_deload === true
+     });
+   
+     return {
+       ...m,
+       fatigueScore: score,
+       fatigueStatus: fatigueStatus(score)
+     };
+   });
 
   renderMuscleFatigue(fatigueByMuscle);
 
@@ -3529,10 +3529,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
-
-if (critical.length > 0) {
-  updateCoachCard({
-    type: 'danger',
-    message: `Deload urgente recomendado (${critical.map(m=>m.muscle).join(', ')})`
-  });
-}
