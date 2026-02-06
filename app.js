@@ -1376,6 +1376,18 @@ async function loadDashboard(mesocycleId) {
   if (status === 'yellow') statusYellow?.classList.add('active');
   if (status === 'red') statusRed?.classList.add('active');
 
+   if (coach.type === 'danger') {
+     const container = document.getElementById('deloadPlan');
+     if (container) {
+       container.innerHTML = `
+         <p>Reducir volumen total 15–25%</p>
+         <ul>
+           ${fatigued.map(m => `<li>${m.muscle}</li>`).join('')}
+         </ul>
+       `;
+     }
+   }
+
   // ======================
   // 5️⃣ MÚSCULOS (RP)
   // ======================
@@ -1407,7 +1419,11 @@ async function loadDashboard(mesocycleId) {
   // ======================
   // 7️⃣ ALERTAS DE FATIGA
   // ======================
-  renderFatigueAlerts(fatigueByMuscle);
+  const criticalDrops = volumeData.filter(v =>
+     v.trend === '↓' && Number(v.percent) < -5
+   );
+   
+   renderFatigueAlerts(criticalDrops);
 
   // ======================
   // 8️⃣ COACH (DELOAD / AJUSTE)
@@ -1503,45 +1519,31 @@ function calculateMuscleVolume(records) {
   });
 }
 
-function evaluateMuscleVolume(raw) {
-  if (!Array.isArray(raw)) return [];
+function evaluateMuscleVolume(data) {
+  if (!Array.isArray(data)) return [];
 
-  return raw.map(m => {
-    const key = MUSCLE_MAP[m.muscle.toLowerCase()] ?? m.muscle;
-    const ranges = RP_RANGES[key];
-
-    const sets = Number(m.sets) || 0;
+  return data.map(d => {
+    const ranges = RP_RANGES[d.muscle];
 
     if (!ranges) {
       return {
-        muscle: key,
-        sets,
-        range: '—',
-        status: 'unknown',
-        statusLabel: 'Sin RP'
+        ...d,
+        ranges: null,
+        status: 'no-ref'
       };
     }
 
     let status = 'optimal';
-    let label = 'Óptimo';
 
-    if (sets < ranges.MEV) {
-      status = 'below';
-      label = 'Bajo';
-    } else if (sets > ranges.MRV) {
-      status = 'over';
-      label = 'Exceso';
-    } else if (sets > ranges.MAV) {
-      status = 'high';
-      label = 'Alto';
-    }
+    if (d.sets < ranges.MEV) status = 'below';
+    else if (d.sets <= ranges.MAV) status = 'optimal';
+    else if (d.sets <= ranges.MRV) status = 'high';
+    else status = 'over';
 
     return {
-      muscle: key,
-      sets,
-      range: `${ranges.MEV}–${ranges.MRV}`,
-      status,
-      statusLabel: label
+      ...d,
+      ranges,
+      status
     };
   });
 }
@@ -1922,32 +1924,25 @@ function safe(n, decimals = 1) {
 
 function renderComparison(a, b) {
   const container = document.getElementById("compareResult");
-
-  const result = evaluateMesocycles(a, b);
+  if (!container) return;
 
   container.innerHTML = `
     <div class="compare-grid">
-
-      <div class="compare-card ${result.winner === 'A' ? 'winner' : ''}">
-        <h4>${a.name ?? 'Mesociclo A'}</h4>
-        <p>Score: <strong>${result.a.score.toFixed(1)}</strong></p>
-        <p>PRs: ${a.pr_count}</p>
-        <p>Volumen: ${Math.round(a.volume)}</p>
-        <p>Fuerza media: ${a.strengthScore.toFixed(1)}</p>
+      <div class="compare-card ${a.efficiency > b.efficiency ? 'winner' : ''}">
+        <h4>${a.name}</h4>
+        <p>PRs: ${a.pr_count ?? 0}</p>
+        <p>Volumen: ${Math.round(a.total_volume ?? 0)}</p>
+        <p>Fuerza media: ${(a.avg_strength ?? 0).toFixed(1)}</p>
       </div>
 
-      <div class="compare-card ${result.winner === 'B' ? 'winner' : ''}">
-        <h4>${b.name ?? 'Mesociclo B'}</h4>
-        <p>Score: <strong>${result.b.score.toFixed(1)}</strong></p>
-        <p>PRs: ${b.pr_count}</p>
-        <p>Volumen: ${Math.round(b.volume)}</p>
-        <p>Fuerza media: ${b.strengthScore.toFixed(1)}</p>
+      <div class="compare-card ${b.efficiency > a.efficiency ? 'winner' : ''}">
+        <h4>${b.name}</h4>
+        <p>PRs: ${b.pr_count ?? 0}</p>
+        <p>Volumen: ${Math.round(b.total_volume ?? 0)}</p>
+        <p>Fuerza media: ${(b.avg_strength ?? 0).toFixed(1)}</p>
       </div>
-
     </div>
   `;
-
-  renderMesocycleRecommendation(result);
 }
 
 function renderMesocycleRecommendation(result) {
