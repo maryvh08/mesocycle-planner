@@ -1,11 +1,4 @@
 console.log("🔥 app.js cargado  exitosamente");
-console.log(
-  muscleData.map(m => ({
-    muscle: m.muscle,
-    hasRP: !!RP_RANGES[m.muscle]
-  }))
-);
-
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 /* ======================
@@ -1389,6 +1382,13 @@ async function loadDashboard(mesocycleId) {
   const rawMuscle = calculateMuscleVolume(records);
   const muscleData = evaluateMuscleVolume(rawMuscle);
   renderMuscleTable(muscleData);
+
+  console.log(
+    muscleData.map(m => ({
+      muscle: m.muscle,
+      hasRP: !!RP_RANGES[m.muscle]
+    }))
+  );
 
   // ======================
   // 6️⃣ FATIGA POR MÚSCULO
