@@ -1807,29 +1807,26 @@ const RP_RANGES = {
 function renderMuscleTable(data) {
   const container = document.getElementById('muscleTable');
 
-  if (!data.length) {
-    container.innerHTML = '<p class="muted">Sin datos musculares</p>';
-    return;
-  }
-
   container.innerHTML = `
-    <table class="volume-table">
+    <table class="muscle-table">
       <thead>
         <tr>
           <th>Músculo</th>
           <th>Sets</th>
-          <th>Rango RP</th>
           <th>Estado</th>
+          <th>Rango RP</th>
         </tr>
       </thead>
       <tbody>
-        ${data.map(m => `
+        ${data.map(d => `
           <tr>
-            <td>${m.muscle}</td>
-            <td>${m.sets}</td>
-            <td>${m.range ?? '—'}</td>
-            <td class="status ${m.status}">
-              ${m.statusLabel ?? m.status}
+            <td>${d.muscle}</td>
+            <td>${d.sets}</td>
+            <td class="status ${d.status}">
+              ${statusLabel(d.status)}
+            </td>
+            <td>
+              ${d.ranges?.MEV ?? '-'}–${d.ranges?.MRV ?? '-'}
             </td>
           </tr>
         `).join('')}
@@ -3152,18 +3149,19 @@ function updateCoachDashboard(exercises) {
 }
 
 function renderFatigueAlerts(alerts) {
-  const container = document.getElementById('fatigueAlerts');
-  container.innerHTML = '';
+  const container = document.getElementById("fatigueAlerts");
+  container.innerHTML = "";
 
   if (!alerts.length) {
-    container.innerHTML = '<p class="muted">Sin alertas críticas</p>';
+    container.innerHTML = `<p class="muted">Sin alertas críticas</p>`;
     return;
   }
 
   alerts.forEach(a => {
-    const div = document.createElement('div');
-    div.className = 'alert-card';
-    div.textContent = `⚠️ ${a.exercise}: caída de ${a.drop}%`;
+    const div = document.createElement("div");
+    div.className = "coach-alert danger";
+    div.textContent = `${a.exercise}: caída de ${Math.abs(a.percent)}%`;
+
     container.appendChild(div);
   });
 }
