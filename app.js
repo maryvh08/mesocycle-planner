@@ -1361,10 +1361,21 @@ async function loadDashboard(mesocycleId) {
   const statusGreen = document.getElementById('statusGreen');
   const statusYellow = document.getElementById('statusYellow');
   const statusRed = document.getElementById('statusRed');
+   let finalStatus = status;
+   
+   // ⚠️ Si hay peligro real, forzar rojo
+   if (fatigued.length >= 2) {
+     finalStatus = 'red';
+   }
 
-  if (statusGreen) statusGreen.textContent = '🟢 Progreso sólido';
-  if (statusYellow) statusYellow.textContent = '🟡 Progreso irregular';
-  if (statusRed) statusRed.textContent = '🔴 Riesgo de estancamiento';
+  ['statusGreen', 'statusYellow', 'statusRed'].forEach(id =>
+     document.getElementById(id)?.classList.remove('active')
+   );
+   
+   if (finalStatus === 'green') statusGreen.classList.add('active');
+   if (finalStatus === 'yellow') statusYellow.classList.add('active');
+   if (finalStatus === 'red') statusRed.classList.add('active');
+
 
   // ======================
   // 2️⃣ DATA BASE
@@ -1730,8 +1741,10 @@ function updateCoachCard({ type, message }) {
   const card = document.getElementById('coachCard');
   const text = document.getElementById('coachMessage');
 
-  card.className = `coach-card ${type}`;
-  text.textContent = message || 'Sin recomendaciones actuales';
+  card.classList.remove('success', 'warning', 'danger');
+  card.classList.add(type, 'active');
+
+  text.textContent = message;
 }
 
 function calculateVolumeTrend(records) {
@@ -1777,12 +1790,14 @@ function calculateVolumeTrend(records) {
       '→';
 
     return {
-      exercise,
-      volume: Math.round(last.total_volume),
-      sets: last.total_sets,
-      trend,
-      percent: Number(percent.toFixed(1)) // 👈 AQUÍ
-    };
+     exercise,
+     volume: Math.round(last.total_volume),
+     sets: last.total_sets,
+     trend,
+     percent: prev
+       ? Number(((last.total_volume - prev.total_volume) / prev.total_volume * 100).toFixed(1))
+       : 0
+   };
   });
 }
 
@@ -3170,6 +3185,9 @@ function updateCoachDashboard(exercises) {
 }
 
 function renderFatigueAlerts(alerts) {
+   const pct = Number(v.percent);
+   
+   if (isNaN(pct)) return null;
   const container = document.getElementById('fatigueAlerts');
   container.innerHTML = '';
 
