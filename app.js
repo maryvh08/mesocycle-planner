@@ -1523,26 +1523,20 @@ function evaluateMuscleVolume(data) {
   if (!Array.isArray(data)) return [];
 
   return data.map(d => {
-    const ranges = RP_RANGES[d.muscle];
+    const ranges = RP_RANGES[d.muscle]; // 👈 CLAVE
 
-    if (!ranges) {
-      return {
-        ...d,
-        ranges: null,
-        status: 'no-ref'
-      };
+    let status = 'unknown';
+
+    if (ranges) {
+      if (d.sets < ranges.MEV) status = 'below';
+      else if (d.sets <= ranges.MAV) status = 'optimal';
+      else if (d.sets <= ranges.MRV) status = 'high';
+      else status = 'over';
     }
-
-    let status = 'optimal';
-
-    if (d.sets < ranges.MEV) status = 'below';
-    else if (d.sets <= ranges.MAV) status = 'optimal';
-    else if (d.sets <= ranges.MRV) status = 'high';
-    else status = 'over';
 
     return {
       ...d,
-      ranges,
+      ranges,   // 👈 AHORA EXISTE
       status
     };
   });
@@ -1742,20 +1736,21 @@ function calculateVolumeTrend(records) {
     const last = weeks.at(-1);
     const prev = weeks.at(-2);
 
-    let percent = 0;
-    let trend = '→';
+    let percent = prev
+      ? ((last.total_volume - prev.total_volume) / prev.total_volume) * 100
+      : 0;
 
-    if (prev) {
-      percent = ((last.total_volume - prev.total_volume) / prev.total_volume) * 100;
-      trend = percent > 3 ? '↑' : percent < -3 ? '↓' : '→';
-    }
+    const trend =
+      percent > 3 ? '↑' :
+      percent < -3 ? '↓' :
+      '→';
 
     return {
       exercise,
       volume: Math.round(last.total_volume),
       sets: last.total_sets,
       trend,
-      percent: percent.toFixed(1)
+      percent: Number(percent.toFixed(1)) // 👈 AQUÍ
     };
   });
 }
