@@ -1467,24 +1467,46 @@ function calculateMuscleVolume(records) {
   });
 }
 
-function evaluateMuscleVolume(data) {
-  if (!Array.isArray(data)) return [];
+function evaluateMuscleVolume(rawMuscleData) {
+  if (!Array.isArray(rawMuscleData)) return [];
 
-  return data.map(d => {
-    const ranges = RP_RANGES[d.muscle];
-    let status = "unknown";
+  return rawMuscleData.map(m => {
+    const ranges = RP_RANGES[m.muscle];
 
-    if (ranges) {
-      if (d.sets < ranges.MEV) status = "below";
-      else if (d.sets <= ranges.MAV) status = "optimal";
-      else if (d.sets <= ranges.MRV) status = "high";
-      else status = "overreached";
+    // 🛑 Seguridad absoluta
+    if (!ranges) {
+      return {
+        muscle: m.muscle,
+        sets: m.sets ?? 0,
+        range: 'N/A',
+        status: 'unknown',
+        statusLabel: 'Sin referencia RP'
+      };
+    }
+
+    const sets = m.sets ?? 0;
+
+    let status = 'optimal';
+    let label = 'Óptimo';
+    let range = `${ranges.MEV}–${ranges.MRV}`;
+
+    if (sets < ranges.MEV) {
+      status = 'below';
+      label = 'Bajo estímulo';
+    } else if (sets > ranges.MRV) {
+      status = 'over';
+      label = 'Exceso';
+    } else if (sets > ranges.MAV) {
+      status = 'high';
+      label = 'Alto';
     }
 
     return {
-      ...d,
-      ranges,
-      status
+      muscle: m.muscle,
+      sets,
+      range,
+      status,
+      statusLabel: label
     };
   });
 }
