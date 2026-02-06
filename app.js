@@ -1311,157 +1311,106 @@ function getTrend(weeks) {
   };
 }
 
-async function loadDashboard(mesocycleId, currentMesocycle = {}) {
-  // ======================
-  // DATOS BASE
-  // ======================
+async function loadDashboard(mesocycleId) {
   const records = await fetchExerciseRecords(mesocycleId);
-  if (!records || !records.length) return;
-
-  const prs = await loadMesocyclePRs(mesocycleId);
+  if (!records.length) return;
 
   // ======================
   // VOLUMEN
   // ======================
   const volumeData = calculateVolumeTrend(records);
   renderVolumeTable(volumeData);
-  updateCoachFromVolume(volumeData);
 
   // ======================
-  // ESTADO GLOBAL
+  // ESTADO GLOBAL (COACH)
   // ======================
   const status = overallProgress(volumeData);
 
-  const progressText = document.getElementById("globalProgressText");
-  if (progressText) {
-    progressText.textContent =
-      status === 'green'
-        ? 'Progreso global positivo'
-        : status === 'yellow'
-        ? 'Progreso irregular'
-        : 'Riesgo de estancamiento';
-  }
+  document.getElementById("globalProgressText").textContent =
+    status === 'green'
+      ? 'Progreso global positivo'
+      : status === 'yellow'
+      ? 'Progreso irregular'
+      : 'Riesgo de estancamiento';
 
-  renderGlobalStatusCards(status);
+  ['statusGreen', 'statusYellow', 'statusRed'].forEach(id =>
+    document.getElementById(id)?.classList.remove('active')
+  );
+
+  if (status === 'green') document.getElementById('statusGreen')?.classList.add('active');
+  if (status === 'yellow') document.getElementById('statusYellow')?.classList.add('active');
+  if (status === 'red') document.getElementById('statusRed')?.classList.add('active');
 
   // ======================
-  // MÚSCULOS (VOLUMEN RP)
+  // MÚSCULOS (RP)
   // ======================
   const rawMuscle = calculateMuscleVolume(records);
   const muscleData = evaluateMuscleVolume(rawMuscle);
   renderMuscleTable(muscleData);
-   const normalizeMuscleName = name =>
-     name.trim().toLowerCase();
-   const ranges = RP_RANGES[normalizeMuscleName(m.muscle)];
+
   // ======================
-  // FATIGA POR MÚSCULO (REAL)
+  // FATIGA POR MÚSCULO (RP)
   // ======================
   const fatigueByMuscle = muscleData.map(m => {
-     const ranges = RP_RANGES[m.muscle];
-   
-     if (!ranges) {
-       console.warn(`⚠️ RP_RANGES no definido para: ${m.muscle}`);
-       return {
-         ...m,
-         fatigueScore: 0,
-         fatigueStatus: 'unknown'
-       };
-     }
-   
-     const score = evaluateMuscleFatigue({
-       muscle: m.muscle,
-       weekly: m,
-       ranges,
-       prevScore: m.prev_fatigue ?? 0,
-       isDeload: currentMesocycle?.is_deload === true
-     });
-   
-     return {
-       ...m,
-       fatigueScore: score,
-       fatigueStatus: fatigueStatus(score)
-     };
-   });
+    const ranges = RP_RANGES[m.muscle];
 
-  renderMuscleFatigue(fatigueByMuscle);
-
-  // ======================
-  // ALERTAS DE FATIGA (VOLUMEN)
-  // ======================
-  const fatigueAlertsData = fatigueAlerts(volumeData);
-  renderFatigueAlerts(fatigueAlertsData);
-
-  // ======================
-  // DECISIÓN DELOAD AUTOMÁTICO
-  // ======================
-  const shouldDeload = needsDeload({
-    volumeData,
-    muscleData: fatigueByMuscle,
-    prs: prs?.length ?? 0
-  });
-
-  let coach = null;
-
-  if (shouldDeload) {
-    const pct = deloadPercentage({
-      volumeData,
-      muscleData: fatigueByMuscle
-    });
-
-    const plan = generateDeloadPlan(records, pct);
-    renderDeloadPlan(plan);
-
-    coach = {
-      type: 'danger',
-      message: `Deload automático recomendado. Reduce volumen ${Math.round(pct * 100)}%.`
-    };
-
-    showDeloadCTA(async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-
-      await createDeloadMesocycle({
-        baseMesocycleId: mesocycleId,
-        deloadPlan: plan,
-        userId: user.id
-      });
-
-      alert('Mesociclo Deload creado automáticamente');
-      loadMesocycles();
-    });
-
-  } else {
-    // ======================
-    // COACH MANUAL
-    // ======================
-    const fatigued = fatigueByMuscle.filter(
-      m => m.fatigueStatus === 'overreached' || m.fatigueStatus === 'critical'
-    );
-
-    const weak = fatigueByMuscle.filter(
-      m => m.status === 'below'
-    );
-
-    if (fatigued.length >= 2) {
-      coach = {
-        type: 'warning',
-        message: 'Fatiga localizada detectada. Considera reducir sets en músculos críticos.'
-      };
-    } else if (weak.length >= 2) {
-      coach = {
-        type: 'info',
-        message: 'Músculos subestimulados. Añadir 1–2 sets podría mejorar el progreso.'
-      };
-    } else {
-      coach = {
-        type: 'success',
-        message: 'Mesociclo bien balanceado. Continúa con la planificación.'
+    if (!ranges) {
+      console.warn(`⚠️ RP_RANGES no definido para: ${m.muscle}`);
+      return {
+        ...m,
+        fatigueScore: 0,
+        fatigueStatus: 'unknown'
       };
     }
-  }
+
+    const score = evaluateMuscleFatigue({
+      muscle: m.muscle,
+      weekly: m,
+      ranges,
+      prevScore: m.prev_fatigue ?? 0,
+      isDeload: false
+    });
+
+    return {
+      ...m,
+      fatigueScore: score,
+      fatigueStatus: fatigueStatus(score)
+    };
+  });
 
   // ======================
-  // OUTPUT FINAL COACH
+  // ALERTAS DE FATIGA
   // ======================
+  renderFatigueAlerts(fatigueByMuscle);
+
+  // ======================
+  // COACH (DELOAD / AJUSTE)
+  // ======================
+  const fatigued = fatigueByMuscle.filter(m =>
+    m.fatigueStatus === 'high' || m.fatigueStatus === 'over'
+  );
+
+  const weak = fatigueByMuscle.filter(m => m.status === 'below');
+
+  let coach;
+
+  if (fatigued.length >= 2) {
+    coach = {
+      type: 'danger',
+      message: 'Fatiga acumulada detectada. Deload recomendado (15–25%).'
+    };
+  } else if (weak.length >= 2) {
+    coach = {
+      type: 'warning',
+      message: 'Algunos músculos subestimulados. Considera añadir 1–2 sets.'
+    };
+  } else {
+    coach = {
+      type: 'success',
+      message: 'Distribución óptima. Mantén volumen e intensidad.'
+    };
+  }
+
   updateCoachCard(coach);
 }
 
