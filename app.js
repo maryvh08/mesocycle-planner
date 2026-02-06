@@ -1334,7 +1334,7 @@ function getTrend(weeks) {
 async function loadDashboard(mesocycleId) {
 
   /* ======================
-     ESTADO GLOBAL (TEXTOS FIJOS)
+     1️⃣ TEXTO FIJO (UI)
   ====================== */
   const statusGreen = document.getElementById('statusGreen');
   const statusYellow = document.getElementById('statusYellow');
@@ -1345,24 +1345,19 @@ async function loadDashboard(mesocycleId) {
   if (statusRed) statusRed.textContent = '🔴 Riesgo de estancamiento';
 
   /* ======================
-     DATA
+     2️⃣ DATA
   ====================== */
   const records = await fetchExerciseRecords(mesocycleId);
   if (!records.length) return;
 
   /* ======================
-     KPIs
-  ====================== */
-  renderKpis(records); // ← kpi-volume, kpi-prs, kpi-sessions
-
-  /* ======================
-     VOLUMEN SEMANAL
+     3️⃣ VOLUMEN
   ====================== */
   const volumeData = calculateVolumeTrend(records);
   renderVolumeTable(volumeData);
 
   /* ======================
-     ESTADO GLOBAL (COACH)
+     4️⃣ ESTADO GLOBAL
   ====================== */
   const status = overallProgress(volumeData);
 
@@ -1382,17 +1377,18 @@ async function loadDashboard(mesocycleId) {
   if (status === 'red') statusRed?.classList.add('active');
 
   /* ======================
-     VOLUMEN POR MÚSCULO (RP)
+     5️⃣ MÚSCULOS (RP)
   ====================== */
   const rawMuscle = calculateMuscleVolume(records);
   const muscleData = evaluateMuscleVolume(rawMuscle);
   renderMuscleTable(muscleData);
 
   /* ======================
-     FATIGA POR MÚSCULO
+     6️⃣ FATIGA POR MÚSCULO
   ====================== */
   const fatigueByMuscle = muscleData.map(m => {
     const ranges = RP_RANGES[m.muscle];
+
     const score = evaluateMuscleFatigue({
       muscle: m.muscle,
       weekly: m,
@@ -1408,10 +1404,13 @@ async function loadDashboard(mesocycleId) {
     };
   });
 
+  /* ======================
+     7️⃣ ALERTAS CRÍTICAS (fatiga real)
+  ====================== */
   renderFatigueAlerts(fatigueByMuscle);
 
   /* ======================
-     COACH – RECOMENDACIÓN ÚNICA
+     8️⃣ COACH
   ====================== */
   const fatigued = fatigueByMuscle.filter(m =>
     m.fatigueStatus === 'high' || m.fatigueStatus === 'over'
@@ -1439,6 +1438,27 @@ async function loadDashboard(mesocycleId) {
   }
 
   updateCoachCard(coach);
+
+  /* ======================
+     9️⃣ DELOAD PLAN
+  ====================== */
+  const deloadSection = document.getElementById('deloadSection');
+  const deloadTable = document.getElementById('deloadTable');
+
+  if (coach.type === 'danger' && fatigued.length) {
+    deloadSection?.classList.remove('hidden');
+
+    if (deloadTable) {
+      deloadTable.innerHTML = `
+        <p><strong>Reducir volumen total 15–25%</strong></p>
+        <ul>
+          ${fatigued.map(m => `<li>${m.muscle}</li>`).join('')}
+        </ul>
+      `;
+    }
+  } else {
+    deloadSection?.classList.add('hidden');
+  }
 }
 
 function safePercentChange(current, previous) {
