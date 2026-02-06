@@ -1350,15 +1350,28 @@ async function loadDashboard(mesocycleId, currentMesocycle = {}) {
   const rawMuscle = calculateMuscleVolume(records);
   const muscleData = evaluateMuscleVolume(rawMuscle);
   renderMuscleTable(muscleData);
-
+   const normalizeMuscleName = name =>
+     name.trim().toLowerCase();
+   const ranges = RP_RANGES[normalizeMuscleName(m.muscle)];
   // ======================
   // FATIGA POR MÚSCULO (REAL)
   // ======================
   const fatigueByMuscle = muscleData.map(m => {
+     const ranges = RP_RANGES[m.muscle];
+   
+     if (!ranges) {
+       console.warn(`⚠️ RP_RANGES no definido para: ${m.muscle}`);
+       return {
+         ...m,
+         fatigueScore: 0,
+         fatigueStatus: 'unknown'
+       };
+     }
+   
      const score = evaluateMuscleFatigue({
        muscle: m.muscle,
        weekly: m,
-       ranges: RP_RANGES[m.muscle],
+       ranges,
        prevScore: m.prev_fatigue ?? 0,
        isDeload: currentMesocycle?.is_deload === true
      });
@@ -1797,13 +1810,14 @@ function updateCoachFromVolume(data) {
 }
 
 const RP_RANGES = {
-  Pecho: { MEV: 8, MAV: 12, MRV: 20 },
-  Espalda: { MEV: 10, MAV: 14, MRV: 22 },
-  Cuádriceps: { MEV: 8, MAV: 12, MRV: 18 },
-  Isquiotibiales: { MEV: 6, MAV: 10, MRV: 16 },
-  Deltoides: { MEV: 10, MAV: 16, MRV: 24 },
-  Bíceps: { MEV: 6, MAV: 10, MRV: 18 },
-  Tríceps: { MEV: 6, MAV: 10, MRV: 18 }
+  chest: { MEV: 10, MAV: 14, MRV: 20 },
+  back: { MEV: 12, MAV: 16, MRV: 22 },
+  shoulders: { MEV: 8, MAV: 12, MRV: 18 },
+  quads: { MEV: 10, MAV: 14, MRV: 20 },
+  hamstrings: { MEV: 8, MAV: 12, MRV: 16 },
+  calves: { MEV: 6, MAV: 10, MRV: 14 },
+  biceps: { MEV: 6, MAV: 10, MRV: 14 },
+  triceps: { MEV: 6, MAV: 10, MRV: 14 }
 };
 
 function renderMuscleTable(data) {
