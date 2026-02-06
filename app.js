@@ -1333,9 +1333,9 @@ function getTrend(weeks) {
 
 async function loadDashboard(mesocycleId) {
 
-  /* ======================
-     1️⃣ TEXTO FIJO (UI)
-  ====================== */
+  // ======================
+  // 1️⃣ TEXTO FIJO DE ESTADOS (solo UI)
+  // ======================
   const statusGreen = document.getElementById('statusGreen');
   const statusYellow = document.getElementById('statusYellow');
   const statusRed = document.getElementById('statusRed');
@@ -1344,21 +1344,21 @@ async function loadDashboard(mesocycleId) {
   if (statusYellow) statusYellow.textContent = '🟡 Progreso irregular';
   if (statusRed) statusRed.textContent = '🔴 Riesgo de estancamiento';
 
-  /* ======================
-     2️⃣ DATA
-  ====================== */
+  // ======================
+  // 2️⃣ DATA BASE
+  // ======================
   const records = await fetchExerciseRecords(mesocycleId);
   if (!records.length) return;
 
-  /* ======================
-     3️⃣ VOLUMEN
-  ====================== */
+  // ======================
+  // 3️⃣ VOLUMEN
+  // ======================
   const volumeData = calculateVolumeTrend(records);
   renderVolumeTable(volumeData);
 
-  /* ======================
-     4️⃣ ESTADO GLOBAL
-  ====================== */
+  // ======================
+  // 4️⃣ ESTADO GLOBAL (COACH)
+  // ======================
   const status = overallProgress(volumeData);
 
   document.getElementById('globalProgressText').textContent =
@@ -1368,24 +1368,24 @@ async function loadDashboard(mesocycleId) {
       ? 'Progreso irregular'
       : 'Riesgo de estancamiento';
 
-  ['statusGreen', 'statusYellow', 'statusRed'].forEach(id =>
-    document.getElementById(id)?.classList.remove('active')
-  );
+  ['statusGreen', 'statusYellow', 'statusRed'].forEach(id => {
+    document.getElementById(id)?.classList.remove('active');
+  });
 
   if (status === 'green') statusGreen?.classList.add('active');
   if (status === 'yellow') statusYellow?.classList.add('active');
   if (status === 'red') statusRed?.classList.add('active');
 
-  /* ======================
-     5️⃣ MÚSCULOS (RP)
-  ====================== */
+  // ======================
+  // 5️⃣ MÚSCULOS (RP)
+  // ======================
   const rawMuscle = calculateMuscleVolume(records);
   const muscleData = evaluateMuscleVolume(rawMuscle);
   renderMuscleTable(muscleData);
 
-  /* ======================
-     6️⃣ FATIGA POR MÚSCULO
-  ====================== */
+  // ======================
+  // 6️⃣ FATIGA POR MÚSCULO
+  // ======================
   const fatigueByMuscle = muscleData.map(m => {
     const ranges = RP_RANGES[m.muscle];
 
@@ -1404,14 +1404,18 @@ async function loadDashboard(mesocycleId) {
     };
   });
 
-  /* ======================
-     7️⃣ ALERTAS CRÍTICAS (fatiga real)
-  ====================== */
-  renderFatigueAlerts(fatigueByMuscle);
+  // ======================
+  // 7️⃣ ALERTAS DE FATIGA
+  // ======================
+  const criticalDrops = volumeData.filter(v =>
+     v.trend === '↓' && Number(v.percent) < -5
+   );
+   
+   renderFatigueAlerts(criticalDrops);
 
-  /* ======================
-     8️⃣ COACH
-  ====================== */
+  // ======================
+  // 8️⃣ COACH (DELOAD / AJUSTE)
+  // ======================
   const fatigued = fatigueByMuscle.filter(m =>
     m.fatigueStatus === 'high' || m.fatigueStatus === 'over'
   );
@@ -1439,26 +1443,17 @@ async function loadDashboard(mesocycleId) {
 
   updateCoachCard(coach);
 
-  /* ======================
-     9️⃣ DELOAD PLAN
-  ====================== */
-  const deloadSection = document.getElementById('deloadSection');
-  const deloadTable = document.getElementById('deloadTable');
-
-  if (coach.type === 'danger' && fatigued.length) {
-    deloadSection?.classList.remove('hidden');
-
-    if (deloadTable) {
-      deloadTable.innerHTML = `
-        <p><strong>Reducir volumen total 15–25%</strong></p>
-        <ul>
-          ${fatigued.map(m => `<li>${m.muscle}</li>`).join('')}
-        </ul>
-      `;
-    }
-  } else {
-    deloadSection?.classList.add('hidden');
-  }
+   if (coach.type === 'danger') {
+     const container = document.getElementById('deloadPlan');
+     if (container) {
+       container.innerHTML = `
+         <p>Reducir volumen total 15–25%</p>
+         <ul>
+           ${fatigued.map(m => `<li>${m.muscle}</li>`).join('')}
+         </ul>
+       `;
+     }
+   }
 }
 
 function safePercentChange(current, previous) {
