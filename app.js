@@ -2084,12 +2084,17 @@ function nextWeekSets(currentSets, range) {
 }
 
 function muscleFatigueScore({
-  sets,
+  sets = 0,
   ranges,
-  strengthTrend,
-  weeksWithoutPR,
-  volumeChange
+  strengthTrend = 0,
+  weeksWithoutPR = 0,
+  volumeChange = 0
 }) {
+  if (!ranges || ranges.MAV == null || ranges.MRV == null) {
+    console.warn('⚠️ RP ranges inválidos:', ranges);
+    return 0; // ← sin score si no hay modelo
+  }
+
   let score = 0;
 
   // 📦 Volumen relativo
@@ -2101,11 +2106,11 @@ function muscleFatigueScore({
 
   // 🧠 Tendencia de fuerza
   if (strengthTrend < -2) score += 20;
-  if (strengthTrend < 0) score += 10;
+  else if (strengthTrend < 0) score += 10;
 
   // ⏳ Estancamiento
-  if (weeksWithoutPR >= 3) score += 10;
   if (weeksWithoutPR >= 5) score += 20;
+  else if (weeksWithoutPR >= 3) score += 10;
 
   return Math.min(score, 100);
 }
@@ -2126,20 +2131,30 @@ function evaluateMuscleFatigue({
   prevScore = 0,
   isDeload = false
 }) {
-  if (isDeload) {
-    return deloadRecovery(prevScore);
+  if (!ranges) {
+    return 0;
   }
 
-  const raw = muscleFatigueScore({
+  const score = muscleFatigueScore({
     sets: weekly.sets,
     ranges,
-    strengthTrend: weekly.strengthTrend,
-    weeksWithoutPR: weekly.weeksWithoutPR,
-    volumeChange: weekly.volumeChange
+    strengthTrend: weekly.strengthTrend ?? 0,
+    weeksWithoutPR: weekly.weeksWithoutPR ?? 0,
+    volumeChange: weekly.volumeChange ?? 0
   });
 
-  return accumulateFatigue(prevScore, raw);
+  return isDeload ? score * 0.6 : score;
 }
+
+const MUSCLE_MAP = {
+  'Cuádriceps': 'quadriceps',
+  'Quadriceps': 'quadriceps',
+  'Pecho': 'chest',
+  'Espalda baja': 'lower_back'
+};
+
+const key = MUSCLE_MAP[m.muscle] ?? m.muscle;
+const ranges = RP_RANGES[key];
 
 function fatigueStatus(score) {
   if (score >= 86) return 'critical';
