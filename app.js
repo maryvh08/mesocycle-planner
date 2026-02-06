@@ -1404,6 +1404,11 @@ async function loadDashboard(mesocycleId) {
   updateCoachCard(coach);
 }
 
+function safePercentChange(current, previous) {
+  if (!previous || previous === 0) return 0;
+  return ((current - previous) / previous) * 100;
+}
+
 function renderGlobalStatusCards(status) {
   const cards = {
     green: {
@@ -1641,8 +1646,7 @@ function updateCoachCard({ type, message }) {
   const card = document.getElementById('coachCard');
   const text = document.getElementById('coachMessage');
 
-  card.classList.remove('success', 'warning', 'danger');
-  card.classList.add(type);
+  card.className = `coach-card ${type}`;
   text.textContent = message;
 }
 
@@ -1762,26 +1766,29 @@ const RP_RANGES = {
 function renderMuscleTable(data) {
   const container = document.getElementById('muscleTable');
 
+  if (!data.length) {
+    container.innerHTML = '<p class="muted">Sin datos musculares</p>';
+    return;
+  }
+
   container.innerHTML = `
-    <table class="muscle-table">
+    <table class="volume-table">
       <thead>
         <tr>
           <th>Músculo</th>
           <th>Sets</th>
-          <th>Estado</th>
           <th>Rango RP</th>
+          <th>Estado</th>
         </tr>
       </thead>
       <tbody>
-        ${data.map(d => `
+        ${data.map(m => `
           <tr>
-            <td>${d.muscle}</td>
-            <td>${d.sets}</td>
-            <td class="status ${d.status}">
-              ${statusLabel(d.status)}
-            </td>
-            <td>
-              ${d.ranges?.MEV ?? '-'}–${d.ranges?.MRV ?? '-'}
+            <td>${m.muscle}</td>
+            <td>${m.sets}</td>
+            <td>${m.range ?? '—'}</td>
+            <td class="status ${m.status}">
+              ${m.statusLabel ?? m.status}
             </td>
           </tr>
         `).join('')}
@@ -1943,6 +1950,7 @@ function volumeResponse(ex) {
 }
 
 function fatigueAlerts(exercises) {
+   const drop = safePercentChange(curr.volume, prev.volume);
   return exercises.filter(e =>
     e.trend === '↓' && Number(e.percent) < -3
   );
@@ -3494,3 +3502,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+document.getElementById('statusGreen').textContent = '🟢 Progreso sólido';
+document.getElementById('statusYellow').textContent = '🟡 Progreso irregular';
+document.getElementById('statusRed').textContent = '🔴 Riesgo de estancamiento';
+
+await loadMesocycles();
+setupMesocycleComparison();
