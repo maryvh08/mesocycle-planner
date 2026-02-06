@@ -3530,10 +3530,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-const critical = fatigueByMuscle.filter(
-  m => m.fatigueScore >= 86
-);
-
 if (critical.length > 0) {
   updateCoachCard({
     type: 'danger',
