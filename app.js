@@ -1332,47 +1332,63 @@ function getTrend(weeks) {
 }
 
 async function loadDashboard(mesocycleId) {
+
+  // ======================
+  // 1️⃣ TEXTO FIJO DE ESTADOS (solo UI)
+  // ======================
+  const statusGreen = document.getElementById('statusGreen');
+  const statusYellow = document.getElementById('statusYellow');
+  const statusRed = document.getElementById('statusRed');
+
+  if (statusGreen) statusGreen.textContent = '🟢 Progreso sólido';
+  if (statusYellow) statusYellow.textContent = '🟡 Progreso irregular';
+  if (statusRed) statusRed.textContent = '🔴 Riesgo de estancamiento';
+
+  // ======================
+  // 2️⃣ DATA BASE
+  // ======================
   const records = await fetchExerciseRecords(mesocycleId);
   if (!records.length) return;
 
   // ======================
-  // VOLUMEN
+  // 3️⃣ VOLUMEN
   // ======================
   const volumeData = calculateVolumeTrend(records);
   renderVolumeTable(volumeData);
 
   // ======================
-  // ESTADO GLOBAL (COACH)
+  // 4️⃣ ESTADO GLOBAL (COACH)
   // ======================
   const status = overallProgress(volumeData);
 
-  document.getElementById("globalProgressText").textContent =
+  document.getElementById('globalProgressText').textContent =
     status === 'green'
       ? 'Progreso global positivo'
       : status === 'yellow'
       ? 'Progreso irregular'
       : 'Riesgo de estancamiento';
 
-  ['statusGreen', 'statusYellow', 'statusRed'].forEach(id =>
-    document.getElementById(id)?.classList.remove('active')
-  );
+  ['statusGreen', 'statusYellow', 'statusRed'].forEach(id => {
+    document.getElementById(id)?.classList.remove('active');
+  });
 
-  if (status === 'green') document.getElementById('statusGreen')?.classList.add('active');
-  if (status === 'yellow') document.getElementById('statusYellow')?.classList.add('active');
-  if (status === 'red') document.getElementById('statusRed')?.classList.add('active');
+  if (status === 'green') statusGreen?.classList.add('active');
+  if (status === 'yellow') statusYellow?.classList.add('active');
+  if (status === 'red') statusRed?.classList.add('active');
 
   // ======================
-  // MÚSCULOS (RP)
+  // 5️⃣ MÚSCULOS (RP)
   // ======================
   const rawMuscle = calculateMuscleVolume(records);
   const muscleData = evaluateMuscleVolume(rawMuscle);
   renderMuscleTable(muscleData);
 
   // ======================
-  // FATIGA POR MÚSCULO (RP)
+  // 6️⃣ FATIGA POR MÚSCULO
   // ======================
   const fatigueByMuscle = muscleData.map(m => {
     const ranges = RP_RANGES[m.muscle];
+
     const score = evaluateMuscleFatigue({
       muscle: m.muscle,
       weekly: m,
@@ -1389,12 +1405,12 @@ async function loadDashboard(mesocycleId) {
   });
 
   // ======================
-  // ALERTAS DE FATIGA
+  // 7️⃣ ALERTAS DE FATIGA
   // ======================
   renderFatigueAlerts(fatigueByMuscle);
 
   // ======================
-  // COACH (DELOAD / AJUSTE)
+  // 8️⃣ COACH (DELOAD / AJUSTE)
   // ======================
   const fatigued = fatigueByMuscle.filter(m =>
     m.fatigueStatus === 'high' || m.fatigueStatus === 'over'
@@ -1987,10 +2003,18 @@ function volumeResponse(ex) {
   return ex.strengthChange / ex.volume;
 }
 
-function fatigueAlerts(exercises) {
-  return exercises.filter(e =>
-    e.trend === '↓' && Number(e.percent) < -3
-  );
+function fatigueAlerts(volumeData) {
+  if (!Array.isArray(volumeData)) return [];
+
+  return volumeData
+    .filter(v =>
+      typeof v.percent === 'number' &&
+      v.percent < -10
+    )
+    .map(v => ({
+      exercise: v.exercise,
+      drop: Math.abs(v.percent).toFixed(1)
+    }));
 }
 
 function coachAdvice(summary) {
@@ -3141,19 +3165,18 @@ function updateCoachDashboard(exercises) {
 }
 
 function renderFatigueAlerts(alerts) {
-  const container = document.getElementById("fatigueAlerts");
-  container.innerHTML = "";
+  const container = document.getElementById('fatigueAlerts');
+  container.innerHTML = '';
 
   if (!alerts.length) {
-    container.innerHTML = `<p class="muted">Sin alertas críticas</p>`;
+    container.innerHTML = '<p class="muted">Sin alertas críticas</p>';
     return;
   }
 
   alerts.forEach(a => {
-    const div = document.createElement("div");
-    div.className = "coach-alert danger";
-    div.textContent = `${a.exercise}: caída de ${Math.abs(a.percent)}%`;
-
+    const div = document.createElement('div');
+    div.className = 'alert-card';
+    div.textContent = `⚠️ ${a.exercise}: caída de ${a.drop}%`;
     container.appendChild(div);
   });
 }
@@ -3552,7 +3575,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 await loadMesocycles();
 setupMesocycleComparison();
-
-document.getElementById('statusGreen').textContent = '🟢 Progreso sólido';
-document.getElementById('statusYellow').textContent = '🟡 Progreso irregular';
-document.getElementById('statusRed').textContent = '🔴 Riesgo de estancamiento';
