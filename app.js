@@ -406,6 +406,26 @@ async function loadMesocycles() {
   });
 }
 
+async function loadMesocycleSelectors() {
+  const a = document.getElementById('mesoA');
+  const b = document.getElementById('mesoB');
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data } = await supabase
+    .from('mesocycles')
+    .select('id, name')
+    .eq('user_id', user.id);
+
+  data.forEach(m => {
+    const optA = new Option(m.name, m.id);
+    const optB = new Option(m.name, m.id);
+    a.add(optA);
+    b.add(optB);
+  });
+}
+
 async function loadMesocyclePRs(mesocycleId) {
   const { data, error } = await supabase
     .from("mesocycle_prs")
@@ -1467,32 +1487,31 @@ function calculateMuscleVolume(records) {
   });
 }
 
-function evaluateMuscleVolume(rawMuscleData) {
-  if (!Array.isArray(rawMuscleData)) return [];
+function evaluateMuscleVolume(raw) {
+  if (!Array.isArray(raw)) return [];
 
-  return rawMuscleData.map(m => {
-    const ranges = RP_RANGES[m.muscle];
+  return raw.map(m => {
+    const key = MUSCLE_MAP[m.muscle.toLowerCase()] ?? m.muscle;
+    const ranges = RP_RANGES[key];
 
-    // 🛑 Seguridad absoluta
+    const sets = Number(m.sets) || 0;
+
     if (!ranges) {
       return {
-        muscle: m.muscle,
-        sets: m.sets ?? 0,
-        range: 'N/A',
+        muscle: key,
+        sets,
+        range: '—',
         status: 'unknown',
-        statusLabel: 'Sin referencia RP'
+        statusLabel: 'Sin RP'
       };
     }
 
-    const sets = m.sets ?? 0;
-
     let status = 'optimal';
     let label = 'Óptimo';
-    let range = `${ranges.MEV}–${ranges.MRV}`;
 
     if (sets < ranges.MEV) {
       status = 'below';
-      label = 'Bajo estímulo';
+      label = 'Bajo';
     } else if (sets > ranges.MRV) {
       status = 'over';
       label = 'Exceso';
@@ -1502,9 +1521,9 @@ function evaluateMuscleVolume(rawMuscleData) {
     }
 
     return {
-      muscle: m.muscle,
+      muscle: key,
       sets,
-      range,
+      range: `${ranges.MEV}–${ranges.MRV}`,
       status,
       statusLabel: label
     };
@@ -1669,7 +1688,7 @@ function updateCoachCard({ type, message }) {
   const text = document.getElementById('coachMessage');
 
   card.className = `coach-card ${type}`;
-  text.textContent = message;
+  text.textContent = message || 'Sin recomendaciones actuales';
 }
 
 function calculateVolumeTrend(records) {
@@ -1971,11 +1990,18 @@ function volumeResponse(ex) {
   return ex.strengthChange / ex.volume;
 }
 
-function fatigueAlerts(exercises) {
-   const drop = safePercentChange(curr.volume, prev.volume);
-  return exercises.filter(e =>
-    e.trend === '↓' && Number(e.percent) < -3
-  );
+function fatigueAlerts(volumeData) {
+  if (!Array.isArray(volumeData)) return [];
+
+  return volumeData
+    .filter(v =>
+      typeof v.percent === 'number' &&
+      v.percent < -10
+    )
+    .map(v => ({
+      exercise: v.exercise,
+      drop: Math.abs(v.percent).toFixed(1)
+    }));
 }
 
 function coachAdvice(summary) {
@@ -2177,10 +2203,23 @@ function evaluateMuscleFatigue({
 }
 
 const MUSCLE_MAP = {
-  'Cuádriceps': 'quadriceps',
-  'Quadriceps': 'quadriceps',
-  'Pecho': 'chest',
-  'Espalda baja': 'lower_back'
+  chest: 'Chest',
+  pecho: 'Chest',
+
+  back: 'Back',
+  espalda: 'Back',
+
+  quads: 'Quads',
+  cuadriceps: 'Quads',
+
+  hamstrings: 'Hamstrings',
+  femorales: 'Hamstrings',
+
+  shoulders: 'Shoulders',
+  hombros: 'Shoulders',
+
+  arms: 'Arms',
+  brazos: 'Arms'
 };
 
 function fatigueStatus(score) {
@@ -2398,20 +2437,17 @@ async function loadInitialDashboard() {
 }
 
 function setupMesocycleComparison() {
-  const a = document.getElementById("mesoA");
-  const b = document.getElementById("mesoB");
-
-  if (!a || !b) return;
+  const a = document.getElementById('mesoA');
+  const b = document.getElementById('mesoB');
 
   const handler = () => {
-    if (!a.value || !b.value) return;
-    if (a.value === b.value) return;
-
-    compareMesocycles(a.value, b.value);
+    if (a.value && b.value && a.value !== b.value) {
+      compareMesocycles(a.value, b.value);
+    }
   };
 
-  a.addEventListener("change", handler);
-  b.addEventListener("change", handler);
+  a.onchange = handler;
+  b.onchange = handler;
 }
 
 async function loadMesocycleComparison() {
@@ -3116,19 +3152,18 @@ function updateCoachDashboard(exercises) {
 }
 
 function renderFatigueAlerts(alerts) {
-  const container = document.getElementById("fatigueAlerts");
-  container.innerHTML = "";
+  const container = document.getElementById('fatigueAlerts');
+  container.innerHTML = '';
 
   if (!alerts.length) {
-    container.innerHTML = `<p class="muted">Sin alertas críticas</p>`;
+    container.innerHTML = '<p class="muted">Sin alertas críticas</p>';
     return;
   }
 
   alerts.forEach(a => {
-    const div = document.createElement("div");
-    div.className = "coach-alert danger";
-    div.textContent = `${a.exercise}: caída de ${Math.abs(a.percent)}%`;
-
+    const div = document.createElement('div');
+    div.className = 'alert-card';
+    div.textContent = `⚠️ ${a.exercise}: caída de ${a.drop}%`;
     container.appendChild(div);
   });
 }
@@ -3525,9 +3560,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+await loadMesocycles();
+setupMesocycleComparison();
+
 document.getElementById('statusGreen').textContent = '🟢 Progreso sólido';
 document.getElementById('statusYellow').textContent = '🟡 Progreso irregular';
 document.getElementById('statusRed').textContent = '🔴 Riesgo de estancamiento';
-
-await loadMesocycles();
-setupMesocycleComparison();
