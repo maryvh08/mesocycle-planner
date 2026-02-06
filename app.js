@@ -1331,6 +1331,13 @@ function getTrend(weeks) {
   };
 }
 
+function normalizeMuscleName(name) {
+  return name
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quita tildes
+    .replace(/\s+/g, '_');
+}
+
 async function loadDashboard(mesocycleId) {
 
   // ======================
@@ -1530,7 +1537,8 @@ function evaluateMuscleVolume(data) {
   if (!Array.isArray(data)) return [];
 
   return data.map(d => {
-    const ranges = RP_RANGES[d.muscle]; // 👈 CLAVE
+    const key = normalizeMuscleName(d.muscle);
+    const ranges = RP_RANGES[key];
 
     let status = 'unknown';
 
@@ -1543,7 +1551,8 @@ function evaluateMuscleVolume(data) {
 
     return {
       ...d,
-      ranges,   // 👈 AHORA EXISTE
+      muscleKey: key,
+      ranges,
       status
     };
   });
@@ -1814,14 +1823,14 @@ function updateCoachFromVolume(data) {
 }
 
 const RP_RANGES = {
-  chest: { MEV: 10, MAV: 14, MRV: 20 },
-  back: { MEV: 12, MAV: 16, MRV: 22 },
-  shoulders: { MEV: 8, MAV: 12, MRV: 18 },
-  quads: { MEV: 10, MAV: 14, MRV: 20 },
-  hamstrings: { MEV: 8, MAV: 12, MRV: 16 },
-  calves: { MEV: 6, MAV: 10, MRV: 14 },
-  biceps: { MEV: 6, MAV: 10, MRV: 14 },
-  triceps: { MEV: 6, MAV: 10, MRV: 14 }
+  cuadriceps: { MEV: 6, MAV: 12, MRV: 18 },
+  isquiotibiales: { MEV: 6, MAV: 10, MRV: 16 },
+  pecho: { MEV: 8, MAV: 14, MRV: 20 },
+  espalda: { MEV: 10, MAV: 16, MRV: 22 },
+  espalda_baja: { MEV: 4, MAV: 6, MRV: 10 },
+  hombros: { MEV: 6, MAV: 12, MRV: 18 },
+  biceps: { MEV: 6, MAV: 10, MRV: 16 },
+  triceps: { MEV: 6, MAV: 10, MRV: 16 }
 };
 
 function renderMuscleTable(data) {
