@@ -3533,13 +3533,12 @@ document.addEventListener("DOMContentLoaded", () => {
    
      if (parts.length !== 2) return alert("Formato inválido MM:SS");
    
-     let minutes = parseInt(parts[0], 10);
-     let seconds = parseInt(parts[1], 10);
+     let minutes = parseInt(document.getElementById("timer-minutes").value) || 0;
+      let seconds = parseInt(document.getElementById("timer-seconds").value) || 0;
+      let totalSeconds = minutes*60 + seconds;
    
      if (isNaN(minutes) || isNaN(seconds)) return alert("Formato inválido");
-   
-     let totalSeconds = minutes * 60 + seconds;
-   
+      
      clearInterval(timerInterval);
    
      timerInterval = setInterval(() => {
@@ -3619,11 +3618,8 @@ document.addEventListener("DOMContentLoaded", () => {
    // ==========================
    // Alarma
    // ==========================
-
    document.getElementById("enable-sound").onclick = () => {
-     alarm = new Audio("alarm.mp3");
-     alarm.loop = true;
-     alarm.play().then(() => alarm.pause());
+     alarm.play().then(() => alarm.pause()); // desbloquea sonido
      alert("Sonido activado");
      document.getElementById("enable-sound").style.display = "none";
    };
