@@ -265,35 +265,45 @@
           <!-- ===============================
                SELECCIÓN DE MESOCICLO
           =============================== -->
-          <div class="trend-card up">
-            <h3>Tendencias por ejercicio</h3> 
-            <div class="trend-main">
-              <div id="strength-trends" class="strength-list"></div>
-            </div>
-          </div>
+          <section class="exercise-analysis">
           
-          <div id="exercise-modal" class="modal hidden">
-            <div class="modal-card">
-              <h4 id="modal-title"></h4>
-              <canvas id="mini-chart"></canvas>
-              <button id="close-modal-btn">Cerrar</button>
+            <!-- ===== TENDENCIAS ===== -->
+            <div class="analysis-block trend-card up">
+              <h3>Tendencias por ejercicio</h3>
+          
+              <div class="trend-main">
+                <div id="strength-trends" class="strength-list"></div>
+              </div>
             </div>
-          </div>
-
-          <div class="spacer"></div>
-
-          <h3>Volumen por ejercicio (peso*reps)</h3>
-          <div id="exercise-volume-list"></div>
-      
-          <h3>Mejores marcas</h3>
-          <div id="pr-table"></div>
-      
-          <h3>Comparación de mesociclos</h3>
-          <div id="mesocycle-comparison"></div>
-      
-        </div>
-      </section>
-
+          
+            <!-- ===== MODAL DE EJERCICIO ===== -->
+            <div id="exercise-modal" class="modal hidden">
+              <div class="modal-card">
+                <h4 id="modal-title"></h4>
+                <canvas id="mini-chart"></canvas>
+                <button id="close-modal-btn">Cerrar</button>
+              </div>
+            </div>
+          
+            <!-- ===== VOLUMEN POR EJERCICIO ===== -->
+            <div class="analysis-block">
+              <h3>Volumen por ejercicio (peso × reps)</h3>
+              <div id="exercise-volume-list"></div>
+            </div>
+          
+            <!-- ===== PRs ===== -->
+            <div class="analysis-block">
+              <h3>Mejores marcas</h3>
+              <div id="pr-table"></div>
+            </div>
+          
+            <!-- ===== COMPARACIÓN DE MESOCICLOS ===== -->
+            <div class="analysis-block">
+              <h3>Comparación de mesociclos</h3>
+              <div id="mesocycle-comparison"></div>
+            </div>
+          
+          </section>
       <!-- ================= TUTORIALES ================= -->
       <section id="tutorials-view" class="tab-content screen hidden">
         <h2>Tutoriales de ejercicios</h2>
