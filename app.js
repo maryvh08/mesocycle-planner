@@ -1142,125 +1142,59 @@ function initStopwatch() {
 }
 
 function initTimer() {
-  const input = document.getElementById("timer-input");
-  const display = document.getElementById("timer-display");
+  const timerInput = document.getElementById("timer-input");
+  const timerDisplay = document.getElementById("timer-display");
   const startBtn = document.getElementById("start-timer");
   const stopBtn = document.getElementById("stop-timer");
-
-  // Crear modal para notificación de tiempo terminado
-  let modal = document.getElementById("timer-modal");
-  if (!modal) {
-    modal = document.createElement("div");
-    modal.id = "timer-modal";
-    modal.style.cssText = `
-      display:none;
-      position:fixed;
-      top:0; left:0; right:0; bottom:0;
-      background:rgba(0,0,0,0.7);
-      color:white;
-      font-size:1.5rem;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      flex-direction:column;
-      z-index:9999;
-    `;
-    modal.innerHTML = `⏰ Tiempo terminado<br><button id="close-modal" style="margin-top:20px;padding:10px 20px;">Cerrar</button>`;
-    document.body.appendChild(modal);
-  }
-  const closeModalBtn = document.getElementById("close-modal");
-
-  let timerTime = 0;
+  const alarm = new Audio("alarm.mp3");
+  alarm.loop = true;
   let timerInterval = null;
-  let timerRunning = false;
-  let alarmPlaying = false;
 
-  display.textContent = "00:00";
+  // Función para actualizar el display
+  const updateDisplay = (totalSeconds) => {
+    const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+    const seconds = String(totalSeconds % 60).padStart(2, "0");
+    timerDisplay.textContent = `${minutes}:${seconds}`;
+  };
 
-  // Función para reproducir beep continuo usando AudioContext
-  function playBeep() {
-    if (!alarmPlaying) return;
-
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    oscillator.type = "sine";
-    oscillator.frequency.value = 1000;
-    oscillator.connect(gain);
-    gain.connect(ctx.destination);
-
-    gain.gain.setValueAtTime(0.1, ctx.currentTime); // volumen bajo
-    oscillator.start();
-    oscillator.stop(ctx.currentTime + 0.5); // dura 0.5s
-
-    if (alarmPlaying) setTimeout(playBeep, 500); // repetir cada 0.5s
-  }
-
+  // Start
   startBtn.onclick = () => {
-    if (!timerRunning && !alarmPlaying) {
-      const timeParts = input.value.split(":");
-      if (timeParts.length !== 2) return;
+    const value = timerInput.value.trim();
+    const parts = value.split(":");
+    if (parts.length !== 2) return alert("Formato inválido: MM:SS");
 
-      const parts = document.getElementById("timer-input").value.split(":");
-      const minutes = parseInt(parts[0]) || 0;
-      const seconds = parseInt(parts[1]) || 0;
-      let totalSeconds = minutes*60 + seconds;
+    const minutes = parseInt(parts[0], 10);
+    const seconds = parseInt(parts[1], 10);
+    if (isNaN(minutes) || isNaN(seconds)) return alert("Formato inválido");
 
-      if (isNaN(minutes) || isNaN(seconds)) return;
+    let totalSeconds = minutes * 60 + seconds;
+    updateDisplay(totalSeconds);
 
-      timerTime = (minutes * 60 + seconds) * 1000;
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      totalSeconds--;
+      updateDisplay(totalSeconds);
 
-      timerInterval = setInterval(() => {
-        timerTime -= 100;
-        if (timerTime <= 0) {
-          clearInterval(timerInterval);
-          timerTime = 0;
-          timerRunning = false;
-          display.textContent = "00:00";
-          startBtn.textContent = "Iniciar";
-
-          // Activar alarma
-          alarmPlaying = true;
-          playBeep();
-          modal.style.display = "flex"; // mostrar modal
-
-          saveTimeHistory("⏲️ Temporizador", formatTime(0));
-        } else {
-          display.textContent = formatTime(timerTime).slice(0, 5);
-        }
-      }, 100);
-
-      timerRunning = true;
-      startBtn.textContent = "Pausar";
-    } else if (!timerRunning && alarmPlaying) {
-      // Si la alarma está sonando, al iniciar no hacemos nada
-      return;
-    } else {
-      // Pausar temporizador
-      clearInterval(timerInterval);
-      timerRunning = false;
-      startBtn.textContent = "Reanudar";
-    }
+      if (totalSeconds <= 0) {
+        clearInterval(timerInterval);
+        alarm.play().catch(() => {
+          // En móvil puede requerir interacción del usuario
+          alert("⏰ Tiempo terminado");
+        });
+        saveTimeHistory({
+          type: "⏲️ Temporizador",
+          time: value,
+          date: new Date().toLocaleString()
+        });
+      }
+    }, 1000);
   };
 
+  // Stop
   stopBtn.onclick = () => {
-    if (timerRunning) {
-      // Pausar temporizador
-      clearInterval(timerInterval);
-      timerRunning = false;
-      startBtn.textContent = "Reanudar";
-    } else if (alarmPlaying) {
-      // Detener alarma
-      alarmPlaying = false;
-      modal.style.display = "none";
-    }
-  };
-
-  closeModalBtn.onclick = () => {
-    // Cerrar modal también detiene alarma
-    alarmPlaying = false;
-    modal.style.display = "none";
+    clearInterval(timerInterval);
+    alarm.pause();
+    alarm.currentTime = 0;
   };
 }
 
@@ -3515,9 +3449,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let swTime = 0;
   let swInterval = null;
   let timerInterval = null;
-  const alarm = new Audio("alarm.mp3"); // agrega tu audio
+  const alarm = new Audio("alarm.mp3");
   alarm.loop = true;
-
   let reps = 0;
   const weightLog = [];
 
@@ -3528,8 +3461,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (swInterval) return;
     swInterval = setInterval(() => {
       swTime += 100;
-      document.getElementById("stopwatch").textContent =
-        (swTime / 1000).toFixed(1);
+      document.getElementById("stopwatch").textContent = (swTime / 1000).toFixed(1);
     }, 100);
   };
 
@@ -3553,28 +3485,37 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==========================
   // Temporizador
   // ==========================
-  document.getElementById("start-timer").onclick = () => {
-    let input = document.getElementById("timer-input").value;
-    if (!input) return;
+  const timerInput = document.getElementById("timer-input");
+  const timerDisplay = document.getElementById("timer-display");
+  const startTimerBtn = document.getElementById("start-timer");
+  const stopTimerBtn = document.getElementById("stop-timer");
 
-    // Soporta MM:SS o SS
-    const parts = input.split(":").map(Number);
-    let totalSeconds = parts.length === 2 ? parts[0]*60 + parts[1] : parts[0];
-    if (totalSeconds <= 0) return;
+  const updateTimerDisplay = (totalSeconds) => {
+    const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+    const seconds = String(totalSeconds % 60).padStart(2, "0");
+    timerDisplay.textContent = `${minutes}:${seconds}`;
+  };
+
+  startTimerBtn.onclick = () => {
+    const input = timerInput.value.trim();
+    const parts = input.split(":");
+    if (parts.length !== 2) return alert("Formato inválido: MM:SS");
+
+    const minutes = parseInt(parts[0], 10);
+    const seconds = parseInt(parts[1], 10);
+    if (isNaN(minutes) || isNaN(seconds)) return alert("Formato inválido");
+
+    let totalSeconds = minutes * 60 + seconds;
+    updateTimerDisplay(totalSeconds);
 
     clearInterval(timerInterval);
-
     timerInterval = setInterval(() => {
       totalSeconds--;
-      const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
-      const seconds = String(totalSeconds % 60).padStart(2, "0");
-      document.getElementById("timer-display").textContent =
-        `${minutes}:${seconds}`;
+      updateTimerDisplay(totalSeconds);
 
       if (totalSeconds <= 0) {
         clearInterval(timerInterval);
-        alarm.play();
-        alert("⏰ Tiempo terminado");
+        alarm.play().catch(() => alert("⏰ Tiempo terminado"));
         saveTimeHistory({
           type: "⏲️ Temporizador",
           time: input,
@@ -3584,7 +3525,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
   };
 
-  document.getElementById("stop-timer").onclick = () => {
+  stopTimerBtn.onclick = () => {
     clearInterval(timerInterval);
     alarm.pause();
     alarm.currentTime = 0;
@@ -3633,7 +3574,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const r = +document.getElementById("rm-reps").value;
     if (!w || !r) return;
 
-    const oneRM = Math.round(w / (1.0278 - 0.0278*r));
+    const oneRM = Math.round(w / (1.0278 - 0.0278 * r));
     document.getElementById("rm-result").textContent = oneRM + " kg";
   };
 
@@ -3643,7 +3584,7 @@ document.addEventListener("DOMContentLoaded", () => {
   startClock();
   renderTimeHistory();
 
-  // Modal oculto por defecto
+  // Ocultar modal por defecto
   const modal = document.getElementById("exercise-modal");
   if (modal) modal.classList.add("hidden");
 });
