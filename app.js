@@ -3530,20 +3530,17 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("start-timer").onclick = () => {
      const input = document.getElementById("timer-input").value; // ejemplo: "02:30"
      const parts = input.split(":");
-   
      if (parts.length !== 2) return alert("Formato inválido MM:SS");
    
-     let minutes = parseInt(document.getElementById("timer-minutes").value) || 0;
-      let seconds = parseInt(document.getElementById("timer-seconds").value) || 0;
-      let totalSeconds = minutes*60 + seconds;
-   
+     let minutes = parseInt(parts[0], 10);
+     let seconds = parseInt(parts[1], 10);
      if (isNaN(minutes) || isNaN(seconds)) return alert("Formato inválido");
-      
+   
+     let totalSeconds = minutes * 60 + seconds;
      clearInterval(timerInterval);
    
      timerInterval = setInterval(() => {
        totalSeconds--;
-   
        const displayMinutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
        const displaySeconds = String(totalSeconds % 60).padStart(2, "0");
    
@@ -3551,13 +3548,8 @@ document.addEventListener("DOMContentLoaded", () => {
    
        if (totalSeconds <= 0) {
          clearInterval(timerInterval);
-         if (alarm) alarm.play(); // aquí suena la alarma
+         if (alarm) alarm.play();
          alert("⏰ Tiempo terminado");
-         saveTimeHistory({
-           type: "⏲️ Temporizador",
-           time: input,
-           date: new Date().toLocaleString()
-         });
        }
      }, 1000);
    };
