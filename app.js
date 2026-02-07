@@ -1202,8 +1202,11 @@ function initTimer() {
       const timeParts = input.value.split(":");
       if (timeParts.length !== 2) return;
 
-      const minutes = parseInt(timeParts[0], 10);
-      const seconds = parseInt(timeParts[1], 10);
+      const parts = document.getElementById("timer-input").value.split(":");
+      const minutes = parseInt(parts[0]) || 0;
+      const seconds = parseInt(parts[1]) || 0;
+      let totalSeconds = minutes*60 + seconds;
+
       if (isNaN(minutes) || isNaN(seconds)) return;
 
       timerTime = (minutes * 60 + seconds) * 1000;
