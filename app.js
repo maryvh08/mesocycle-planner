@@ -3622,6 +3622,14 @@ document.addEventListener("DOMContentLoaded", () => {
   if (modal) modal.classList.add("hidden");
 });
 
+document.getElementById("enable-sound").onclick = () => {
+  alarm = new Audio("alarm.mp3");
+  alarm.loop = true;
+  alarm.play().then(() => alarm.pause());
+  alert("Sonido activado");
+  document.getElementById("enable-sound").style.display = "none";
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   const mesocycleId = localStorage.getItem('active_mesocycle');
   if (mesocycleId) {
