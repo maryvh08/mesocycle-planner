@@ -90,6 +90,10 @@ body.human {
   height: 1.5rem;
 }
 
+.tab-content.screen {
+  background: var(--bg);
+  min-height: 100vh;
+}
 /* ======================
    TIPOGRAFÍA
 ====================== */
