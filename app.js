@@ -1146,25 +1146,45 @@ function initTimer() {
   const display = document.getElementById("timer-display");
   const startBtn = document.getElementById("start-timer");
   const stopBtn = document.getElementById("stop-timer");
-  const alarm = document.getElementById("timer-alarm");
 
   let timerTime = 0;
   let timerInterval = null;
   let timerRunning = false;
+  let alarmPlaying = false;
 
   display.textContent = "00:00";
 
-  // Botón para detener la alarma
+  // Crear botón para detener alarma
   let stopAlarmBtn = document.createElement("button");
   stopAlarmBtn.textContent = "Detener alarma";
   stopAlarmBtn.style.display = "none";
   stopAlarmBtn.onclick = () => {
-    alarm.pause();
-    alarm.currentTime = 0;
-    alarm.loop = false;
+    alarmPlaying = false;
     stopAlarmBtn.style.display = "none";
   };
   startBtn.parentNode.appendChild(stopAlarmBtn);
+
+  // Función para reproducir un beep usando AudioContext
+  function playBeep() {
+    if (!alarmPlaying) return;
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    oscillator.type = "sine";
+    oscillator.frequency.value = 1000; // 1000 Hz
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+
+    oscillator.start();
+    gain.gain.setValueAtTime(0.1, ctx.currentTime); // volumen bajo
+    oscillator.stop(ctx.currentTime + 0.5); // dura 0.5 s
+
+    // repetir cada 0.5 s mientras alarmPlaying = true
+    if (alarmPlaying) {
+      setTimeout(playBeep, 500);
+    }
+  }
 
   startBtn.onclick = () => {
     if (!timerRunning) {
@@ -1186,15 +1206,10 @@ function initTimer() {
           display.textContent = "00:00";
           startBtn.textContent = "Iniciar";
 
-          // Activar alarma correctamente
-          if (alarm) {
-            alarm.loop = true;  // repetición automática
-            alarm.currentTime = 0;
-            alarm.play().catch(() => {
-              console.log("El navegador bloqueó el audio. Haz clic en algún botón para activarlo.");
-            });
-            stopAlarmBtn.style.display = "inline-block";
-          }
+          // activar alarma
+          alarmPlaying = true;
+          stopAlarmBtn.style.display = "inline-block";
+          playBeep();
 
           saveTimeHistory("⏲️ Temporizador", formatTime(0));
           alert("⏰ Tiempo terminado");
@@ -1229,11 +1244,7 @@ function initTimer() {
     timerRunning = false;
     display.textContent = "00:00";
     startBtn.textContent = "Iniciar";
-
-    // Detener alarma si estaba sonando
-    alarm.pause();
-    alarm.currentTime = 0;
-    alarm.loop = false;
+    alarmPlaying = false;
     stopAlarmBtn.style.display = "none";
   };
 
