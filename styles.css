@@ -176,10 +176,10 @@ section {
 /* ======================
    VISTAS
 ====================== */
-#login-view,
-#app-view {
-  background: var(--bg);
-  min-height: 100vh;
+#login-view, 
+#app-view { 
+   max-width: 1000px; 
+   margin: 0 auto; 
 }
 
 /* ======================
