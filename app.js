@@ -3482,127 +3482,145 @@ document.getElementById('clear-filters')?.addEventListener('click', () => {
   renderTutorials(tutorialsData);
 });
 
-document.querySelectorAll('.filter-btn').forEach(btn=>{
-  btn.addEventListener('click', e=>{
-    e.stopPropagation();
-    btn.parentElement.classList.toggle('open');
-  });
-});
-
-document.addEventListener('click', ()=>{
-  document.querySelectorAll('.multi-filter').forEach(f=>f.classList.remove('open'));
-});
-
-document.addEventListener('change', e=>{
-  if(e.target.closest('.filter-dropdown')) applyFilters();
-});
-
-document.getElementById('close-tutorial-modal-btn').addEventListener('click', closeTutorial);
-document.getElementById('tutorial-modal').addEventListener('click', e=>{
-  if(e.target.id==='tutorial-modal') closeTutorial();
-});
-
-// Cargar tutoriales al inicio
-loadTutorials();
-
-document.getElementById("start-stopwatch").onclick = () => {
-  if (swInterval) return;
-  swInterval = setInterval(() => {
-    swTime += 100;
-    document.getElementById("stopwatch").textContent =
-      (swTime / 1000).toFixed(1);
-  }, 100);
-};
-
-document.getElementById("stop-stopwatch").onclick = () => {
-  if (!swInterval) return;
-
-  clearInterval(swInterval);
-  swInterval = null;
-
-  saveTimeHistory({
-    type: "⏱️ Cronómetro",
-    time: (swTime / 1000).toFixed(1) + " s",
-    date: new Date().toLocaleString()
-  });
-};
-
-document.getElementById("reset-stopwatch").onclick = () => {
-  swTime = 0;
-  document.getElementById("stopwatch").textContent = "00:00.0";
-};
-
-document.getElementById("start-timer").onclick = () => {
-  let seconds = parseInt(document.getElementById("timer-input").value);
-  if (!seconds || seconds <= 0) return;
-
-  clearInterval(timerInterval);
-
-  timerInterval = setInterval(() => {
-    seconds--;
-    document.getElementById("timer-display").textContent =
-      `00:${String(seconds).padStart(2, "0")}`;
-
-    if (seconds <= 0) {
-      clearInterval(timerInterval);
-      alert("⏰ Tiempo terminado");
-       saveTimeHistory({
-        type: "⏲️ Temporizador",
-        time: document.getElementById("timer-input").value + " s",
-        date: new Date().toLocaleString()
-      });
-    }
-  }, 1000);
-};
-
-document.getElementById("stop-timer").onclick = () => {
-  clearInterval(timerInterval);
-};
-
-document.getElementById("clear-history")?.addEventListener("click", () => {
-  if (!confirm("¿Borrar historial completo?")) return;
-  localStorage.removeItem("timeHistory");
-  renderTimeHistory();
-});
-
 document.addEventListener("DOMContentLoaded", () => {
-  initTools();
+  // ==========================
+  // Variables globales
+  // ==========================
+  let swTime = 0;
+  let swInterval = null;
+  let timerInterval = null;
+  const alarm = new Audio("alarm.mp3"); // agrega tu audio
+  alarm.loop = true;
 
-  // Asegurarnos de que el modal empiece oculto
+  let reps = 0;
+  const weightLog = [];
+
+  // ==========================
+  // Cronómetro
+  // ==========================
+  document.getElementById("start-stopwatch").onclick = () => {
+    if (swInterval) return;
+    swInterval = setInterval(() => {
+      swTime += 100;
+      document.getElementById("stopwatch").textContent =
+        (swTime / 1000).toFixed(1);
+    }, 100);
+  };
+
+  document.getElementById("stop-stopwatch").onclick = () => {
+    if (!swInterval) return;
+    clearInterval(swInterval);
+    swInterval = null;
+
+    saveTimeHistory({
+      type: "⏱️ Cronómetro",
+      time: (swTime / 1000).toFixed(1) + " s",
+      date: new Date().toLocaleString()
+    });
+  };
+
+  document.getElementById("reset-stopwatch").onclick = () => {
+    swTime = 0;
+    document.getElementById("stopwatch").textContent = "00:00.0";
+  };
+
+  // ==========================
+  // Temporizador
+  // ==========================
+  document.getElementById("start-timer").onclick = () => {
+    let input = document.getElementById("timer-input").value;
+    if (!input) return;
+
+    // Soporta MM:SS o SS
+    const parts = input.split(":").map(Number);
+    let totalSeconds = parts.length === 2 ? parts[0]*60 + parts[1] : parts[0];
+    if (totalSeconds <= 0) return;
+
+    clearInterval(timerInterval);
+
+    timerInterval = setInterval(() => {
+      totalSeconds--;
+      const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+      const seconds = String(totalSeconds % 60).padStart(2, "0");
+      document.getElementById("timer-display").textContent =
+        `${minutes}:${seconds}`;
+
+      if (totalSeconds <= 0) {
+        clearInterval(timerInterval);
+        alarm.play();
+        alert("⏰ Tiempo terminado");
+        saveTimeHistory({
+          type: "⏲️ Temporizador",
+          time: input,
+          date: new Date().toLocaleString()
+        });
+      }
+    }, 1000);
+  };
+
+  document.getElementById("stop-timer").onclick = () => {
+    clearInterval(timerInterval);
+    alarm.pause();
+    alarm.currentTime = 0;
+  };
+
+  // ==========================
+  // Historial
+  // ==========================
+  document.getElementById("clear-history")?.addEventListener("click", () => {
+    if (!confirm("¿Borrar historial completo?")) return;
+    localStorage.removeItem("timeHistory");
+    renderTimeHistory();
+  });
+
+  // ==========================
+  // Reps
+  // ==========================
+  document.getElementById("add-rep").onclick = () => {
+    reps++;
+    document.getElementById("reps-display").textContent = reps;
+  };
+
+  document.getElementById("reset-reps").onclick = () => {
+    reps = 0;
+    document.getElementById("reps-display").textContent = reps;
+  };
+
+  // ==========================
+  // Peso y sets
+  // ==========================
+  document.getElementById("save-weight").onclick = () => {
+    const weight = document.getElementById("weight-input").value;
+    const sets = document.getElementById("sets-input").value;
+    if (!weight || !sets) return;
+
+    weightLog.push({ weight, sets });
+    document.getElementById("weight-log").textContent =
+      weightLog.map(e => `${e.sets}x${e.weight}kg`).join(", ");
+  };
+
+  // ==========================
+  // Cálculo 1RM
+  // ==========================
+  document.getElementById("calc-1rm").onclick = () => {
+    const w = +document.getElementById("rm-weight").value;
+    const r = +document.getElementById("rm-reps").value;
+    if (!w || !r) return;
+
+    const oneRM = Math.round(w / (1.0278 - 0.0278*r));
+    document.getElementById("rm-result").textContent = oneRM + " kg";
+  };
+
+  // ==========================
+  // Inicializaciones
+  // ==========================
+  startClock();
+  renderTimeHistory();
+
+  // Modal oculto por defecto
   const modal = document.getElementById("exercise-modal");
-  if(modal) modal.classList.add("hidden");
+  if (modal) modal.classList.add("hidden");
 });
-
-let reps = 0;
-document.getElementById("add-rep").onclick = () => {
-  reps++;
-  document.getElementById("reps-display").textContent = reps;
-};
-document.getElementById("reset-reps").onclick = () => {
-  reps = 0;
-  document.getElementById("reps-display").textContent = reps;
-};
-
-const weightLog = [];
-document.getElementById("save-weight").onclick = () => {
-  const weight = document.getElementById("weight-input").value;
-  const sets = document.getElementById("sets-input").value;
-  if(!weight || !sets) return;
-  weightLog.push({ weight, sets });
-  document.getElementById("weight-log").textContent =
-    weightLog.map(e => `${e.sets}x${e.weight}kg`).join(", ");
-};
-
-document.getElementById("calc-1rm").onclick = () => {
-  const w = +document.getElementById("rm-weight").value;
-  const r = +document.getElementById("rm-reps").value;
-  if(!w || !r) return;
-  const oneRM = Math.round(w / (1.0278 - 0.0278*r));
-  document.getElementById("rm-result").textContent = oneRM + " kg";
-};
-
-startClock();
-renderTimeHistory();
 
 document.addEventListener('DOMContentLoaded', () => {
   const mesocycleId = localStorage.getItem('active_mesocycle');
