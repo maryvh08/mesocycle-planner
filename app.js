@@ -3639,3 +3639,46 @@ mesocycleSelect.addEventListener('change', () => {
 
 // Estado inicial
 updateStatsSections();
+
+startBtn.onclick = () => {
+  const timeParts = input.value.split(":");
+  if (timeParts.length !== 2) return;
+
+  const minutes = parseInt(timeParts[0]);
+  const seconds = parseInt(timeParts[1]);
+  if (isNaN(minutes) || isNaN(seconds)) return;
+
+  timerTime = (minutes * 60 + seconds) * 1000;
+
+  clearInterval(timerInterval);
+
+  // Desbloquear audio al primer click
+  alarmSound.pause();
+  alarmSound.currentTime = 0;
+  alarmSound.play().catch(() => {}); // esto desbloquea el audio, no lo reproduce ahora
+
+  timerInterval = setInterval(() => {
+    timerTime -= 100;
+    if (timerTime <= 0) {
+      clearInterval(timerInterval);
+      timerTime = 0;
+      timerRunning = false;
+      display.textContent = "00:00.00";
+      startBtn.textContent = "Iniciar";
+
+      // 🔔 Reproducir alarma al finalizar
+      alarmSound.play().catch(() => {
+        console.log("Alarma bloqueada por autoplay, se intentará reproducir después de interacción");
+      });
+
+      saveTimeHistory("⏲️ Temporizador", formatTime(0));
+      display.style.color = "red";
+    } else {
+      display.textContent = formatTime(timerTime);
+      display.style.color = "inherit";
+    }
+  }, 100);
+
+  timerRunning = true;
+  startBtn.textContent = "Pausar";
+};
