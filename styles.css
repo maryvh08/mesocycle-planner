@@ -178,8 +178,8 @@ section {
 ====================== */
 #login-view,
 #app-view {
-  max-width: 1000px;
-  margin: 0 auto;
+  background: var(--bg);
+  min-height: 100vh;
 }
 
 /* ======================
