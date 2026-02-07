@@ -150,7 +150,7 @@
         <div class="screen-header">Estadísticas</div>
       
         <div class="screen-content">
-
+      
           <div class="card">
             <label>Mesociclo</label>
             <select id="stats-mesocycle">
@@ -167,86 +167,76 @@
             <div id="kpi-prs" class="kpi-card"></div>
             <div id="kpi-sessions" class="kpi-card"></div>
           </div>
-
+      
           <div class="separator"></div>
-
+      
           <!-- ===============================
                ANÁLISIS / DASHBOARD
           =============================== -->
           <section id="analysisDashboard" class="analysis-dashboard">
-          
+      
             <!-- ===== VOLUMEN SEMANAL POR EJERCICIO ===== -->
             <div class="dashboard-block volume-section">
               <h3>Volumen semanal por ejercicio</h3>
-          
-              <div id="volumeTable" class="table-wrapper">
-                <!-- renderVolumeTable(data) -->
-              </div>
+              <div id="volumeTable" class="table-wrapper"></div>
             </div>
-          
+      
             <!-- ===== COMPARACIÓN DE MESOCICLOS ===== -->
             <div class="dashboard-block mesocycle-compare">
               <h3>Comparar mesociclos</h3>
-          
               <div class="compare-controls">
                 <select id="mesoA">
                   <option value="">Selecciona mesociclo A</option>
                 </select>
-          
                 <select id="mesoB">
                   <option value="">Selecciona mesociclo B</option>
                 </select>
               </div>
-          
               <div id="compareResult"></div>
             </div>
-          
+      
             <!-- ===== VOLUMEN POR GRUPO MUSCULAR (RP) ===== -->
             <div class="dashboard-block muscle-volume">
               <h3>Volumen por grupo muscular</h3>
-          
               <div id="muscleTable" class="table-wrapper"></div>
             </div>
-          
+      
             <!-- ===== COACH DASHBOARD ===== -->
             <div class="dashboard-block coach-dashboard">
               <h2>Coach</h2>
-          
+      
               <!-- ESTADO GLOBAL -->
               <div class="coach-section">
                 <h3>Interpretación estado global</h3>
-          
                 <div class="coach-grid" id="coachStatusGrid">
                   <div class="coach-card" id="statusGreen"></div>
                   <div class="coach-card" id="statusYellow"></div>
                   <div class="coach-card" id="statusRed"></div>
                 </div>
-          
                 <div class="coach-card" id="globalProgressCard">
                   <p id="globalProgressText"></p>
                 </div>
               </div>
-          
+      
               <!-- ALERTAS -->
               <div class="coach-section">
                 <h3>Alertas críticas</h3>
                 <div id="fatigueAlerts"></div>
               </div>
-          
+      
               <!-- RECOMENDACIÓN -->
               <div class="coach-section">
                 <h3>Recomendación</h3>
-          
                 <div class="coach-card success" id="coachCard">
                   <div class="coach-content">
                     <p id="coachMessage"></p>
                   </div>
                 </div>
               </div>
-          
+      
             </div>
-          </section>
-
+          </section> <!-- Cierre de analysisDashboard -->
+      
           <!-- ===============================
                GRAFICA FUERZA
           =============================== -->
@@ -260,23 +250,22 @@
               ← Volver a evolución general
             </button>
           </div>
-          
+      
           <div class="spacer"></div>
-
+      
           <!-- ===============================
                SELECCIÓN DE MESOCICLO
           =============================== -->
           <section id="exerciseAnalysis" class="exercise-analysis hidden">
-          
+      
             <!-- ===== TENDENCIAS ===== -->
             <div class="analysis-block trend-card up">
               <h3>Tendencias por ejercicio</h3>
-          
               <div class="trend-main">
                 <div id="strength-trends" class="strength-list"></div>
               </div>
             </div>
-          
+      
             <!-- ===== MODAL DE EJERCICIO ===== -->
             <div id="exercise-modal" class="modal hidden">
               <div class="modal-card">
@@ -285,29 +274,32 @@
                 <button id="close-modal-btn">Cerrar</button>
               </div>
             </div>
-          
+      
             <!-- ===== VOLUMEN POR EJERCICIO ===== -->
             <div class="analysis-block">
               <h3>Volumen por ejercicio (peso × reps)</h3>
               <div id="exercise-volume-list"></div>
             </div>
-          
+      
             <!-- ===== PRs ===== -->
             <div class="analysis-block">
               <h3>Mejores marcas</h3>
               <div id="pr-table"></div>
             </div>
-          
+      
             <!-- ===== COMPARACIÓN DE MESOCICLOS ===== -->
             <div class="analysis-block">
               <h3>Comparación de mesociclos</h3>
               <div id="mesocycle-comparison"></div>
             </div>
-  
-        </section>
-      </section>
+      
+          </section> <!-- Cierre de exerciseAnalysis -->
+      
+        </div> <!-- Cierre de screen-content -->
+      </section> <!-- Cierre de stats -->
+      
       <!-- ================= TUTORIALES ================= -->
-      <section id="tools-tab" class="tab-content screen hidden">
+      <section id="tutorials-view" class="tab-content screen hidden">
         <h2>Tutoriales de ejercicios</h2>
         <h3 class="subtitle">Aprende y mejora tu técnica</h3>
       
@@ -358,7 +350,6 @@
         <div id="tutorial-modal" class="hidden">
           <div class="modal-content">
             <h3 id="tutorial-title"></h3>
-      
             <div class="video-wrapper">
               <iframe
                 id="tutorial-video"
@@ -367,14 +358,12 @@
                 allowfullscreen
               ></iframe>
             </div>
-      
             <div id="tutorial-cues"></div>
-      
             <button id="close-tutorial-modal-btn">Cerrar</button>
           </div>
         </div>
       </section>
-
+      
       <!-- ================= HERRAMIENTAS ================= -->
       <section id="tools-tab" class="tab-content screen hidden">
         <div class="screen-header">Herramientas</div>
@@ -401,7 +390,6 @@
           <!-- ===== TEMPORIZADOR ===== -->
           <div class="card tool-card">
             <h3>⏲️ Temporizador</h3>
-      
             <input
               type="text"
               id="timer-input"
@@ -409,9 +397,7 @@
               pattern="[0-5]?[0-9]:[0-5][0-9]"
               inputmode="numeric"
             />
-      
             <div id="timer-display" class="tool-display">00:00</div>
-      
             <div class="tool-actions">
               <button id="start-timer">Iniciar</button>
               <button id="stop-timer">Detener</button>
@@ -419,6 +405,7 @@
           </div>
       
         </div>
+      
         <div class="card tool-card">
           <h3>📜 Historial de tiempos</h3>
           <div id="time-history" class="time-history">
