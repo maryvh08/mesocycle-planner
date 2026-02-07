@@ -1946,22 +1946,23 @@ function renderComparison(a, b) {
   if (!container) return;
 
   container.innerHTML = `
-    <div class="compare-grid">
-      <div class="mesocycle-stat-card ${a.efficiency > b.efficiency ? 'winner' : ''}">
-        <h4>${a.name}</h4>
-        <p>PRs: ${a.pr_count}</p>
-        <p>Volumen: ${Math.round(a.total_volume)}</p>
-        <p>Fuerza media: ${a.avg_strength.toFixed(1)}</p>
-      </div>
-
-      <div class="mesocycle-stat-card ${b.efficiency > a.efficiency ? 'winner' : ''}">
-        <h4>${b.name}</h4>
-        <p>PRs: ${b.pr_count}</p>
-        <p>Volumen: ${Math.round(b.total_volume)}</p>
-        <p>Fuerza media: ${b.avg_strength.toFixed(1)}</p>
-      </div>
-    </div>
-  `;
+    container.innerHTML = `
+     <div class="compare-grid">
+       <div class="mesocycle-stat-card ${a.efficiency > b.efficiency ? 'winner' : ''}">
+         <h4>${a.name}</h4>
+         <p><strong>PRs:</strong> ${a.pr_count}</p>
+         <p><strong>Volumen:</strong> ${Math.round(a.total_volume)}</p>
+         <p><strong>Fuerza media:</strong> ${a.avg_strength.toFixed(1)}</p>
+       </div>
+   
+       <div class="mesocycle-stat-card ${b.efficiency > a.efficiency ? 'winner' : ''}">
+         <h4>${b.name}</h4>
+         <p><strong>PRs:</strong> ${b.pr_count}</p>
+         <p><strong>Volumen:</strong> ${Math.round(b.total_volume)}</p>
+         <p><strong>Fuerza media:</strong> ${b.avg_strength.toFixed(1)}</p>
+       </div>
+     </div>
+   `;
 }
 
 function renderMesocycleRecommendation(result) {
