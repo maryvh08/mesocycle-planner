@@ -3589,3 +3589,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+const mesocycleSelect = document.getElementById('stats-mesocycle');
+
+const analysisDashboard = document.getElementById('analysisDashboard');
+const exerciseAnalysis = document.getElementById('exerciseAnalysis');
+
+function updateStatsSections() {
+  const selected = mesocycleSelect.value;
+
+  const isAll = selected === '';
+
+  // 🧠 ANÁLISIS / DASHBOARD
+  analysisDashboard.classList.toggle('hidden', !isAll);
+
+  // 🧠 SELECCIÓN DE MESOCICLO
+  exerciseAnalysis.classList.toggle('hidden', isAll);
+
+  // 🧠 GRÁFICA DE FUERZA
+  // 👉 NO SE TOCA: siempre visible
+}
+
+// Al cambiar el select
+mesocycleSelect.addEventListener('change', () => {
+  updateStatsSections();
+});
+
+// Estado inicial
+updateStatsSections();
