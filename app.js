@@ -3528,35 +3528,40 @@ document.addEventListener("DOMContentLoaded", () => {
   // Temporizador
   // ==========================
   document.getElementById("start-timer").onclick = () => {
-    let input = document.getElementById("timer-input").value;
-    if (!input) return;
-
-    // Soporta MM:SS o SS
-    const parts = input.split(":").map(Number);
-    let totalSeconds = parts.length === 2 ? parts[0]*60 + parts[1] : parts[0];
-    if (totalSeconds <= 0) return;
-
-    clearInterval(timerInterval);
-
-    timerInterval = setInterval(() => {
-      totalSeconds--;
-      const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
-      const seconds = String(totalSeconds % 60).padStart(2, "0");
-      document.getElementById("timer-display").textContent =
-        `${minutes}:${seconds}`;
-
-      if (totalSeconds <= 0) {
-        clearInterval(timerInterval);
-        alarm.play();
-        alert("⏰ Tiempo terminado");
-        saveTimeHistory({
-          type: "⏲️ Temporizador",
-          time: input,
-          date: new Date().toLocaleString()
-        });
-      }
-    }, 1000);
-  };
+     const input = document.getElementById("timer-input").value; // ejemplo: "02:30"
+     const parts = input.split(":");
+   
+     if (parts.length !== 2) return alert("Formato inválido MM:SS");
+   
+     let minutes = parseInt(parts[0], 10);
+     let seconds = parseInt(parts[1], 10);
+   
+     if (isNaN(minutes) || isNaN(seconds)) return alert("Formato inválido");
+   
+     let totalSeconds = minutes * 60 + seconds;
+   
+     clearInterval(timerInterval);
+   
+     timerInterval = setInterval(() => {
+       totalSeconds--;
+   
+       const displayMinutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+       const displaySeconds = String(totalSeconds % 60).padStart(2, "0");
+   
+       document.getElementById("timer-display").textContent = `${displayMinutes}:${displaySeconds}`;
+   
+       if (totalSeconds <= 0) {
+         clearInterval(timerInterval);
+         if (alarm) alarm.play(); // aquí suena la alarma
+         alert("⏰ Tiempo terminado");
+         saveTimeHistory({
+           type: "⏲️ Temporizador",
+           time: input,
+           date: new Date().toLocaleString()
+         });
+       }
+     }, 1000);
+   };
 
   document.getElementById("stop-timer").onclick = () => {
     clearInterval(timerInterval);
@@ -3611,6 +3616,18 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("rm-result").textContent = oneRM + " kg";
   };
 
+   // ==========================
+   // Alarma
+   // ==========================
+
+   document.getElementById("enable-sound").onclick = () => {
+     alarm = new Audio("alarm.mp3");
+     alarm.loop = true;
+     alarm.play().then(() => alarm.pause());
+     alert("Sonido activado");
+     document.getElementById("enable-sound").style.display = "none";
+   };
+
   // ==========================
   // Inicializaciones
   // ==========================
@@ -3621,14 +3638,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const modal = document.getElementById("exercise-modal");
   if (modal) modal.classList.add("hidden");
 });
-
-document.getElementById("enable-sound").onclick = () => {
-  alarm = new Audio("alarm.mp3");
-  alarm.loop = true;
-  alarm.play().then(() => alarm.pause());
-  alert("Sonido activado");
-  document.getElementById("enable-sound").style.display = "none";
-};
 
 document.addEventListener('DOMContentLoaded', () => {
   const mesocycleId = localStorage.getItem('active_mesocycle');
