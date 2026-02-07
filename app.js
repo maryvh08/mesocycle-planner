@@ -1146,23 +1146,64 @@ function initTimer() {
   const display = document.getElementById("timer-display");
   const startBtn = document.getElementById("start-timer");
   const stopBtn = document.getElementById("stop-timer");
-  const alarm = document.getElementById("timer-alarm");
+
+  // Crear modal para notificación de tiempo terminado
+  let modal = document.getElementById("timer-modal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "timer-modal";
+    modal.style.cssText = `
+      display:none;
+      position:fixed;
+      top:0; left:0; right:0; bottom:0;
+      background:rgba(0,0,0,0.7);
+      color:white;
+      font-size:1.5rem;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      z-index:9999;
+    `;
+    modal.innerHTML = `⏰ Tiempo terminado<br><button id="close-modal" style="margin-top:20px;padding:10px 20px;">Cerrar</button>`;
+    document.body.appendChild(modal);
+  }
+  const closeModalBtn = document.getElementById("close-modal");
 
   let timerTime = 0;
   let timerInterval = null;
   let timerRunning = false;
+  let alarmPlaying = false;
 
   display.textContent = "00:00";
 
+  // Función para reproducir beep continuo usando AudioContext
+  function playBeep() {
+    if (!alarmPlaying) return;
+
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    oscillator.type = "sine";
+    oscillator.frequency.value = 1000;
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+
+    gain.gain.setValueAtTime(0.1, ctx.currentTime); // volumen bajo
+    oscillator.start();
+    oscillator.stop(ctx.currentTime + 0.5); // dura 0.5s
+
+    if (alarmPlaying) setTimeout(playBeep, 500); // repetir cada 0.5s
+  }
+
   startBtn.onclick = () => {
-    if (!timerRunning) {
-      // Si no está corriendo, inicia o reinicia el temporizador
+    if (!timerRunning && !alarmPlaying) {
       const timeParts = input.value.split(":");
       if (timeParts.length !== 2) return;
 
       const minutes = parseInt(timeParts[0], 10);
       const seconds = parseInt(timeParts[1], 10);
-
       if (isNaN(minutes) || isNaN(seconds)) return;
 
       timerTime = (minutes * 60 + seconds) * 1000;
@@ -1176,23 +1217,24 @@ function initTimer() {
           display.textContent = "00:00";
           startBtn.textContent = "Iniciar";
 
-          // Reproducir alarma
-          if (alarm) {
-            alarm.currentTime = 0;
-            alarm.play();
-          }
+          // Activar alarma
+          alarmPlaying = true;
+          playBeep();
+          modal.style.display = "flex"; // mostrar modal
 
           saveTimeHistory("⏲️ Temporizador", formatTime(0));
-          alert("⏰ Tiempo terminado");
         } else {
-          display.textContent = formatTime(timerTime).slice(0, 5); // MM:SS
+          display.textContent = formatTime(timerTime).slice(0, 5);
         }
       }, 100);
 
       timerRunning = true;
       startBtn.textContent = "Pausar";
+    } else if (!timerRunning && alarmPlaying) {
+      // Si la alarma está sonando, al iniciar no hacemos nada
+      return;
     } else {
-      // Si ya está corriendo, pausa
+      // Pausar temporizador
       clearInterval(timerInterval);
       timerRunning = false;
       startBtn.textContent = "Reanudar";
@@ -1201,28 +1243,22 @@ function initTimer() {
 
   stopBtn.onclick = () => {
     if (timerRunning) {
+      // Pausar temporizador
       clearInterval(timerInterval);
       timerRunning = false;
       startBtn.textContent = "Reanudar";
+    } else if (alarmPlaying) {
+      // Detener alarma
+      alarmPlaying = false;
+      modal.style.display = "none";
     }
   };
 
-  // Botón de reset
-  const resetBtn = document.createElement("button");
-  resetBtn.textContent = "Restablecer";
-  resetBtn.onclick = () => {
-    clearInterval(timerInterval);
-    timerTime = 0;
-    timerRunning = false;
-    display.textContent = "00:00";
-    startBtn.textContent = "Iniciar";
+  closeModalBtn.onclick = () => {
+    // Cerrar modal también detiene alarma
+    alarmPlaying = false;
+    modal.style.display = "none";
   };
-
-  const parent = startBtn.parentNode;
-  if (parent && !parent.querySelector(".timer-reset")) {
-    resetBtn.classList.add("timer-reset");
-    parent.appendChild(resetBtn);
-  }
 }
 
 function startClock() {
@@ -3531,6 +3567,14 @@ document.getElementById("clear-history")?.addEventListener("click", () => {
 
 document.addEventListener("DOMContentLoaded", () => {
   initTools();
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  initTools();
+
+  // Asegurarnos de que el modal empiece oculto
+  const modal = document.getElementById("exercise-modal");
+  if(modal) modal.classList.add("hidden");
 });
 
 startClock();
