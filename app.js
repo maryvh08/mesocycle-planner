@@ -3508,80 +3508,145 @@ document.getElementById('tutorial-modal').addEventListener('click', e=>{
 // Cargar tutoriales al inicio
 loadTutorials();
 
-document.getElementById("start-stopwatch").onclick = () => {
-  if (swInterval) return;
-  swInterval = setInterval(() => {
-    swTime += 100;
-    document.getElementById("stopwatch").textContent =
-      (swTime / 1000).toFixed(1);
-  }, 100);
-};
+document.addEventListener("DOMContentLoaded", () => {
+  // ==========================
+  // Variables globales
+  // ==========================
+  let swTime = 0;
+  let swInterval = null;
+  let timerInterval = null;
+  const alarm = new Audio("alarm.mp3"); // agrega tu audio
+  alarm.loop = true;
 
-document.getElementById("stop-stopwatch").onclick = () => {
-  if (!swInterval) return;
+  let reps = 0;
+  const weightLog = [];
 
-  clearInterval(swInterval);
-  swInterval = null;
+  // ==========================
+  // Cronómetro
+  // ==========================
+  document.getElementById("start-stopwatch").onclick = () => {
+    if (swInterval) return;
+    swInterval = setInterval(() => {
+      swTime += 100;
+      document.getElementById("stopwatch").textContent =
+        (swTime / 1000).toFixed(1);
+    }, 100);
+  };
 
-  saveTimeHistory({
-    type: "⏱️ Cronómetro",
-    time: (swTime / 1000).toFixed(1) + " s",
-    date: new Date().toLocaleString()
+  document.getElementById("stop-stopwatch").onclick = () => {
+    if (!swInterval) return;
+    clearInterval(swInterval);
+    swInterval = null;
+
+    saveTimeHistory({
+      type: "⏱️ Cronómetro",
+      time: (swTime / 1000).toFixed(1) + " s",
+      date: new Date().toLocaleString()
+    });
+  };
+
+  document.getElementById("reset-stopwatch").onclick = () => {
+    swTime = 0;
+    document.getElementById("stopwatch").textContent = "00:00.0";
+  };
+
+  // ==========================
+  // Temporizador
+  // ==========================
+  document.getElementById("start-timer").onclick = () => {
+    let input = document.getElementById("timer-input").value;
+    if (!input) return;
+
+    // Soporta MM:SS o SS
+    const parts = input.split(":").map(Number);
+    let totalSeconds = parts.length === 2 ? parts[0]*60 + parts[1] : parts[0];
+    if (totalSeconds <= 0) return;
+
+    clearInterval(timerInterval);
+
+    timerInterval = setInterval(() => {
+      totalSeconds--;
+      const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+      const seconds = String(totalSeconds % 60).padStart(2, "0");
+      document.getElementById("timer-display").textContent =
+        `${minutes}:${seconds}`;
+
+      if (totalSeconds <= 0) {
+        clearInterval(timerInterval);
+        alarm.play();
+        alert("⏰ Tiempo terminado");
+        saveTimeHistory({
+          type: "⏲️ Temporizador",
+          time: input,
+          date: new Date().toLocaleString()
+        });
+      }
+    }, 1000);
+  };
+
+  document.getElementById("stop-timer").onclick = () => {
+    clearInterval(timerInterval);
+    alarm.pause();
+    alarm.currentTime = 0;
+  };
+
+  // ==========================
+  // Historial
+  // ==========================
+  document.getElementById("clear-history")?.addEventListener("click", () => {
+    if (!confirm("¿Borrar historial completo?")) return;
+    localStorage.removeItem("timeHistory");
+    renderTimeHistory();
   });
-};
 
-document.getElementById("reset-stopwatch").onclick = () => {
-  swTime = 0;
-  document.getElementById("stopwatch").textContent = "00:00.0";
-};
+  // ==========================
+  // Reps
+  // ==========================
+  document.getElementById("add-rep").onclick = () => {
+    reps++;
+    document.getElementById("reps-display").textContent = reps;
+  };
 
-document.getElementById("start-timer").onclick = () => {
-  let seconds = parseInt(document.getElementById("timer-input").value);
-  if (!seconds || seconds <= 0) return;
+  document.getElementById("reset-reps").onclick = () => {
+    reps = 0;
+    document.getElementById("reps-display").textContent = reps;
+  };
 
-  clearInterval(timerInterval);
+  // ==========================
+  // Peso y sets
+  // ==========================
+  document.getElementById("save-weight").onclick = () => {
+    const weight = document.getElementById("weight-input").value;
+    const sets = document.getElementById("sets-input").value;
+    if (!weight || !sets) return;
 
-  timerInterval = setInterval(() => {
-    seconds--;
-    document.getElementById("timer-display").textContent =
-      `00:${String(seconds).padStart(2, "0")}`;
+    weightLog.push({ weight, sets });
+    document.getElementById("weight-log").textContent =
+      weightLog.map(e => `${e.sets}x${e.weight}kg`).join(", ");
+  };
 
-    if (seconds <= 0) {
-      clearInterval(timerInterval);
-      alert("⏰ Tiempo terminado");
-       saveTimeHistory({
-        type: "⏲️ Temporizador",
-        time: document.getElementById("timer-input").value + " s",
-        date: new Date().toLocaleString()
-      });
-    }
-  }, 1000);
-};
+  // ==========================
+  // Cálculo 1RM
+  // ==========================
+  document.getElementById("calc-1rm").onclick = () => {
+    const w = +document.getElementById("rm-weight").value;
+    const r = +document.getElementById("rm-reps").value;
+    if (!w || !r) return;
 
-document.getElementById("stop-timer").onclick = () => {
-  clearInterval(timerInterval);
-};
+    const oneRM = Math.round(w / (1.0278 - 0.0278*r));
+    document.getElementById("rm-result").textContent = oneRM + " kg";
+  };
 
-document.getElementById("clear-history")?.addEventListener("click", () => {
-  if (!confirm("¿Borrar historial completo?")) return;
-  localStorage.removeItem("timeHistory");
+  // ==========================
+  // Inicializaciones
+  // ==========================
+  startClock();
   renderTimeHistory();
-});
 
-document.addEventListener("DOMContentLoaded", () => {
-  initTools();
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  initTools();
-
-  // Asegurarnos de que el modal empiece oculto
+  // Modal oculto por defecto
   const modal = document.getElementById("exercise-modal");
-  if(modal) modal.classList.add("hidden");
+  if (modal) modal.classList.add("hidden");
 });
-
-startClock();
-renderTimeHistory();
 
 document.addEventListener('DOMContentLoaded', () => {
   const mesocycleId = localStorage.getItem('active_mesocycle');
