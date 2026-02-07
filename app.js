@@ -1947,14 +1947,14 @@ function renderComparison(a, b) {
 
   container.innerHTML = `
     <div class="compare-grid">
-      <div class="compare-card ${a.efficiency > b.efficiency ? 'winner' : ''}">
+      <div class="mesocycle-stat-card ${a.efficiency > b.efficiency ? 'winner' : ''}">
         <h4>${a.name}</h4>
          <p><strong>PRs:</strong> ${a.pr_count}</p>
          <p><strong>Volumen:</strong> ${Math.round(a.total_volume)}</p>
          <p><strong>Fuerza media:</strong> ${a.avg_strength.toFixed(1)}</p>
        </div>
 
-      <div class="compare-card ${b.efficiency > a.efficiency ? 'winner' : ''}">
+      <div class="mesocycle-stat-card ${b.efficiency > a.efficiency ? 'winner' : ''}">
         <h4>${b.name}</h4>
          <p><strong>PRs:</strong> ${b.pr_count}</p>
          <p><strong>Volumen:</strong> ${Math.round(b.total_volume)}</p>
