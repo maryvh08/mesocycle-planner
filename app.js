@@ -1942,7 +1942,7 @@ function safe(n, decimals = 1) {
 }
 
 function renderComparison(a, b) {
-  const container = document.getElementById('compareResult');
+  const container = document.getElementById("compareResult");
   if (!container) return;
 
   container.innerHTML = `
@@ -1950,15 +1950,15 @@ function renderComparison(a, b) {
       <div class="compare-card ${a.efficiency > b.efficiency ? 'winner' : ''}">
         <h4>${a.name}</h4>
         <p>PRs: ${a.pr_count}</p>
-        <p>Volumen: ${Math.round(a.volume)}</p>
-        <p>Fuerza media: ${a.strengthScore.toFixed(1)}</p>
+        <p>Volumen: ${Math.round(a.total_volume)}</p>
+        <p>Fuerza media: ${a.avg_strength.toFixed(1)}</p>
       </div>
 
       <div class="compare-card ${b.efficiency > a.efficiency ? 'winner' : ''}">
         <h4>${b.name}</h4>
         <p>PRs: ${b.pr_count}</p>
-        <p>Volumen: ${Math.round(b.volume)}</p>
-        <p>Fuerza media: ${b.strengthScore.toFixed(1)}</p>
+        <p>Volumen: ${Math.round(b.total_volume)}</p>
+        <p>Fuerza media: ${b.avg_strength.toFixed(1)}</p>
       </div>
     </div>
   `;
@@ -2478,65 +2478,92 @@ function setupMesocycleComparison() {
 }
 
 async function loadMesocycleComparison() {
-  const listContainer = document.getElementById('mesocycle-comparison');
-  const selectA = document.getElementById('mesoA');
-  const selectB = document.getElementById('mesoB');
-
-  if (!listContainer || !selectA || !selectB) return;
+  const container = document.getElementById("mesocycle-comparison");
+  if (!container) return;
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  // 📦 VIEW con datos consolidados
-  const { data, error } = await supabase
-    .from('v_mesocycle_summary')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at');
+  const { data: mesocycles } = await supabase
+    .from("mesocycles")
+    .select("id, name")
+    .eq("user_id", user.id)
+    .order("created_at");
 
-  if (error || !data?.length) return;
+  const { data: records } = await supabase
+    .from("exercise_records")
+    .select("mesocycle_id, exercise_name, weight, reps")
+    .eq("user_id", user.id);
 
-  // ---------- 1️⃣ LIMPIAR ----------
-  listContainer.innerHTML = '';
-  selectA.innerHTML = `<option value="">Selecciona mesociclo A</option>`;
-  selectB.innerHTML = `<option value="">Selecciona mesociclo B</option>`;
+  const { data: prs } = await supabase
+    .from("mesocycle_prs")
+    .select("*")
+    .eq("user_id", user.id);
 
-  // ---------- 2️⃣ RENDER TARJETAS + SELECTS ----------
-  data.forEach(m => {
-    // tarjetas resumen
-    const card = document.createElement('div');
-    card.className = 'mesocycle-stat-card';
+  const prMap = {};
+  prs.forEach(p => prMap[p.mesocycle_id] = p.pr_count);
 
-    card.innerHTML = `
-      <h4>${m.name}</h4>
-      <p>Volumen: <strong>${Math.round(m.volume)}</strong></p>
-      <p>PRs: <strong>${m.pr_count}</strong></p>
-      <p>Fuerza media: <strong>${m.strengthScore.toFixed(1)}</strong></p>
-    `;
+  const statsByCycle = {};
 
-    listContainer.appendChild(card);
+  records.forEach(r => {
+    if (!statsByCycle[r.mesocycle_id]) {
+      statsByCycle[r.mesocycle_id] = {
+        volume: 0,
+        exercises: {}
+      };
+    }
 
-    // opciones selects
-    const optA = new Option(m.name, m.mesocycle_id);
-    const optB = new Option(m.name, m.mesocycle_id);
+    statsByCycle[r.mesocycle_id].volume +=
+      (r.weight || 0) * (r.reps || 0);
 
-    selectA.appendChild(optA);
-    selectB.appendChild(optB);
+    if (!statsByCycle[r.mesocycle_id].exercises[r.exercise_name]) {
+      statsByCycle[r.mesocycle_id].exercises[r.exercise_name] = [];
+    }
+
+    statsByCycle[r.mesocycle_id].exercises[r.exercise_name].push(r.weight);
   });
 
-  // ---------- 3️⃣ LISTENERS ----------
-  const handler = () => {
-    if (!selectA.value || !selectB.value) return;
-    if (selectA.value === selectB.value) return;
+  container.innerHTML = "";
 
-    const a = data.find(m => m.mesocycle_id == selectA.value);
-    const b = data.find(m => m.mesocycle_id == selectB.value);
+  mesocycles.forEach(m => {
+    const s = statsByCycle[m.id];
+    if (!s) return;
 
-    if (a && b) renderComparison(a, b);
-  };
+    const exerciseAverages = Object.values(s.exercises)
+      .map(arr => arr.reduce((a,b)=>a+b,0) / arr.length);
 
-  selectA.onchange = handler;
-  selectB.onchange = handler;
+    const avgStrength =
+      exerciseAverages.reduce((a,b)=>a+b,0) / exerciseAverages.length || 0;
+
+    const div = document.createElement("div");
+    div.className = "mesocycle-stat-card";
+
+    div.innerHTML = `
+      <h4>${m.name}</h4>
+      <p>Volumen: <strong>${Math.round(s.volume)} kg</strong></p>
+      <p>Record Personal: <strong>${prMap[m.id] || 0} ejercicios</strong></p>
+      <p>Fuerza media: <strong>${avgStrength.toFixed(1)} kg</strong></p>
+    `;
+
+    container.appendChild(div);
+  });
+   
+   const selectA = document.getElementById("mesoA");
+   const selectB = document.getElementById("mesoB");
+   
+   selectA.innerHTML = `<option value="">Selecciona mesociclo A</option>`;
+   selectB.innerHTML = `<option value="">Selecciona mesociclo B</option>`;
+   
+   mesocycles.forEach(m => {
+     const optA = document.createElement("option");
+     optA.value = m.id;
+     optA.textContent = m.name;
+   
+     const optB = optA.cloneNode(true);
+   
+     selectA.appendChild(optA);
+     selectB.appendChild(optB);
+   });
 }
 
 async function compareMesocycles(mesoA, mesoB) {
@@ -3562,5 +3589,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
-
-
