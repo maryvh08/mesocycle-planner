@@ -3482,6 +3482,29 @@ document.getElementById('clear-filters')?.addEventListener('click', () => {
   renderTutorials(tutorialsData);
 });
 
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click', e=>{
+    e.stopPropagation();
+    btn.parentElement.classList.toggle('open');
+  });
+});
+
+document.addEventListener('click', ()=>{
+  document.querySelectorAll('.multi-filter').forEach(f=>f.classList.remove('open'));
+});
+
+document.addEventListener('change', e=>{
+  if(e.target.closest('.filter-dropdown')) applyFilters();
+});
+
+document.getElementById('close-tutorial-modal-btn').addEventListener('click', closeTutorial);
+document.getElementById('tutorial-modal').addEventListener('click', e=>{
+  if(e.target.id==='tutorial-modal') closeTutorial();
+});
+
+// Cargar tutoriales al inicio
+loadTutorials();
+
 document.addEventListener("DOMContentLoaded", () => {
   // ==========================
   // Variables globales
@@ -3610,8 +3633,11 @@ document.addEventListener("DOMContentLoaded", () => {
    // ==========================
    // Alarma
    // ==========================
+
    document.getElementById("enable-sound").onclick = () => {
-     alarm.play().then(() => alarm.pause()); // desbloquea sonido
+     alarm = new Audio("alarm.mp3");
+     alarm.loop = true;
+     alarm.play().then(() => alarm.pause());
      alert("Sonido activado");
      document.getElementById("enable-sound").style.display = "none";
    };
