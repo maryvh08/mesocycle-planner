@@ -369,7 +369,6 @@
         <div class="screen-header">Herramientas</div>
       
         <div class="screen-content tools-grid">
-          <button id="enable-sound">Activar Sonido</button>
       
           <!-- ===== RELOJ ===== -->
           <div class="card tool-card">
@@ -391,14 +390,20 @@
           <!-- ===== TEMPORIZADOR ===== -->
           <div class="card tool-card">
             <h3>⏲️ Temporizador</h3>
-            <input type="number" id="timer-minutes" min="0" placeholder="MM" />
-            <input type="number" id="timer-seconds" min="0" max="59" placeholder="SS" />
+            <input
+              type="text"
+              id="timer-input"
+              placeholder="MM:SS"
+              pattern="[0-5]?[0-9]:[0-5][0-9]"
+              inputmode="numeric"
+            />
             <div id="timer-display" class="tool-display">00:00</div>
             <div class="tool-actions">
               <button id="start-timer">Iniciar</button>
               <button id="stop-timer">Detener</button>
             </div>
-    
+          </div>
+      
         </div>
       
         <div class="card tool-card">
@@ -408,32 +413,6 @@
           </div>
           <button id="clear-history">Borrar historial</button>
         </div>
-
-        <div class="card tool-card">
-          <h3>💪 Contador de reps</h3>
-          <div id="reps-display" class="tool-display">0</div>
-          <div class="tool-actions">
-            <button id="add-rep">+1</button>
-            <button id="reset-reps">Reset</button>
-          </div>
-        </div>
-
-        <div class="card tool-card">
-          <h3>🏋️ Peso y sets</h3>
-          <input id="weight-input" type="number" placeholder="Peso (kg)" />
-          <input id="sets-input" type="number" placeholder="Sets" />
-          <button id="save-weight">Guardar</button>
-          <div id="weight-log" class="tool-display"></div>
-        </div>
-
-        <div class="card tool-card">
-          <h3>📊 Calculadora 1RM</h3>
-          <input id="rm-weight" type="number" placeholder="Peso (kg)" />
-          <input id="rm-reps" type="number" placeholder="Reps" />
-          <button id="calc-1rm">Calcular 1RM</button>
-          <div id="rm-result" class="tool-display"></div>
-        </div>
-
       </section>
 </div>
 
