@@ -1947,19 +1947,19 @@ function renderComparison(a, b) {
 
   container.innerHTML = `
     <div class="compare-grid">
-      <div class="compare-card ${a.efficiency > b.efficiency ? 'winner' : ''}">
+      <div class="mesocycle-stat-card ${a.efficiency > b.efficiency ? 'winner' : ''}">
         <h4>${a.name}</h4>
-        <p>PRs: ${a.pr_count}</p>
-        <p>Volumen: ${Math.round(a.total_volume)}</p>
-        <p>Fuerza media: ${a.avg_strength.toFixed(1)}</p>
-      </div>
+         <p><strong>PRs:</strong> ${a.pr_count} ejercicios</p>
+         <p><strong>Volumen:</strong> ${Math.round(a.total_volume)} kg</p>
+         <p><strong>Fuerza media:</strong> ${a.avg_strength.toFixed(1)} kg</p>
+       </div>
 
-      <div class="compare-card ${b.efficiency > a.efficiency ? 'winner' : ''}">
+      <div class="mesocycle-stat-card ${b.efficiency > a.efficiency ? 'winner' : ''}">
         <h4>${b.name}</h4>
-        <p>PRs: ${b.pr_count}</p>
-        <p>Volumen: ${Math.round(b.total_volume)}</p>
-        <p>Fuerza media: ${b.avg_strength.toFixed(1)}</p>
-      </div>
+         <p><strong>PRs:</strong> ${b.pr_count} ejercicios</p>
+         <p><strong>Volumen:</strong> ${Math.round(b.total_volume)} kg</p>
+         <p><strong>Fuerza media:</strong> ${b.avg_strength.toFixed(1)} kg</p>
+       </div>
     </div>
   `;
 }
@@ -3589,3 +3589,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+const mesocycleSelect = document.getElementById('stats-mesocycle');
+
+const analysisDashboard = document.getElementById('analysisDashboard');
+const exerciseAnalysis = document.getElementById('exerciseAnalysis');
+
+function updateStatsSections() {
+  const selected = mesocycleSelect.value;
+
+  const isAll = selected === '';
+
+  // 🧠 ANÁLISIS / DASHBOARD
+  analysisDashboard.classList.toggle('hidden', !isAll);
+
+  // 🧠 SELECCIÓN DE MESOCICLO
+  exerciseAnalysis.classList.toggle('hidden', isAll);
+
+  // 🧠 GRÁFICA DE FUERZA
+  // 👉 NO SE TOCA: siempre visible
+}
+
+// Al cambiar el select
+mesocycleSelect.addEventListener('change', () => {
+  updateStatsSections();
+});
+
+// Estado inicial
+updateStatsSections();
