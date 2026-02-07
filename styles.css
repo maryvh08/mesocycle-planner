@@ -94,6 +94,15 @@ body.human {
   background: var(--bg);
   min-height: 100vh;
 }
+
+.screen-content {
+  background: transparent;
+}
+
+#tools-tab {
+  background: var(--bg);
+}
+
 /* ======================
    TIPOGRAFÍA
 ====================== */
