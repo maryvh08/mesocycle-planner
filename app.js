@@ -3640,45 +3640,106 @@ mesocycleSelect.addEventListener('change', () => {
 // Estado inicial
 updateStatsSections();
 
-startBtn.onclick = () => {
-  const timeParts = input.value.split(":");
-  if (timeParts.length !== 2) return;
 
-  const minutes = parseInt(timeParts[0]);
-  const seconds = parseInt(timeParts[1]);
-  if (isNaN(minutes) || isNaN(seconds)) return;
+document.getElementById("start-stopwatch").onclick = () => {
+  if (swInterval) return;
+  swInterval = setInterval(() => {
+    swTime += 100;
+    document.getElementById("stopwatch").textContent =
+      (swTime / 1000).toFixed(1);
+  }, 100);
+};
 
-  timerTime = (minutes * 60 + seconds) * 1000;
+document.getElementById("stop-stopwatch").onclick = () => {
+  if (!swInterval) return;
+
+  clearInterval(swInterval);
+  swInterval = null;
+
+  saveTimeHistory({
+    type: "⏱️ Cronómetro",
+    time: (swTime / 1000).toFixed(1) + " s",
+    date: new Date().toLocaleString(),
+  });
+};
+
+document.getElementById("reset-stopwatch").onclick = () => {
+  swTime = 0;
+  document.getElementById("stopwatch").textContent = "00:00.0";
+};
+
+// ==================== TEMPORIZADOR ====================
+document.getElementById("start-timer").onclick = () => {
+  const input = document.getElementById("timer-input").value;
+  const [minStr, secStr] = input.split(":");
+  let minutes = parseInt(minStr);
+  let seconds = parseInt(secStr);
+
+  if (isNaN(minutes)) minutes = 0;
+  if (isNaN(seconds)) seconds = 0;
+
+  timerRemaining = minutes * 60 + seconds;
+  if (timerRemaining <= 0) return;
 
   clearInterval(timerInterval);
-
-  // Desbloquear audio al primer click
   alarmSound.pause();
   alarmSound.currentTime = 0;
-  alarmSound.play().catch(() => {}); // esto desbloquea el audio, no lo reproduce ahora
 
   timerInterval = setInterval(() => {
-    timerTime -= 100;
-    if (timerTime <= 0) {
+    if (timerRemaining <= 0) {
       clearInterval(timerInterval);
-      timerTime = 0;
-      timerRunning = false;
-      display.textContent = "00:00.00";
-      startBtn.textContent = "Iniciar";
+      document.getElementById("timer-display").textContent = "00:00";
 
-      // 🔔 Reproducir alarma al finalizar
-      alarmSound.play().catch(() => {
-        console.log("Alarma bloqueada por autoplay, se intentará reproducir después de interacción");
+      // 🔔 Reproducir alarma
+      alarmSound.play();
+
+      // Guardar historial
+      saveTimeHistory({
+        type: "⏲️ Temporizador",
+        time: input,
+        date: new Date().toLocaleString(),
       });
-
-      saveTimeHistory("⏲️ Temporizador", formatTime(0));
-      display.style.color = "red";
-    } else {
-      display.textContent = formatTime(timerTime);
-      display.style.color = "inherit";
+      return;
     }
-  }, 100);
 
-  timerRunning = true;
-  startBtn.textContent = "Pausar";
+    const displayMinutes = String(Math.floor(timerRemaining / 60)).padStart(2, "0");
+    const displaySeconds = String(timerRemaining % 60).padStart(2, "0");
+    document.getElementById("timer-display").textContent = `${displayMinutes}:${displaySeconds}`;
+
+    timerRemaining--;
+  }, 1000);
 };
+
+document.getElementById("stop-timer").onclick = () => {
+  clearInterval(timerInterval);
+  alarmSound.pause();
+  alarmSound.currentTime = 0;
+};
+
+// ==================== LIMPIAR HISTORIAL ====================
+document.getElementById("clear-history")?.addEventListener("click", () => {
+  if (!confirm("¿Borrar historial completo?")) return;
+  localStorage.removeItem("timeHistory");
+  renderTimeHistory();
+});
+
+// ==================== INICIALIZACIÓN ====================
+document.addEventListener("DOMContentLoaded", () => {
+  renderTimeHistory();
+});
+
+// ==================== RELOJ EN TIEMPO REAL ====================
+function startClock() {
+  const clockEl = document.getElementById("clock");
+  if (!clockEl) return;
+
+  setInterval(() => {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+    clockEl.textContent = `${hours}:${minutes}:${seconds}`;
+  }, 1000);
+}
+
+startClock();
