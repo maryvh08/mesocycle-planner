@@ -1151,18 +1151,29 @@ function initTimer() {
 
   display.textContent = "00:00.00";
 
+  // 🔔 Creamos audio de alarma
+  let alarmSound = document.getElementById("timer-alarm");
+  if (!alarmSound) {
+    alarmSound = document.createElement("audio");
+    alarmSound.id = "timer-alarm";
+    alarmSound.src = "alarm.mp3"; // ajusta la ruta a tu archivo
+    alarmSound.preload = "auto";
+    document.body.appendChild(alarmSound);
+  }
+
   startBtn.onclick = () => {
-      const timeParts = input.value.split(":");
-      if (timeParts.length !== 2) return; // no válido
-      
-      const minutes = parseInt(timeParts[0]);
-      const seconds = parseInt(timeParts[1]);
-      
-      if (isNaN(minutes) || isNaN(seconds)) return;
-      
-      timerTime = (minutes * 60 + seconds) * 1000;
+    const timeParts = input.value.split(":");
+    if (timeParts.length !== 2) return; // formato inválido
+
+    const minutes = parseInt(timeParts[0]);
+    const seconds = parseInt(timeParts[1]);
+    if (isNaN(minutes) || isNaN(seconds)) return;
+
+    timerTime = (minutes * 60 + seconds) * 1000;
 
     clearInterval(timerInterval);
+    alarmSound.pause();
+    alarmSound.currentTime = 0;
 
     timerInterval = setInterval(() => {
       timerTime -= 100;
@@ -1171,11 +1182,20 @@ function initTimer() {
         timerTime = 0;
         timerRunning = false;
         display.textContent = "00:00.00";
-        saveTimeHistory("⏲️ Temporizador", formatTime(0));
         startBtn.textContent = "Iniciar";
-        alert("⏰ Tiempo terminado");
+
+        // 🔔 Reproducir alarma
+        alarmSound.play();
+
+        // Guardar historial
+        saveTimeHistory("⏲️ Temporizador", formatTime(0));
+
+        // Opcional: alerta visual
+        display.style.color = "red";
+
       } else {
         display.textContent = formatTime(timerTime);
+        display.style.color = "inherit"; // vuelve al color normal
       }
     }, 100);
 
@@ -1190,7 +1210,7 @@ function initTimer() {
     startBtn.textContent = "Reanudar";
   };
 
-  // Agregamos botón de reset
+  // Botón de reset
   const resetBtn = document.createElement("button");
   resetBtn.textContent = "Restablecer";
   resetBtn.onclick = () => {
@@ -1199,9 +1219,11 @@ function initTimer() {
     timerRunning = false;
     display.textContent = "00:00.00";
     startBtn.textContent = "Iniciar";
+    display.style.color = "inherit"; // restaurar color normal
+    alarmSound.pause();
+    alarmSound.currentTime = 0;
   };
 
-  // Añadimos reset al contenedor de botones
   const parent = startBtn.parentNode;
   if (parent && !parent.querySelector(".timer-reset")) {
     resetBtn.classList.add("timer-reset");
