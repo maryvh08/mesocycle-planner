@@ -170,86 +170,83 @@
           <div class="separator"></div>
 
           <!-- ===============================
-             VOLUMEN SEMANAL POR EJERCICIO
-          ================================ -->
-          <section class="volume-section">
-            <h3>Volumen semanal por ejercicio</h3>
-          
-            <!-- JS renderiza tabla desde v_exercise_volume_trend -->
-            <div id="volumeTable" class="table-wrapper">
-              <!-- renderVolumeTable(data) -->
-            </div>
-          </section>
-
-          <!-- ===============================
-             COMPARACIÓN DE MESOCICLOS
-          ================================ -->
-          <section class="mesocycle-compare">
-            <h3>Comparar mesociclos</h3>
-          
-            <div class="compare-controls">
-              <select id="mesoA">
-                <option value="">Selecciona mesociclo A</option>
-              </select>
-          
-              <select id="mesoB">
-                <option value="">Selecciona mesociclo B</option>
-              </select>
-            </div>
-          
-            <!-- renderComparison(a, b) -->
-            <div id="compareResult"></div>
-          </section>
-
-          <!-- ===============================
-             VOLUMEN POR GRUPO MUSCULAR (RP)
-          ================================ -->
-          <section class="muscle-volume">
-            <h3>Volumen por grupo muscular</h3>
-          
-            <!-- renderMuscleTable(data) -->
-            <div id="muscleTable" class="table-wrapper"></div>
-          </section>
-          
-          <!-- ===============================
-               COACH DASHBOARD
+               ANÁLISIS / DASHBOARD
           =============================== -->
-          <section class="coach-dashboard">
-            <h2>Coach</h2>
+          <section class="analysis-dashboard">
           
-            <!-- ===== ESTADO GLOBAL ===== -->
-            <div class="coach-section">
-              <h3>Interpretación estado global</h3>
+            <!-- ===== VOLUMEN SEMANAL POR EJERCICIO ===== -->
+            <div class="dashboard-block volume-section">
+              <h3>Volumen semanal por ejercicio</h3>
           
-              <div class="coach-grid" id="coachStatusGrid">
-                <div class="coach-card" id="statusGreen"></div>
-                <div class="coach-card" id="statusYellow"></div>
-                <div class="coach-card" id="statusRed"></div>
-              </div>
-          
-              <div class="coach-card" id="globalProgressCard">
-                <p id="globalProgressText"></p>
+              <div id="volumeTable" class="table-wrapper">
+                <!-- renderVolumeTable(data) -->
               </div>
             </div>
           
-            <!-- ===== ALERTAS CRÍTICAS ===== -->
-            <div class="coach-section">
-              <h3>Alertas críticas</h3>
-              <div id="fatigueAlerts"></div>
+            <!-- ===== COMPARACIÓN DE MESOCICLOS ===== -->
+            <div class="dashboard-block mesocycle-compare">
+              <h3>Comparar mesociclos</h3>
+          
+              <div class="compare-controls">
+                <select id="mesoA">
+                  <option value="">Selecciona mesociclo A</option>
+                </select>
+          
+                <select id="mesoB">
+                  <option value="">Selecciona mesociclo B</option>
+                </select>
+              </div>
+          
+              <div id="compareResult"></div>
             </div>
           
-            <!-- ===== RECOMENDACIÓN ÚNICA ===== -->
-            <div class="coach-section">
-              <h3>Recomendación</h3>
+            <!-- ===== VOLUMEN POR GRUPO MUSCULAR (RP) ===== -->
+            <div class="dashboard-block muscle-volume">
+              <h3>Volumen por grupo muscular</h3>
           
-              <div class="coach-card success" id="coachCard">
-                <div class="coach-content">
-                  <p id="coachMessage"></p>
+              <div id="muscleTable" class="table-wrapper"></div>
+            </div>
+          
+            <!-- ===== COACH DASHBOARD ===== -->
+            <div class="dashboard-block coach-dashboard">
+              <h2>Coach</h2>
+          
+              <!-- ESTADO GLOBAL -->
+              <div class="coach-section">
+                <h3>Interpretación estado global</h3>
+          
+                <div class="coach-grid" id="coachStatusGrid">
+                  <div class="coach-card" id="statusGreen"></div>
+                  <div class="coach-card" id="statusYellow"></div>
+                  <div class="coach-card" id="statusRed"></div>
+                </div>
+          
+                <div class="coach-card" id="globalProgressCard">
+                  <p id="globalProgressText"></p>
                 </div>
               </div>
+          
+              <!-- ALERTAS -->
+              <div class="coach-section">
+                <h3>Alertas críticas</h3>
+                <div id="fatigueAlerts"></div>
+              </div>
+          
+              <!-- RECOMENDACIÓN -->
+              <div class="coach-section">
+                <h3>Recomendación</h3>
+          
+                <div class="coach-card success" id="coachCard">
+                  <div class="coach-content">
+                    <p id="coachMessage"></p>
+                  </div>
+                </div>
+              </div>
+          
             </div>
           </section>
 
+          <!-- ===== GRAFICA FUERZA ===== -->
           <h3>
             Evolución de fuerza
             <span id="strength-exercise-label" class="exercise-label hidden"></span>
@@ -263,6 +260,7 @@
           
           <div class="spacer"></div>
 
+          <!-- ===== SELECCIÓN DE MESOCICLO ===== -->
           <div class="trend-card up">
             <h3>Tendencias por ejercicio</h3> 
             <div class="trend-main">
