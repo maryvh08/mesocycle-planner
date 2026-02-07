@@ -1151,29 +1151,18 @@ function initTimer() {
 
   display.textContent = "00:00.00";
 
-  // 🔔 Creamos audio de alarma
-  let alarmSound = document.getElementById("timer-alarm");
-  if (!alarmSound) {
-    alarmSound = document.createElement("audio");
-    alarmSound.id = "timer-alarm";
-    alarmSound.src = "alarm.mp3"; // ajusta la ruta a tu archivo
-    alarmSound.preload = "auto";
-    document.body.appendChild(alarmSound);
-  }
-
   startBtn.onclick = () => {
-    const timeParts = input.value.split(":");
-    if (timeParts.length !== 2) return; // formato inválido
-
-    const minutes = parseInt(timeParts[0]);
-    const seconds = parseInt(timeParts[1]);
-    if (isNaN(minutes) || isNaN(seconds)) return;
-
-    timerTime = (minutes * 60 + seconds) * 1000;
+      const timeParts = input.value.split(":");
+      if (timeParts.length !== 2) return; // no válido
+      
+      const minutes = parseInt(timeParts[0]);
+      const seconds = parseInt(timeParts[1]);
+      
+      if (isNaN(minutes) || isNaN(seconds)) return;
+      
+      timerTime = (minutes * 60 + seconds) * 1000;
 
     clearInterval(timerInterval);
-    alarmSound.pause();
-    alarmSound.currentTime = 0;
 
     timerInterval = setInterval(() => {
       timerTime -= 100;
@@ -1182,20 +1171,11 @@ function initTimer() {
         timerTime = 0;
         timerRunning = false;
         display.textContent = "00:00.00";
-        startBtn.textContent = "Iniciar";
-
-        // 🔔 Reproducir alarma
-        alarmSound.play();
-
-        // Guardar historial
         saveTimeHistory("⏲️ Temporizador", formatTime(0));
-
-        // Opcional: alerta visual
-        display.style.color = "red";
-
+        startBtn.textContent = "Iniciar";
+        alert("⏰ Tiempo terminado");
       } else {
         display.textContent = formatTime(timerTime);
-        display.style.color = "inherit"; // vuelve al color normal
       }
     }, 100);
 
@@ -1210,7 +1190,7 @@ function initTimer() {
     startBtn.textContent = "Reanudar";
   };
 
-  // Botón de reset
+  // Agregamos botón de reset
   const resetBtn = document.createElement("button");
   resetBtn.textContent = "Restablecer";
   resetBtn.onclick = () => {
@@ -1219,11 +1199,9 @@ function initTimer() {
     timerRunning = false;
     display.textContent = "00:00.00";
     startBtn.textContent = "Iniciar";
-    display.style.color = "inherit"; // restaurar color normal
-    alarmSound.pause();
-    alarmSound.currentTime = 0;
   };
 
+  // Añadimos reset al contenedor de botones
   const parent = startBtn.parentNode;
   if (parent && !parent.querySelector(".timer-reset")) {
     resetBtn.classList.add("timer-reset");
@@ -3639,107 +3617,3 @@ mesocycleSelect.addEventListener('change', () => {
 
 // Estado inicial
 updateStatsSections();
-
-
-document.getElementById("start-stopwatch").onclick = () => {
-  if (swInterval) return;
-  swInterval = setInterval(() => {
-    swTime += 100;
-    document.getElementById("stopwatch").textContent =
-      (swTime / 1000).toFixed(1);
-  }, 100);
-};
-
-document.getElementById("stop-stopwatch").onclick = () => {
-  if (!swInterval) return;
-
-  clearInterval(swInterval);
-  swInterval = null;
-
-  saveTimeHistory({
-    type: "⏱️ Cronómetro",
-    time: (swTime / 1000).toFixed(1) + " s",
-    date: new Date().toLocaleString(),
-  });
-};
-
-document.getElementById("reset-stopwatch").onclick = () => {
-  swTime = 0;
-  document.getElementById("stopwatch").textContent = "00:00.0";
-};
-
-// ==================== TEMPORIZADOR ====================
-document.getElementById("start-timer").onclick = () => {
-  const input = document.getElementById("timer-input").value;
-  const [minStr, secStr] = input.split(":");
-  let minutes = parseInt(minStr);
-  let seconds = parseInt(secStr);
-
-  if (isNaN(minutes)) minutes = 0;
-  if (isNaN(seconds)) seconds = 0;
-
-  timerRemaining = minutes * 60 + seconds;
-  if (timerRemaining <= 0) return;
-
-  clearInterval(timerInterval);
-  alarmSound.pause();
-  alarmSound.currentTime = 0;
-
-  timerInterval = setInterval(() => {
-    if (timerRemaining <= 0) {
-      clearInterval(timerInterval);
-      document.getElementById("timer-display").textContent = "00:00";
-
-      // 🔔 Reproducir alarma
-      alarmSound.play();
-
-      // Guardar historial
-      saveTimeHistory({
-        type: "⏲️ Temporizador",
-        time: input,
-        date: new Date().toLocaleString(),
-      });
-      return;
-    }
-
-    const displayMinutes = String(Math.floor(timerRemaining / 60)).padStart(2, "0");
-    const displaySeconds = String(timerRemaining % 60).padStart(2, "0");
-    document.getElementById("timer-display").textContent = `${displayMinutes}:${displaySeconds}`;
-
-    timerRemaining--;
-  }, 1000);
-};
-
-document.getElementById("stop-timer").onclick = () => {
-  clearInterval(timerInterval);
-  alarmSound.pause();
-  alarmSound.currentTime = 0;
-};
-
-// ==================== LIMPIAR HISTORIAL ====================
-document.getElementById("clear-history")?.addEventListener("click", () => {
-  if (!confirm("¿Borrar historial completo?")) return;
-  localStorage.removeItem("timeHistory");
-  renderTimeHistory();
-});
-
-// ==================== INICIALIZACIÓN ====================
-document.addEventListener("DOMContentLoaded", () => {
-  renderTimeHistory();
-});
-
-// ==================== RELOJ EN TIEMPO REAL ====================
-function startClock() {
-  const clockEl = document.getElementById("clock");
-  if (!clockEl) return;
-
-  setInterval(() => {
-    const now = new Date();
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    const seconds = String(now.getSeconds()).padStart(2, "0");
-    clockEl.textContent = `${hours}:${minutes}:${seconds}`;
-  }, 1000);
-}
-
-startClock();
