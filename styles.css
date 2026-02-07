@@ -2060,6 +2060,25 @@ h3 {
    z-index:9999;
 }
 
+.timer-inputs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.timer-inputs input {
+  width: 60px;
+  text-align: center;
+  padding: 6px;
+  border-radius: 6px;
+  border: none;
+  font-size: 1rem;
+}
+
+.timer-inputs span {
+  font-weight: bold;
+}
 /* ================== DELOAD SECTION ================== */
 #deloadSection {
   margin-top: 2rem;
