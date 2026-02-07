@@ -3569,6 +3569,34 @@ document.addEventListener("DOMContentLoaded", () => {
   initTools();
 });
 
+let reps = 0;
+document.getElementById("add-rep").onclick = () => {
+  reps++;
+  document.getElementById("reps-display").textContent = reps;
+};
+document.getElementById("reset-reps").onclick = () => {
+  reps = 0;
+  document.getElementById("reps-display").textContent = reps;
+};
+
+const weightLog = [];
+document.getElementById("save-weight").onclick = () => {
+  const weight = document.getElementById("weight-input").value;
+  const sets = document.getElementById("sets-input").value;
+  if(!weight || !sets) return;
+  weightLog.push({ weight, sets });
+  document.getElementById("weight-log").textContent =
+    weightLog.map(e => `${e.sets}x${e.weight}kg`).join(", ");
+};
+
+document.getElementById("calc-1rm").onclick = () => {
+  const w = +document.getElementById("rm-weight").value;
+  const r = +document.getElementById("rm-reps").value;
+  if(!w || !r) return;
+  const oneRM = Math.round(w / (1.0278 - 0.0278*r));
+  document.getElementById("rm-result").textContent = oneRM + " kg";
+};
+
 startClock();
 renderTimeHistory();
 
