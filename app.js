@@ -1151,12 +1151,28 @@ function initTimer() {
   let timerTime = 0;
   let timerInterval = null;
   let timerRunning = false;
+  let alarmInterval = null;
 
   display.textContent = "00:00";
 
+  // Botón para detener la alarma
+  let stopAlarmBtn = document.createElement("button");
+  stopAlarmBtn.textContent = "Detener alarma";
+  stopAlarmBtn.style.display = "none"; // oculto inicialmente
+  stopAlarmBtn.onclick = () => {
+    if (alarmInterval) {
+      clearInterval(alarmInterval);
+      alarm.pause();
+      alarm.currentTime = 0;
+      alarmInterval = null;
+      stopAlarmBtn.style.display = "none";
+    }
+  };
+  startBtn.parentNode.appendChild(stopAlarmBtn);
+
   startBtn.onclick = () => {
     if (!timerRunning) {
-      // Si no está corriendo, inicia o reinicia el temporizador
+      // Iniciar el temporizador
       const timeParts = input.value.split(":");
       if (timeParts.length !== 2) return;
 
@@ -1176,10 +1192,13 @@ function initTimer() {
           display.textContent = "00:00";
           startBtn.textContent = "Iniciar";
 
-          // Reproducir alarma
+          // Reproducir alarma repetidamente
           if (alarm) {
-            alarm.currentTime = 0;
-            alarm.play();
+            alarmInterval = setInterval(() => {
+              alarm.currentTime = 0;
+              alarm.play();
+            }, 1000); // suena cada segundo
+            stopAlarmBtn.style.display = "inline-block"; // mostrar botón de detener
           }
 
           saveTimeHistory("⏲️ Temporizador", formatTime(0));
@@ -1192,7 +1211,7 @@ function initTimer() {
       timerRunning = true;
       startBtn.textContent = "Pausar";
     } else {
-      // Si ya está corriendo, pausa
+      // Pausar
       clearInterval(timerInterval);
       timerRunning = false;
       startBtn.textContent = "Reanudar";
@@ -1216,6 +1235,15 @@ function initTimer() {
     timerRunning = false;
     display.textContent = "00:00";
     startBtn.textContent = "Iniciar";
+
+    // Detener alarma si estaba sonando
+    if (alarmInterval) {
+      clearInterval(alarmInterval);
+      alarm.pause();
+      alarm.currentTime = 0;
+      alarmInterval = null;
+      stopAlarmBtn.style.display = "none";
+    }
   };
 
   const parent = startBtn.parentNode;
