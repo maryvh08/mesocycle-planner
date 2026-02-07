@@ -3485,45 +3485,31 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==========================
   // Temporizador
   // ==========================
-  const timerInput = document.getElementById("timer-input");
-  const timerDisplay = document.getElementById("timer-display");
-  const startTimerBtn = document.getElementById("start-timer");
-  const stopTimerBtn = document.getElementById("stop-timer");
-
-  const updateTimerDisplay = (totalSeconds) => {
-    const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
-    const seconds = String(totalSeconds % 60).padStart(2, "0");
-    timerDisplay.textContent = `${minutes}:${seconds}`;
-  };
-
   startTimerBtn.onclick = () => {
-    const input = timerInput.value.trim();
-    const parts = input.split(":");
-    if (parts.length !== 2) return alert("Formato inválido: MM:SS");
-
-    const minutes = parseInt(parts[0], 10);
-    const seconds = parseInt(parts[1], 10);
-    if (isNaN(minutes) || isNaN(seconds)) return alert("Formato inválido");
-
-    let totalSeconds = minutes * 60 + seconds;
-    updateTimerDisplay(totalSeconds);
-
-    clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-      totalSeconds--;
-      updateTimerDisplay(totalSeconds);
-
-      if (totalSeconds <= 0) {
-        clearInterval(timerInterval);
-        alarm.play().catch(() => alert("⏰ Tiempo terminado"));
-        saveTimeHistory({
-          type: "⏲️ Temporizador",
-          time: input,
-          date: new Date().toLocaleString()
-        });
-      }
-    }, 1000);
-  };
+     let minutes = parseInt(document.getElementById("timer-minutes").value, 10) || 0;
+     let seconds = parseInt(document.getElementById("timer-seconds").value, 10) || 0;
+   
+     let totalSeconds = minutes * 60 + seconds;
+     if (totalSeconds <= 0) return alert("Ingresa un tiempo mayor a 0");
+   
+     updateTimerDisplay(totalSeconds);
+     clearInterval(timerInterval);
+   
+     timerInterval = setInterval(() => {
+       totalSeconds--;
+       updateTimerDisplay(totalSeconds);
+   
+       if (totalSeconds <= 0) {
+         clearInterval(timerInterval);
+         alarm.play().catch(() => alert("⏰ Tiempo terminado"));
+         saveTimeHistory({
+           type: "⏲️ Temporizador",
+           time: `${minutes}:${String(seconds).padStart(2,"0")}`,
+           date: new Date().toLocaleString()
+         });
+       }
+     }, 1000);
+   };
 
   stopTimerBtn.onclick = () => {
     clearInterval(timerInterval);
