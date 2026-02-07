@@ -3567,6 +3567,10 @@ document.getElementById("clear-history")?.addEventListener("click", () => {
 
 document.addEventListener("DOMContentLoaded", () => {
   initTools();
+
+  // Asegurarnos de que el modal empiece oculto
+  const modal = document.getElementById("exercise-modal");
+  if(modal) modal.classList.add("hidden");
 });
 
 let reps = 0;
