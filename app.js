@@ -1151,34 +1151,28 @@ function initTimer() {
   let timerTime = 0;
   let timerInterval = null;
   let timerRunning = false;
-  let alarmInterval = null;
 
   display.textContent = "00:00";
 
   // Botón para detener la alarma
   let stopAlarmBtn = document.createElement("button");
   stopAlarmBtn.textContent = "Detener alarma";
-  stopAlarmBtn.style.display = "none"; // oculto inicialmente
+  stopAlarmBtn.style.display = "none";
   stopAlarmBtn.onclick = () => {
-    if (alarmInterval) {
-      clearInterval(alarmInterval);
-      alarm.pause();
-      alarm.currentTime = 0;
-      alarmInterval = null;
-      stopAlarmBtn.style.display = "none";
-    }
+    alarm.pause();
+    alarm.currentTime = 0;
+    alarm.loop = false;
+    stopAlarmBtn.style.display = "none";
   };
   startBtn.parentNode.appendChild(stopAlarmBtn);
 
   startBtn.onclick = () => {
     if (!timerRunning) {
-      // Iniciar el temporizador
       const timeParts = input.value.split(":");
       if (timeParts.length !== 2) return;
 
       const minutes = parseInt(timeParts[0], 10);
       const seconds = parseInt(timeParts[1], 10);
-
       if (isNaN(minutes) || isNaN(seconds)) return;
 
       timerTime = (minutes * 60 + seconds) * 1000;
@@ -1192,26 +1186,26 @@ function initTimer() {
           display.textContent = "00:00";
           startBtn.textContent = "Iniciar";
 
-          // Reproducir alarma repetidamente
+          // Activar alarma correctamente
           if (alarm) {
-            alarmInterval = setInterval(() => {
-              alarm.currentTime = 0;
-              alarm.play();
-            }, 1000); // suena cada segundo
-            stopAlarmBtn.style.display = "inline-block"; // mostrar botón de detener
+            alarm.loop = true;  // repetición automática
+            alarm.currentTime = 0;
+            alarm.play().catch(() => {
+              console.log("El navegador bloqueó el audio. Haz clic en algún botón para activarlo.");
+            });
+            stopAlarmBtn.style.display = "inline-block";
           }
 
           saveTimeHistory("⏲️ Temporizador", formatTime(0));
           alert("⏰ Tiempo terminado");
         } else {
-          display.textContent = formatTime(timerTime).slice(0, 5); // MM:SS
+          display.textContent = formatTime(timerTime).slice(0, 5);
         }
       }, 100);
 
       timerRunning = true;
       startBtn.textContent = "Pausar";
     } else {
-      // Pausar
       clearInterval(timerInterval);
       timerRunning = false;
       startBtn.textContent = "Reanudar";
@@ -1237,13 +1231,10 @@ function initTimer() {
     startBtn.textContent = "Iniciar";
 
     // Detener alarma si estaba sonando
-    if (alarmInterval) {
-      clearInterval(alarmInterval);
-      alarm.pause();
-      alarm.currentTime = 0;
-      alarmInterval = null;
-      stopAlarmBtn.style.display = "none";
-    }
+    alarm.pause();
+    alarm.currentTime = 0;
+    alarm.loop = false;
+    stopAlarmBtn.style.display = "none";
   };
 
   const parent = startBtn.parentNode;
