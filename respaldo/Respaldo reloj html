@@ -180,7 +180,7 @@
               <!-- renderVolumeTable(data) -->
             </div>
           </section>
-          
+
           <!-- ===============================
              COMPARACIÓN DE MESOCICLOS
           ================================ -->
@@ -200,7 +200,7 @@
             <!-- renderComparison(a, b) -->
             <div id="compareResult"></div>
           </section>
-          
+
           <!-- ===============================
              VOLUMEN POR GRUPO MUSCULAR (RP)
           ================================ -->
@@ -212,16 +212,15 @@
           </section>
           
           <!-- ===============================
-             COACH DASHBOARD
-          ================================ -->
+               COACH DASHBOARD
+          =============================== -->
           <section class="coach-dashboard">
-            <h2>🧠 Coach</h2>
+            <h2>Coach</h2>
           
             <!-- ===== ESTADO GLOBAL ===== -->
             <div class="coach-section">
-              <h3>Estado global</h3>
+              <h3>Interpretación estado global</h3>
           
-              <!-- JS decide colores según overallProgress() -->
               <div class="coach-grid" id="coachStatusGrid">
                 <div class="coach-card" id="statusGreen"></div>
                 <div class="coach-card" id="statusYellow"></div>
@@ -236,11 +235,7 @@
             <!-- ===== ALERTAS CRÍTICAS ===== -->
             <div class="coach-section">
               <h3>Alertas críticas</h3>
-          
-              <!-- JS inyecta alertas desde v_fatigue_alerts -->
-              <div id="fatigueAlerts">
-                <!-- alert-card / coach-alert -->
-              </div>
+              <div id="fatigueAlerts"></div>
             </div>
           
             <!-- ===== RECOMENDACIÓN ÚNICA ===== -->
@@ -248,7 +243,6 @@
               <h3>Recomendación</h3>
           
               <div class="coach-card success" id="coachCard">
-                <div class="coach-icon">🧠</div>
                 <div class="coach-content">
                   <p id="coachMessage"></p>
                 </div>
