@@ -1148,8 +1148,6 @@ function initTimer() {
    const startBtn = document.getElementById("start-timer");
    const stopBtn = document.getElementById("stop-timer");
 
-  if (!input || !display || !startBtn || !stopBtn) return;
-
   display.textContent = "00:00.00";
 
   startBtn.onclick = () => {
