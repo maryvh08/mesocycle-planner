@@ -1618,6 +1618,14 @@ function evaluateMuscleVolume(data) {
       status
     };
   });
+   document.getElementById('exportDashboard').onclick = () => {
+     exportDashboardToExcel({
+       volumeData,
+       muscleData,
+       fatigueAlerts: criticalDrops,
+       coach
+     });
+   };
 }
 
 async function fetchExerciseRecords(mesocycleId) {
@@ -3263,6 +3271,95 @@ function getCoachInsight(trend) {
 }
 
 // =====================
+//EXPORTAR
+// =====================
+async function exportHistoryToExcel() {
+  const { data: records, error } = await supabase
+    .from('exercise_records')
+    .select(`
+      created_at,
+      week_number,
+      exercise_name,
+      weight,
+      reps,
+      mesocycles ( name )
+    `)
+    .order('created_at');
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const rows = records.map(r => ({
+    Fecha: new Date(r.created_at).toLocaleDateString(),
+    Semana: r.week_number,
+    Ejercicio: r.exercise_name,
+    Peso: r.weight,
+    Reps: r.reps,
+    Volumen: r.weight * r.reps,
+    Mesociclo: r.mesocycles?.name ?? '-'
+  }));
+
+  const wb = XLSX.utils.book_new();
+  const sheet = XLSX.utils.json_to_sheet(rows);
+
+  XLSX.utils.book_append_sheet(wb, sheet, 'Historial');
+  XLSX.writeFile(wb, 'historial_entrenamiento.xlsx');
+}
+
+function exportDashboardToExcel({
+  volumeData,
+  muscleData,
+  fatigueAlerts,
+  coach
+}) {
+  const wb = XLSX.utils.book_new();
+
+  // 1️⃣ Volumen por ejercicio
+  const volumeSheet = XLSX.utils.json_to_sheet(
+    volumeData.map(v => ({
+      Ejercicio: v.exercise,
+      Volumen: v.volume,
+      Sets: v.sets,
+      Tendencia: v.trend,
+      Cambio: `${v.percent}%`
+    }))
+  );
+  XLSX.utils.book_append_sheet(wb, volumeSheet, 'Volumen');
+
+  // 2️⃣ Volumen por músculo
+  const muscleSheet = XLSX.utils.json_to_sheet(
+    muscleData.map(m => ({
+      Músculo: m.muscle,
+      Sets: m.sets,
+      Estado: m.status,
+      'Rango RP': `${m.ranges?.MEV ?? '-'}–${m.ranges?.MRV ?? '-'}`
+    }))
+  );
+  XLSX.utils.book_append_sheet(wb, muscleSheet, 'Músculos');
+
+  // 3️⃣ Alertas de fatiga
+  const fatigueSheet = XLSX.utils.json_to_sheet(
+    fatigueAlerts.map(f => ({
+      Ejercicio: f.exercise,
+      Tendencia: f.trend,
+      Cambio: `${f.percent}%`
+    }))
+  );
+  XLSX.utils.book_append_sheet(wb, fatigueSheet, 'Alertas');
+
+  // 4️⃣ Coach
+  const coachSheet = XLSX.utils.json_to_sheet([{
+    Estado: coach.type,
+    Recomendación: coach.message
+  }]);
+  XLSX.utils.book_append_sheet(wb, coachSheet, 'Coach');
+
+  XLSX.writeFile(wb, 'dashboard_entrenamiento.xlsx');
+}
+
+// =====================
 //TUTORIALES
 // =====================
 async function loadTutorials() {
@@ -3664,3 +3761,5 @@ mesocycleSelect.addEventListener('change', () => {
 
 // Estado inicial
 updateStatsSections();
+
+document.getElementById('exportHistory').onclick = exportHistoryToExcel;
