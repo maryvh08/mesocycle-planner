@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,6 +12,7 @@
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="icon" type="image/png" href="mcp logo.png" />
 </head>
 <body>
 
@@ -411,6 +413,9 @@
               <button id="start-timer">Iniciar</button>
               <button id="stop-timer">Detener</button>
             </div>
+            <audio id="alarm-sound" preload="auto">
+              <source src="alarm.mp3" type="audio/mpeg">
+            </audio>
           </div>
       
         </div>
