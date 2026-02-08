@@ -3290,14 +3290,14 @@ async function exportHistoryToExcel() {
   const { data: records, error } = await supabase
     .from('exercise_records')
     .select(`
-      created_at,
+      updated_at,
       week_number,
       exercise_name,
       weight,
       reps,
       mesocycles ( name )
     `)
-    .order('created_at');
+    .order('updated_at');
 
   if (error) {
     console.error(error);
@@ -3305,7 +3305,7 @@ async function exportHistoryToExcel() {
   }
 
   const rows = records.map(r => ({
-    Fecha: new Date(r.created_at).toLocaleDateString(),
+    Fecha: new Date(r.updated_at).toLocaleDateString(),
     Semana: r.week_number,
     Ejercicio: r.exercise_name,
     Peso: r.weight,
