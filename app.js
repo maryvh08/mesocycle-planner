@@ -1620,11 +1620,25 @@ function evaluateMuscleVolume(data) {
      });
    };
    window.__dashboardCache = {
-     volumeData,
-     muscleData,
-     fatigueAlerts: criticalDrops ?? [],
-     coach
+     mode: 'analysis',
+     volume: volumeData,
+     muscles: muscleData,
+     alerts: criticalDrops,
+     coach,
+     generatedAt: new Date().toISOString()
    };
+}
+
+function getStatsMode() {
+  const analysis = document.getElementById('analysisDashboard');
+  const exercise = document.getElementById('exerciseAnalysis');
+
+  if (!analysis || !exercise) return null;
+
+  if (!analysis.classList.contains('hidden')) return 'analysis';
+  if (!exercise.classList.contains('hidden')) return 'mesocycle';
+
+  return null;
 }
 
 async function fetchExerciseRecords(mesocycleId) {
@@ -3363,21 +3377,24 @@ function setupExportButtons() {
   const exportHistoryBtn = document.getElementById('exportHistory');
 
   if (exportDashboardBtn) {
-    exportDashboardBtn.addEventListener('click', () => {
-      console.log('📊 Export dashboard click');
-
-      if (typeof XLSX === 'undefined') {
-        alert('Error: librería XLSX no cargada');
-        return;
-      }
-
-      if (!window.__dashboardCache) {
-        alert('Dashboard aún no cargado');
-        return;
-      }
-
-      exportDashboardToExcel(window.__dashboardCache);
-    });
+      exportDashboardBtn.addEventListener('click', () => {
+        const mode = getStatsMode();
+      
+        if (mode !== 'analysis') {
+          alert(
+            'El dashboard solo puede exportarse desde la vista de Análisis.\n\n' +
+            'Vuelve a la vista general para exportarlo.'
+          );
+          return;
+        }
+      
+        if (!window.__dashboardCache) {
+          alert('El dashboard aún no se ha generado.');
+          return;
+        }
+      
+        exportDashboardToExcel(window.__dashboardCache);
+      });
   }
 
   if (exportHistoryBtn) {
@@ -3386,6 +3403,16 @@ function setupExportButtons() {
       exportHistoryToExcel();
     });
   }
+}
+
+function updateExportButtonsUI() {
+  const btn = document.getElementById('exportDashboard');
+  if (!btn) return;
+
+  const mode = getStatsMode();
+
+  btn.disabled = mode !== 'analysis';
+  btn.classList.toggle('disabled', mode !== 'analysis');
 }
 
 // =====================
