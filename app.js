@@ -1619,13 +1619,17 @@ function evaluateMuscleVolume(data) {
        coach
      });
    };
+      // ======================
+   // 9️⃣ CACHE PARA EXPORTAR
+   // ======================
    window.__dashboardCache = {
-     mode: 'analysis',
-     volume: volumeData,
-     muscles: muscleData,
-     alerts: criticalDrops,
-     coach,
-     generatedAt: new Date().toISOString()
+     generatedAt: new Date().toISOString(),
+     mesocycleId: mesocycleId ?? null,
+     volumeByExercise: volumeData,
+     muscleVolume: muscleData,
+     fatigueAlerts: criticalDrops,
+     coach: coach,
+     globalStatus: status
    };
 }
 
@@ -3823,3 +3827,21 @@ document.addEventListener('DOMContentLoaded', () => {
   setupExportButtons();
 });
 
+document.getElementById('exportDashboard').addEventListener('click', () => {
+  const analysis = document.getElementById('analysisDashboard');
+
+  if (!analysis || analysis.classList.contains('hidden')) {
+    alert(
+      'El dashboard solo puede exportarse desde la vista de Análisis.\n' +
+      'Quita la selección de mesociclo.'
+    );
+    return;
+  }
+
+  if (!window.__dashboardCache) {
+    alert('El dashboard aún no se ha generado.');
+    return;
+  }
+
+  exportDashboardToExcel(window.__dashboardCache);
+});
