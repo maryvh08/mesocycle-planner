@@ -1161,7 +1161,7 @@ function initTimer() {
   startBtn.onclick = () => {
     // 🔔 Crear audio dentro del click (OBLIGATORIO en Android)
     if (!alarmAudio) {
-      alarmAudio = new Audio("alarm.mp3"); // ruta correcta
+      alarmAudio = new Audio("alarms.mp3"); // ruta correcta
       alarmAudio.preload = "auto";
     }
 
