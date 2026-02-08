@@ -1626,6 +1626,12 @@ function evaluateMuscleVolume(data) {
        coach
      });
    };
+   window.__dashboardCache = {
+     volumeData,
+     muscleData,
+     fatigueAlerts: criticalDrops ?? [],
+     coach
+   };
 }
 
 async function fetchExerciseRecords(mesocycleId) {
@@ -3359,6 +3365,36 @@ function exportDashboardToExcel({
   XLSX.writeFile(wb, 'dashboard_entrenamiento.xlsx');
 }
 
+function setupExportButtons() {
+  const exportDashboardBtn = document.getElementById('exportDashboard');
+  const exportHistoryBtn = document.getElementById('exportHistory');
+
+  if (exportDashboardBtn) {
+    exportDashboardBtn.addEventListener('click', () => {
+      console.log('📊 Export dashboard click');
+
+      if (typeof XLSX === 'undefined') {
+        alert('Error: librería XLSX no cargada');
+        return;
+      }
+
+      if (!window.__dashboardCache) {
+        alert('Dashboard aún no cargado');
+        return;
+      }
+
+      exportDashboardToExcel(window.__dashboardCache);
+    });
+  }
+
+  if (exportHistoryBtn) {
+    exportHistoryBtn.addEventListener('click', () => {
+      console.log('📋 Export history click');
+      exportHistoryToExcel();
+    });
+  }
+}
+
 // =====================
 //TUTORIALES
 // =====================
@@ -3763,4 +3799,7 @@ mesocycleSelect.addEventListener('change', () => {
 updateStatsSections();
 
 document.getElementById('exportHistory').onclick = exportHistoryToExcel;
+document.addEventListener('DOMContentLoaded', () => {
+  setupExportButtons();
+});
 
