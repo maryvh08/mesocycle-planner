@@ -3377,24 +3377,25 @@ function setupExportButtons() {
   const exportHistoryBtn = document.getElementById('exportHistory');
 
   if (exportDashboardBtn) {
-      exportDashboardBtn.addEventListener('click', () => {
-         const analysis = document.getElementById('analysisDashboard');
-         
-         if (!analysis || analysis.classList.contains('hidden')) {
-          alert(
-            'El dashboard solo puede exportarse desde la vista de Análisis.\n\n' +
-            'Quita la selección de mesociclo para exportarlo.'
-          );
-          return;
-         }
-         
-         if (!window.__dashboardCache) {
-          alert('El dashboard aún no se ha generado.');
-          return;
-         }
-         
-         exportDashboardToExcel(window.__dashboardCache);
-         });
+    exportDashboardBtn.addEventListener('click', () => {
+      const analysis = document.getElementById('analysisDashboard');
+
+      if (!analysis || analysis.classList.contains('hidden')) {
+        alert(
+          'El dashboard solo puede exportarse desde la vista de Análisis.\n\n' +
+          'Quita la selección de mesociclo para exportarlo.'
+        );
+        return;
+      }
+
+      if (!window.__dashboardCache) {
+        alert('El dashboard aún no se ha generado.');
+        return;
+      }
+
+      exportDashboardToExcel(window.__dashboardCache);
+    });
+  }
 
   if (exportHistoryBtn) {
     exportHistoryBtn.addEventListener('click', () => {
