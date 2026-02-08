@@ -3378,24 +3378,23 @@ function setupExportButtons() {
 
   if (exportDashboardBtn) {
       exportDashboardBtn.addEventListener('click', () => {
-        const mode = getStatsMode();
-      
-        if (mode !== 'analysis') {
+         const analysis = document.getElementById('analysisDashboard');
+         
+         if (!analysis || analysis.classList.contains('hidden')) {
           alert(
             'El dashboard solo puede exportarse desde la vista de Análisis.\n\n' +
-            'Vuelve a la vista general para exportarlo.'
+            'Quita la selección de mesociclo para exportarlo.'
           );
           return;
-        }
-      
-        if (!window.__dashboardCache) {
+         }
+         
+         if (!window.__dashboardCache) {
           alert('El dashboard aún no se ha generado.');
           return;
-        }
-      
-        exportDashboardToExcel(window.__dashboardCache);
-      });
-  }
+         }
+         
+         exportDashboardToExcel(window.__dashboardCache);
+         });
 
   if (exportHistoryBtn) {
     exportHistoryBtn.addEventListener('click', () => {
