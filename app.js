@@ -1143,45 +1143,50 @@ function initStopwatch() {
 }
 
 function initTimer() {
-   const minutesInput = document.getElementById("timer-minutes");
-   const secondsInput = document.getElementById("timer-seconds");
-   const display = document.getElementById("timer-display");
-   const startBtn = document.getElementById("start-timer");
-   const stopBtn = document.getElementById("stop-timer");
-   const alarm = document.getElementById("alarm-sound");
+  const minutesInput = document.getElementById("timer-minutes");
+  const secondsInput = document.getElementById("timer-seconds");
+  const display = document.getElementById("timer-display");
+  const startBtn = document.getElementById("start-timer");
+  const stopBtn = document.getElementById("stop-timer");
 
   if (!minutesInput || !secondsInput || !display || !startBtn || !stopBtn) return;
 
   let timerInterval = null;
   let timerTime = 0;
   let timerRunning = false;
+  let alarmAudio = null;
 
   display.textContent = "00:00.00";
 
   startBtn.onclick = () => {
+    // 🔔 Crear audio dentro del click (OBLIGATORIO en Android)
+    if (!alarmAudio) {
+      alarmAudio = new Audio("alarm.mp3"); // ruta correcta
+      alarmAudio.preload = "auto";
+    }
+
+    // 🔓 Desbloquea el audio (fix Android)
+    alarmAudio.pause();
+    alarmAudio.currentTime = 0;
+    alarmAudio.play()
+      .then(() => {
+        alarmAudio.pause();
+        alarmAudio.currentTime = 0;
+      })
+      .catch(() => {});
+
     if (timerRunning) return;
 
     const minutes = parseInt(minutesInput.value) || 0;
     const seconds = parseInt(secondsInput.value) || 0;
 
     if (minutes === 0 && seconds === 0) return;
-
     if (seconds > 59) {
-      alert("Los segundos deben estar entre 0 y 59");
+      alert("Los segundos deben ser entre 0 y 59");
       return;
     }
 
     timerTime = (minutes * 60 + seconds) * 1000;
-
-     // Preparar audio para móvil (desbloquea reproducción)
-      alarm.pause();
-      alarm.currentTime = 0;
-      alarm.loop = false;
-      alarm.currentTime = 0;
-      alarm.play().then(() => {
-        alarm.pause();
-        alarm.currentTime = 0;
-      }).catch(() => {});
 
     timerInterval = setInterval(() => {
       timerTime -= 100;
@@ -1191,16 +1196,16 @@ function initTimer() {
         timerInterval = null;
         timerRunning = false;
         timerTime = 0;
-      
+
         display.textContent = "00:00.00";
         startBtn.textContent = "Iniciar";
-      
-        alarm.currentTime = 0;
-        alarm.loop = true;
-         alarm.play();
-      
+
+        // 🔊 SONAR ALARMA
+        alarmAudio.currentTime = 0;
+        alarmAudio.loop = true;
+        alarmAudio.play();
+
         saveTimeHistory("⏲️ Temporizador", formatTime(0));
-        alert("⏰ Tiempo terminado");
       } else {
         display.textContent = formatTime(timerTime);
       }
@@ -1211,15 +1216,20 @@ function initTimer() {
   };
 
   stopBtn.onclick = () => {
-    if (!timerRunning) return;
-
     clearInterval(timerInterval);
     timerInterval = null;
     timerRunning = false;
     startBtn.textContent = "Reanudar";
+
+    // 🔕 detener alarma
+    if (alarmAudio) {
+      alarmAudio.pause();
+      alarmAudio.currentTime = 0;
+      alarmAudio.loop = false;
+    }
   };
 
-  // Botón reset
+  // 🔄 Reset
   const resetBtn = document.createElement("button");
   resetBtn.textContent = "Restablecer";
 
@@ -1231,6 +1241,12 @@ function initTimer() {
 
     display.textContent = "00:00.00";
     startBtn.textContent = "Iniciar";
+
+    if (alarmAudio) {
+      alarmAudio.pause();
+      alarmAudio.currentTime = 0;
+      alarmAudio.loop = false;
+    }
   };
 
   const parent = startBtn.parentNode;
