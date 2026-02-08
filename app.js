@@ -1681,29 +1681,24 @@ async function loadStatsForMesocycle(mesocycleId) {
 
   document.getElementById('analysisDashboard')?.classList.add('hidden');
   document.getElementById('exerciseAnalysis')?.classList.remove('hidden');
+
+  document.getElementById('stats-mesocycle-label').textContent =
+    `Mesociclo seleccionado`;
 }
 
-function onStatsMesocycleChange(mesocycleId) {
-  if (mesocycleId) {
-    loadStatsForMesocycle(mesocycleId);
-  } else {
-    loadStatsGlobal(); // 🔑 ESTA ES LA CLAVE
-  }
-}
 
 async function loadStatsGlobal() {
-  const records = await fetchExerciseRecords(); // SIN filtro
+  const records = await fetchExerciseRecords(); // sin filtro
 
-  // 🔁 recalcular TODO
-  const volumeData = calculateVolumeTrend(records);
-  renderVolumeTable(volumeData);
-
-  updateKPIs(records); // ← ESTO NO SE ESTABA EJECUTANDO
+  updateKPIs(records);
   loadDashboard(null);
 
-  // mostrar / ocultar secciones
+  // UI
   document.getElementById('analysisDashboard')?.classList.remove('hidden');
   document.getElementById('exerciseAnalysis')?.classList.add('hidden');
+
+  document.getElementById('stats-mesocycle-label').textContent =
+    'Todos los mesociclos';
 }
 
 function updateKPIs(records) {
@@ -3893,9 +3888,15 @@ document.getElementById('exportDashboard').addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
   const select = document.getElementById('stats-mesocycle');
 
-  if (select) {
-    select.addEventListener('change', e => {
-      onStatsMesocycleChange(e.target.value);
-    });
-  }
+  if (!select) return;
+
+  select.addEventListener('change', e => {
+    const value = e.target.value;
+
+    if (value === 'all') {
+      loadStatsGlobal();
+    } else {
+      loadStatsForMesocycle(value);
+    }
+  });
 });
