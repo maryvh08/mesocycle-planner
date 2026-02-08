@@ -1673,6 +1673,50 @@ async function fetchExerciseRecords(mesocycleId) {
   }));
 }
 
+async function loadStatsForMesocycle(mesocycleId) {
+  const records = await fetchExerciseRecords(mesocycleId);
+
+  updateKPIs(records);
+  loadDashboard(mesocycleId);
+
+  document.getElementById('analysisDashboard')?.classList.add('hidden');
+  document.getElementById('exerciseAnalysis')?.classList.remove('hidden');
+}
+
+function onStatsMesocycleChange(mesocycleId) {
+  if (mesocycleId) {
+    loadStatsForMesocycle(mesocycleId);
+  } else {
+    loadStatsGlobal(); // 🔑 ESTA ES LA CLAVE
+  }
+}
+
+async function loadStatsGlobal() {
+  const records = await fetchExerciseRecords(); // SIN filtro
+
+  // 🔁 recalcular TODO
+  const volumeData = calculateVolumeTrend(records);
+  renderVolumeTable(volumeData);
+
+  updateKPIs(records); // ← ESTO NO SE ESTABA EJECUTANDO
+  loadDashboard(null);
+
+  // mostrar / ocultar secciones
+  document.getElementById('analysisDashboard')?.classList.remove('hidden');
+  document.getElementById('exerciseAnalysis')?.classList.add('hidden');
+}
+
+function updateKPIs(records) {
+  document.getElementById('kpi-volume').textContent =
+    totalVolume(records);
+
+  document.getElementById('kpi-prs').textContent =
+    totalPRs(records);
+
+  document.getElementById('kpi-sessions').textContent =
+    totalSessions(records);
+}
+
 function renderStrengthTable(grouped) {
   const container = document.getElementById('strength-table');
   container.innerHTML = '';
@@ -3844,4 +3888,14 @@ document.getElementById('exportDashboard').addEventListener('click', () => {
   }
 
   exportDashboardToExcel(window.__dashboardCache);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const select = document.getElementById('stats-mesocycle');
+
+  if (select) {
+    select.addEventListener('change', e => {
+      onStatsMesocycleChange(e.target.value);
+    });
+  }
 });
