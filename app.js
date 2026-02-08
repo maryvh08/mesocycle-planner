@@ -22,6 +22,7 @@ let timerInterval = null;
 let timerTime = 0;      
 let timerRunning = false; 
 let miniChartInstance = null;
+let alarmAudio = null;
 
 /* ======================
    UI ELEMENTS
@@ -1142,11 +1143,12 @@ function initStopwatch() {
 }
 
 function initTimer() {
-  const minutesInput = document.getElementById("timer-minutes");
-  const secondsInput = document.getElementById("timer-seconds");
-  const display = document.getElementById("timer-display");
-  const startBtn = document.getElementById("start-timer");
-  const stopBtn = document.getElementById("stop-timer");
+   const minutesInput = document.getElementById("timer-minutes");
+   const secondsInput = document.getElementById("timer-seconds");
+   const display = document.getElementById("timer-display");
+   const startBtn = document.getElementById("start-timer");
+   const stopBtn = document.getElementById("stop-timer");
+   const alarm = document.getElementById("alarm-sound");
 
   if (!minutesInput || !secondsInput || !display || !startBtn || !stopBtn) return;
 
@@ -1171,6 +1173,16 @@ function initTimer() {
 
     timerTime = (minutes * 60 + seconds) * 1000;
 
+     // Preparar audio para móvil (desbloquea reproducción)
+      alarm.pause();
+      alarm.currentTime = 0;
+      alarm.loop = false;
+      alarm.currentTime = 0;
+      alarm.play().then(() => {
+        alarm.pause();
+        alarm.currentTime = 0;
+      }).catch(() => {});
+
     timerInterval = setInterval(() => {
       timerTime -= 100;
 
@@ -1179,10 +1191,14 @@ function initTimer() {
         timerInterval = null;
         timerRunning = false;
         timerTime = 0;
-
+      
         display.textContent = "00:00.00";
         startBtn.textContent = "Iniciar";
-
+      
+        alarm.currentTime = 0;
+        alarm.loop = true;
+         alarm.play();
+      
         saveTimeHistory("⏲️ Temporizador", formatTime(0));
         alert("⏰ Tiempo terminado");
       } else {
