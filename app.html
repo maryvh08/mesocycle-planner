@@ -119,6 +119,7 @@
       <!-- ================= HISTORIAL ================= -->
       <section id="historial-tab" class="tab-content screen hidden">
         <div class="screen-header">Historial</div>
+        <button id="exportHistory">📋 Exportar Historial</button>
         <div class="screen-content">
           <div id="history-list"></div>
         </div>
@@ -149,6 +150,7 @@
       <!-- ================= STATS ================= -->
       <section id="stats" class="tab-content screen hidden">
         <div class="screen-header">Estadísticas</div>
+        <button id="exportDashboard">📊 Exportar Dashboard</button>
       
         <div class="screen-content">
       
@@ -174,8 +176,7 @@
           <!-- ===============================
                ANÁLISIS / DASHBOARD
           =============================== -->
-          <section id="analysisDashboard" class="analysis-dashboard">
-      
+          <section id="analysisDashboard" class="analysis-dashboard">      
             <!-- ===== VOLUMEN SEMANAL POR EJERCICIO ===== -->
             <div class="dashboard-block volume-section">
               <h3>Volumen semanal por ejercicio</h3>
@@ -430,6 +431,7 @@
 </div>
 
 <!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script type="module" src="app.js"></script>
 
 </body>
