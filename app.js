@@ -23,6 +23,7 @@ let timerTime = 0;
 let timerRunning = false; 
 let miniChartInstance = null;
 let alarmAudio = null;
+let dashboardLoaded = false;
 
 /* ======================
    UI ELEMENTS
@@ -1401,7 +1402,6 @@ const RP_RANGES = {
 };
 
 async function loadDashboard(mesocycleId) {
-
   // ======================
   // 1️⃣ TEXTO FIJO DE ESTADOS (solo UI)
   // ======================
