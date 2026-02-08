@@ -3762,4 +3762,19 @@ mesocycleSelect.addEventListener('change', () => {
 // Estado inicial
 updateStatsSections();
 
-document.getElementById('exportHistory').onclick = exportHistoryToExcel;
+document
+  .getElementById('exportHistory')
+  .addEventListener('click', exportHistoryToExcel);
+
+document
+  .getElementById('exportDashboard')
+  .addEventListener('click', () => {
+
+    exportDashboardToExcel({
+      volumeData: dashboardState.volumeData,
+      muscleData: dashboardState.muscleData,
+      fatigueAlerts: dashboardState.fatigueAlerts,
+      coach: dashboardState.coach
+    });
+
+  });
