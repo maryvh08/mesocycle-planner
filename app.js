@@ -1452,13 +1452,6 @@ async function loadDashboard(mesocycleId) {
   const muscleData = evaluateMuscleVolume(rawMuscle);
   renderMuscleTable(muscleData);
 
-  console.log(
-    muscleData.map(m => ({
-      muscle: m.muscle,
-      hasRP: !!RP_RANGES[m.muscle]
-    }))
-  );
-
   // ======================
   // 6️⃣ FATIGA POR MÚSCULO
   // ======================
