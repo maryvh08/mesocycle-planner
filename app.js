@@ -3762,6 +3762,13 @@ mesocycleSelect.addEventListener('change', () => {
 // Estado inicial
 updateStatsSections();
 
+const dashboardState = {
+  volumeData: [],
+  muscleData: [],
+  fatigueAlerts: [],
+  coach: null
+};
+
 document
   .getElementById('exportHistory')
   .addEventListener('click', exportHistoryToExcel);
@@ -3770,11 +3777,10 @@ document
   .getElementById('exportDashboard')
   .addEventListener('click', () => {
 
-    exportDashboardToExcel({
-      volumeData: dashboardState.volumeData,
-      muscleData: dashboardState.muscleData,
-      fatigueAlerts: dashboardState.fatigueAlerts,
-      coach: dashboardState.coach
-    });
+    if (!dashboardState.volumeData.length) {
+      alert('Primero carga un mesociclo');
+      return;
+    }
 
+    exportDashboardToExcel(dashboardState);
   });
