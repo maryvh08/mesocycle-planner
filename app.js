@@ -3777,7 +3777,7 @@ document
   .getElementById('exportDashboard')
   .addEventListener('click', () => {
 
-    if (!dashboardState.volumeData.length) {
+    if (!dashboardLoaded) {
       alert('Primero carga un mesociclo');
       return;
     }
