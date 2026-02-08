@@ -1142,37 +1142,48 @@ function initStopwatch() {
 }
 
 function initTimer() {
-  const input = document.getElementById("timer-input");
+  const minutesInput = document.getElementById("timer-minutes");
+  const secondsInput = document.getElementById("timer-seconds");
   const display = document.getElementById("timer-display");
   const startBtn = document.getElementById("start-timer");
   const stopBtn = document.getElementById("stop-timer");
 
-  if (!input || !display || !startBtn || !stopBtn) return;
+  if (!minutesInput || !secondsInput || !display || !startBtn || !stopBtn) return;
+
+  let timerInterval = null;
+  let timerTime = 0;
+  let timerRunning = false;
 
   display.textContent = "00:00.00";
 
   startBtn.onclick = () => {
-      const timeParts = input.value.split(":");
-      if (timeParts.length !== 2) return; // no válido
-      
-      const minutes = parseInt(timeParts[0]);
-      const seconds = parseInt(timeParts[1]);
-      
-      if (isNaN(minutes) || isNaN(seconds)) return;
-      
-      timerTime = (minutes * 60 + seconds) * 1000;
+    if (timerRunning) return;
 
-    clearInterval(timerInterval);
+    const minutes = parseInt(minutesInput.value) || 0;
+    const seconds = parseInt(secondsInput.value) || 0;
+
+    if (minutes === 0 && seconds === 0) return;
+
+    if (seconds > 59) {
+      alert("Los segundos deben estar entre 0 y 59");
+      return;
+    }
+
+    timerTime = (minutes * 60 + seconds) * 1000;
 
     timerInterval = setInterval(() => {
       timerTime -= 100;
+
       if (timerTime <= 0) {
         clearInterval(timerInterval);
-        timerTime = 0;
+        timerInterval = null;
         timerRunning = false;
+        timerTime = 0;
+
         display.textContent = "00:00.00";
-        saveTimeHistory("⏲️ Temporizador", formatTime(0));
         startBtn.textContent = "Iniciar";
+
+        saveTimeHistory("⏲️ Temporizador", formatTime(0));
         alert("⏰ Tiempo terminado");
       } else {
         display.textContent = formatTime(timerTime);
@@ -1185,23 +1196,27 @@ function initTimer() {
 
   stopBtn.onclick = () => {
     if (!timerRunning) return;
+
     clearInterval(timerInterval);
+    timerInterval = null;
     timerRunning = false;
     startBtn.textContent = "Reanudar";
   };
 
-  // Agregamos botón de reset
+  // Botón reset
   const resetBtn = document.createElement("button");
   resetBtn.textContent = "Restablecer";
+
   resetBtn.onclick = () => {
     clearInterval(timerInterval);
-    timerTime = 0;
+    timerInterval = null;
     timerRunning = false;
+    timerTime = 0;
+
     display.textContent = "00:00.00";
     startBtn.textContent = "Iniciar";
   };
 
-  // Añadimos reset al contenedor de botones
   const parent = startBtn.parentNode;
   if (parent && !parent.querySelector(".timer-reset")) {
     resetBtn.classList.add("timer-reset");
