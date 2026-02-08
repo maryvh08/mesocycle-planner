@@ -3762,25 +3762,5 @@ mesocycleSelect.addEventListener('change', () => {
 // Estado inicial
 updateStatsSections();
 
-const dashboardState = {
-  volumeData: [],
-  muscleData: [],
-  fatigueAlerts: [],
-  coach: null
-};
+document.getElementById('exportHistory').onclick = exportHistoryToExcel;
 
-document
-  .getElementById('exportHistory')
-  .addEventListener('click', exportHistoryToExcel);
-
-document
-  .getElementById('exportDashboard')
-  .addEventListener('click', () => {
-
-    if (!dashboardLoaded) {
-      alert('Primero carga un mesociclo');
-      return;
-    }
-
-    exportDashboardToExcel(dashboardState);
-  });
