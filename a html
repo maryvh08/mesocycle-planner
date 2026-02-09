@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Workout Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="icon" type="image/png" href="mcp logo.png" />
+</head>
+<body>
+
+<div id="app-shell">
+
+  <!-- ================= LOGIN ================= -->
+    <section id="login-view" class="screen login-screen">
+      <div class="auth-card">
+    
+        <div class="auth-header">
+          <h1>Workout</h1>
+          <p>Entrena con datos. Mejora con intención.</p>
+        </div>
+    
+        <div class="auth-form">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="tucorreo@email.com" />
+    
+          <label>Contraseña</label>
+          <input type="password" id="password" placeholder="••••••••" />
+    
+          <button id="login-btn" class="primary">Entrar</button>
+    
+          <p class="auth-footer">
+            ¿Nuevo aquí? <a href="signup.html">Crear cuenta</a>
+          </p>
+          
+          <a href="reset.html" class="forgot-link">
+            ¿Olvidaste tu contraseña?
+          </a>
+          
+          <p id="auth-message" class="auth-message"></p>
+        </div>
+    
+      </div>
+    </section>
+  
+  <!-- ================= APP ================= -->
+  <section id="app-view" class="hidden">
+
+    <!-- Header -->
+    <header id="app-header">
+      <button id="logout-btn" class="icon-btn">⎋</button>
+    </header>
+
+    <!-- ☰ MENU -->
+    <div id="menu-toggle" class="menu-toggle">☰</div>
+
+    <!-- Sidebar -->
+    <nav id="side-menu" class="side-menu">
+      <button class="menu-item" data-tab="crear-tab">Crear mesociclo</button>
+      <button class="menu-item" data-tab="historial-tab">Historial</button>
+      <button class="menu-item" data-tab="registro-tab">Registro</button>
+      <button class="menu-item" data-tab="stats">Estadísticas</button>
+      <button class="menu-item" data-tab="tutorials-view">Tutoriales</button>
+      <button class="menu-item" data-tab="tools-tab">Herramientas</button>
+    </nav>
+    
+    <!-- Main content -->
+    <main id="app-content">
+
+      <!-- ================= CREAR ================= -->
+      <section id="crear-tab" class="tab-content screen">
+        <div class="screen-header">Crear Mesociclo</div>
+
+        <div class="screen-content">
+
+          <div class="card">
+            <label>Nombre del mesociclo</label>
+            <input type="text" id="mesocycle-name" placeholder="Ej: Fuerza Enero" />
+          </div>
+
+          <div class="card">
+            <label>Semanas</label>
+            <input type="number" id="mesocycle-weeks" min="1" max="12" />
+          </div>
+
+          <div class="card">
+            <label>Plantilla</label>
+            <select id="template-select">
+              <option value="">Selecciona plantilla</option>
+            </select>
+          </div>
+
+          <div class="card">
+            <label>Días por semana</label>
+            <div id="day-buttons-container" class="day-buttons">
+              <button class="day-btn" data-days="1">1</button>
+              <button class="day-btn" data-days="2">2</button>
+              <button class="day-btn" data-days="3">3</button>
+              <button class="day-btn" data-days="4">4</button>
+              <button class="day-btn" data-days="5">5</button>
+              <button class="day-btn" data-days="6">6</button>
+              <button class="day-btn" data-days="7">7</button>
+            </div>
+          </div>
+
+          <button id="create-mesocycle-btn" class="primary">
+            Guardar mesociclo
+          </button>
+
+        </div>
+      </section>
+
+      <!-- ================= HISTORIAL ================= -->
+      <section id="historial-tab" class="tab-content screen hidden">
+        <div class="screen-header">Historial</div>
+        <button id="exportHistory">📋 Exportar Historial</button>
+        <div class="screen-content">
+          <div id="history-list"></div>
+        </div>
+      </section>
+
+      <!-- ================= REGISTRO ================= -->
+      <section id="registro-tab" class="tab-content screen hidden">
+        <div class="screen-header">Registro</div>
+
+        <div class="screen-content">
+
+          <div class="card">
+            <label>Mesociclo</label>
+            <select id="registro-select">
+              <option value="">Selecciona mesociclo</option>
+            </select>
+          </div>
+
+          <div id="registro-editor" class="registro-editor">
+            <p class="placeholder">Selecciona un mesociclo para comenzar</p>
+          </div>
+
+          <div id="registered-exercises"></div>
+
+        </div>
+      </section>
+
+      <!-- ================= STATS ================= -->
+      <section id="stats" class="tab-content screen hidden">
+        <div class="screen-header">Estadísticas</div>
+        <button id="exportDashboard">📊 Exportar Dashboard</button>
+      
+        <div class="screen-content">
+      
+          <div class="card">
+            <label>Mesociclo</label>
+            <select id="stats-mesocycle">
+              <option value="">Todos</option>
+            </select>
+            <div id="stats-mesocycle-label" class="stats-subtitle">
+              Todos los mesociclos
+            </div>
+          </div>
+      
+          <!-- KPIs -->
+          <div class="kpi-grid">
+            <div id="kpi-volume" class="kpi-card"></div>
+            <div id="kpi-prs" class="kpi-card"></div>
+            <div id="kpi-sessions" class="kpi-card"></div>
+          </div>
+      
+          <div class="separator"></div>
+      
+          <!-- ===============================
+               ANÁLISIS / DASHBOARD
+          =============================== -->
+          <section id="analysisDashboard" class="analysis-dashboard">      
+            <!-- ===== VOLUMEN SEMANAL POR EJERCICIO ===== -->
+            <div class="dashboard-block volume-section">
+              <h3>Volumen semanal por ejercicio</h3>
+              <div id="volumeTable" class="table-wrapper"></div>
+            </div>
+      
+            <!-- ===== COMPARACIÓN DE MESOCICLOS ===== -->
+            <div class="dashboard-block mesocycle-compare">
+              <h3>Comparar mesociclos</h3>
+              <div class="compare-controls">
+                <select id="mesoA">
+                  <option value="">Selecciona mesociclo A</option>
+                </select>
+                <select id="mesoB">
+                  <option value="">Selecciona mesociclo B</option>
+                </select>
+              </div>
+              <div id="compareResult"></div>
+            </div>
+      
+            <!-- ===== VOLUMEN POR GRUPO MUSCULAR (RP) ===== -->
+            <div class="dashboard-block muscle-volume">
+              <h3>Volumen por grupo muscular</h3>
+              <div id="muscleTable" class="table-wrapper"></div>
+            </div>
+      
+            <!-- ===== COACH DASHBOARD ===== -->
+            <div class="dashboard-block coach-dashboard">
+              <h2>Coach</h2>
+      
+              <!-- ESTADO GLOBAL -->
+              <div class="coach-section">
+                <h3>Interpretación estado global</h3>
+                <div class="coach-grid" id="coachStatusGrid">
+                  <div class="coach-card" id="statusGreen"></div>
+                  <div class="coach-card" id="statusYellow"></div>
+                  <div class="coach-card" id="statusRed"></div>
+                </div>
+                <div class="coach-card" id="globalProgressCard">
+                  <p id="globalProgressText"></p>
+                </div>
+              </div>
+      
+              <!-- ALERTAS -->
+              <div class="coach-section">
+                <h3>Alertas críticas</h3>
+                <div id="fatigueAlerts"></div>
+              </div>
+      
+              <!-- RECOMENDACIÓN -->
+              <div class="coach-section">
+                <h3>Recomendación</h3>
+                <div class="coach-card success" id="coachCard">
+                  <div class="coach-content">
+                    <p id="coachMessage"></p>
+                  </div>
+                </div>
+              </div>
+      
+            </div>
+          </section> <!-- Cierre de analysisDashboard -->
+      
+          <!-- ===============================
+               GRAFICA FUERZA
+          =============================== -->
+          <h3>
+            Evolución de fuerza
+            <span id="strength-exercise-label" class="exercise-label hidden"></span>
+          </h3>
+          <div class="chart-container" style="position: relative;">
+            <canvas id="strength-chart"></canvas>
+            <button id="back-to-general" class="back-badge hidden">
+              ← Volver a evolución general
+            </button>
+          </div>
+      
+          <div class="spacer"></div>
+      
+          <!-- ===============================
+               SELECCIÓN DE MESOCICLO
+          =============================== -->
+          <section id="exerciseAnalysis" class="exercise-analysis hidden">
+      
+            <!-- ===== TENDENCIAS ===== -->
+            <div class="analysis-block trend-card up">
+              <h3>Tendencias por ejercicio</h3>
+              <div class="trend-main">
+                <div id="strength-trends" class="strength-list"></div>
+              </div>
+            </div>
+      
+            <!-- ===== MODAL DE EJERCICIO ===== -->
+            <div id="exercise-modal" class="modal hidden">
+              <div class="modal-card">
+                <h4 id="modal-title"></h4>
+                <canvas id="mini-chart"></canvas>
+                <button id="close-modal-btn">Cerrar</button>
+              </div>
+            </div>
+      
+            <!-- ===== VOLUMEN POR EJERCICIO ===== -->
+            <div class="analysis-block">
+              <h3>Volumen por ejercicio (peso × reps)</h3>
+              <div id="exercise-volume-list"></div>
+            </div>
+      
+            <!-- ===== PRs ===== -->
+            <div class="analysis-block">
+              <h3>Mejores marcas</h3>
+              <div id="pr-table"></div>
+            </div>
+      
+            <!-- ===== COMPARACIÓN DE MESOCICLOS ===== -->
+            <div class="analysis-block">
+              <h3>Comparación de mesociclos</h3>
+              <div id="mesocycle-comparison"></div>
+            </div>
+      
+          </section> <!-- Cierre de exerciseAnalysis -->
+      
+        </div> <!-- Cierre de screen-content -->
+      </section> <!-- Cierre de stats -->
+      
+      <!-- ================= TUTORIALES ================= -->
+      <section id="tutorials-view" class="tab-content screen hidden">
+        <h2>Tutoriales de ejercicios</h2>
+        <h3 class="subtitle">Aprende y mejora tu técnica</h3>
+      
+        <!-- FILTROS Y BÚSQUEDA -->
+        <div class="filters-container">
+      
+          <!-- Búsqueda -->
+          <div class="search-box">
+            <input type="text" id="tutorial-search" placeholder="Buscar tutorial...">
+          </div>
+      
+          <!-- Solo favoritos -->
+          <label class="favorites-filter">
+            <input type="checkbox" id="filter-favorites">
+            <span class="checkmark"></span>
+            Solo favoritos
+          </label>
+      
+          <!-- Filtro por tipo -->
+          <div class="filter-dropdown multi-filter">
+            <button class="filter-btn">Filtrar por tipo ▾</button>
+            <div id="type-options" class="filter-options filter-dropdown-content"></div>
+          </div>
+      
+          <!-- Filtro por subgrupo -->
+          <div class="filter-dropdown multi-filter">
+            <button class="filter-btn">Filtrar por subgrupo ▾</button>
+            <div id="subgroup-options" class="filter-options filter-dropdown-content"></div>
+          </div>
+      
+          <!-- Ordenar -->
+          <select id="sort-by">
+            <option value="">Ordenar</option>
+            <option value="name-asc">Nombre ↑</option>
+            <option value="name-desc">Nombre ↓</option>
+            <option value="type-asc">Tipo ↑</option>
+            <option value="type-desc">Tipo ↓</option>
+          </select>
+      
+          <!-- Borrar filtros -->
+          <button id="clear-filters">Borrar filtros</button>
+        </div>
+      
+        <!-- LISTA DE TUTORIALES -->
+        <div id="tutorial-list"></div>
+      
+        <!-- MODAL TUTORIAL -->
+        <div id="tutorial-modal" class="hidden">
+          <div class="modal-content">
+            <h3 id="tutorial-title"></h3>
+            <div class="video-wrapper">
+              <iframe
+                id="tutorial-video"
+                src=""
+                frameborder="0"
+                allowfullscreen
+              ></iframe>
+            </div>
+            <div id="tutorial-cues"></div>
+            <button id="close-tutorial-modal-btn">Cerrar</button>
+          </div>
+        </div>
+      </section>
+      
+      <!-- ================= HERRAMIENTAS ================= -->
+      <section id="tools-tab" class="tab-content screen hidden">
+        <div class="screen-header">Herramientas</div>
+      
+        <div class="screen-content tools-grid">
+      
+          <!-- ===== RELOJ ===== -->
+          <div class="card tool-card">
+            <h3>🕒 Reloj</h3>
+            <div id="clock" class="tool-display">00:00:00</div>
+          </div>
+      
+          <!-- ===== CRONÓMETRO ===== -->
+          <div class="card tool-card">
+            <h3>⏱️ Cronómetro</h3>
+            <div id="stopwatch" class="tool-display">00:00.0</div>
+            <div class="tool-actions">
+              <button id="start-stopwatch">Iniciar</button>
+              <button id="stop-stopwatch">Detener</button>
+              <button id="reset-stopwatch">Reset</button>
+            </div>
+          </div>
+      
+          <!-- ===== TEMPORIZADOR ===== -->
+          <div class="card tool-card">
+            <h3>⏲️ Temporizador</h3>
+            <div class="timer-inputs">
+              <input
+                type="number"
+                id="timer-minutes"
+                placeholder="Min"
+                min="0"
+              />
+              <span>:</span>
+              <input
+                type="number"
+                id="timer-seconds"
+                placeholder="Seg"
+                min="0"
+                max="59"
+              />
+            </div>
+            <div id="timer-display" class="tool-display">00:00</div>
+            <div class="tool-actions">
+              <button id="start-timer">Iniciar</button>
+              <button id="stop-timer">Detener</button>
+            </div>
+            <audio id="alarm-sound" preload="auto">
+              <source src="alarm.mp3" type="audio/mpeg">
+            </audio>
+          </div>
+      
+        </div>
+      
+        <div class="card tool-card">
+          <h3>📜 Historial de tiempos</h3>
+          <div id="time-history" class="time-history">
+            <p class="placeholder">Aún no hay registros</p>
+          </div>
+          <button id="clear-history">Borrar historial</button>
+        </div>
+      </section>
+</div>
+
+<!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script type="module" src="app.js"></script>
+
+</body>
+</html>
