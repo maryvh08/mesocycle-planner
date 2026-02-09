@@ -1676,29 +1676,27 @@ async function fetchExerciseRecords(mesocycleId) {
 async function loadStatsForMesocycle(mesocycleId) {
   const records = await fetchExerciseRecords(mesocycleId);
 
+  dashboardState = {
+    mode: "mesocycle",
+    mesocycleId,
+    records
+  };
+
   updateKPIs(records);
   loadDashboard(mesocycleId);
-
-  document.getElementById('analysisDashboard')?.classList.add('hidden');
-  document.getElementById('exerciseAnalysis')?.classList.remove('hidden');
-
-  document.getElementById('stats-mesocycle-label').textContent =
-    `Mesociclo seleccionado`;
 }
 
-
 async function loadStatsGlobal() {
-  const records = await fetchExerciseRecords(); // sin filtro
+  const records = await fetchExerciseRecords();
+
+  dashboardState = {
+    mode: "all",
+    mesocycleId: null,
+    records
+  };
 
   updateKPIs(records);
   loadDashboard(null);
-
-  // UI
-  document.getElementById('analysisDashboard')?.classList.remove('hidden');
-  document.getElementById('exerciseAnalysis')?.classList.add('hidden');
-
-  document.getElementById('stats-mesocycle-label').textContent =
-    'Todos los mesociclos';
 }
 
 function updateKPIs(records) {
@@ -3250,7 +3248,11 @@ async function loadStatsMesocycles() {
   }
 
   const select = document.getElementById("stats-mesocycle");
-  select.innerHTML = `<option value="">Selecciona mesociclo</option>`;
+
+  // 🔵 OPCIÓN EXPLÍCITA
+  select.innerHTML = `
+    <option value="all">🟦 Ver todos los mesociclos</option>
+  `;
 
   data.forEach(m => {
     const opt = document.createElement("option");
@@ -3258,6 +3260,9 @@ async function loadStatsMesocycles() {
     opt.textContent = m.name;
     select.appendChild(opt);
   });
+
+  // 🔒 Estado inicial correcto
+  select.value = "all";
 }
 
 function updateCoachDashboard(exercises) {
@@ -3866,25 +3871,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setupExportButtons();
 });
 
-document.getElementById('exportDashboard').addEventListener('click', () => {
-  const analysis = document.getElementById('analysisDashboard');
-
-  if (!analysis || analysis.classList.contains('hidden')) {
-    alert(
-      'El dashboard solo puede exportarse desde la vista de Análisis.\n' +
-      'Quita la selección de mesociclo.'
-    );
-    return;
-  }
-
-  if (!window.__dashboardCache) {
-    alert('El dashboard aún no se ha generado.');
-    return;
-  }
-
-  exportDashboardToExcel(window.__dashboardCache);
-});
-
 document.addEventListener('DOMContentLoaded', () => {
   const select = document.getElementById('stats-mesocycle');
 
@@ -3899,4 +3885,15 @@ document.addEventListener('DOMContentLoaded', () => {
       loadStatsForMesocycle(value);
     }
   });
+});
+
+document.getElementById("exportDashboard")
+  ?.addEventListener("click", () => {
+
+    if (!dashboardState.records.length) {
+      alert("El dashboard aún no se ha generado");
+      return;
+    }
+
+    exportDashboardToExcel(dashboardState);
 });
