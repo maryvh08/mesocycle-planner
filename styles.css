@@ -2144,3 +2144,26 @@ h3 {
   color: #ffb3b3;
   font-size: 1.1rem;
 }
+
+/* ================== PASSWORD ================== */
+
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 40px; /* espacio para el ojito */
+}
+
+.password-wrapper button {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+}
+
