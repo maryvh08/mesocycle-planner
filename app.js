@@ -408,6 +408,15 @@ async function loadMesocycles() {
   });
 }
 
+// ============================
+// DASHBOARD STATE (GLOBAL)
+// ============================
+let dashboardState = {
+  mode: "all",
+  mesocycleId: null,
+  records: []
+};
+
 async function loadMesocycleSelectors() {
   const a = document.getElementById('mesoA');
   const b = document.getElementById('mesoB');
