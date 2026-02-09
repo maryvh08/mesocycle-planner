@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -17,36 +19,36 @@
 <div id="app-shell">
 
   <!-- ================= LOGIN ================= -->
-    <section id="login-view" class="screen login-screen">
-      <div class="auth-card">
-    
-        <div class="auth-header">
-          <h1>Workout</h1>
-          <p>Entrena con datos. Mejora con intención.</p>
-        </div>
-    
-        <div class="auth-form">
-          <label>Email</label>
-          <input type="email" id="email" placeholder="tucorreo@email.com" />
-    
-          <label>Contraseña</label>
-          <input type="password" id="password" placeholder="••••••••" />
-    
-          <button id="login-btn" class="primary">Entrar</button>
-    
-          <p class="auth-footer">
-            ¿Nuevo aquí? <a href="signup.html">Crear cuenta</a>
-          </p>
-          
-          <a href="reset.html" class="forgot-link">
-            ¿Olvidaste tu contraseña?
-          </a>
-          
-          <p id="auth-message" class="auth-message"></p>
-        </div>
-    
+  <section id="login-view" class="screen login-screen">
+    <div class="auth-card">
+  
+      <div class="auth-header">
+        <h1>Workout</h1>
+        <p>Entrena con datos. Mejora con intención.</p>
       </div>
-    </section>
+  
+      <div class="auth-form">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="tucorreo@email.com" />
+  
+        <label>Contraseña</label>
+        <input type="password" id="password" placeholder="••••••••" />
+  
+        <button id="login-btn" class="primary">Entrar</button>
+  
+        <p class="auth-footer">
+          ¿Nuevo aquí? <a href="signup.html">Crear cuenta</a>
+        </p>
+        
+        <a href="reset.html" class="forgot-link">
+          ¿Olvidaste tu contraseña?
+        </a>
+        
+        <p id="auth-message" class="auth-message"></p>
+      </div>
+  
+    </div>
+  </section>
   
   <!-- ================= APP ================= -->
   <section id="app-view" class="hidden">
@@ -118,7 +120,6 @@
       <!-- ================= HISTORIAL ================= -->
       <section id="historial-tab" class="tab-content screen hidden">
         <div class="screen-header">Historial</div>
-        <button id="exportHistory">📋 Exportar Historial</button>
         <div class="screen-content">
           <div id="history-list"></div>
         </div>
@@ -149,7 +150,6 @@
       <!-- ================= STATS ================= -->
       <section id="stats" class="tab-content screen hidden">
         <div class="screen-header">Estadísticas</div>
-        <button id="exportDashboard">📊 Exportar Dashboard</button>
       
         <div class="screen-content">
       
@@ -175,7 +175,8 @@
           <!-- ===============================
                ANÁLISIS / DASHBOARD
           =============================== -->
-          <section id="analysisDashboard" class="analysis-dashboard">      
+          <section id="analysisDashboard" class="analysis-dashboard">
+      
             <!-- ===== VOLUMEN SEMANAL POR EJERCICIO ===== -->
             <div class="dashboard-block volume-section">
               <h3>Volumen semanal por ejercicio</h3>
@@ -430,7 +431,6 @@
 </div>
 
 <!-- JS -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script type="module" src="app.js"></script>
 
 </body>
