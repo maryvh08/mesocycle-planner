@@ -1,4 +1,3 @@
-
 console.log("🔥 app.js cargado  exitosamente");
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
@@ -23,7 +22,6 @@ let timerInterval = null;
 let timerTime = 0;      
 let timerRunning = false; 
 let miniChartInstance = null;
-let alarmAudio = null;
 
 /* ======================
    UI ELEMENTS
@@ -1144,69 +1142,38 @@ function initStopwatch() {
 }
 
 function initTimer() {
-  const minutesInput = document.getElementById("timer-minutes");
-  const secondsInput = document.getElementById("timer-seconds");
+  const input = document.getElementById("timer-input");
   const display = document.getElementById("timer-display");
   const startBtn = document.getElementById("start-timer");
   const stopBtn = document.getElementById("stop-timer");
 
-  if (!minutesInput || !secondsInput || !display || !startBtn || !stopBtn) return;
-
-  let timerInterval = null;
-  let timerTime = 0;
-  let timerRunning = false;
-  let alarmAudio = null;
+  if (!input || !display || !startBtn || !stopBtn) return;
 
   display.textContent = "00:00.00";
 
   startBtn.onclick = () => {
-    // 🔔 Crear audio dentro del click (OBLIGATORIO en Android)
-    if (!alarmAudio) {
-      alarmAudio = new Audio("alarm.mp3"); // ruta correcta
-      alarmAudio.preload = "auto";
-    }
+      const timeParts = input.value.split(":");
+      if (timeParts.length !== 2) return; // no válido
+      
+      const minutes = parseInt(timeParts[0]);
+      const seconds = parseInt(timeParts[1]);
+      
+      if (isNaN(minutes) || isNaN(seconds)) return;
+      
+      timerTime = (minutes * 60 + seconds) * 1000;
 
-    // 🔓 Desbloquea el audio (fix Android)
-    alarmAudio.pause();
-    alarmAudio.currentTime = 0;
-    alarmAudio.play()
-      .then(() => {
-        alarmAudio.pause();
-        alarmAudio.currentTime = 0;
-      })
-      .catch(() => {});
-
-    if (timerRunning) return;
-
-    const minutes = parseInt(minutesInput.value) || 0;
-    const seconds = parseInt(secondsInput.value) || 0;
-
-    if (minutes === 0 && seconds === 0) return;
-    if (seconds > 59) {
-      alert("Los segundos deben ser entre 0 y 59");
-      return;
-    }
-
-    timerTime = (minutes * 60 + seconds) * 1000;
+    clearInterval(timerInterval);
 
     timerInterval = setInterval(() => {
       timerTime -= 100;
-
       if (timerTime <= 0) {
         clearInterval(timerInterval);
-        timerInterval = null;
-        timerRunning = false;
         timerTime = 0;
-
+        timerRunning = false;
         display.textContent = "00:00.00";
-        startBtn.textContent = "Iniciar";
-
-        // 🔊 SONAR ALARMA
-        alarmAudio.currentTime = 0;
-        alarmAudio.loop = true;
-        alarmAudio.play();
-
         saveTimeHistory("⏲️ Temporizador", formatTime(0));
+        startBtn.textContent = "Iniciar";
+        alert("⏰ Tiempo terminado");
       } else {
         display.textContent = formatTime(timerTime);
       }
@@ -1217,39 +1184,24 @@ function initTimer() {
   };
 
   stopBtn.onclick = () => {
+    if (!timerRunning) return;
     clearInterval(timerInterval);
-    timerInterval = null;
     timerRunning = false;
     startBtn.textContent = "Reanudar";
-
-    // 🔕 detener alarma
-    if (alarmAudio) {
-      alarmAudio.pause();
-      alarmAudio.currentTime = 0;
-      alarmAudio.loop = false;
-    }
   };
 
-  // 🔄 Reset
+  // Agregamos botón de reset
   const resetBtn = document.createElement("button");
   resetBtn.textContent = "Restablecer";
-
   resetBtn.onclick = () => {
     clearInterval(timerInterval);
-    timerInterval = null;
-    timerRunning = false;
     timerTime = 0;
-
+    timerRunning = false;
     display.textContent = "00:00.00";
     startBtn.textContent = "Iniciar";
-
-    if (alarmAudio) {
-      alarmAudio.pause();
-      alarmAudio.currentTime = 0;
-      alarmAudio.loop = false;
-    }
   };
 
+  // Añadimos reset al contenedor de botones
   const parent = startBtn.parentNode;
   if (parent && !parent.querySelector(".timer-reset")) {
     resetBtn.classList.add("timer-reset");
@@ -3637,31 +3589,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
-
-const mesocycleSelect = document.getElementById('stats-mesocycle');
-
-const analysisDashboard = document.getElementById('analysisDashboard');
-const exerciseAnalysis = document.getElementById('exerciseAnalysis');
-
-function updateStatsSections() {
-  const selected = mesocycleSelect.value;
-
-  const isAll = selected === '';
-
-  // 🧠 ANÁLISIS / DASHBOARD
-  analysisDashboard.classList.toggle('hidden', !isAll);
-
-  // 🧠 SELECCIÓN DE MESOCICLO
-  exerciseAnalysis.classList.toggle('hidden', isAll);
-
-  // 🧠 GRÁFICA DE FUERZA
-  // 👉 NO SE TOCA: siempre visible
-}
-
-// Al cambiar el select
-mesocycleSelect.addEventListener('change', () => {
-  updateStatsSections();
-});
-
-// Estado inicial
-updateStatsSections();
