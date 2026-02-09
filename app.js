@@ -1,3 +1,4 @@
+
 console.log("🔥 app.js cargado  exitosamente");
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
@@ -23,7 +24,6 @@ let timerTime = 0;
 let timerRunning = false; 
 let miniChartInstance = null;
 let alarmAudio = null;
-let dashboardLoaded = false;
 
 /* ======================
    UI ELEMENTS
@@ -407,15 +407,6 @@ async function loadMesocycles() {
     }
   });
 }
-
-// ============================
-// DASHBOARD STATE (GLOBAL)
-// ============================
-let dashboardState = {
-  mode: "all",
-  mesocycleId: null,
-  records: []
-};
 
 async function loadMesocycleSelectors() {
   const a = document.getElementById('mesoA');
@@ -1411,6 +1402,7 @@ const RP_RANGES = {
 };
 
 async function loadDashboard(mesocycleId) {
+
   // ======================
   // 1️⃣ TEXTO FIJO DE ESTADOS (solo UI)
   // ======================
@@ -1460,6 +1452,13 @@ async function loadDashboard(mesocycleId) {
   const rawMuscle = calculateMuscleVolume(records);
   const muscleData = evaluateMuscleVolume(rawMuscle);
   renderMuscleTable(muscleData);
+
+  console.log(
+    muscleData.map(m => ({
+      muscle: m.muscle,
+      hasRP: !!RP_RANGES[m.muscle]
+    }))
+  );
 
   // ======================
   // 6️⃣ FATIGA POR MÚSCULO
@@ -1620,38 +1619,6 @@ function evaluateMuscleVolume(data) {
       status
     };
   });
-   document.getElementById('exportDashboard').onclick = () => {
-     exportDashboardToExcel({
-       volumeData,
-       muscleData,
-       fatigueAlerts: criticalDrops,
-       coach
-     });
-   };
-      // ======================
-   // 9️⃣ CACHE PARA EXPORTAR
-   // ======================
-   window.__dashboardCache = {
-     generatedAt: new Date().toISOString(),
-     mesocycleId: mesocycleId ?? null,
-     volumeByExercise: volumeData,
-     muscleVolume: muscleData,
-     fatigueAlerts: criticalDrops,
-     coach: coach,
-     globalStatus: status
-   };
-}
-
-function getStatsMode() {
-  const analysis = document.getElementById('analysisDashboard');
-  const exercise = document.getElementById('exerciseAnalysis');
-
-  if (!analysis || !exercise) return null;
-
-  if (!analysis.classList.contains('hidden')) return 'analysis';
-  if (!exercise.classList.contains('hidden')) return 'mesocycle';
-
-  return null;
 }
 
 async function fetchExerciseRecords(mesocycleId) {
@@ -1680,43 +1647,6 @@ async function fetchExerciseRecords(mesocycleId) {
     volume: r.weight * r.reps,
     muscle_group: r.exercises?.subgroup ?? 'Otros'
   }));
-}
-
-async function loadStatsForMesocycle(mesocycleId) {
-  const records = await fetchExerciseRecords(mesocycleId);
-
-  dashboardState = {
-    mode: "mesocycle",
-    mesocycleId,
-    records
-  };
-
-  updateKPIs(records);
-  loadDashboard(mesocycleId);
-}
-
-async function loadStatsGlobal() {
-  const records = await fetchExerciseRecords();
-
-  dashboardState = {
-    mode: "all",
-    mesocycleId: null,
-    records
-  };
-
-  updateKPIs(records);
-  loadDashboard(null);
-}
-
-function updateKPIs(records) {
-  document.getElementById('kpi-volume').textContent =
-    totalVolume(records);
-
-  document.getElementById('kpi-prs').textContent =
-    totalPRs(records);
-
-  document.getElementById('kpi-sessions').textContent =
-    totalSessions(records);
 }
 
 function renderStrengthTable(grouped) {
@@ -3257,11 +3187,7 @@ async function loadStatsMesocycles() {
   }
 
   const select = document.getElementById("stats-mesocycle");
-
-  // 🔵 OPCIÓN EXPLÍCITA
-  select.innerHTML = `
-    <option value="all">🟦 Ver todos los mesociclos</option>
-  `;
+  select.innerHTML = `<option value="">Selecciona mesociclo</option>`;
 
   data.forEach(m => {
     const opt = document.createElement("option");
@@ -3269,9 +3195,6 @@ async function loadStatsMesocycles() {
     opt.textContent = m.name;
     select.appendChild(opt);
   });
-
-  // 🔒 Estado inicial correcto
-  select.value = "all";
 }
 
 function updateCoachDashboard(exercises) {
@@ -3338,138 +3261,6 @@ function getCoachInsight(trend) {
   if (trend === "up") return "💪 Excelente progresión, sigue así";
   if (trend === "flat") return "⚠️ Considera subir carga o volumen";
   return "🛑 Posible fatiga, revisa descanso";
-}
-
-// =====================
-//EXPORTAR
-// =====================
-async function exportHistoryToExcel() {
-  const { data: records, error } = await supabase
-    .from('exercise_records')
-    .select(`
-      updated_at,
-      week_number,
-      exercise_name,
-      weight,
-      reps,
-      mesocycles ( name )
-    `)
-    .order('updated_at');
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  const rows = records.map(r => ({
-    Fecha: new Date(r.updated_at).toLocaleDateString(),
-    Semana: r.week_number,
-    Ejercicio: r.exercise_name,
-    Peso: r.weight,
-    Reps: r.reps,
-    Volumen: r.weight * r.reps,
-    Mesociclo: r.mesocycles?.name ?? '-'
-  }));
-
-  const wb = XLSX.utils.book_new();
-  const sheet = XLSX.utils.json_to_sheet(rows);
-
-  XLSX.utils.book_append_sheet(wb, sheet, 'Historial');
-  XLSX.writeFile(wb, 'historial_entrenamiento.xlsx');
-}
-
-function exportDashboardToExcel({
-  volumeData,
-  muscleData,
-  fatigueAlerts,
-  coach
-}) {
-  const wb = XLSX.utils.book_new();
-
-  // 1️⃣ Volumen por ejercicio
-  const volumeSheet = XLSX.utils.json_to_sheet(
-    volumeData.map(v => ({
-      Ejercicio: v.exercise,
-      Volumen: v.volume,
-      Sets: v.sets,
-      Tendencia: v.trend,
-      Cambio: `${v.percent}%`
-    }))
-  );
-  XLSX.utils.book_append_sheet(wb, volumeSheet, 'Volumen');
-
-  // 2️⃣ Volumen por músculo
-  const muscleSheet = XLSX.utils.json_to_sheet(
-    muscleData.map(m => ({
-      Músculo: m.muscle,
-      Sets: m.sets,
-      Estado: m.status,
-      'Rango RP': `${m.ranges?.MEV ?? '-'}–${m.ranges?.MRV ?? '-'}`
-    }))
-  );
-  XLSX.utils.book_append_sheet(wb, muscleSheet, 'Músculos');
-
-  // 3️⃣ Alertas de fatiga
-  const fatigueSheet = XLSX.utils.json_to_sheet(
-    fatigueAlerts.map(f => ({
-      Ejercicio: f.exercise,
-      Tendencia: f.trend,
-      Cambio: `${f.percent}%`
-    }))
-  );
-  XLSX.utils.book_append_sheet(wb, fatigueSheet, 'Alertas');
-
-  // 4️⃣ Coach
-  const coachSheet = XLSX.utils.json_to_sheet([{
-    Estado: coach.type,
-    Recomendación: coach.message
-  }]);
-  XLSX.utils.book_append_sheet(wb, coachSheet, 'Coach');
-
-  XLSX.writeFile(wb, 'dashboard_entrenamiento.xlsx');
-}
-
-function setupExportButtons() {
-  const exportDashboardBtn = document.getElementById('exportDashboard');
-  const exportHistoryBtn = document.getElementById('exportHistory');
-
-  if (exportDashboardBtn) {
-    exportDashboardBtn.addEventListener('click', () => {
-      const analysis = document.getElementById('analysisDashboard');
-
-      if (!analysis || analysis.classList.contains('hidden')) {
-        alert(
-          'El dashboard solo puede exportarse desde la vista de Análisis.\n\n' +
-          'Quita la selección de mesociclo para exportarlo.'
-        );
-        return;
-      }
-
-      if (!window.__dashboardCache) {
-        alert('El dashboard aún no se ha generado.');
-        return;
-      }
-
-      exportDashboardToExcel(window.__dashboardCache);
-    });
-  }
-
-  if (exportHistoryBtn) {
-    exportHistoryBtn.addEventListener('click', () => {
-      console.log('📋 Export history click');
-      exportHistoryToExcel();
-    });
-  }
-}
-
-function updateExportButtonsUI() {
-  const btn = document.getElementById('exportDashboard');
-  if (!btn) return;
-
-  const mode = getStatsMode();
-
-  btn.disabled = mode !== 'analysis';
-  btn.classList.toggle('disabled', mode !== 'analysis');
 }
 
 // =====================
@@ -3874,35 +3665,3 @@ mesocycleSelect.addEventListener('change', () => {
 
 // Estado inicial
 updateStatsSections();
-
-document.getElementById('exportHistory').onclick = exportHistoryToExcel;
-document.addEventListener('DOMContentLoaded', () => {
-  setupExportButtons();
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  const select = document.getElementById('stats-mesocycle');
-
-  if (!select) return;
-
-  select.addEventListener('change', e => {
-    const value = e.target.value;
-
-    if (value === 'all') {
-      loadStatsGlobal();
-    } else {
-      loadStatsForMesocycle(value);
-    }
-  });
-});
-
-document.getElementById("exportDashboard")
-  ?.addEventListener("click", () => {
-
-    if (!dashboardState.records.length) {
-      alert("El dashboard aún no se ha generado");
-      return;
-    }
-
-    exportDashboardToExcel(dashboardState);
-});
