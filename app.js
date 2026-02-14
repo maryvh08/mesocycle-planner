@@ -2485,6 +2485,29 @@ async function loadVolumeKPI(mesocycleId) {
   `;
 }
 
+async function loadPRsKPI(mesocycleId) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user || !mesocycleId) return; // 👈 aquí SÍ es obligatorio
+
+  const { data, error } = await supabase
+    .from("mesocycle_prs")
+    .select("pr_count")
+    .eq("user_id", user.id)
+    .eq("mesocycle_id", mesocycleId)
+    .single();
+
+  if (error) {
+    console.error("❌ Error PRs", error);
+    return;
+  }
+
+  document.getElementById("kpi-prs").innerHTML = `
+    <h4>PRs</h4>
+    <strong>${data?.pr_count || 0}</strong>
+    <span class="kpi-sub">Récords personales</span>
+  `;
+}
+
 async function loadSessionsKPI(mesocycleId) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
