@@ -3231,12 +3231,7 @@ async function loadStatsMesocycles() {
   }
 
   const select = document.getElementById("stats-mesocycle");
-
-  // 🔵 OPCIÓN EXPLÍCITA
-  select.innerHTML = `
-    <option value="all">🟦 Ver todos los mesociclos</option>
-  `;
-
+   
   data.forEach(m => {
     const opt = document.createElement("option");
     opt.value = m.id;
