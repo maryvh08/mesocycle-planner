@@ -1682,32 +1682,6 @@ async function fetchExerciseRecords(mesocycleId) {
   }));
 }
 
-async function loadStatsForMesocycle(mesocycleId) {
-  const records = await fetchExerciseRecords(mesocycleId);
-
-  dashboardState = {
-    mode: "mesocycle",
-    mesocycleId,
-    records
-  };
-
-  updateKPIs(records);
-  loadDashboard(mesocycleId);
-}
-
-async function loadStatsGlobal() {
-  const records = await fetchExerciseRecords();
-
-  dashboardState = {
-    mode: "all",
-    mesocycleId: null,
-    records
-  };
-
-  updateKPIs(records);
-  loadDashboard(null);
-}
-
 function updateKPIs(records) {
   document.getElementById('kpi-volume').textContent =
     totalVolume(records);
