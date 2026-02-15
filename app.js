@@ -1410,6 +1410,64 @@ const RP_RANGES = {
   triceps: { MEV: 6, MAV: 10, MRV: 16 }
 };
 
+async function loadDashboardAllMesocycles() {
+
+  // 🔒 Limpia KPIs (por seguridad)
+  hideKPIs();
+
+  // ======================
+  // DATA
+  // ======================
+  const records = await fetchExerciseRecords(); // 👈 sin mesociclo
+  if (!records.length) return;
+
+  // ======================
+  // DASHBOARD STATE
+  // ======================
+  dashboardState = {
+    mode: "all",
+    records
+  };
+
+  // ======================
+  // ANÁLISIS (solo lo que tiene sentido)
+  // ======================
+  const volumeData = calculateVolumeTrend(records);
+  renderVolumeTable(volumeData);
+
+  const rawMuscle = calculateMuscleVolume(records);
+  const muscleData = evaluateMuscleVolume(rawMuscle);
+  renderMuscleTable(muscleData);
+
+  // ======================
+  // ESTADO GLOBAL (neutral)
+  // ======================
+  document.getElementById("globalProgressText").textContent =
+    "Análisis global de todos los mesociclos";
+
+  ["statusGreen", "statusYellow", "statusRed"].forEach(id => {
+    document.getElementById(id)?.classList.remove("active");
+  });
+
+  // ======================
+  // ALERTAS (válidas globalmente)
+  // ======================
+  const criticalDrops = volumeData.filter(v =>
+    v.trend === "↓" && Number(v.percent) < -5
+  );
+
+  renderFatigueAlerts(criticalDrops);
+
+  // ======================
+  // COACH (informativo)
+  // ======================
+  updateCoachCard({
+    type: "info",
+    message:
+      "Vista agregada de todos los mesociclos. Selecciona uno para análisis detallado."
+  });
+}
+
 async function loadDashboard(mesocycleId) {
   // ======================
   // 1️⃣ TEXTO FIJO DE ESTADOS (solo UI)
