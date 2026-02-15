@@ -3605,59 +3605,51 @@ function buildDashboardSheet(records, title) {
   return XLSX.utils.aoa_to_sheet(rows);
 }
 
-
 async function exportDashboardToPDF(element) {
-  if (!element) {
-    console.error("No se recibió elemento para exportar");
-    return;
-  }
 
-  if (typeof html2canvas === "undefined") {
-    console.error("html2canvas no está cargado");
-    return;
-  }
+  if (!element) return;
 
-  if (!window.jspdf) {
-    console.error("jsPDF no está cargado");
-    return;
-  }
+  const originalDisplay = element.style.display;
 
-  try {
-    const { jsPDF } = window.jspdf;
+  // 🔓 Forzar visible temporalmente
+  element.style.display = "block";
 
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true
-    });
+  await new Promise(resolve => setTimeout(resolve, 100));
 
-    const imgData = canvas.toDataURL("image/png");
+  const { jsPDF } = window.jspdf;
 
-    const pdf = new jsPDF("p", "mm", "a4");
+  const canvas = await html2canvas(element, {
+    scale: 2,
+    useCORS: true
+  });
 
-    const pageWidth = 210; // A4 mm
-    const pageHeight = 297;
+  const imgData = canvas.toDataURL("image/png");
 
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  const pdf = new jsPDF("p", "mm", "a4");
 
-    let heightLeft = imgHeight;
-    let position = 0;
+  const pageWidth = 210;
+  const pageHeight = 297;
 
+  const imgWidth = pageWidth;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+  let heightLeft = imgHeight;
+  let position = 0;
+
+  pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+  heightLeft -= pageHeight;
+
+  while (heightLeft > 0) {
+    position = heightLeft - imgHeight;
+    pdf.addPage();
     pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
     heightLeft -= pageHeight;
-
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-
-    pdf.save("Dashboard.pdf");
-
-  } catch (error) {
-    console.error("Error generando PDF:", error);
   }
+
+  pdf.save("Dashboard.pdf");
+
+  // 🔁 Restaurar estado original
+  element.style.display = originalDisplay;
 }
 
 function updateExportButtonsUI() {
