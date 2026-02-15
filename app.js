@@ -1682,6 +1682,14 @@ async function fetchExerciseRecords(mesocycleId) {
   }));
 }
 
+function hideKPIs() {
+  document.querySelector(".kpi-grid")?.classList.add("hidden");
+}
+
+function showKPIs() {
+  document.querySelector(".kpi-grid")?.classList.remove("hidden");
+}
+
 function updateKPIs(records) {
   document.getElementById('kpi-volume').textContent =
     totalVolume(records);
@@ -3849,13 +3857,44 @@ document.addEventListener('DOMContentLoaded', () => {
   setupExportButtons();
 });
 
-document.getElementById("exportDashboard")
-  ?.addEventListener("click", () => {
+document
+  .getElementById("exportDashboard")
+  .addEventListener("click", () => {
 
-    if (!dashboardState.records.length) {
-      alert("El dashboard aún no se ha generado");
+    if (!dashboardState.records?.length) {
+      alert("El dashboard aún no se ha generado.");
       return;
     }
 
-    exportDashboardToExcel(dashboardState);
-});
+    if (dashboardState.mode === "all") {
+      exportDashboardAllMesocycles(dashboardState.records);
+    } else {
+      exportDashboardSingleMesocycle(
+        dashboardState.records,
+        dashboardState.mesocycleId
+      );
+    }
+  });
+
+
+document
+  .getElementById("stats-mesocycle")
+  .addEventListener("change", async e => {
+    const mesocycleId = e.target.value;
+
+    if (!mesocycleId) {
+      // 🔵 TODOS LOS MESOCICLOS
+      hideKPIs();
+
+      await loadDashboardAllMesocycles(); // análisis agregado
+      dashboardState.mode = "all";
+
+    } else {
+      // 🟢 UN MESOCICLO
+      showKPIs();
+
+      await loadDashboard(mesocycleId);
+      dashboardState.mode = "mesocycle";
+      dashboardState.mesocycleId = mesocycleId;
+    }
+  });
