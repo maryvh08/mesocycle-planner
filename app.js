@@ -4060,19 +4060,18 @@ mesocycleSelect.addEventListener('change', () => {
 // Estado inicial
 updateStatsSections();
 
-document.getElementById('exportHistory').onclick = exportHistoryToExcel;
 document.addEventListener('DOMContentLoaded', () => {
+
+  document.getElementById('exportHistory')
+    ?.addEventListener('click', exportHistoryToExcel);
+
+  document.getElementById('exportDashboard')
+    ?.addEventListener('click', exportFullDashboardExcel);
+
+  document.getElementById('exportDashboardpdf')
+    ?.addEventListener('click', exportDashboardToPDF);
+
   setupExportButtons();
-});
-
-document.getElementById("exportDashboard").onclick = () => {
-document.addEventListener('DOMContentLoaded', () => {
-  exportFullDashboardExcel();
-});
-
-document.getElementById("exportDashboardpdf").onclick = () => {
-document.addEventListener('DOMContentLoaded', () => {
-  exportDashboardToPDF();
 });
 
 document
