@@ -1712,28 +1712,32 @@ function getStatsMode() {
   return null;
 }
 
-async function fetchExerciseRecords(mesocycleId = null) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
-
-  let query = supabase
-    .from("exercise_records")
-    .select("*")
-    .eq("user_id", user.id);
-
-  // 👇 SOLO filtrar si hay mesociclo
-  if (mesocycleId) {
-    query = query.eq("mesocycle_id", mesocycleId);
-  }
-
-  const { data, error } = await query;
+async function fetchExerciseRecords(mesocycleId) {
+  const { data, error } = await supabase
+    .from('exercise_records')
+    .select(`
+      exercise_name,
+      week_number,
+      weight,
+      reps,
+      exercises (
+        subgroup
+      )
+    `)
+    .eq('mesocycle_id', mesocycleId)
+    .order('week_number');
 
   if (error) {
-    console.error("❌ fetchExerciseRecords", error);
+    console.error(error);
     return [];
   }
 
-  return data;
+  return data.map(r => ({
+    exercise: r.exercise_name,
+    week: r.week_number,
+    volume: r.weight * r.reps,
+    muscle_group: r.exercises?.subgroup ?? 'Otros'
+  }));
 }
 
 function hideKPIs() {
