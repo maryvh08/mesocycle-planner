@@ -4067,13 +4067,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 document
 document.getElementById("exportDashboard").onclick = () => {
+document.addEventListener('DOMContentLoaded', () => {
   exportFullDashboardExcel();
-};
+});
 
-document
 document.getElementById("exportDashboardpdf").onclick = () => {
+document.addEventListener('DOMContentLoaded', () => {
   exportDashboardToPDF();
-};
+});
 
 document
   .getElementById("stats-mesocycle")
