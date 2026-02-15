@@ -3571,12 +3571,79 @@ function setupExportButtons() {
     });
   }
 
+   if (exportDashboardPDFBtn) {
+    exportDashboardPDFBtn.addEventListener('click', async () => {
+      const analysis = document.getElementById('analysisDashboard');
+   
+      if (!analysis || analysis.classList.contains('hidden')) {
+        alert(
+          'El PDF solo puede exportarse desde la vista de Análisis visible.'
+        );
+        return;
+      }
+   
+      await exportDashboardToPDF(analysis);
+    });
+   }
+
   if (exportHistoryBtn) {
     exportHistoryBtn.addEventListener('click', () => {
       console.log('📋 Export history click');
       exportHistoryToExcel();
     });
   }
+}
+
+async function exportDashboardToPDF(element) {
+  const { jsPDF } = window.jspdf;
+
+  // Captura el dashboard visible
+  const canvas = await html2canvas(element, {
+    scale: 2,
+    useCORS: true,
+    scrollY: -window.scrollY
+  });
+
+  const imgData = canvas.toDataURL('image/png');
+
+  const pdf = new jsPDF({
+    orientation: 'portrait',
+    unit: 'px',
+    format: 'a4'
+  });
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+
+  const imgWidth = pageWidth;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+  let position = 0;
+
+  // Paginación automática
+  while (position < imgHeight) {
+    pdf.addImage(
+      imgData,
+      'PNG',
+      0,
+      -position,
+      imgWidth,
+      imgHeight
+    );
+
+    position += pageHeight;
+
+    if (position < imgHeight) {
+      pdf.addPage();
+    }
+  }
+
+  const fileName =
+    window.__dashboardCache?.scope === 'all'
+      ? 'Dashboard_Todos_los_Mesociclos.pdf'
+      : 'Dashboard_Mesociclo.pdf';
+
+  pdf.save(fileName);
 }
 
 function updateExportButtonsUI() {
