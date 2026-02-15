@@ -3494,69 +3494,40 @@ function sanitizeSheetName(name) {
   return name.replace(/[\\/?*[\]:]/g, "").slice(0, 31);
 }
 
-async function exportFullDashboardExcel() {
-  const wb = XLSX.utils.book_new();
+function setupExportButtons() {
+  const exportDashboardBtn = document.getElementById('exportDashboard');
+  const exportHistoryBtn = document.getElementById('exportHistory');
+  const exportDashboardPDFBtn = document.getElementById('exportDashboardpdf');
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+  if (exportDashboardBtn) {
+    exportDashboardBtn.addEventListener('click', () => {
+      const analysis = document.getElementById('analysisDashboard');
 
-  // =========================
-  // 1️⃣ TODOS LOS MESOCICLOS
-  // =========================
-  const allRecords = await fetchExerciseRecords();
-  const allSheet = buildDashboardSheet(allRecords, "Todos los mesociclos");
-  XLSX.utils.book_append_sheet(wb, allSheet, "Resumen General");
-
-  // =========================
-  // 2️⃣ MESOCICLOS INDIVIDUALES
-  // =========================
-  const { data: mesocycles } = await supabase
-    .from("mesocycles")
-    .select("id, name")
-    .eq("user_id", user.id);
-
-  for (const m of mesocycles) {
-    const records = await fetchExerciseRecords(m.id);
-    if (!records.length) continue;
-
-    const sheet = buildDashboardSheet(records, m.name);
-    XLSX.utils.book_append_sheet(
-      wb,
-      sheet,
-      sanitizeSheetName(m.name)
-    );
+      exportFullDashboardExcel(window.__dashboardCache);
+    });
   }
 
-  // =========================
-  // 3️⃣ DESCARGA
-  // =========================
-  XLSX.writeFile(wb, "Dashboard_Mesociclos.xlsx");
-}
+   if (exportDashboardPDFBtn) {
+    exportDashboardPDFBtn.addEventListener('click', async () => {
+      const analysis = document.getElementById('analysisDashboard');
+   
+      if (!analysis || analysis.classList.contains('hidden')) {
+        alert(
+          'El PDF solo puede exportarse desde la vista de Análisis visible.'
+        );
+        return;
+      }
+   
+      await exportDashboardToPDF(analysis);
+    });
+   }
 
-function buildDashboardSheet(records, title) {
-  const volume = calculateVolumeTrend(records);
-  const muscle = evaluateMuscleVolume(
-    calculateMuscleVolume(records)
-  );
-
-  const rows = [
-    [title],
-    [],
-    ["VOLUMEN POR EJERCICIO"],
-    ["Ejercicio", "Tendencia", "%"],
-    ...volume.map(v => [v.exercise, v.trend, v.percent]),
-    [],
-    ["VOLUMEN POR GRUPO MUSCULAR"],
-    ["Músculo", "Sets", "Estado", "RP"],
-    ...muscle.map(m => [
-      m.muscle,
-      m.sets,
-      m.status,
-      `${m.ranges?.MEV ?? "-"}–${m.ranges?.MRV ?? "-"}`
-    ])
-  ];
-
-  return XLSX.utils.aoa_to_sheet(rows);
+  if (exportHistoryBtn) {
+    exportHistoryBtn.addEventListener('click', () => {
+      console.log('📋 Export history click');
+      exportHistoryToExcel();
+    });
+  }
 }
 
 async function exportFullDashboardExcel() {
@@ -3606,6 +3577,33 @@ async function exportFullDashboardExcel() {
 
   XLSX.writeFile(wb, "Dashboard_Mesociclos.xlsx");
 }
+
+function buildDashboardSheet(records, title) {
+  const volume = calculateVolumeTrend(records);
+  const muscle = evaluateMuscleVolume(
+    calculateMuscleVolume(records)
+  );
+
+  const rows = [
+    [title],
+    [],
+    ["VOLUMEN POR EJERCICIO"],
+    ["Ejercicio", "Tendencia", "%"],
+    ...volume.map(v => [v.exercise, v.trend, v.percent]),
+    [],
+    ["VOLUMEN POR GRUPO MUSCULAR"],
+    ["Músculo", "Sets", "Estado", "RP"],
+    ...muscle.map(m => [
+      m.muscle,
+      m.sets,
+      m.status,
+      `${m.ranges?.MEV ?? "-"}–${m.ranges?.MRV ?? "-"}`
+    ])
+  ];
+
+  return XLSX.utils.aoa_to_sheet(rows);
+}
+
 
 async function exportDashboardToPDF(element) {
   const { jsPDF } = window.jspdf;
