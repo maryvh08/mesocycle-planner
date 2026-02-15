@@ -4065,7 +4065,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setupExportButtons();
 });
 
-document
 document.getElementById("exportDashboard").onclick = () => {
 document.addEventListener('DOMContentLoaded', () => {
   exportFullDashboardExcel();
