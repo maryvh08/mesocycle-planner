@@ -4082,6 +4082,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+document.getElementById("exportDashboardPDF")
+
 document
   .getElementById("stats-mesocycle")
   .addEventListener("change", async e => {
