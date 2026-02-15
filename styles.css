@@ -1915,6 +1915,11 @@ h3 {
   overflow: hidden;
 }
 
+.pdf-mode {
+  background: #111 !important;
+  color: #fff !important;
+}
+
 .volume-table th,
 .volume-table td {
   padding: 0.9rem 1rem;
