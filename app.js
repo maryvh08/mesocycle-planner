@@ -4066,7 +4066,7 @@ mesocycleSelect.addEventListener('change', () => {
 updateStatsSections();
 
 document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("exportDashboardpdf");
+  const btn = document.getElementById("exportDashboardPDF");
 
   if (btn) {
     btn.addEventListener("click", () => {
