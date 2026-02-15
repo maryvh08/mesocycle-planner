@@ -1412,60 +1412,125 @@ const RP_RANGES = {
 
 async function loadDashboardAllMesocycles() {
 
-  // 🔒 Limpia KPIs (por seguridad)
-  hideKPIs();
+  // ======================
+  // 1️⃣ TEXTO FIJO DE ESTADOS
+  // ======================
+  const statusGreen = document.getElementById('statusGreen');
+  const statusYellow = document.getElementById('statusYellow');
+  const statusRed = document.getElementById('statusRed');
+
+  statusGreen.textContent = '🟢 Progreso sólido';
+  statusYellow.textContent = '🟡 Progreso irregular';
+  statusRed.textContent = '🔴 Riesgo de estancamiento';
 
   // ======================
-  // DATA
+  // 2️⃣ DATA (SIN FILTRO)
   // ======================
-  const records = await fetchExerciseRecords(); // 👈 sin mesociclo
+  const records = await fetchExerciseRecords();
   if (!records.length) return;
 
-  // ======================
-  // DASHBOARD STATE
-  // ======================
   dashboardState = {
     mode: "all",
     records
   };
 
   // ======================
-  // ANÁLISIS (solo lo que tiene sentido)
+  // 3️⃣ VOLUMEN
   // ======================
   const volumeData = calculateVolumeTrend(records);
   renderVolumeTable(volumeData);
 
+  // ======================
+  // 4️⃣ ESTADO GLOBAL REAL
+  // ======================
+  const status = overallProgress(volumeData);
+
+  document.getElementById('globalProgressText').textContent =
+    status === 'green'
+      ? 'Progreso global positivo'
+      : status === 'yellow'
+      ? 'Progreso irregular'
+      : 'Riesgo de estancamiento';
+
+  ['statusGreen', 'statusYellow', 'statusRed'].forEach(id => {
+    document.getElementById(id)?.classList.remove('active');
+  });
+
+  if (status === 'green') statusGreen?.classList.add('active');
+  if (status === 'yellow') statusYellow?.classList.add('active');
+  if (status === 'red') statusRed?.classList.add('active');
+
+  // ======================
+  // 5️⃣ MÚSCULOS
+  // ======================
   const rawMuscle = calculateMuscleVolume(records);
   const muscleData = evaluateMuscleVolume(rawMuscle);
   renderMuscleTable(muscleData);
 
   // ======================
-  // ESTADO GLOBAL (neutral)
+  // 6️⃣ FATIGA (GLOBAL)
   // ======================
-  document.getElementById("globalProgressText").textContent =
-    "Análisis global de todos los mesociclos";
+  const fatigueByMuscle = muscleData.map(m => {
+    const ranges = RP_RANGES[m.muscle];
 
-  ["statusGreen", "statusYellow", "statusRed"].forEach(id => {
-    document.getElementById(id)?.classList.remove("active");
+    const score = evaluateMuscleFatigue({
+      muscle: m.muscle,
+      weekly: m,
+      ranges,
+      prevScore: m.prev_fatigue ?? 0,
+      isDeload: false
+    });
+
+    return {
+      ...m,
+      fatigueScore: score,
+      fatigueStatus: fatigueStatus(score)
+    };
   });
 
   // ======================
-  // ALERTAS (válidas globalmente)
+  // 7️⃣ ALERTAS DE CAÍDA DE VOLUMEN
   // ======================
   const criticalDrops = volumeData.filter(v =>
-    v.trend === "↓" && Number(v.percent) < -5
+    v.trend === '↓' && Number(v.percent) < -5
   );
 
   renderFatigueAlerts(criticalDrops);
 
   // ======================
-  // COACH (informativo)
+  // 8️⃣ COACH GLOBAL (REAL)
   // ======================
-  updateCoachCard({
-    type: "info",
-    message:
-      "Vista agregada de todos los mesociclos. Selecciona uno para análisis detallado."
-  });
+  const fatigued = fatigueByMuscle.filter(m =>
+    m.fatigueStatus === 'high' || m.fatigueStatus === 'over'
+  );
+
+  const weak = fatigueByMuscle.filter(m => m.status === 'below');
+
+  let coach;
+
+  if (fatigued.length >= 2) {
+    coach = {
+      type: 'danger',
+      message: 'Fatiga acumulada detectada en múltiples mesociclos. Deload estratégico recomendado.'
+    };
+  } else if (weak.length >= 2) {
+    coach = {
+      type: 'warning',
+      message: 'Algunos músculos consistentemente subestimulados. Ajusta volumen estructural.'
+    };
+  } else if (status === 'green') {
+    coach = {
+      type: 'success',
+      message: 'Progresión sólida a lo largo de los mesociclos. Mantén estrategia actual.'
+    };
+  } else {
+    coach = {
+      type: 'info',
+      message: 'Progreso mixto entre mesociclos. Revisa distribución y recuperación.'
+    };
+  }
+
+  updateCoachCard(coach);
 }
 
 async function loadDashboard(mesocycleId) {
