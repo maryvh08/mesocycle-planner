@@ -3490,23 +3490,45 @@ async function exportHistoryToExcel() {
   XLSX.writeFile(wb, 'historial_entrenamiento.xlsx');
 }
 
-async function exportFullDashboardExcel(cache) {
-  if (!cache) {
-    alert('No hay datos para exportar.');
-    return;
-  }
-
+async function exportFullDashboardExcel() {
   const wb = XLSX.utils.book_new();
 
-  const sheet = buildDashboardSheet(
-    cache.records,
-    'Todos los mesociclos'
-  );
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
 
-  XLSX.utils.book_append_sheet(wb, sheet, 'Resumen General');
+  // =========================
+  // 1️⃣ TODOS LOS MESOCICLOS
+  // =========================
+  const allRecords = await fetchExerciseRecords();
+  const allSheet = buildDashboardSheet(allRecords, "Todos los mesociclos");
+  XLSX.utils.book_append_sheet(wb, allSheet, "Resumen General");
 
-  XLSX.writeFile(wb, 'Dashboard_Mesociclos.xlsx');
+  // =========================
+  // 2️⃣ MESOCICLOS INDIVIDUALES
+  // =========================
+  const { data: mesocycles } = await supabase
+    .from("mesocycles")
+    .select("id, name")
+    .eq("user_id", user.id);
+
+  for (const m of mesocycles) {
+    const records = await fetchExerciseRecords(m.id);
+    if (!records.length) continue;
+
+    const sheet = buildDashboardSheet(records, m.name);
+    XLSX.utils.book_append_sheet(
+      wb,
+      sheet,
+      sanitizeSheetName(m.name)
+    );
+  }
+
+  // =========================
+  // 3️⃣ DESCARGA
+  // =========================
+  XLSX.writeFile(wb, "Dashboard_Mesociclos.xlsx");
 }
+
 
 function setupExportButtons() {
   const exportDashboardBtn = document.getElementById('exportDashboard');
