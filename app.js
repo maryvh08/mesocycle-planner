@@ -3508,19 +3508,20 @@ function setupExportButtons() {
   }
 
    if (exportDashboardPDFBtn) {
-    exportDashboardPDFBtn.addEventListener('click', async () => {
-      const analysis = document.getElementById('analysisDashboard');
+     exportDashboardPDFBtn.addEventListener('click', async () => {
+       console.log("🟢 Click PDF detectado");
    
-      if (!analysis || analysis.classList.contains('hidden')) {
-        alert(
-          'El PDF solo puede exportarse desde la vista de Análisis visible.'
-        );
-        return;
-      }
+       const analysis = document.getElementById('analysisDashboard');
    
-      await exportDashboardToPDF(analysis);
-    });
+       if (!analysis) {
+         console.log("❌ analysisDashboard no encontrado");
+         return;
+       }
+   
+       await exportDashboardToPDF(analysis);
+     });
    }
+
 
   if (exportHistoryBtn) {
     exportHistoryBtn.addEventListener('click', () => {
@@ -3606,55 +3607,57 @@ function buildDashboardSheet(records, title) {
 
 
 async function exportDashboardToPDF(element) {
-  const { jsPDF } = window.jspdf;
+  try {
+    const { jsPDF } = window.jspdf;
 
-  // Captura el dashboard visible
-  const canvas = await html2canvas(element, {
-    scale: 2,
-    useCORS: true,
-    scrollY: -window.scrollY
-  });
+    console.log("🟢 Iniciando captura...");
 
-  const imgData = canvas.toDataURL('image/png');
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      scrollY: -window.scrollY
+    });
 
-  const pdf = new jsPDF({
-    orientation: 'portrait',
-    unit: 'px',
-    format: 'a4'
-  });
+    console.log("🟢 Canvas generado");
 
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgData = canvas.toDataURL('image/png');
 
-  const imgWidth = pageWidth;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'px',
+      format: 'a4'
+    });
 
-  let position = 0;
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
 
-  // Paginación automática
-  while (position < imgHeight) {
-    pdf.addImage(
-      imgData,
-      'PNG',
-      0,
-      -position,
-      imgWidth,
-      imgHeight
-    );
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    position += pageHeight;
+    let position = 0;
 
-    if (position < imgHeight) {
-      pdf.addPage();
+    while (position < imgHeight) {
+      pdf.addImage(
+        imgData,
+        'PNG',
+        0,
+        -position,
+        imgWidth,
+        imgHeight
+      );
+
+      position += pageHeight;
+
+      if (position < imgHeight) pdf.addPage();
     }
+
+    console.log("🟢 Guardando PDF");
+
+    pdf.save("Dashboard.pdf");
+
+  } catch (err) {
+    console.error("❌ Error exportando PDF:", err);
   }
-
-  const fileName =
-    window.__dashboardCache?.scope === 'all'
-      ? 'Dashboard_Todos_los_Mesociclos.pdf'
-      : 'Dashboard_Mesociclo.pdf';
-
-  pdf.save(fileName);
 }
 
 function updateExportButtonsUI() {
