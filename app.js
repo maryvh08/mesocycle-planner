@@ -4132,7 +4132,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.getElementById("exportDashboardPDF")
 
-statsChart.toBase64Image()
+const canvases = element.querySelectorAll("canvas");
+const replacements = [];
+
+canvases.forEach(canvas => {
+  const img = document.createElement("img");
+
+  img.src = canvas.toDataURL("image/png", 1.0);
+
+  img.style.width = canvas.offsetWidth + "px";
+  img.style.height = canvas.offsetHeight + "px";
+
+  canvas.style.display = "none";
+  canvas.parentNode.insertBefore(img, canvas);
+
+  replacements.push({ canvas, img });
+});
+
 
 document
   .getElementById("stats-mesocycle")
