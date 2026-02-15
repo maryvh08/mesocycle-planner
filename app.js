@@ -3607,56 +3607,56 @@ function buildDashboardSheet(records, title) {
 
 
 async function exportDashboardToPDF(element) {
+  if (!element) {
+    console.error("No se recibió elemento para exportar");
+    return;
+  }
+
+  if (typeof html2canvas === "undefined") {
+    console.error("html2canvas no está cargado");
+    return;
+  }
+
+  if (!window.jspdf) {
+    console.error("jsPDF no está cargado");
+    return;
+  }
+
   try {
     const { jsPDF } = window.jspdf;
 
-    console.log("🟢 Iniciando captura...");
-
     const canvas = await html2canvas(element, {
       scale: 2,
-      useCORS: true,
-      scrollY: -window.scrollY
+      useCORS: true
     });
 
-    console.log("🟢 Canvas generado");
+    const imgData = canvas.toDataURL("image/png");
 
-    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF("p", "mm", "a4");
 
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'px',
-      format: 'a4'
-    });
-
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
+    const pageWidth = 210; // A4 mm
+    const pageHeight = 297;
 
     const imgWidth = pageWidth;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
+    let heightLeft = imgHeight;
     let position = 0;
 
-    while (position < imgHeight) {
-      pdf.addImage(
-        imgData,
-        'PNG',
-        0,
-        -position,
-        imgWidth,
-        imgHeight
-      );
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
 
-      position += pageHeight;
-
-      if (position < imgHeight) pdf.addPage();
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
     }
-
-    console.log("🟢 Guardando PDF");
 
     pdf.save("Dashboard.pdf");
 
-  } catch (err) {
-    console.error("❌ Error exportando PDF:", err);
+  } catch (error) {
+    console.error("Error generando PDF:", error);
   }
 }
 
@@ -4073,18 +4073,21 @@ mesocycleSelect.addEventListener('change', () => {
 // Estado inicial
 updateStatsSections();
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("exportDashboardpdf");
 
-  document.getElementById('exportHistory')
-    ?.addEventListener('click', exportHistoryToExcel);
+  if (btn) {
+    btn.addEventListener("click", () => {
+      const analysis = document.getElementById("analysisDashboard");
 
-  document.getElementById('exportDashboard')
-    ?.addEventListener('click', exportFullDashboardExcel);
+      if (!analysis) {
+        console.error("No existe #analysisDashboard");
+        return;
+      }
 
-  document.getElementById('exportDashboardpdf')
-    ?.addEventListener('click', exportDashboardToPDF);
-
-  setupExportButtons();
+      exportDashboardToPDF(analysis);
+    });
+  }
 });
 
 document
