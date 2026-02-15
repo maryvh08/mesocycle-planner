@@ -3529,6 +3529,31 @@ async function exportFullDashboardExcel() {
   XLSX.writeFile(wb, "Dashboard_Mesociclos.xlsx");
 }
 
+function buildDashboardSheet(records, title) {
+  const volume = calculateVolumeTrend(records);
+  const muscle = evaluateMuscleVolume(
+    calculateMuscleVolume(records)
+  );
+
+  const rows = [
+    [title],
+    [],
+    ["VOLUMEN POR EJERCICIO"],
+    ["Ejercicio", "Tendencia", "%"],
+    ...volume.map(v => [v.exercise, v.trend, v.percent]),
+    [],
+    ["VOLUMEN POR GRUPO MUSCULAR"],
+    ["Músculo", "Sets", "Estado", "RP"],
+    ...muscle.map(m => [
+      m.muscle,
+      m.sets,
+      m.status,
+      `${m.ranges?.MEV ?? "-"}–${m.ranges?.MRV ?? "-"}`
+    ])
+  ];
+
+  return XLSX.utils.aoa_to_sheet(rows);
+}
 
 function setupExportButtons() {
   const exportDashboardBtn = document.getElementById('exportDashboard');
