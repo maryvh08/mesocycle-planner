@@ -3609,21 +3609,35 @@ async function exportDashboardToPDF(element) {
 
   if (!element) return;
 
-  const originalBackground = element.style.backgroundColor;
-  const originalColor = element.style.color;
+  const { jsPDF } = window.jspdf;
 
-  // 🔥 Forzar fondo oscuro y texto claro temporalmente
-  element.style.backgroundColor = "#111";
-  element.style.color = "#ffffff";
+  // =========================
+  // 1️⃣ Convertir charts a imágenes
+  // =========================
+  const canvases = element.querySelectorAll("canvas");
+  const replacements = [];
+
+  canvases.forEach(canvas => {
+    const img = document.createElement("img");
+    img.src = canvas.toDataURL("image/png");
+    img.style.width = canvas.offsetWidth + "px";
+    img.style.height = canvas.offsetHeight + "px";
+
+    canvas.style.display = "none";
+    canvas.parentNode.insertBefore(img, canvas);
+
+    replacements.push({ canvas, img });
+  });
 
   await new Promise(resolve => setTimeout(resolve, 100));
 
-  const { jsPDF } = window.jspdf;
-
+  // =========================
+  // 2️⃣ Capturar dashboard
+  // =========================
   const canvas = await html2canvas(element, {
     scale: 2,
     useCORS: true,
-    backgroundColor: "#111" // 👈 clave
+    backgroundColor: "#111"
   });
 
   const imgData = canvas.toDataURL("image/png");
@@ -3651,9 +3665,13 @@ async function exportDashboardToPDF(element) {
 
   pdf.save("Dashboard.pdf");
 
-  // 🔁 Restaurar estilos originales
-  element.style.backgroundColor = originalBackground;
-  element.style.color = originalColor;
+  // =========================
+  // 3️⃣ Restaurar canvas originales
+  // =========================
+  replacements.forEach(({ canvas, img }) => {
+    canvas.style.display = "";
+    img.remove();
+  });
 }
 
 function updateExportButtonsUI() {
