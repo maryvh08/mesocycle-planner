@@ -3849,22 +3849,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setupExportButtons();
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-  const select = document.getElementById('stats-mesocycle');
-
-  if (!select) return;
-
-  select.addEventListener('change', e => {
-    const value = e.target.value;
-
-    if (value === 'all') {
-      loadStatsGlobal();
-    } else {
-      loadStatsForMesocycle(value);
-    }
-  });
-});
-
 document.getElementById("exportDashboard")
   ?.addEventListener("click", () => {
 
