@@ -3663,7 +3663,7 @@ async function exportDashboardToPDF(element) {
     heightLeft -= pageHeight;
   }
 
-  pdf.save("Dashboard.pdf");
+  pdf.save("Dashboard_mesocycles.pdf");
 
   // =========================
   // 3️⃣ Restaurar canvas originales
