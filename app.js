@@ -4132,7 +4132,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.getElementById("exportDashboardPDF")
 
-chartInstance.toBase64Image()
+strengthChart.toBase64Image()
 
 document
   .getElementById("stats-mesocycle")
