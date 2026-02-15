@@ -3609,10 +3609,12 @@ async function exportDashboardToPDF(element) {
 
   if (!element) return;
 
-  const originalDisplay = element.style.display;
+  const originalBackground = element.style.backgroundColor;
+  const originalColor = element.style.color;
 
-  // 🔓 Forzar visible temporalmente
-  element.style.display = "block";
+  // 🔥 Forzar fondo oscuro y texto claro temporalmente
+  element.style.backgroundColor = "#111";
+  element.style.color = "#ffffff";
 
   await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -3620,7 +3622,8 @@ async function exportDashboardToPDF(element) {
 
   const canvas = await html2canvas(element, {
     scale: 2,
-    useCORS: true
+    useCORS: true,
+    backgroundColor: "#111" // 👈 clave
   });
 
   const imgData = canvas.toDataURL("image/png");
@@ -3648,8 +3651,9 @@ async function exportDashboardToPDF(element) {
 
   pdf.save("Dashboard.pdf");
 
-  // 🔁 Restaurar estado original
-  element.style.display = originalDisplay;
+  // 🔁 Restaurar estilos originales
+  element.style.backgroundColor = originalBackground;
+  element.style.color = originalColor;
 }
 
 function updateExportButtonsUI() {
