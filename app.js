@@ -24,6 +24,7 @@ let timerRunning = false;
 let miniChartInstance = null;
 let alarmAudio = null;
 let dashboardLoaded = false;
+window.__dashboardCache = null;
 
 /* ======================
    UI ELEMENTS
@@ -3489,75 +3490,23 @@ async function exportHistoryToExcel() {
   XLSX.writeFile(wb, 'historial_entrenamiento.xlsx');
 }
 
-async function exportFullDashboardExcel() {
-  const wb = XLSX.utils.book_new();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-
-  // =========================
-  // 1️⃣ TODOS LOS MESOCICLOS
-  // =========================
-  const allRecords = await fetchExerciseRecords();
-  const allSheet = buildDashboardSheet(allRecords, "Todos los mesociclos");
-  XLSX.utils.book_append_sheet(wb, allSheet, "Resumen General");
-
-  // =========================
-  // 2️⃣ MESOCICLOS INDIVIDUALES
-  // =========================
-  const { data: mesocycles } = await supabase
-    .from("mesocycles")
-    .select("id, name")
-    .eq("user_id", user.id);
-
-  for (const m of mesocycles) {
-    const records = await fetchExerciseRecords(m.id);
-    if (!records.length) continue;
-
-    const sheet = buildDashboardSheet(records, m.name);
-    XLSX.utils.book_append_sheet(
-      wb,
-      sheet,
-      sanitizeSheetName(m.name)
-    );
+async function exportFullDashboardExcel(cache) {
+  if (!cache) {
+    alert('No hay datos para exportar.');
+    return;
   }
 
-  // =========================
-  // 3️⃣ DESCARGA
-  // =========================
-  XLSX.writeFile(wb, "Dashboard_Mesociclos.xlsx");
-}
+  const wb = XLSX.utils.book_new();
 
-function sanitizeSheetName(name) {
-  return name.replace(/[\\/?*[\]:]/g, "").slice(0, 31);
-}
-
-function buildDashboardSheet(records, title) {
-  const volume = calculateVolumeTrend(records);
-  const muscle = evaluateMuscleVolume(
-    calculateMuscleVolume(records)
+  const sheet = buildDashboardSheet(
+    cache.records,
+    'Todos los mesociclos'
   );
 
-  const rows = [
-    [title],
-    [],
-    ["VOLUMEN POR EJERCICIO"],
-    ["Ejercicio", "Tendencia", "%"],
-    ...volume.map(v => [v.exercise, v.trend, v.percent]),
-    [],
-    ["VOLUMEN POR GRUPO MUSCULAR"],
-    ["Músculo", "Sets", "Estado", "RP"],
-    ...muscle.map(m => [
-      m.muscle,
-      m.sets,
-      m.status,
-      `${m.ranges?.MEV ?? "-"}–${m.ranges?.MRV ?? "-"}`
-    ])
-  ];
+  XLSX.utils.book_append_sheet(wb, sheet, 'Resumen General');
 
-  return XLSX.utils.aoa_to_sheet(rows);
+  XLSX.writeFile(wb, 'Dashboard_Mesociclos.xlsx');
 }
-
 
 function setupExportButtons() {
   const exportDashboardBtn = document.getElementById('exportDashboard');
