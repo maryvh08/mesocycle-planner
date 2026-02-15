@@ -3559,40 +3559,52 @@ function buildDashboardSheet(records, title) {
   return XLSX.utils.aoa_to_sheet(rows);
 }
 
-function setupExportButtons() {
-  const exportDashboardBtn = document.getElementById('exportDashboard');
-  const exportHistoryBtn = document.getElementById('exportHistory');
-  const exportDashboardPDFBtn = document.getElementById('exportDashboardpdf');
+async function exportFullDashboardExcel() {
+  const wb = XLSX.utils.book_new();
 
-  if (exportDashboardBtn) {
-    exportDashboardBtn.addEventListener('click', () => {
-      const analysis = document.getElementById('analysisDashboard');
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
 
-      exportFullDashboardExcel(window.__dashboardCache);
-    });
+  // 1️⃣ TODOS
+  const allRecords = await fetchExerciseRecords();
+  if (allRecords.length) {
+    const allSheet = buildDashboardSheet(
+      allRecords,
+      "Todos los mesociclos"
+    );
+    XLSX.utils.book_append_sheet(wb, allSheet, "Resumen General");
   }
 
-   if (exportDashboardPDFBtn) {
-    exportDashboardPDFBtn.addEventListener('click', async () => {
-      const analysis = document.getElementById('analysisDashboard');
-   
-      if (!analysis || analysis.classList.contains('hidden')) {
-        alert(
-          'El PDF solo puede exportarse desde la vista de Análisis visible.'
-        );
-        return;
-      }
-   
-      await exportDashboardToPDF(analysis);
-    });
-   }
+  // 2️⃣ MESOCICLOS
+  const { data: mesocycles, error } = await supabase
+    .from("mesocycles")
+    .select("id, name")
+    .eq("user_id", user.id);
 
-  if (exportHistoryBtn) {
-    exportHistoryBtn.addEventListener('click', () => {
-      console.log('📋 Export history click');
-      exportHistoryToExcel();
-    });
+  if (error || !mesocycles?.length) {
+    XLSX.writeFile(wb, "Dashboard_Mesociclos.xlsx");
+    return;
   }
+
+  // 🚀 Paraleliza
+  const recordSets = await Promise.all(
+    mesocycles.map(m => fetchExerciseRecords(m.id))
+  );
+
+  mesocycles.forEach((m, index) => {
+    const records = recordSets[index];
+    if (!records.length) return;
+
+    const sheet = buildDashboardSheet(records, m.name);
+
+    XLSX.utils.book_append_sheet(
+      wb,
+      sheet,
+      sanitizeSheetName(m.name)
+    );
+  });
+
+  XLSX.writeFile(wb, "Dashboard_Mesociclos.xlsx");
 }
 
 async function exportDashboardToPDF(element) {
