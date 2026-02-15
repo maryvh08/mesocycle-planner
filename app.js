@@ -3612,14 +3612,17 @@ async function exportDashboardToPDF(element) {
   const { jsPDF } = window.jspdf;
 
   // =========================
-  // 1️⃣ Convertir charts a imágenes
+  // 1️⃣ Convertir charts a imágenes HD
   // =========================
   const canvases = element.querySelectorAll("canvas");
   const replacements = [];
 
   canvases.forEach(canvas => {
     const img = document.createElement("img");
-    img.src = canvas.toDataURL("image/png");
+
+    // 🔥 Exportar en máxima resolución interna
+    img.src = canvas.toDataURL("image/png", 1.0);
+
     img.style.width = canvas.offsetWidth + "px";
     img.style.height = canvas.offsetHeight + "px";
 
@@ -3629,18 +3632,22 @@ async function exportDashboardToPDF(element) {
     replacements.push({ canvas, img });
   });
 
-  await new Promise(resolve => setTimeout(resolve, 100));
+  await new Promise(resolve => setTimeout(resolve, 150));
 
   // =========================
-  // 2️⃣ Capturar dashboard
+  // 2️⃣ Captura en alta resolución
   // =========================
+  const scaleFactor = 3; // 🔥 Retina level
+
   const canvas = await html2canvas(element, {
-    scale: 2,
+    scale: scaleFactor,
     useCORS: true,
-    backgroundColor: "#111"
+    backgroundColor: "#111",
+    windowWidth: element.scrollWidth,
+    windowHeight: element.scrollHeight
   });
 
-  const imgData = canvas.toDataURL("image/png");
+  const imgData = canvas.toDataURL("image/jpeg", 1.0); // JPEG alta calidad
 
   const pdf = new jsPDF("p", "mm", "a4");
 
@@ -3653,17 +3660,36 @@ async function exportDashboardToPDF(element) {
   let heightLeft = imgHeight;
   let position = 0;
 
-  pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+  pdf.addImage(
+    imgData,
+    "JPEG",
+    0,
+    position,
+    imgWidth,
+    imgHeight,
+    undefined,
+    "FAST"
+  );
+
   heightLeft -= pageHeight;
 
   while (heightLeft > 0) {
     position = heightLeft - imgHeight;
     pdf.addPage();
-    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    pdf.addImage(
+      imgData,
+      "JPEG",
+      0,
+      position,
+      imgWidth,
+      imgHeight,
+      undefined,
+      "FAST"
+    );
     heightLeft -= pageHeight;
   }
 
-  pdf.save("Dashboard_mesocycles.pdf");
+  pdf.save("Dashboard_High_Quality.pdf");
 
   // =========================
   // 3️⃣ Restaurar canvas originales
