@@ -3562,6 +3562,7 @@ function buildDashboardSheet(records, title) {
 function setupExportButtons() {
   const exportDashboardBtn = document.getElementById('exportDashboard');
   const exportHistoryBtn = document.getElementById('exportHistory');
+  const exportDashboardPDFBtn = document.getElementById('exportDashboardpdf');
 
   if (exportDashboardBtn) {
     exportDashboardBtn.addEventListener('click', () => {
@@ -4067,6 +4068,11 @@ document.addEventListener('DOMContentLoaded', () => {
 document
 document.getElementById("exportDashboard").onclick = () => {
   exportFullDashboardExcel();
+};
+
+document
+document.getElementById("exportDashboardpdf").onclick = () => {
+  exportDashboardToPDF();
 };
 
 document
