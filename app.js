@@ -3474,9 +3474,6 @@ function buildDashboardSheet(records, title) {
   return XLSX.utils.aoa_to_sheet(rows);
 }
 
-function sanitizeSheetName(name) {
-  return name.replace(/[\\/?*[\]:]/g, "").slice(0, 31);
-}
 
 function setupExportButtons() {
   const exportDashboardBtn = document.getElementById('exportDashboard');
