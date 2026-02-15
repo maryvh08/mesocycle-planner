@@ -3452,6 +3452,10 @@ async function exportFullDashboardExcel() {
   XLSX.writeFile(wb, "Dashboard_Mesociclos.xlsx");
 }
 
+function sanitizeSheetName(name) {
+  return name.replace(/[\\/?*[\]:]/g, "").slice(0, 31);
+}
+
 function buildDashboardSheet(records, title) {
   const volume = calculateVolumeTrend(records);
   const muscle = evaluateMuscleVolume(
