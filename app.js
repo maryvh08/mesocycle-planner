@@ -165,7 +165,7 @@ function showLogin() {
   appView.classList.add("hidden");
 }
 
-aasync function showApp() {
+async function showApp() {
   loginView.classList.add("hidden");
   appView.classList.remove("hidden");
 
