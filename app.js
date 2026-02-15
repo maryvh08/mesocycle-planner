@@ -1712,32 +1712,28 @@ function getStatsMode() {
   return null;
 }
 
-async function fetchExerciseRecords(mesocycleId) {
-  const { data, error } = await supabase
-    .from('exercise_records')
-    .select(`
-      exercise_name,
-      week_number,
-      weight,
-      reps,
-      exercises (
-        subgroup
-      )
-    `)
-    .eq('mesocycle_id', mesocycleId)
-    .order('week_number');
+async function fetchExerciseRecords(mesocycleId = null) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  let query = supabase
+    .from("exercise_records")
+    .select("*")
+    .eq("user_id", user.id);
+
+  // 👇 SOLO filtrar si hay mesociclo
+  if (mesocycleId) {
+    query = query.eq("mesocycle_id", mesocycleId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
-    console.error(error);
+    console.error("❌ fetchExerciseRecords", error);
     return [];
   }
 
-  return data.map(r => ({
-    exercise: r.exercise_name,
-    week: r.week_number,
-    volume: r.weight * r.reps,
-    muscle_group: r.exercises?.subgroup ?? 'Otros'
-  }));
+  return data;
 }
 
 function hideKPIs() {
@@ -3413,55 +3409,73 @@ async function exportHistoryToExcel() {
   XLSX.writeFile(wb, 'historial_entrenamiento.xlsx');
 }
 
-function exportDashboardToExcel({
-  volumeData,
-  muscleData,
-  fatigueAlerts,
-  coach
-}) {
+async function exportFullDashboardExcel() {
   const wb = XLSX.utils.book_new();
 
-  // 1️⃣ Volumen por ejercicio
-  const volumeSheet = XLSX.utils.json_to_sheet(
-    volumeData.map(v => ({
-      Ejercicio: v.exercise,
-      Volumen: v.volume,
-      Sets: v.sets,
-      Tendencia: v.trend,
-      Cambio: `${v.percent}%`
-    }))
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  // =========================
+  // 1️⃣ TODOS LOS MESOCICLOS
+  // =========================
+  const allRecords = await fetchExerciseRecords();
+  const allSheet = buildDashboardSheet(allRecords, "Todos los mesociclos");
+  XLSX.utils.book_append_sheet(wb, allSheet, "Resumen General");
+
+  // =========================
+  // 2️⃣ MESOCICLOS INDIVIDUALES
+  // =========================
+  const { data: mesocycles } = await supabase
+    .from("mesocycles")
+    .select("id, name")
+    .eq("user_id", user.id);
+
+  for (const m of mesocycles) {
+    const records = await fetchExerciseRecords(m.id);
+    if (!records.length) continue;
+
+    const sheet = buildDashboardSheet(records, m.name);
+    XLSX.utils.book_append_sheet(
+      wb,
+      sheet,
+      sanitizeSheetName(m.name)
+    );
+  }
+
+  // =========================
+  // 3️⃣ DESCARGA
+  // =========================
+  XLSX.writeFile(wb, "Dashboard_Mesociclos.xlsx");
+}
+
+function buildDashboardSheet(records, title) {
+  const volume = calculateVolumeTrend(records);
+  const muscle = evaluateMuscleVolume(
+    calculateMuscleVolume(records)
   );
-  XLSX.utils.book_append_sheet(wb, volumeSheet, 'Volumen');
 
-  // 2️⃣ Volumen por músculo
-  const muscleSheet = XLSX.utils.json_to_sheet(
-    muscleData.map(m => ({
-      Músculo: m.muscle,
-      Sets: m.sets,
-      Estado: m.status,
-      'Rango RP': `${m.ranges?.MEV ?? '-'}–${m.ranges?.MRV ?? '-'}`
-    }))
-  );
-  XLSX.utils.book_append_sheet(wb, muscleSheet, 'Músculos');
+  const rows = [
+    [title],
+    [],
+    ["VOLUMEN POR EJERCICIO"],
+    ["Ejercicio", "Tendencia", "%"],
+    ...volume.map(v => [v.exercise, v.trend, v.percent]),
+    [],
+    ["VOLUMEN POR GRUPO MUSCULAR"],
+    ["Músculo", "Sets", "Estado", "RP"],
+    ...muscle.map(m => [
+      m.muscle,
+      m.sets,
+      m.status,
+      `${m.ranges?.MEV ?? "-"}–${m.ranges?.MRV ?? "-"}`
+    ])
+  ];
 
-  // 3️⃣ Alertas de fatiga
-  const fatigueSheet = XLSX.utils.json_to_sheet(
-    fatigueAlerts.map(f => ({
-      Ejercicio: f.exercise,
-      Tendencia: f.trend,
-      Cambio: `${f.percent}%`
-    }))
-  );
-  XLSX.utils.book_append_sheet(wb, fatigueSheet, 'Alertas');
+  return XLSX.utils.aoa_to_sheet(rows);
+}
 
-  // 4️⃣ Coach
-  const coachSheet = XLSX.utils.json_to_sheet([{
-    Estado: coach.type,
-    Recomendación: coach.message
-  }]);
-  XLSX.utils.book_append_sheet(wb, coachSheet, 'Coach');
-
-  XLSX.writeFile(wb, 'dashboard_entrenamiento.xlsx');
+function sanitizeSheetName(name) {
+  return name.replace(/[\\/?*[\]:]/g, "").slice(0, 31);
 }
 
 function setupExportButtons() {
@@ -3485,7 +3499,7 @@ function setupExportButtons() {
         return;
       }
 
-      exportDashboardToExcel(window.__dashboardCache);
+      exportFullDashboardExcel(window.__dashboardCache);
     });
   }
 
@@ -3916,24 +3930,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document
-  .getElementById("exportDashboard")
-  .addEventListener("click", () => {
-
-    if (!dashboardState.records?.length) {
-      alert("El dashboard aún no se ha generado.");
-      return;
-    }
-
-    if (dashboardState.mode === "all") {
-      exportDashboardAllMesocycles(dashboardState.records);
-    } else {
-      exportDashboardSingleMesocycle(
-        dashboardState.records,
-        dashboardState.mesocycleId
-      );
-    }
-  });
-
+document.getElementById("exportDashboard").onclick = () => {
+  exportFullDashboardExcel();
+};
 
 document
   .getElementById("stats-mesocycle")
