@@ -2469,19 +2469,22 @@ async function loadVolumeSection(mesocycleId) {
    CARGA STATS + GRAFICA
 ====================== */
 async function loadStatsOverview(mesocycleId = null) {
+  // 🔹 Obtener usuario
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
+  // 🔹 Construir query base
   let query = supabase
     .from("exercise_records")
-    .select("weight, reps, exercise_name")
+    .select("weight, reps, sets, exercise_name")
     .eq("user_id", user.id);
 
-  // 👉 solo filtrar si se seleccionó un mesociclo
+  // 🔹 Filtrar por mesociclo si se proporcionó
   if (mesocycleId) {
     query = query.eq("mesocycle_id", mesocycleId);
   }
 
+  // 🔹 Ejecutar query
   const { data, error } = await query;
 
   if (error) {
@@ -2489,18 +2492,26 @@ async function loadStatsOverview(mesocycleId = null) {
     return;
   }
 
+  // 🔹 Inicializar métricas
   let totalSets = 0;
   let totalVolume = 0;
   const exercises = new Set();
 
+  // 🔹 Recorrer registros
   data.forEach(r => {
     if (!r.exercise_name) return;
 
-    totalSets++;
-    totalVolume += (r.weight || 0) * (r.reps || 0);
+    const sets = r.sets || 1;
+    const reps = r.reps || 0;
+    const weight = r.weight || 0;
+
+    totalSets += sets;
+    totalVolume += weight * reps * sets;
+
     exercises.add(r.exercise_name);
   });
 
+  // 🔹 Actualizar UI
   const setsEl = document.getElementById("total-sets");
   const volumeEl = document.getElementById("total-volume");
   const exercisesEl = document.getElementById("total-exercises");
@@ -2553,24 +2564,21 @@ async function loadVolumeKPI(mesocycleId) {
 
   let query = supabase
     .from("exercise_records")
-    .select("weight, reps")
+    .select("weight, reps, sets")  // 🔹 ahora trae sets
     .eq("user_id", user.id);
 
-  if (mesocycleId) {
-    query = query.eq("mesocycle_id", mesocycleId);
-  }
+  if (mesocycleId) query = query.eq("mesocycle_id", mesocycleId);
 
   const { data, error } = await query;
-
   if (error) {
     console.error("❌ Error volumen", error);
     return;
   }
 
-  const totalVolume = data.reduce(
-    (sum, r) => sum + (r.weight || 0) * (r.reps || 0),
-    0
-  );
+  const totalVolume = data.reduce((sum, r) => {
+    const sets = r.sets || 1;
+    return sum + (r.weight || 0) * (r.reps || 0) * sets;
+  }, 0);
 
   document.getElementById("kpi-volume").innerHTML = `
     <h4>Volumen total</h4>
@@ -2678,7 +2686,7 @@ async function loadMesocycleComparison() {
 
   const { data: records } = await supabase
     .from("exercise_records")
-    .select("mesocycle_id, exercise_name, weight, reps")
+    .select("mesocycle_id, exercise_name, weight, reps, sets")
     .eq("user_id", user.id);
 
   const { data: prs } = await supabase
@@ -2699,8 +2707,7 @@ async function loadMesocycleComparison() {
       };
     }
 
-    statsByCycle[r.mesocycle_id].volume +=
-      (r.weight || 0) * (r.reps || 0);
+    statsByCycle[r.mesocycle_id].volume += (r.weight || 0) * (r.reps || 0) * sets;
 
     if (!statsByCycle[r.mesocycle_id].exercises[r.exercise_name]) {
       statsByCycle[r.mesocycle_id].exercises[r.exercise_name] = [];
