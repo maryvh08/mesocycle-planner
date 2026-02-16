@@ -778,7 +778,7 @@ async function renderRegistroEditor(mesocycleId) {
     exerciseSelect,
     weightInput,
     repsInput,
-      setsinput
+      setsinput,
     saveBtn
   );
 
