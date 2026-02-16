@@ -767,6 +767,10 @@ async function renderRegistroEditor(mesocycleId) {
   repsInput.type = "number";
   repsInput.placeholder = "Reps";
 
+   const setsInput = document.createElement("input");
+   repsInput.type = "number";
+   repsInput.placeholder = "Sets";
+
   const saveBtn = document.createElement("button");
   saveBtn.textContent = "Guardar";
 
