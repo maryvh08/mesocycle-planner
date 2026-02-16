@@ -1447,7 +1447,7 @@ async function loadDashboardAllMesocycles() {
   // ======================
   // 3️⃣ VOLUMEN
   // ======================
-  const volumeData = calculateVolumeTrend(records);
+  const volumeData = calculateWeeklyVolumeTrend(records);
   renderVolumeTable(volumeData);
 
   // ======================
@@ -1558,7 +1558,7 @@ async function loadDashboard(mesocycleId = null) {
   const records = await fetchExerciseRecords(mesocycleId);
   if (!records.length) return;
 
-  const volumeData = calculateVolumeTrend(records);
+  const volumeData = calculateWeeklyVolumeTrend(records);
   renderVolumeTable(volumeData);
 
   const rawMuscle = calculateMuscleVolume(records);
@@ -1864,70 +1864,6 @@ function updateCoachCard({ type, message }) {
   card.classList.add(type, 'active');
 
   text.textContent = message;
-}
-
-// ------------------------
-// Calcula volumen y tendencia
-// ------------------------
-function calculateVolumeTrend(records) {
-  const byExercise = {};
-
-  records.forEach(r => {
-    const exercise = r.exercise || r.exercise_name || "Desconocido";
-    const week = r.week ?? 1;
-    const sets = Number(r.sets || 1);
-    const reps = Number(r.reps || 0);
-    const weight = Number(r.weight || 0);
-
-    const key = `${exercise}-W${week}`;
-
-    if (!byExercise[key]) {
-      byExercise[key] = {
-        exercise,
-        week,
-        total_volume: 0,
-        total_sets: 0
-      };
-    }
-
-    byExercise[key].total_volume += weight * reps * sets;
-    byExercise[key].total_sets += sets;
-  });
-
-  // Agrupar por ejercicio
-  const grouped = {};
-  Object.values(byExercise).forEach(r => {
-    if (!grouped[r.exercise]) grouped[r.exercise] = [];
-    grouped[r.exercise].push(r);
-  });
-
-  // Calcular tendencia
-  const result = [];
-  Object.values(grouped).forEach(weeks => {
-    weeks.sort((a, b) => a.week - b.week);
-
-    weeks.forEach((w, i) => {
-      let trend = "→";
-      let percent = 0;
-      if (i > 0) {
-        const prev = weeks[i - 1];
-        percent = prev.total_volume
-          ? ((w.total_volume - prev.total_volume) / prev.total_volume) * 100
-          : 0;
-        trend = percent > 3 ? "↑" : percent < -3 ? "↓" : "→";
-      }
-
-      result.push({
-        exercise: w.exercise,
-        volume: Math.round(w.total_volume),
-        sets: w.total_sets,
-        trend,
-        percent: Number(percent.toFixed(1))
-      });
-    });
-  });
-
-  return result;
 }
 
 function updateCoachFromVolume(data) {
@@ -2343,27 +2279,26 @@ async function loadVolumeSection(mesocycleId) {
 
   if (error) return console.error(error);
 
-  const volumeTrend = calculateVolumeTrend(data);
+  const volumeTrend = calculateWeeklyVolumeTrend(data);
   renderVolumeTable(volumeTrend);
   updateCoachFromVolume(volumeTrend);
 }
 
 function calculateWeeklyVolumeTrend(records) {
-  const byExerciseWeek = {};
+  const byExercise = {};
 
-  // Agrupar por ejercicio y semana
   records.forEach(r => {
-    const exercise = r.exercise_name || r.exercise || "Desconocido";
+    const exercise = r.exercise || r.exercise_name || "Desconocido";
     const week = r.week ?? 1;
+
     const sets = Number(r.sets || 1);
     const reps = Number(r.reps || 0);
     const weight = Number(r.weight || 0);
-    const volume = sets * reps * weight;
+    const recordVolume = sets * reps * weight;
 
     const key = `${exercise}-${week}`;
-
-    if (!byExerciseWeek[key]) {
-      byExerciseWeek[key] = {
+    if (!byExercise[key]) {
+      byExercise[key] = {
         exercise,
         week,
         total_volume: 0,
@@ -2371,41 +2306,38 @@ function calculateWeeklyVolumeTrend(records) {
       };
     }
 
-    byExerciseWeek[key].total_volume += volume;
-    byExerciseWeek[key].total_sets += sets;
+    byExercise[key].total_volume += recordVolume;
+    byExercise[key].total_sets += sets;
   });
 
   // Agrupar por ejercicio
   const grouped = {};
-  Object.values(byExerciseWeek).forEach(r => {
+  Object.values(byExercise).forEach(r => {
     if (!grouped[r.exercise]) grouped[r.exercise] = [];
     grouped[r.exercise].push(r);
   });
 
   // Calcular tendencia comparando la última semana con la anterior
-  const result = [];
-  Object.entries(grouped).forEach(([exercise, weeks]) => {
-    weeks.sort((a, b) => a.week - b.week);
+  return Object.entries(grouped).map(([exercise, weeks]) => {
+    weeks.sort((a,b) => a.week - b.week);
 
     const last = weeks.at(-1);
-    const prev = weeks.length > 1 ? weeks.at(-2) : null;
+    const prev = weeks.at(-2);
 
     const percent = prev
-      ? ((last.total_volume - prev.total_volume) / (prev.total_volume || 1)) * 100
+      ? ((last.total_volume - prev.total_volume) / prev.total_volume) * 100
       : 0;
 
-    const trend = percent > 3 ? "↑" : percent < -3 ? "↓" : "→";
+    const trend = percent > 3 ? '↑' : percent < -3 ? '↓' : '→';
 
-    result.push({
+    return {
       exercise,
       volume: Math.round(last.total_volume),
       sets: last.total_sets,
       trend,
-      percent: Number(percent.toFixed(1))
-    });
+      percent: prev ? Number(percent.toFixed(1)) : 0
+    };
   });
-
-  return result;
 }
 
 function renderVolumeTable(records) {
@@ -3535,7 +3467,7 @@ async function exportFullDashboardExcel() {
 }
 
 function buildDashboardSheet(records, title) {
-  const volume = calculateVolumeTrend(records);
+  const volume = calculateWeeklyVolumeTrend(records);
   const muscle = evaluateMuscleVolume(
     calculateMuscleVolume(records)
   );
