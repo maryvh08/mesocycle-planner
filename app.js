@@ -2291,19 +2291,29 @@ function calculateVolumeTrend(records) {
   const byExercise = {};
 
   records.forEach(r => {
-    const key = `${r.exercise}-${r.week}`;
+    const exercise = r.exercise || r.exercise_name || "Desconocido";
+    const week = r.week ?? 1;
+    const sets = Number(r.sets || 1);
+    const reps = Number(r.reps || 0);
+    const weight = Number(r.weight || 0);
+
+    // Calcular el volumen real de este registro
+    const volume = r.volume ?? (weight * reps * sets);
+
+    const key = `${exercise}-W${week}`;
 
     if (!byExercise[key]) {
       byExercise[key] = {
-        exercise: r.exercise,
-        week: r.week,
+        exercise,
+        week,
         total_volume: 0,
         total_sets: 0
       };
     }
 
-    byExercise[key].total_volume += r.volume;
-    byExercise[key].total_sets += 1;
+    // Sumar volumen y sets correctamente
+    byExercise[key].total_volume += volume;
+    byExercise[key].total_sets += sets;
   });
 
   // Agrupar por ejercicio
@@ -2313,7 +2323,7 @@ function calculateVolumeTrend(records) {
     grouped[r.exercise].push(r);
   });
 
-  // Tendencia real
+  // Calcular tendencia
   return Object.entries(grouped).map(([exercise, weeks]) => {
     weeks.sort((a, b) => a.week - b.week);
 
@@ -2330,14 +2340,14 @@ function calculateVolumeTrend(records) {
       '→';
 
     return {
-     exercise,
-     volume: Math.round(last.total_volume),
-     sets: last.total_sets,
-     trend,
-     percent: prev
-       ? Number(((last.total_volume - prev.total_volume) / prev.total_volume * 100).toFixed(1))
-       : 0
-   };
+      exercise,
+      volume: Math.round(last.total_volume),
+      sets: last.total_sets,
+      trend,
+      percent: prev
+        ? Number(((last.total_volume - prev.total_volume) / prev.total_volume * 100).toFixed(1))
+        : 0
+    };
   });
 }
 
