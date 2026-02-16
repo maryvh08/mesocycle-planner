@@ -2299,6 +2299,14 @@ function calculateVolumeTrend(records) {
     const reps = Number(r.reps ?? 0);
     const weight = Number(r.weight ?? 0);
 
+      console.log('DEBUG RECORD', {
+        exercise,
+        sets: r.sets,
+        reps: r.reps,
+        weight: r.weight,
+        fullRecord: r
+      });
+
     // Volumen real de este registro
     const volume = sets * reps * weight;
 
