@@ -1918,6 +1918,7 @@ function calculateVolumeTrend(records) {
 
 function renderVolumeTable(data) {
   const container = document.getElementById('volumeTable');
+  if (!container) return;
 
   container.innerHTML = `
     <table class="volume-table">
@@ -1932,11 +1933,11 @@ function renderVolumeTable(data) {
       <tbody>
         ${data.map(d => `
           <tr>
-            <td>${d.exercise}</td>
-            <td>${d.volume}</td>
-            <td>${d.sets}</td>
+            <td>${d.exercise || 'Desconocido'}</td>
+            <td>${d.volume ?? 0}</td>
+            <td>${d.sets ?? 0}</td>
             <td class="trend ${trendClass(d.trend)}">
-              ${d.trend} ${Math.abs(d.percent)}%
+              ${d.trend || '→'} ${d.percent ?? 0}%
             </td>
           </tr>
         `).join('')}
