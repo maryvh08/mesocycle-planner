@@ -1870,17 +1870,18 @@ function calculateVolumeTrend(records) {
   const map = {};
 
   records.forEach(r => {
-    const week = r.week ?? r.week_number ?? 1; // asegurar que haya semana
+    const week = r.week ?? r.week_number ?? 1;
     const sets = Number(r.sets || 1);
     const weight = Number(r.weight || 0);
     const reps = Number(r.reps || 0);
     const volume = weight * reps * sets;
 
-    const key = `${r.exercise_name}-W${week}`;
+    const exerciseName = r.exercise || r.exercise_name || "Desconocido"; // seguridad
+    const key = `${exerciseName}-W${week}`;
 
     if (!map[key]) {
       map[key] = {
-        exercise: r.exercise_name,
+        exercise: exerciseName,
         week,
         volume: 0,
         sets: 0
@@ -1891,7 +1892,7 @@ function calculateVolumeTrend(records) {
     map[key].sets += sets;
   });
 
-  // 🔹 calcular tendencia respecto a semanas anteriores por ejercicio
+  // Calcular tendencia
   const trendMap = {};
 
   Object.values(map).forEach(d => {
@@ -1902,15 +1903,14 @@ function calculateVolumeTrend(records) {
   const result = [];
 
   Object.values(trendMap).forEach(weeks => {
-    weeks.sort((a, b) => a.week - b.week); // orden ascendente por semana
+    weeks.sort((a,b)=>a.week - b.week);
 
-    weeks.forEach((w, i) => {
+    weeks.forEach((w,i)=>{
       let trend = "→";
       let percent = 0;
-
-      if (i > 0) {
+      if (i>0){
         const prev = weeks[i-1];
-        percent = prev.volume ? ((w.volume - prev.volume)/prev.volume) * 100 : 0;
+        percent = prev.volume ? ((w.volume - prev.volume)/prev.volume)*100 : 0;
         trend = percent > 2 ? "↑" : percent < -2 ? "↓" : "→";
       }
 
