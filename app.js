@@ -1930,46 +1930,6 @@ function calculateVolumeTrend(records) {
   return result;
 }
 
-// ------------------------
-// Clase para colorear tendencia
-// ------------------------
-function trendClass(trend) {
-  return trend === "↑" ? "up" :
-         trend === "↓" ? "down" : "neutral";
-}
-
-// ------------------------
-// Renderiza la tabla
-// ------------------------
-function renderVolumeTable(data) {
-  const container = document.getElementById('volumeTable');
-
-  container.innerHTML = `
-    <table class="volume-table">
-      <thead>
-        <tr>
-          <th>Ejercicio</th>
-          <th>Volumen</th>
-          <th>Sets</th>
-          <th>Tendencia</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${data.map(d => `
-          <tr>
-            <td>${d.exercise}</td>
-            <td>${d.volume}</td>
-            <td>${d.sets}</td>
-            <td class="trend ${trendClass(d.trend)}">
-              ${d.trend} ${Math.abs(d.percent)}%
-            </td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-  `;
-}
-
 function updateCoachFromVolume(data) {
   const downs = data.filter(d => d.trend === '↓').length;
 
@@ -2386,6 +2346,72 @@ async function loadVolumeSection(mesocycleId) {
   const volumeTrend = calculateVolumeTrend(data);
   renderVolumeTable(volumeTrend);
   updateCoachFromVolume(volumeTrend);
+}
+
+function calculateWeeklyVolume(records) {
+  const summary = {};
+
+  // Sumar volumen y sets por ejercicio
+  records.forEach(r => {
+    const exercise = r.exercise || r.exercise_name || "Desconocido";
+    const sets = Number(r.sets || 1);
+    const reps = Number(r.reps || 0);
+    const weight = Number(r.weight || 0);
+
+    if (!summary[exercise]) {
+      summary[exercise] = {
+        exercise,
+        total_volume: 0,
+        total_sets: 0
+      };
+    }
+
+    summary[exercise].total_volume += weight * reps * sets;
+    summary[exercise].total_sets += sets;
+  });
+
+  // Convertir a array y calcular tendencia respecto al último registro anterior si lo hubiera
+  return Object.values(summary).map(e => ({
+    exercise: e.exercise,
+    volume: Math.round(e.total_volume),
+    sets: e.total_sets,
+    trend: e.total_volume > 0 ? "→" : "→", // Por ahora → si no hay comparación previa
+    percent: 0
+  }));
+}
+
+function renderVolumeTable(data) {
+  const container = document.getElementById('volumeTable');
+
+  container.innerHTML = `
+    <table class="volume-table">
+      <thead>
+        <tr>
+          <th>Ejercicio</th>
+          <th>Volumen</th>
+          <th>Sets</th>
+          <th>Tendencia</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.map(d => `
+          <tr>
+            <td>${d.exercise}</td>
+            <td>${d.volume}</td>
+            <td>${d.sets}</td>
+            <td class="trend ${trendClass(d.trend)}">
+              ${d.trend} ${d.percent}%
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function trendClass(trend) {
+  return trend === "↑" ? "up" :
+         trend === "↓" ? "down" : "neutral";
 }
 
 /* ======================
