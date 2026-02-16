@@ -2408,15 +2408,25 @@ function calculateWeeklyVolumeTrend(records) {
   return result;
 }
 
-function renderVolumeTable(data) {
+function renderVolumeTable(records) {
   const container = document.getElementById('volumeTable');
+  if (!container) return;
 
+  // Calcula volumen y tendencia
+  const data = calculateWeeklyVolumeTrend(records);
+
+  // Función auxiliar para clase CSS de la tendencia
+  function trendClass(trend) {
+    return trend === '↑' ? 'up' : trend === '↓' ? 'down' : 'neutral';
+  }
+
+  // Genera la tabla
   container.innerHTML = `
     <table class="volume-table">
       <thead>
         <tr>
           <th>Ejercicio</th>
-          <th>Volumen</th>
+          <th>Volumen (kg)</th>
           <th>Sets</th>
           <th>Tendencia</th>
         </tr>
@@ -2428,7 +2438,7 @@ function renderVolumeTable(data) {
             <td>${d.volume}</td>
             <td>${d.sets}</td>
             <td class="trend ${trendClass(d.trend)}">
-              ${d.trend} ${d.percent}%
+              ${d.trend} ${Math.abs(d.percent)}%
             </td>
           </tr>
         `).join('')}
