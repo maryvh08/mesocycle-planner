@@ -1867,43 +1867,53 @@ function updateCoachCard({ type, message }) {
 }
 
 function calculateVolumeTrend(records) {
-  // map[exercise][week] = {volume, sets}
-  const map = {};
+  // Agrupar por ejercicio y semana
+  const weeklyMap = {};
 
   records.forEach(r => {
+    const exerciseName = r.exercise || r.exercise_name || "Desconocido";
+    const week = r.week ?? r.week_number ?? 1;
     const sets = Number(r.sets || 1);
     const reps = Number(r.reps || 0);
     const weight = Number(r.weight || 0);
-    const exercise = r.exercise || r.exercise_name || "Desconocido";
-    const week = r.week ?? 1;
 
-    if (!map[exercise]) map[exercise] = {};
-    if (!map[exercise][week]) map[exercise][week] = { volume: 0, sets: 0 };
+    const key = `${exerciseName}-W${week}`;
+    if (!weeklyMap[key]) {
+      weeklyMap[key] = {
+        exercise: exerciseName,
+        week,
+        volume: 0,
+        sets: 0
+      };
+    }
 
-    map[exercise][week].volume += weight * reps * sets;
-    map[exercise][week].sets += sets;
+    weeklyMap[key].volume += weight * reps;
+    weeklyMap[key].sets += sets;
   });
 
-  // Construir array con tendencia
-  const result = [];
+  // Convertir a array y calcular tendencias
+  const exercisesMap = {};
+  Object.values(weeklyMap).forEach(item => {
+    if (!exercisesMap[item.exercise]) exercisesMap[item.exercise] = [];
+    exercisesMap[item.exercise].push(item);
+  });
 
-  Object.entries(map).forEach(([exercise, weeksObj]) => {
-    const weeks = Object.entries(weeksObj)
-      .map(([week, data]) => ({ week: Number(week), ...data }))
-      .sort((a,b) => a.week - b.week);
+  const result = [];
+  Object.values(exercisesMap).forEach(weeks => {
+    weeks.sort((a, b) => a.week - b.week);
 
     weeks.forEach((w, i) => {
       let trend = "→";
       let percent = 0;
 
       if (i > 0) {
-        const prev = weeks[i-1];
+        const prev = weeks[i - 1];
         percent = prev.volume ? ((w.volume - prev.volume) / prev.volume) * 100 : 0;
         trend = percent > 2 ? "↑" : percent < -2 ? "↓" : "→";
       }
 
       result.push({
-        exercise,
+        exercise: w.exercise,
         week: w.week,
         volume: w.volume,
         sets: w.sets,
