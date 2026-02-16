@@ -775,11 +775,11 @@ async function renderRegistroEditor(mesocycleId) {
   saveBtn.textContent = "Guardar";
 
   registroEditor.append(
-    exerciseSelect,
-    weightInput,
-    repsInput,
+      exerciseSelect,
+      weightInput,
+      repsInput,
       setsinput,
-    saveBtn
+      saveBtn
   );
 
   /* ======================
