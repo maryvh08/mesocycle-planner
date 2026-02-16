@@ -1389,7 +1389,7 @@ function getTrend(weeks) {
   const first = weeks[0].avg_force;
   const last = weeks.at(-1).avg_force;
 
-  const change = ((last - first) / first) * 100;
+  const change = first ? ((last - first) / first) * 100 : 0;
 
   return {
     icon: change > 2 ? '↑' : change < -2 ? '↓' : '→',
@@ -1399,6 +1399,7 @@ function getTrend(weeks) {
 }
 
 function normalizeMuscleName(name) {
+   if (!name) return '';
   return name
     .toLowerCase()
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quita tildes
@@ -1796,7 +1797,7 @@ async function fetchExerciseRecords(mesocycleId = null) {
   return data.map(r => ({
     exercise: r.exercise_name,
     week: r.week_number,
-    volume: r.weight * r.reps,
+    volume: r.weight * r.reps * r.sets,
     muscle_group: r.exercises?.subgroup ?? 'Otros'
   }));
 }
@@ -2365,23 +2366,21 @@ function muscleFatigueScore({
   }
 
   let score = 0;
-
-  // 📦 Volumen relativo
-  if (sets > ranges.MAV) score += 20;
-  if (sets > ranges.MRV) score += 35;
-
-  // 📉 Fuerza vs volumen
-  if (strengthTrend < 0 && volumeChange > 0) score += 25;
-
-  // 🧠 Tendencia de fuerza
-  if (strengthTrend < -2) score += 20;
-  else if (strengthTrend < 0) score += 10;
-
-  // ⏳ Estancamiento
-  if (weeksWithoutPR >= 5) score += 20;
-  else if (weeksWithoutPR >= 3) score += 10;
-
-  return Math.min(score, 100);
+   if (sets > ranges.MRV) score += 35;
+   else if (sets > ranges.MAV) score += 20;
+   
+   // fuerza vs volumen
+   if (strengthTrend < 0 && volumeChange > 0) score += 25;
+   
+   // tendencia de fuerza
+   if (strengthTrend < -2) score += 20;
+   else if (strengthTrend < 0) score += 10;
+   
+   // estancamiento
+   if (weeksWithoutPR >= 5) score += 20;
+   else if (weeksWithoutPR >= 3) score += 10;
+   
+   return Math.min(score, 100);
 }
 
 function accumulateFatigue(prev, current) {
