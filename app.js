@@ -1870,17 +1870,62 @@ function calculateVolumeTrend(records) {
   const map = {};
 
   records.forEach(r => {
-    const volume = (r.volume || r.weight * r.reps || 0);
-    const key = `${r.exercise}-W${r.week}`;
+    const week = r.week ?? r.week_number ?? 1; // asegurar que haya semana
+    const sets = Number(r.sets || 1);
+    const weight = Number(r.weight || 0);
+    const reps = Number(r.reps || 0);
+    const volume = weight * reps * sets;
+
+    const key = `${r.exercise_name}-W${week}`;
 
     if (!map[key]) {
-      map[key] = { exercise: r.exercise, week: r.week, volume: 0 };
+      map[key] = {
+        exercise: r.exercise_name,
+        week,
+        volume: 0,
+        sets: 0
+      };
     }
 
     map[key].volume += volume;
+    map[key].sets += sets;
   });
 
-  return Object.values(map);
+  // 🔹 calcular tendencia respecto a semanas anteriores por ejercicio
+  const trendMap = {};
+
+  Object.values(map).forEach(d => {
+    if (!trendMap[d.exercise]) trendMap[d.exercise] = [];
+    trendMap[d.exercise].push(d);
+  });
+
+  const result = [];
+
+  Object.values(trendMap).forEach(weeks => {
+    weeks.sort((a, b) => a.week - b.week); // orden ascendente por semana
+
+    weeks.forEach((w, i) => {
+      let trend = "→";
+      let percent = 0;
+
+      if (i > 0) {
+        const prev = weeks[i-1];
+        percent = prev.volume ? ((w.volume - prev.volume)/prev.volume) * 100 : 0;
+        trend = percent > 2 ? "↑" : percent < -2 ? "↓" : "→";
+      }
+
+      result.push({
+        exercise: w.exercise,
+        week: w.week,
+        volume: w.volume,
+        sets: w.sets,
+        trend,
+        percent: percent.toFixed(1)
+      });
+    });
+  });
+
+  return result;
 }
 
 function renderVolumeTable(data) {
