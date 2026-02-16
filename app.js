@@ -1870,27 +1870,30 @@ function calculateVolumeTrend(records) {
   const map = {};
 
   records.forEach(r => {
-    const week = r.week ?? r.week_number ?? 1;
-    const sets = Number(r.sets || 1);
-    const weight = Number(r.weight || 0);
-    const reps = Number(r.reps || 0);
-    const volume = weight * reps * sets;
-
-    const exerciseName = r.exercise || r.exercise_name || "Desconocido"; // seguridad
-    const key = `${exerciseName}-W${week}`;
-
-    if (!map[key]) {
-      map[key] = {
-        exercise: exerciseName,
-        week,
-        volume: 0,
-        sets: 0
-      };
-    }
-
-    map[key].volume += volume;
-    map[key].sets += sets;
-  });
+     const sets = Number(r.sets || 1);
+     const reps = Number(r.reps || 0);
+     const weight = Number(r.weight || 0);
+   
+     const exerciseName = r.exercise || r.exercise_name || "Desconocido";
+     const week = r.week ?? 1;
+   
+     if (!statsByCycle[r.mesocycle_id]) {
+       statsByCycle[r.mesocycle_id] = {
+         volume: 0,
+         exercises: {}
+       };
+     }
+   
+     // sumar volumen
+     statsByCycle[r.mesocycle_id].volume += weight * reps * sets;
+   
+     // almacenar por ejercicio
+     if (!statsByCycle[r.mesocycle_id].exercises[exerciseName]) {
+       statsByCycle[r.mesocycle_id].exercises[exerciseName] = [];
+     }
+   
+     statsByCycle[r.mesocycle_id].exercises[exerciseName].push(weight * reps * sets);
+   });
 
   // Calcular tendencia
   const trendMap = {};
