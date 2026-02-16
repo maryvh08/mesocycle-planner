@@ -2348,36 +2348,64 @@ async function loadVolumeSection(mesocycleId) {
   updateCoachFromVolume(volumeTrend);
 }
 
-function calculateWeeklyVolume(records) {
-  const summary = {};
+function calculateWeeklyVolumeTrend(records) {
+  const byExerciseWeek = {};
 
-  // Sumar volumen y sets por ejercicio
+  // Agrupar por ejercicio y semana
   records.forEach(r => {
-    const exercise = r.exercise || r.exercise_name || "Desconocido";
+    const exercise = r.exercise_name || r.exercise || "Desconocido";
+    const week = r.week ?? 1;
     const sets = Number(r.sets || 1);
     const reps = Number(r.reps || 0);
     const weight = Number(r.weight || 0);
+    const volume = sets * reps * weight;
 
-    if (!summary[exercise]) {
-      summary[exercise] = {
+    const key = `${exercise}-${week}`;
+
+    if (!byExerciseWeek[key]) {
+      byExerciseWeek[key] = {
         exercise,
+        week,
         total_volume: 0,
         total_sets: 0
       };
     }
 
-    summary[exercise].total_volume += weight * reps * sets;
-    summary[exercise].total_sets += sets;
+    byExerciseWeek[key].total_volume += volume;
+    byExerciseWeek[key].total_sets += sets;
   });
 
-  // Convertir a array y calcular tendencia respecto al último registro anterior si lo hubiera
-  return Object.values(summary).map(e => ({
-    exercise: e.exercise,
-    volume: Math.round(e.total_volume),
-    sets: e.total_sets,
-    trend: e.total_volume > 0 ? "→" : "→", // Por ahora → si no hay comparación previa
-    percent: 0
-  }));
+  // Agrupar por ejercicio
+  const grouped = {};
+  Object.values(byExerciseWeek).forEach(r => {
+    if (!grouped[r.exercise]) grouped[r.exercise] = [];
+    grouped[r.exercise].push(r);
+  });
+
+  // Calcular tendencia comparando la última semana con la anterior
+  const result = [];
+  Object.entries(grouped).forEach(([exercise, weeks]) => {
+    weeks.sort((a, b) => a.week - b.week);
+
+    const last = weeks.at(-1);
+    const prev = weeks.length > 1 ? weeks.at(-2) : null;
+
+    const percent = prev
+      ? ((last.total_volume - prev.total_volume) / (prev.total_volume || 1)) * 100
+      : 0;
+
+    const trend = percent > 3 ? "↑" : percent < -3 ? "↓" : "→";
+
+    result.push({
+      exercise,
+      volume: Math.round(last.total_volume),
+      sets: last.total_sets,
+      trend,
+      percent: Number(percent.toFixed(1))
+    });
+  });
+
+  return result;
 }
 
 function renderVolumeTable(data) {
