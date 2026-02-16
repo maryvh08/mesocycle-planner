@@ -524,7 +524,7 @@ async function loadExerciseHistory(mesocycleId, container) {
         chip.className = "exercise-chip";
 
         const label = document.createElement("span");
-        label.textContent = `${r.exercise_name} — ${r.sets} × ${r.reps} reps × ${r.weight} kg`;
+        label.textContent = `${r.exercise_name} — ${r.sets} series × ${r.reps} reps × ${r.weight} kg`;
         label.onclick = () => editExerciseRecord(r);
 
         const deleteBtn = document.createElement("button");
@@ -1069,7 +1069,7 @@ async function renderExercisesForDay(mesocycleId, week, day) {
     chip.className = "exercise-chip";
 
     const label = document.createElement("span");
-    label.textContent = `${r.exercise_name} — ${r.sets} × ${r.reps} reps × ${r.weight} kg`;
+    label.textContent = `${r.exercise_name} — ${r.sets} sets × ${r.reps} reps × ${r.weight} kg`;
 
     // 👉 click para editar
     label.onclick = () => editExerciseRecord(r);
