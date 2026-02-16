@@ -2291,26 +2291,19 @@ function calculateVolumeTrend(records) {
   const byExercise = {};
 
   records.forEach(r => {
-    const exercise = r.exercise || r.exercise_name || "Desconocido";
-    const week = r.week ?? 1;
-    const sets = Number(r.sets || 1);
-    const reps = Number(r.reps || 1);        // valor mínimo 1
-    const weight = Number(r.weight || 0);    // 0 si no hay peso
-
-    const key = `${exercise}-W${week}`;
+    const key = `${r.exercise}-${r.week}`;
 
     if (!byExercise[key]) {
       byExercise[key] = {
-        exercise,
-        week,
+        exercise: r.exercise,
+        week: r.week,
         total_volume: 0,
         total_sets: 0
       };
     }
 
-    // calcular volumen: si weight o reps son 0, el volumen será 0
-    byExercise[key].total_volume += weight * reps * sets;
-    byExercise[key].total_sets += sets;
+    byExercise[key].total_volume += r.volume;
+    byExercise[key].total_sets += 1;
   });
 
   // Agrupar por ejercicio
@@ -2320,34 +2313,32 @@ function calculateVolumeTrend(records) {
     grouped[r.exercise].push(r);
   });
 
-  // Calcular tendencia semana a semana
-  const result = [];
-  Object.values(grouped).forEach(weeks => {
+  // Tendencia real
+  return Object.entries(grouped).map(([exercise, weeks]) => {
     weeks.sort((a, b) => a.week - b.week);
 
-    weeks.forEach((w, i) => {
-      let trend = "→";
-      let percent = 0;
+    const last = weeks.at(-1);
+    const prev = weeks.at(-2);
 
-      if (i > 0) {
-        const prev = weeks[i - 1];
-        percent = prev.total_volume
-          ? ((w.total_volume - prev.total_volume) / prev.total_volume) * 100
-          : 0;
-        trend = percent > 3 ? "↑" : percent < -3 ? "↓" : "→";
-      }
+    let percent = prev
+      ? ((last.total_volume - prev.total_volume) / prev.total_volume) * 100
+      : 0;
 
-      result.push({
-        exercise: w.exercise,
-        volume: Math.round(w.total_volume),
-        sets: w.total_sets,
-        trend,
-        percent: Number(percent.toFixed(1))
-      });
-    });
+    const trend =
+      percent > 3 ? '↑' :
+      percent < -3 ? '↓' :
+      '→';
+
+    return {
+     exercise,
+     volume: Math.round(last.total_volume),
+     sets: last.total_sets,
+     trend,
+     percent: prev
+       ? Number(((last.total_volume - prev.total_volume) / prev.total_volume * 100).toFixed(1))
+       : 0
+   };
   });
-
-  return result;
 }
 
 // ------------------------
