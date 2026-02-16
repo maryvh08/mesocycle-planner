@@ -2293,12 +2293,14 @@ function calculateVolumeTrend(records) {
   records.forEach(r => {
     const exercise = r.exercise || r.exercise_name || "Desconocido";
     const week = r.week ?? 1;
-    const sets = Number(r.sets || 1);
-    const reps = Number(r.reps || 0);
-    const weight = Number(r.weight || 0);
 
-    // Calcular el volumen real de este registro
-    const volume = r.volume ?? (weight * reps * sets);
+    // Forzar valores numéricos válidos
+    const sets = Number(r.sets ?? 1);
+    const reps = Number(r.reps ?? 0);
+    const weight = Number(r.weight ?? 0);
+
+    // Volumen real de este registro
+    const volume = sets * reps * weight;
 
     const key = `${exercise}-W${week}`;
 
@@ -2330,7 +2332,7 @@ function calculateVolumeTrend(records) {
     const last = weeks.at(-1);
     const prev = weeks.at(-2);
 
-    let percent = prev
+    let percent = prev && prev.total_volume > 0
       ? ((last.total_volume - prev.total_volume) / prev.total_volume) * 100
       : 0;
 
@@ -2344,9 +2346,7 @@ function calculateVolumeTrend(records) {
       volume: Math.round(last.total_volume),
       sets: last.total_sets,
       trend,
-      percent: prev
-        ? Number(((last.total_volume - prev.total_volume) / prev.total_volume * 100).toFixed(1))
-        : 0
+      percent: Number(percent.toFixed(1))
     };
   });
 }
