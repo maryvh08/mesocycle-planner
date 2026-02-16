@@ -3637,13 +3637,30 @@ async function exportDashboardToPDF(element) {
 
   const imgData = canvas.toDataURL("image/jpeg", 1.0);
 
-  const pdf = new jsPDF("p", "mm", "a4");
+   const pdf = new jsPDF("l", "mm", "a4");
 
-  const pageWidth = 210;
-  const pageHeight = 297;
-
-  const imgWidth = pageWidth;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+   const pageWidth = 297;
+   const pageHeight = 210;
+   
+   const ratio = Math.min(
+     pageWidth / canvas.width,
+     pageHeight / canvas.height
+   );
+   
+   const imgWidth = canvas.width * ratio;
+   const imgHeight = canvas.height * ratio;
+   
+   pdf.addImage(
+     imgData,
+     "JPEG",
+     (pageWidth - imgWidth) / 2,
+     10,
+     imgWidth,
+     imgHeight
+   );
+   
+   const imgWidth = canvas.width * ratio;
+   const imgHeight = canvas.height * ratio;
 
   let heightLeft = imgHeight;
   let position = 0;
