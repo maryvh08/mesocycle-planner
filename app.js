@@ -3642,22 +3642,21 @@ async function exportDashboardToPDF(element) {
    const pageWidth = 297;
    const pageHeight = 210;
    
-   const ratio = Math.min(
-     pageWidth / canvas.width,
-     pageHeight / canvas.height
-   );
+   const imgWidth = pageWidth; // 👈 ancho completo
+   const imgHeight = (canvas.height * imgWidth) / canvas.width;
    
-   const imgWidth = canvas.width * ratio;
-   const imgHeight = canvas.height * ratio;
+   let heightLeft = imgHeight;
+   let position = 0;
    
-   pdf.addImage(
-     imgData,
-     "JPEG",
-     (pageWidth - imgWidth) / 2,
-     10,
-     imgWidth,
-     imgHeight
-   );
+   pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+   heightLeft -= pageHeight;
+   
+   while (heightLeft > 0) {
+     position = heightLeft - imgHeight;
+     pdf.addPage();
+     pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+     heightLeft -= pageHeight;
+   }
 
   let heightLeft = imgHeight;
   let position = 0;
