@@ -2284,6 +2284,9 @@ async function loadVolumeSection(mesocycleId) {
   updateCoachFromVolume(volumeTrend);
 }
 
+// ------------------------
+// Calcula volumen y tendencia seguro
+// ------------------------
 function calculateVolumeTrend(records) {
   const byExercise = {};
 
@@ -2291,8 +2294,8 @@ function calculateVolumeTrend(records) {
     const exercise = r.exercise || r.exercise_name || "Desconocido";
     const week = r.week ?? 1;
     const sets = Number(r.sets || 1);
-    const reps = Number(r.reps || 0);
-    const weight = Number(r.weight || 0);
+    const reps = Number(r.reps || 1);        // valor mínimo 1
+    const weight = Number(r.weight || 0);    // 0 si no hay peso
 
     const key = `${exercise}-W${week}`;
 
@@ -2305,6 +2308,7 @@ function calculateVolumeTrend(records) {
       };
     }
 
+    // calcular volumen: si weight o reps son 0, el volumen será 0
     byExercise[key].total_volume += weight * reps * sets;
     byExercise[key].total_sets += sets;
   });
@@ -2316,7 +2320,7 @@ function calculateVolumeTrend(records) {
     grouped[r.exercise].push(r);
   });
 
-  // Calcular tendencia
+  // Calcular tendencia semana a semana
   const result = [];
   Object.values(grouped).forEach(weeks => {
     weeks.sort((a, b) => a.week - b.week);
@@ -2324,6 +2328,7 @@ function calculateVolumeTrend(records) {
     weeks.forEach((w, i) => {
       let trend = "→";
       let percent = 0;
+
       if (i > 0) {
         const prev = weeks[i - 1];
         percent = prev.total_volume
@@ -2345,19 +2350,25 @@ function calculateVolumeTrend(records) {
   return result;
 }
 
-function renderVolumeTable(records) {
+// ------------------------
+// Clase para colorear tendencia
+// ------------------------
+function trendClass(trend) {
+  return trend === "↑" ? "up" :
+         trend === "↓" ? "down" : "neutral";
+}
+
+// ------------------------
+// Renderiza la tabla
+// ------------------------
+function renderVolumeTable(data) {
   const container = document.getElementById('volumeTable');
-  if (!container) return;
 
-  // Calcula volumen y tendencia
-  const data = calculateVolumeTrend(records);
-
-  // Función auxiliar para clase CSS de la tendencia
-  function trendClass(trend) {
-    return trend === '↑' ? 'up' : trend === '↓' ? 'down' : 'neutral';
+  if (!data || data.length === 0) {
+    container.innerHTML = "<p>No hay registros de ejercicios.</p>";
+    return;
   }
 
-  // Genera la tabla
   container.innerHTML = `
     <table class="volume-table">
       <thead>
@@ -2382,11 +2393,6 @@ function renderVolumeTable(records) {
       </tbody>
     </table>
   `;
-}
-
-function trendClass(trend) {
-  return trend === "↑" ? "up" :
-         trend === "↓" ? "down" : "neutral";
 }
 
 /* ======================
