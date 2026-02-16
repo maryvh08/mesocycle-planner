@@ -3658,9 +3658,6 @@ async function exportDashboardToPDF(element) {
      imgWidth,
      imgHeight
    );
-   
-   const imgWidth = canvas.width * ratio;
-   const imgHeight = canvas.height * ratio;
 
   let heightLeft = imgHeight;
   let position = 0;
