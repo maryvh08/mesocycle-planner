@@ -1866,6 +1866,9 @@ function updateCoachCard({ type, message }) {
   text.textContent = message;
 }
 
+// ------------------------
+// Calcula volumen y tendencia
+// ------------------------
 function calculateVolumeTrend(records) {
   const byExercise = {};
 
@@ -1927,6 +1930,17 @@ function calculateVolumeTrend(records) {
   return result;
 }
 
+// ------------------------
+// Clase para colorear tendencia
+// ------------------------
+function trendClass(trend) {
+  return trend === "↑" ? "up" :
+         trend === "↓" ? "down" : "neutral";
+}
+
+// ------------------------
+// Renderiza la tabla
+// ------------------------
 function renderVolumeTable(data) {
   const container = document.getElementById('volumeTable');
 
@@ -1954,12 +1968,6 @@ function renderVolumeTable(data) {
       </tbody>
     </table>
   `;
-}
-
-function trendClass(trend) {
-  if (trend === '↑') return 'up';
-  if (trend === '↓') return 'down';
-  return 'flat';
 }
 
 function updateCoachFromVolume(data) {
