@@ -2296,8 +2296,22 @@ function calculateVolumeTrend(records) {
 
     // Forzar valores numéricos válidos
     const sets = Number(r.sets ?? 1);
-    const reps = Number(r.reps ?? 0);
-    const weight = Number(r.weight ?? 0);
+    const reps = Number(
+        r.reps ??
+        r.repetitions ??
+        r.reps_done ??
+        r.rep_count ??
+        0
+      );
+      
+      const weight = Number(
+        r.weight ??
+        r.load ??
+        r.kg ??
+        r.weight_kg ??
+        r.weight_used ??
+        0
+      );
 
       console.log('DEBUG RECORD', {
         exercise,
