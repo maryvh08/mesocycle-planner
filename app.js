@@ -3629,6 +3629,9 @@ async function exportDashboardToPDF(element) {
 
   await new Promise(resolve => setTimeout(resolve, 150));
 
+   const originalWidth = element.style.width;
+   element.style.width = "1200px"; // o el ancho real de tu layout
+
   const canvas = await html2canvas(element, {
     scale: 3,
     useCORS: true,
