@@ -1867,58 +1867,43 @@ function updateCoachCard({ type, message }) {
 }
 
 function calculateVolumeTrend(records) {
+  // map[exercise][week] = {volume, sets}
   const map = {};
 
   records.forEach(r => {
-     const sets = Number(r.sets || 1);
-     const reps = Number(r.reps || 0);
-     const weight = Number(r.weight || 0);
-   
-     const exerciseName = r.exercise || r.exercise_name || "Desconocido";
-     const week = r.week ?? 1;
-   
-     if (!statsByCycle[r.mesocycle_id]) {
-       statsByCycle[r.mesocycle_id] = {
-         volume: 0,
-         exercises: {}
-       };
-     }
-   
-     // sumar volumen
-     statsByCycle[r.mesocycle_id].volume += weight * reps * sets;
-   
-     // almacenar por ejercicio
-     if (!statsByCycle[r.mesocycle_id].exercises[exerciseName]) {
-       statsByCycle[r.mesocycle_id].exercises[exerciseName] = [];
-     }
-   
-     statsByCycle[r.mesocycle_id].exercises[exerciseName].push(weight * reps * sets);
-   });
+    const sets = Number(r.sets || 1);
+    const reps = Number(r.reps || 0);
+    const weight = Number(r.weight || 0);
+    const exercise = r.exercise || r.exercise_name || "Desconocido";
+    const week = r.week ?? 1;
 
-  // Calcular tendencia
-  const trendMap = {};
+    if (!map[exercise]) map[exercise] = {};
+    if (!map[exercise][week]) map[exercise][week] = { volume: 0, sets: 0 };
 
-  Object.values(map).forEach(d => {
-    if (!trendMap[d.exercise]) trendMap[d.exercise] = [];
-    trendMap[d.exercise].push(d);
+    map[exercise][week].volume += weight * reps * sets;
+    map[exercise][week].sets += sets;
   });
 
+  // Construir array con tendencia
   const result = [];
 
-  Object.values(trendMap).forEach(weeks => {
-    weeks.sort((a,b)=>a.week - b.week);
+  Object.entries(map).forEach(([exercise, weeksObj]) => {
+    const weeks = Object.entries(weeksObj)
+      .map(([week, data]) => ({ week: Number(week), ...data }))
+      .sort((a,b) => a.week - b.week);
 
-    weeks.forEach((w,i)=>{
+    weeks.forEach((w, i) => {
       let trend = "→";
       let percent = 0;
-      if (i>0){
+
+      if (i > 0) {
         const prev = weeks[i-1];
-        percent = prev.volume ? ((w.volume - prev.volume)/prev.volume)*100 : 0;
+        percent = prev.volume ? ((w.volume - prev.volume) / prev.volume) * 100 : 0;
         trend = percent > 2 ? "↑" : percent < -2 ? "↓" : "→";
       }
 
       result.push({
-        exercise: w.exercise,
+        exercise,
         week: w.week,
         volume: w.volume,
         sets: w.sets,
