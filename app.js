@@ -1382,12 +1382,10 @@ function renderStatsView() {
    DASHBOARD
 ====================== */
 function getTrend(weeks) {
-  if (weeks.length < 2) {
-    return { icon: '→', percent: '0.0' };
-  }
+  if (!weeks || weeks.length < 2) return { icon: '→', percent: '0.0', value: 0 };
 
-  const first = weeks[0].avg_force;
-  const last = weeks.at(-1).avg_force;
+  const first = weeks[0].avg_force || 0;
+  const last = weeks.at(-1).avg_force || 0;
 
   const change = first ? ((last - first) / first) * 100 : 0;
 
@@ -1399,10 +1397,11 @@ function getTrend(weeks) {
 }
 
 function normalizeMuscleName(name) {
-   if (!name) return '';
+  if (!name) return '';
   return name
     .toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quita tildes
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/\s+/g, '_');
 }
 
@@ -1544,128 +1543,56 @@ async function loadDashboardAllMesocycles() {
   updateCoachCard(coach);
 }
 
-async function loadDashboard(mesocycleId) {
-  // ======================
-  // 1️⃣ TEXTO FIJO DE ESTADOS (solo UI)
-  // ======================
-  const statusGreen = document.getElementById('statusGreen');
-  const statusYellow = document.getElementById('statusYellow');
-  const statusRed = document.getElementById('statusRed');
+async function loadDashboard(mesocycleId = null) {
+  const statusElements = {
+    green: document.getElementById('statusGreen'),
+    yellow: document.getElementById('statusYellow'),
+    red: document.getElementById('statusRed')
+  };
 
-  document.getElementById('statusGreen').textContent = '🟢 Progreso sólido';
-  document.getElementById('statusYellow').textContent = '🟡 Progreso irregular';
-  document.getElementById('statusRed').textContent = '🔴 Riesgo de estancamiento';
-   
-  // ======================
-  // 2️⃣ DATA BASE
-  // ======================
+  // Texto fijo
+  statusElements.green.textContent = '🟢 Progreso sólido';
+  statusElements.yellow.textContent = '🟡 Progreso irregular';
+  statusElements.red.textContent = '🔴 Riesgo de estancamiento';
+
   const records = await fetchExerciseRecords(mesocycleId);
   if (!records.length) return;
 
-  // ======================
-  // 3️⃣ VOLUMEN
-  // ======================
   const volumeData = calculateVolumeTrend(records);
   renderVolumeTable(volumeData);
 
-  // ======================
-  // 4️⃣ ESTADO GLOBAL (COACH)
-  // ======================
-  const status = overallProgress(volumeData);
-
-  document.getElementById('globalProgressText').textContent =
-    status === 'green'
-      ? 'Progreso global positivo'
-      : status === 'yellow'
-      ? 'Progreso irregular'
-      : 'Riesgo de estancamiento';
-
-  ['statusGreen', 'statusYellow', 'statusRed'].forEach(id => {
-    document.getElementById(id)?.classList.remove('active');
-  });
-
-  if (status === 'green') statusGreen?.classList.add('active');
-  if (status === 'yellow') statusYellow?.classList.add('active');
-  if (status === 'red') statusRed?.classList.add('active');
-
-  // ======================
-  // 5️⃣ MÚSCULOS (RP)
-  // ======================
   const rawMuscle = calculateMuscleVolume(records);
   const muscleData = evaluateMuscleVolume(rawMuscle);
   renderMuscleTable(muscleData);
 
-  // ======================
-  // 6️⃣ FATIGA POR MÚSCULO
-  // ======================
   const fatigueByMuscle = muscleData.map(m => {
-    const ranges = RP_RANGES[m.muscle];
-
     const score = evaluateMuscleFatigue({
       muscle: m.muscle,
       weekly: m,
-      ranges,
-      prevScore: m.prev_fatigue ?? 0,
-      isDeload: false
+      ranges: m.ranges
     });
-
-    return {
-      ...m,
-      fatigueScore: score,
-      fatigueStatus: fatigueStatus(score)
-    };
+    return { ...m, fatigueScore: score, fatigueStatus: fatigueStatus(score) };
   });
 
-  // ======================
-  // 7️⃣ ALERTAS DE FATIGA
-  // ======================
-  const criticalDrops = volumeData.filter(v =>
-     v.trend === '↓' && Number(v.percent) < -5
-   );
-   
-   renderFatigueAlerts(criticalDrops);
+  // Estado global
+  const status = overallProgress(volumeData);
+  Object.values(statusElements).forEach(el => el?.classList.remove('active'));
+  statusElements[status]?.classList.add('active');
+  document.getElementById('globalProgressText').textContent =
+    status === 'green' ? 'Progreso global positivo' :
+    status === 'yellow' ? 'Progreso irregular' :
+    'Riesgo de estancamiento';
 
-  // ======================
-  // 8️⃣ COACH (DELOAD / AJUSTE)
-  // ======================
-  const fatigued = fatigueByMuscle.filter(m =>
-    m.fatigueStatus === 'high' || m.fatigueStatus === 'over'
-  );
-
+  // Coach
+  const fatigued = fatigueByMuscle.filter(m => ['overreached','critical'].includes(m.fatigueStatus));
   const weak = fatigueByMuscle.filter(m => m.status === 'below');
 
-  let coach;
-
-  if (fatigued.length >= 2) {
-    coach = {
-      type: 'danger',
-      message: 'Fatiga acumulada detectada. Deload recomendado (15–25%).'
-    };
-  } else if (weak.length >= 2) {
-    coach = {
-      type: 'warning',
-      message: 'Algunos músculos subestimulados. Considera añadir 1–2 sets.'
-    };
-  } else {
-    coach = {
-      type: 'success',
-      message: 'Distribución óptima. Mantén volumen e intensidad.'
-    };
-  }
+  let coach = { type: 'info', message: 'Progreso mixto.' };
+  if (fatigued.length >= 2) coach = { type: 'danger', message: 'Fatiga acumulada. Deload recomendado.' };
+  else if (weak.length >= 2) coach = { type: 'warning', message: 'Músculos subestimulados. Ajusta volumen.' };
+  else if (status === 'green') coach = { type: 'success', message: 'Progresión sólida. Mantén estrategia.' };
 
   updateCoachCard(coach);
-
-   if (coach.type === 'danger') {
-     const container = document.getElementById('deloadPlan');
-     if (container) {
-       container.innerHTML = `
-         <p>Reducir volumen total 15–25%</p>
-         <ul>
-           ${fatigued.map(m => `<li>${m.muscle}</li>`).join('')}
-         </ul>
-       `;
-     }
-   }
 }
 
 function safePercentChange(current, previous) {
@@ -1705,20 +1632,14 @@ function calculateMuscleVolume(records) {
   const muscleMap = {};
 
   records.forEach(r => {
-    const muscle = r.muscle_group;
+    const muscle = normalizeMuscleName(MUSCLE_MAP[r.muscle_group] || r.muscle_group || 'otros');
     if (!muscle) return;
 
-    const volume = calculateSetVolume(r);
+    const volume = r.volume || (r.weight || 0) * (r.reps || 0);
 
-    if (!muscleMap[muscle]) {
-      muscleMap[muscle] = {
-        muscle,
-        sets: 0,
-        volume: 0
-      };
-    }
+    if (!muscleMap[muscle]) muscleMap[muscle] = { muscle, sets: 0, volume: 0 };
 
-    muscleMap[muscle].sets += Number(r.sets) || 1;
+    muscleMap[muscle].sets += Number(r.sets || 1);
     muscleMap[muscle].volume += volume;
   });
 
@@ -1728,26 +1649,15 @@ function calculateMuscleVolume(records) {
 function evaluateMuscleVolume(muscleData) {
   return muscleData.map(m => {
     const ranges = RP_RANGES[m.muscle];
-
-    if (!ranges) {
-      return {
-        ...m,
-        status: 'unknown',
-        ranges: null
-      };
-    }
+    if (!ranges) return { ...m, status: 'unknown', ranges: null };
 
     let status;
     if (m.sets < ranges.MEV) status = 'below';
     else if (m.sets <= ranges.MAV) status = 'optimal';
     else if (m.sets <= ranges.MRV) status = 'high';
-    else status = 'excessive';
+    else status = 'over';
 
-    return {
-      ...m,
-      status,
-      ranges
-    };
+    return { ...m, status, ranges };
   });
 }
 
@@ -1960,15 +1870,11 @@ function calculateVolumeTrend(records) {
   const map = {};
 
   records.forEach(r => {
-    const key = `${r.exercise_name}-W${r.week_number}`;
-    const volume = calculateSetVolume(r);
+    const volume = (r.volume || r.weight * r.reps || 0);
+    const key = `${r.exercise}-W${r.week}`;
 
     if (!map[key]) {
-      map[key] = {
-        exercise: r.exercise_name,
-        week: r.week_number,
-        volume: 0
-      };
+      map[key] = { exercise: r.exercise, week: r.week, volume: 0 };
     }
 
     map[key].volume += volume;
@@ -2353,38 +2259,26 @@ function nextWeekSets(currentSets, range) {
   return range.mav - 2; // deload preventivo
 }
 
-function muscleFatigueScore({
-  sets = 0,
-  ranges,
-  strengthTrend = 0,
-  weeksWithoutPR = 0,
-  volumeChange = 0
-}) {
-  if (!ranges || ranges.MAV == null || ranges.MRV == null) {
-    console.warn('⚠️ RP ranges inválidos:', ranges);
-    return 0; // ← sin score si no hay modelo
-  }
+function muscleFatigueScore({ sets = 0, ranges, strengthTrend = 0, weeksWithoutPR = 0, volumeChange = 0 }) {
+  if (!ranges || ranges.MAV == null || ranges.MRV == null) return 0;
 
   let score = 0;
-   if (sets > ranges.MRV) score += 35;
-   else if (sets > ranges.MAV) score += 20;
-   
-   // fuerza vs volumen
-   if (strengthTrend < 0 && volumeChange > 0) score += 25;
-   
-   // tendencia de fuerza
-   if (strengthTrend < -2) score += 20;
-   else if (strengthTrend < 0) score += 10;
-   
-   // estancamiento
-   if (weeksWithoutPR >= 5) score += 20;
-   else if (weeksWithoutPR >= 3) score += 10;
-   
-   return Math.min(score, 100);
+
+  if (sets > ranges.MRV) score += 35;
+  else if (sets > ranges.MAV) score += 20;
+
+  if (strengthTrend < 0 && volumeChange > 0) score += 25;
+
+  if (strengthTrend < -2) score += 20;
+  else if (strengthTrend < 0) score += 10;
+
+  if (weeksWithoutPR >= 5) score += 20;
+  else if (weeksWithoutPR >= 3) score += 10;
+
+  return Math.min(score, 100);
 }
 
 function accumulateFatigue(prev, current) {
-  // se arrastra el 70% de la fatiga previa
   return Math.min(100, Math.round(prev * 0.7 + current));
 }
 
@@ -2392,17 +2286,8 @@ function deloadRecovery(prevScore) {
   return Math.max(0, Math.round(prevScore * 0.4));
 }
 
-function evaluateMuscleFatigue({
-  muscle,
-  weekly,
-  ranges,
-  prevScore = 0,
-  isDeload = false
-}) {
-  if (!ranges) {
-    return 0;
-  }
-
+function evaluateMuscleFatigue({ muscle, weekly, ranges, prevScore = 0, isDeload = false }) {
+  if (!ranges) return 0;
   const score = muscleFatigueScore({
     sets: weekly.sets,
     ranges,
@@ -2410,28 +2295,16 @@ function evaluateMuscleFatigue({
     weeksWithoutPR: weekly.weeksWithoutPR ?? 0,
     volumeChange: weekly.volumeChange ?? 0
   });
-
   return isDeload ? score * 0.6 : score;
 }
 
 const MUSCLE_MAP = {
-  chest: 'Chest',
-  pecho: 'Chest',
-
-  back: 'Back',
-  espalda: 'Back',
-
-  quads: 'Quads',
-  cuadriceps: 'Quads',
-
-  hamstrings: 'Hamstrings',
-  femorales: 'Hamstrings',
-
-  shoulders: 'Shoulders',
-  hombros: 'Shoulders',
-
-  arms: 'Arms',
-  brazos: 'Arms'
+  chest: 'Chest', pecho: 'Chest',
+  back: 'Back', espalda: 'Back',
+  quads: 'Quads', cuadriceps: 'Quads',
+  hamstrings: 'Hamstrings', femorales: 'Hamstrings',
+  shoulders: 'Shoulders', hombros: 'Shoulders',
+  arms: 'Arms', brazos: 'Arms'
 };
 
 function fatigueStatus(score) {
@@ -2441,7 +2314,6 @@ function fatigueStatus(score) {
   if (score >= 26) return 'working';
   return 'fresh';
 }
-
 
 function muscleStatus(vol, mev, mav, mrv, strengthTrend) {
   if (vol < mev) return "under";
