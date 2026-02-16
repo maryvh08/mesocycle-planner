@@ -3658,19 +3658,6 @@ async function exportDashboardToPDF(element) {
      heightLeft -= pageHeight;
    }
 
-  let heightLeft = imgHeight;
-  let position = 0;
-
-  pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-  heightLeft -= pageHeight;
-
-  while (heightLeft > 0) {
-    position = heightLeft - imgHeight;
-    pdf.addPage();
-    pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-  }
-
   pdf.save("Dashboard_High_Quality.pdf");
 
   // 🔁 Restaurar
