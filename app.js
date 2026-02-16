@@ -468,6 +468,7 @@ async function loadExerciseHistory(mesocycleId, container) {
       exercise_name,
       weight,
       reps,
+      sets,
       week_number,
       day_number,
       updated_at
@@ -523,7 +524,7 @@ async function loadExerciseHistory(mesocycleId, container) {
         chip.className = "exercise-chip";
 
         const label = document.createElement("span");
-        label.textContent = `${r.exercise_name} — ${r.weight}kg × ${r.reps}`;
+        label.textContent = `${r.exercise_name} — ${r.sets} × ${r.reps} reps × ${r.weight} kg`;
         label.onclick = () => editExerciseRecord(r);
 
         const deleteBtn = document.createElement("button");
@@ -786,6 +787,8 @@ async function renderRegistroEditor(mesocycleId) {
     const exercise = exercisesById[exerciseSelect.value];
     if (!exercise) return alert("Ejercicio inválido");
 
+      const setsInput = document.getElementById('sets');
+     
     const payload = {
       user_id: session.user.id,
       mesocycle_id: mesocycleId,
@@ -794,7 +797,8 @@ async function renderRegistroEditor(mesocycleId) {
       week_number: Number(weekSelect.value),
       day_number: selectedDay,
       weight: Number(weightInput.value),
-      reps: Number(repsInput.value)
+      reps: Number(repsInput.value),
+      sets: Number(setsInput?.value) || 1
     };
 
     // 🚨 comprobar duplicado
@@ -1036,7 +1040,7 @@ async function renderExercisesForDay(mesocycleId, week, day) {
 
   const { data, error } = await supabase
     .from("exercise_records")
-    .select("id, exercise_name, weight, reps")
+    .select("id, exercise_name, weight, reps, sets")
     .eq("mesocycle_id", mesocycleId)
     .eq("week_number", week)
     .eq("day_number", day)
@@ -1060,7 +1064,7 @@ async function renderExercisesForDay(mesocycleId, week, day) {
     chip.className = "exercise-chip";
 
     const label = document.createElement("span");
-    label.textContent = `${r.exercise_name} — ${r.weight}kg × ${r.reps}`;
+    label.textContent = `${r.exercise_name} — ${r.sets} × ${r.reps} reps × ${r.weight} kg`;
 
     // 👉 click para editar
     label.onclick = () => editExerciseRecord(r);
@@ -1692,78 +1696,53 @@ function renderGlobalStatusCards(status) {
 }
 
 function calculateMuscleVolume(records) {
-  const byMuscle = {};
+  const muscleMap = {};
 
   records.forEach(r => {
-    const key = `${r.muscle_group}-${r.week}`;
+    const muscle = r.muscle_group;
+    if (!muscle) return;
 
-    if (!byMuscle[key]) {
-      byMuscle[key] = {
-        muscle: r.muscle_group,
-        week: r.week,
-        total_sets: 0
+    const volume = calculateSetVolume(r);
+
+    if (!muscleMap[muscle]) {
+      muscleMap[muscle] = {
+        muscle,
+        sets: 0,
+        volume: 0
       };
     }
 
-    byMuscle[key].total_sets += 1;
+    muscleMap[muscle].sets += Number(r.sets) || 1;
+    muscleMap[muscle].volume += volume;
   });
 
-  const grouped = {};
-  Object.values(byMuscle).forEach(r => {
-    if (!grouped[r.muscle]) grouped[r.muscle] = [];
-    grouped[r.muscle].push(r);
-  });
-
-  return Object.entries(grouped).map(([muscle, weeks]) => {
-    weeks.sort((a, b) => a.week - b.week);
-    const last = weeks.at(-1);
-    return { muscle, sets: last.total_sets };
-  });
+  return Object.values(muscleMap);
 }
 
-function evaluateMuscleVolume(data) {
-  if (!Array.isArray(data)) return [];
+function evaluateMuscleVolume(muscleData) {
+  return muscleData.map(m => {
+    const ranges = RP_RANGES[m.muscle];
 
-  return data.map(d => {
-    const key = normalizeMuscleName(d.muscle);
-    const ranges = RP_RANGES[key];
-
-    let status = 'unknown';
-
-    if (ranges) {
-      if (d.sets < ranges.MEV) status = 'below';
-      else if (d.sets <= ranges.MAV) status = 'optimal';
-      else if (d.sets <= ranges.MRV) status = 'high';
-      else status = 'over';
+    if (!ranges) {
+      return {
+        ...m,
+        status: 'unknown',
+        ranges: null
+      };
     }
 
+    let status;
+    if (m.sets < ranges.MEV) status = 'below';
+    else if (m.sets <= ranges.MAV) status = 'optimal';
+    else if (m.sets <= ranges.MRV) status = 'high';
+    else status = 'excessive';
+
     return {
-      ...d,
-      muscleKey: key,
-      ranges,
-      status
+      ...m,
+      status,
+      ranges
     };
   });
-   document.getElementById('exportDashboard').onclick = () => {
-     exportDashboardToExcel({
-       volumeData,
-       muscleData,
-       fatigueAlerts: criticalDrops,
-       coach
-     });
-   };
-      // ======================
-   // 9️⃣ CACHE PARA EXPORTAR
-   // ======================
-   window.__dashboardCache = {
-     generatedAt: new Date().toISOString(),
-     mesocycleId: mesocycleId ?? null,
-     volumeByExercise: volumeData,
-     muscleVolume: muscleData,
-     fatigueAlerts: criticalDrops,
-     coach: coach,
-     globalStatus: status
-   };
 }
 
 function getStatsMode() {
@@ -1972,57 +1951,24 @@ function updateCoachCard({ type, message }) {
 }
 
 function calculateVolumeTrend(records) {
-  const byExercise = {};
+  const map = {};
 
   records.forEach(r => {
-    const key = `${r.exercise}-${r.week}`;
+    const key = `${r.exercise_name}-W${r.week_number}`;
+    const volume = calculateSetVolume(r);
 
-    if (!byExercise[key]) {
-      byExercise[key] = {
-        exercise: r.exercise,
-        week: r.week,
-        total_volume: 0,
-        total_sets: 0
+    if (!map[key]) {
+      map[key] = {
+        exercise: r.exercise_name,
+        week: r.week_number,
+        volume: 0
       };
     }
 
-    byExercise[key].total_volume += r.volume;
-    byExercise[key].total_sets += 1;
+    map[key].volume += volume;
   });
 
-  // Agrupar por ejercicio
-  const grouped = {};
-  Object.values(byExercise).forEach(r => {
-    if (!grouped[r.exercise]) grouped[r.exercise] = [];
-    grouped[r.exercise].push(r);
-  });
-
-  // Tendencia real
-  return Object.entries(grouped).map(([exercise, weeks]) => {
-    weeks.sort((a, b) => a.week - b.week);
-
-    const last = weeks.at(-1);
-    const prev = weeks.at(-2);
-
-    let percent = prev
-      ? ((last.total_volume - prev.total_volume) / prev.total_volume) * 100
-      : 0;
-
-    const trend =
-      percent > 3 ? '↑' :
-      percent < -3 ? '↓' :
-      '→';
-
-    return {
-     exercise,
-     volume: Math.round(last.total_volume),
-     sets: last.total_sets,
-     trend,
-     percent: prev
-       ? Number(((last.total_volume - prev.total_volume) / prev.total_volume * 100).toFixed(1))
-       : 0
-   };
-  });
+  return Object.values(map);
 }
 
 function renderVolumeTable(data) {
@@ -3852,6 +3798,18 @@ function populateFilters(exercises) {
 
 function getSelectedValues(containerId) {
   return Array.from(document.querySelectorAll(`#${containerId} input:checked`)).map(i=>i.value);
+}
+
+// =====================
+// SETS
+// =====================
+
+function calculateSetVolume(record) {
+  const sets = Number(record.sets) || 1;
+  const reps = Number(record.reps) || 0;
+  const weight = Number(record.weight) || 0;
+
+  return sets * reps * weight;
 }
 
 // =====================
