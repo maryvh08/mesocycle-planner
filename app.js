@@ -2549,6 +2549,8 @@ async function loadMesocycleComparison() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
+   const sets = r.sets || 1;
+
   const { data: mesocycles } = await supabase
     .from("mesocycles")
     .select("id, name")
