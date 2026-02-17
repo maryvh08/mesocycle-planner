@@ -1445,9 +1445,8 @@ async function loadDashboardAllMesocycles() {
   // 2️⃣ DATA (SIN FILTRO)
   // ======================
   const records = await fetchExerciseRecords();
-  if (!records.length) return;
-
    console.log('RECORDS RECIBIDOS', records.slice(0, 5));
+  if (!records.length) return;
    
   dashboardState = {
     mode: "all",
