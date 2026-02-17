@@ -586,9 +586,9 @@ async function editExerciseRecord(record) {
   const { error } = await supabase
     .from("exercise_records")
     .update({
-      weight: Number(newWeight),
+      sets: Number(newSets),
       reps: Number(newReps),
-       sets: Number(newSets),
+      weight: Number(newWeight),
       updated_at: new Date().toISOString()
     })
     .eq("id", record.id);
@@ -766,20 +766,20 @@ async function renderRegistroEditor(mesocycleId) {
     exerciseSelect.append(new Option(ex.name, ex.id))
   );
 
-  const weightInput = document.createElement("input");
-  weightInput.type = "number";
-  weightInput.placeholder = "Peso (kg)";
-
-  const repsInput = document.createElement("input");
-  repsInput.type = "number";
-  repsInput.placeholder = "Reps";
-
    const setsInput = document.createElement("input");
    setsInput.type = "number";
    setsInput.placeholder = "Sets";
+   
+   const repsInput = document.createElement("input");
+   repsInput.type = "number";
+   repsInput.placeholder = "Reps";
+   
+   const weightInput = document.createElement("input");
+   weightInput.type = "number";
+   weightInput.placeholder = "Peso (kg)";
 
-  const saveBtn = document.createElement("button");
-  saveBtn.textContent = "Guardar";
+   const saveBtn = document.createElement("button");
+   saveBtn.textContent = "Guardar";
 
   registroEditor.append(
       exerciseSelect,
@@ -845,8 +845,9 @@ async function renderRegistroEditor(mesocycleId) {
       return;
     }
 
-    weightInput.value = "";
-    repsInput.value = "";
+      weightInput.value = "";
+      repsInput.value = "";
+      setsInput.value = "";
 
     renderExercisesForDay(
       mesocycleId,
@@ -1643,7 +1644,7 @@ function calculateMuscleVolume(records) {
     const muscle = normalizeMuscleName(MUSCLE_MAP[r.muscle_group] || r.muscle_group || 'otros');
     if (!muscle) return;
 
-    const volume = r.volume || (r.weight || 0) * (r.reps || 0);
+    const volume = r.volume || (r.weight || 0) * (r.reps || 0) * (r.sets || 0);
 
     if (!muscleMap[muscle]) muscleMap[muscle] = { muscle, sets: 0, volume: 0 };
 
@@ -3415,7 +3416,8 @@ async function exportHistoryToExcel() {
     Ejercicio: r.exercise_name,
     Peso: r.weight,
     Reps: r.reps,
-    Volumen: r.weight * r.reps,
+     Sets: r.sets,
+    Volumen: r.weight * r.reps * r.sets,
     Mesociclo: r.mesocycles?.name ?? '-'
   }));
 
