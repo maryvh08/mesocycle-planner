@@ -1447,7 +1447,8 @@ async function loadDashboardAllMesocycles() {
   // ======================
   // 3️⃣ VOLUMEN
   // ======================
-  const volumeData = calculateVolumeTrend(records);
+  const volumeData = calculateVolumeTrend(validRecords);
+
   renderVolumeTable(volumeData);
 
   // ======================
@@ -2313,6 +2314,11 @@ function calculateVolumeTrend(records) {
         0
       );
 
+     const validRecords = records.filter(r =>
+        r.reps != null &&
+        r.weight != null
+      );
+     
       console.log('DEBUG RECORD', {
         exercise,
         sets: r.sets,
