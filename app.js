@@ -1428,8 +1428,6 @@ const RP_RANGES = {
   triceps: { MEV: 6, MAV: 10, MRV: 16 }
 };
 
-console.log('RECORDS RECIBIDOS', records.slice(0, 5));
-
 async function loadDashboardAllMesocycles() {
 
   // ======================
@@ -1638,6 +1636,8 @@ function renderGlobalStatusCards(status) {
     document.getElementById(cards[status].el).classList.add('active');
   }
 }
+
+console.log('RECORDS RECIBIDOS', records.slice(0, 5));
 
 function calculateMuscleVolume(records) {
   const muscleMap = {};
