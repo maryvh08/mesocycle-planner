@@ -2295,7 +2295,7 @@ async function loadVolumeSection(mesocycleId) {
 }
 
 // ------------------------
-// Calcula volumen y tendencia seguro
+// Calcula volumen y tendencia
 // ------------------------
 function calculateVolumeTrend(records) {
   const byExercise = {};
@@ -2308,6 +2308,7 @@ function calculateVolumeTrend(records) {
     const reps = Number(r.reps || 0);
     const weight = Number(r.weight || 0);
 
+    // Volumen real
     const volume = sets * reps * weight;
 
     const key = `${exercise}-W${week}`;
@@ -2325,26 +2326,28 @@ function calculateVolumeTrend(records) {
     byExercise[key].total_sets += sets;
   });
 
+  // Agrupar por ejercicio
   const grouped = {};
-  Object.values(byExercise).forEach(r => {
-    if (!grouped[r.exercise]) grouped[r.exercise] = [];
-    grouped[r.exercise].push(r);
+  Object.values(byExercise).forEach(entry => {
+    if (!grouped[entry.exercise]) grouped[entry.exercise] = [];
+    grouped[entry.exercise].push(entry);
   });
 
+  // Calcular tendencia (última vs anterior semana)
   return Object.entries(grouped).map(([exercise, weeks]) => {
     weeks.sort((a, b) => a.week - b.week);
 
     const last = weeks.at(-1);
-    const prev = weeks.at(-2);
+    const prev = weeks.length > 1 ? weeks.at(-2) : null;
 
     const percent = prev && prev.total_volume > 0
       ? ((last.total_volume - prev.total_volume) / prev.total_volume) * 100
       : 0;
 
     const trend =
-      percent > 3 ? '↑' :
-      percent < -3 ? '↓' :
-      '→';
+      percent > 3 ? "↑" :
+      percent < -3 ? "↓" :
+      "→";
 
     return {
       exercise,
@@ -2360,18 +2363,22 @@ function calculateVolumeTrend(records) {
 // Clase para colorear tendencia
 // ------------------------
 function trendClass(trend) {
-  return trend === "↑" ? "up" :
-         trend === "↓" ? "down" : "neutral";
+  if (trend === "↑") return "up";
+  if (trend === "↓") return "down";
+  return "neutral";
 }
 
 // ------------------------
 // Renderiza la tabla
 // ------------------------
-function renderVolumeTable(data) {
-  const container = document.getElementById('volumeTable');
+function renderVolumeTable(records) {
+  const container = document.getElementById("volumeTable");
+  if (!container) return;
 
-  if (!data || data.length === 0) {
-    container.innerHTML = "<p>No hay registros de ejercicios.</p>";
+  const data = calculateVolumeTrend(records);
+
+  if (!data.length) {
+    container.innerHTML = "<p>No hay registros.</p>";
     return;
   }
 
@@ -2395,7 +2402,7 @@ function renderVolumeTable(data) {
               ${d.trend} ${Math.abs(d.percent)}%
             </td>
           </tr>
-        `).join('')}
+        `).join("")}
       </tbody>
     </table>
   `;
