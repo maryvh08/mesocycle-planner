@@ -2295,20 +2295,48 @@ async function loadVolumeSection(mesocycleId) {
 }
 
 // ------------------------
-// Calcula volumen y tendencia
+// Calcula volumen y tendencia seguro
 // ------------------------
 function calculateVolumeTrend(records) {
   const byExercise = {};
 
   records.forEach(r => {
-    const exercise = r.exercise_name || "Desconocido";
-    const week = r.week_number ?? 1;
+    const exercise = r.exercise || r.exercise_name || "Desconocido";
+    const week = r.week ?? 1;
 
-    const sets = Number(r.sets || 1);
-    const reps = Number(r.reps || 0);
-    const weight = Number(r.weight || 0);
+    // Forzar valores numéricos válidos
+    const sets = Number(r.sets ?? 1);
+    const reps = Number(
+        r.reps ??
+        r.repetitions ??
+        r.reps_done ??
+        r.rep_count ??
+        0
+      );
+      
+      const weight = Number(
+        r.weight ??
+        r.load ??
+        r.kg ??
+        r.weight_kg ??
+        r.weight_used ??
+        0
+      );
 
-    // Volumen real
+     const validRecords = records.filter(r =>
+        r.reps != null &&
+        r.weight != null
+      );
+     
+      console.log('DEBUG RECORD', {
+        exercise,
+        sets: r.sets,
+        reps: r.reps,
+        weight: r.weight,
+        fullRecord: r
+      });
+
+    // Volumen real de este registro
     const volume = sets * reps * weight;
 
     const key = `${exercise}-W${week}`;
@@ -2322,32 +2350,33 @@ function calculateVolumeTrend(records) {
       };
     }
 
+    // Sumar volumen y sets correctamente
     byExercise[key].total_volume += volume;
     byExercise[key].total_sets += sets;
   });
 
   // Agrupar por ejercicio
   const grouped = {};
-  Object.values(byExercise).forEach(entry => {
-    if (!grouped[entry.exercise]) grouped[entry.exercise] = [];
-    grouped[entry.exercise].push(entry);
+  Object.values(byExercise).forEach(r => {
+    if (!grouped[r.exercise]) grouped[r.exercise] = [];
+    grouped[r.exercise].push(r);
   });
 
-  // Calcular tendencia (última vs anterior semana)
+  // Calcular tendencia
   return Object.entries(grouped).map(([exercise, weeks]) => {
     weeks.sort((a, b) => a.week - b.week);
 
     const last = weeks.at(-1);
-    const prev = weeks.length > 1 ? weeks.at(-2) : null;
+    const prev = weeks.at(-2);
 
-    const percent = prev && prev.total_volume > 0
+    let percent = prev && prev.total_volume > 0
       ? ((last.total_volume - prev.total_volume) / prev.total_volume) * 100
       : 0;
 
     const trend =
-      percent > 3 ? "↑" :
-      percent < -3 ? "↓" :
-      "→";
+      percent > 3 ? '↑' :
+      percent < -3 ? '↓' :
+      '→';
 
     return {
       exercise,
@@ -2363,22 +2392,18 @@ function calculateVolumeTrend(records) {
 // Clase para colorear tendencia
 // ------------------------
 function trendClass(trend) {
-  if (trend === "↑") return "up";
-  if (trend === "↓") return "down";
-  return "neutral";
+  return trend === "↑" ? "up" :
+         trend === "↓" ? "down" : "neutral";
 }
 
 // ------------------------
 // Renderiza la tabla
 // ------------------------
-function renderVolumeTable(records) {
-  const container = document.getElementById("volumeTable");
-  if (!container) return;
+function renderVolumeTable(data) {
+  const container = document.getElementById('volumeTable');
 
-  const data = calculateVolumeTrend(records);
-
-  if (!data.length) {
-    container.innerHTML = "<p>No hay registros.</p>";
+  if (!data || data.length === 0) {
+    container.innerHTML = "<p>No hay registros de ejercicios.</p>";
     return;
   }
 
@@ -2402,7 +2427,7 @@ function renderVolumeTable(records) {
               ${d.trend} ${Math.abs(d.percent)}%
             </td>
           </tr>
-        `).join("")}
+        `).join('')}
       </tbody>
     </table>
   `;
