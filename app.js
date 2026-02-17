@@ -577,11 +577,18 @@ async function editExerciseRecord(record) {
   );
   if (newReps === null) return;
 
+  const newSets = prompt(
+    `Editar sets (${record.exercise_name})`,
+    record.sets
+  );
+  if (newSets === null) return;
+
   const { error } = await supabase
     .from("exercise_records")
     .update({
       weight: Number(newWeight),
       reps: Number(newReps),
+       sets: Number(newSets),
       updated_at: new Date().toISOString()
     })
     .eq("id", record.id);
@@ -1685,6 +1692,7 @@ async function fetchExerciseRecords(mesocycleId = null) {
       week_number,
       weight,
       reps,
+      sets,
       mesocycle_id,
       exercises (
         subgroup
@@ -3391,6 +3399,7 @@ async function exportHistoryToExcel() {
       exercise_name,
       weight,
       reps,
+      sets,
       mesocycles ( name )
     `)
     .order('updated_at');
