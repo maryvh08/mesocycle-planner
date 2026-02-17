@@ -2298,47 +2298,39 @@ async function loadVolumeSection(mesocycleId) {
 // Calcula volumen y tendencia seguro
 // ------------------------
 function calculateVolumeTrend(records) {
+
+  // 1️⃣ Filtrar registros inválidos
+  const validRecords = records.filter(r =>
+    (r.reps ?? r.repetitions ?? r.reps_done ?? r.rep_count) != null &&
+    (r.weight ?? r.load ?? r.kg ?? r.weight_kg ?? r.weight_used) != null
+  );
+
   const byExercise = {};
 
-  records.forEach(r => {
+  validRecords.forEach(r => {
     const exercise = r.exercise || r.exercise_name || "Desconocido";
-    const week = r.week ?? 1;
+    const week = Number(r.week ?? r.week_number ?? 1);
 
-    // Forzar valores numéricos válidos
     const sets = Number(r.sets ?? 1);
     const reps = Number(
-        r.reps ??
-        r.repetitions ??
-        r.reps_done ??
-        r.rep_count ??
-        0
-      );
-      
-      const weight = Number(
-        r.weight ??
-        r.load ??
-        r.kg ??
-        r.weight_kg ??
-        r.weight_used ??
-        0
-      );
+      r.reps ??
+      r.repetitions ??
+      r.reps_done ??
+      r.rep_count
+    );
 
-     const validRecords = records.filter(r =>
-        r.reps != null &&
-        r.weight != null
-      );
-     
-      console.log('DEBUG RECORD', {
-        exercise,
-        sets: r.sets,
-        reps: r.reps,
-        weight: r.weight,
-        fullRecord: r
-      });
+    const weight = Number(
+      r.weight ??
+      r.load ??
+      r.kg ??
+      r.weight_kg ??
+      r.weight_used
+    );
 
-    // Volumen real de este registro
+    // 🧠 Seguridad extra
+    if (reps <= 0 || weight <= 0) return;
+
     const volume = sets * reps * weight;
-
     const key = `${exercise}-W${week}`;
 
     if (!byExercise[key]) {
@@ -2350,26 +2342,25 @@ function calculateVolumeTrend(records) {
       };
     }
 
-    // Sumar volumen y sets correctamente
     byExercise[key].total_volume += volume;
     byExercise[key].total_sets += sets;
   });
 
-  // Agrupar por ejercicio
+  // 2️⃣ Agrupar por ejercicio
   const grouped = {};
   Object.values(byExercise).forEach(r => {
     if (!grouped[r.exercise]) grouped[r.exercise] = [];
     grouped[r.exercise].push(r);
   });
 
-  // Calcular tendencia
+  // 3️⃣ Calcular tendencia
   return Object.entries(grouped).map(([exercise, weeks]) => {
     weeks.sort((a, b) => a.week - b.week);
 
     const last = weeks.at(-1);
     const prev = weeks.at(-2);
 
-    let percent = prev && prev.total_volume > 0
+    const percent = prev && prev.total_volume > 0
       ? ((last.total_volume - prev.total_volume) / prev.total_volume) * 100
       : 0;
 
