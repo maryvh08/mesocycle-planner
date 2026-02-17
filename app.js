@@ -1447,6 +1447,8 @@ async function loadDashboardAllMesocycles() {
   const records = await fetchExerciseRecords();
   if (!records.length) return;
 
+   console.log('RECORDS RECIBIDOS', records.slice(0, 5));
+   
   dashboardState = {
     mode: "all",
     records
@@ -1636,8 +1638,6 @@ function renderGlobalStatusCards(status) {
     document.getElementById(cards[status].el).classList.add('active');
   }
 }
-
-console.log('RECORDS RECIBIDOS', records.slice(0, 5));
 
 function calculateMuscleVolume(records) {
   const muscleMap = {};
