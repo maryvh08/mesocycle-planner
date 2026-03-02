@@ -1437,11 +1437,6 @@ async function loadDashboardAllMesocycles() {
   const statusYellow = document.getElementById('statusYellow');
   const statusRed = document.getElementById('statusRed');
 
-   const validRecords = records.filter(r =>
-    (r.reps ?? r.repetitions ?? r.reps_done ?? r.rep_count) != null &&
-    (r.weight ?? r.load ?? r.kg ?? r.weight_kg ?? r.weight_used) != null
-   );
-
   statusGreen.textContent = '🟢 Progreso sólido';
   statusYellow.textContent = '🟡 Progreso irregular';
   statusRed.textContent = '🔴 Riesgo de estancamiento';
@@ -1461,7 +1456,7 @@ async function loadDashboardAllMesocycles() {
   // ======================
   // 3️⃣ VOLUMEN
   // ======================
-  const volumeData = calculateVolumeTrend(ValidRecords);
+  const volumeData = calculateVolumeTrend(records);
 
   renderVolumeTable(volumeData);
 
