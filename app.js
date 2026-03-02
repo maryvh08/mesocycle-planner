@@ -1456,7 +1456,7 @@ async function loadDashboardAllMesocycles() {
   // ======================
   // 3️⃣ VOLUMEN
   // ======================
-  const volumeData = calculateVolumeTrend(validRecords);
+  const volumeData = calculateVolumeTrend(records);
 
   renderVolumeTable(volumeData);
 
