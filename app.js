@@ -1551,9 +1551,45 @@ async function loadDashboardAllMesocycles() {
   }
 
   updateCoachCard(coach);
+  await loadKPIs(null);
+  await loadStrengthChart(null);
+
+  // 🔹 Sin filtro de mesociclo
+  await loadWeeklyVolume(null);
 }
 
-async function loadDashboard(mesocycleId = null) {
+async function loadWeeklyVolume(mesocycleId = null) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  let query = supabase
+    .from("exercise_records")
+    .select("exercise_name, week_number, weight, reps, sets")
+    .eq("user_id", user.id);
+
+  // 🔵 Si hay mesociclo específico, filtra
+  if (mesocycleId && mesocycleId !== "") {
+    query = query.eq("mesocycle_id", mesocycleId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Error cargando volumen semanal:", error);
+    renderVolumeTable([]);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    renderVolumeTable([]);
+    return;
+  }
+
+  const trendData = calculateVolumeTrend(data);
+  renderVolumeTable(trendData);
+}
+
+async function loadDashboard(mesocycleId) {
   const statusElements = {
     green: document.getElementById('statusGreen'),
     yellow: document.getElementById('statusYellow'),
@@ -1603,6 +1639,12 @@ async function loadDashboard(mesocycleId = null) {
   else if (status === 'green') coach = { type: 'success', message: 'Progresión sólida. Mantén estrategia.' };
 
   updateCoachCard(coach);
+  // 🔹 Tus otras cargas (KPIs, charts, etc.)
+  await loadKPIs(mesocycleId);
+  await loadStrengthChart(mesocycleId);
+
+  // 🔹 NUEVO: volumen semanal centralizado
+  await loadWeeklyVolume(mesocycleId);
 }
 
 function safePercentChange(current, previous) {
@@ -4002,8 +4044,27 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-const mesocycleSelect = document.getElementById('stats-mesocycle');
+document
+  .getElementById("stats-mesocycle")
+  .addEventListener("change", async e => {
 
+    const mesocycleId = e.target.value;
+
+    if (!mesocycleId) {
+      // 🔵 TODOS
+      dashboardState.mode = "all";
+      dashboardState.mesocycleId = null;
+
+      await loadDashboardAllMesocycles();
+
+    } else {
+      // 🟢 MESOCICLO ESPECÍFICO
+      dashboardState.mode = "mesocycle";
+      dashboardState.mesocycleId = mesocycleId;
+
+      await loadDashboard(mesocycleId);
+    }
+  });
 const analysisDashboard = document.getElementById('analysisDashboard');
 const exerciseAnalysis = document.getElementById('exerciseAnalysis');
 
