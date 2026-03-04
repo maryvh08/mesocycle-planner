@@ -3311,7 +3311,7 @@ async function loadStatsMesocycles() {
   });
 
   // 🔒 Estado inicial correcto
-  select.value = "all";
+  select.value = "";
 }
 
 function updateCoachDashboard(exercises) {
@@ -3789,9 +3789,12 @@ function getSelectedValues(containerId) {
 // =====================
 
 function calculateSetVolume(record) {
-  const sets = Number(record.sets) || 1;
-  const reps = Number(record.reps) || 0;
-  const weight = Number(record.weight) || 0;
+  const sets = record.sets != null ? Number(record.sets) : 1;
+  const reps = record.reps != null ? Number(record.reps) : 0;
+  const weight = record.weight != null ? Number(record.weight) : 0;
+
+  if (isNaN(sets) || isNaN(reps) || isNaN(weight)) return 0;
+  if (sets <= 0 || reps <= 0 || weight <= 0) return 0;
 
   return sets * reps * weight;
 }
