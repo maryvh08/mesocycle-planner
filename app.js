@@ -4024,54 +4024,33 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-const analysisDashboard = document.getElementById('analysisDashboard');
-const exerciseAnalysis = document.getElementById('exerciseAnalysis');
-const mesocycleSelect = document.getElementById('mesocicloSelect');
-document
-  .getElementById("stats-mesocycle")
-  .addEventListener("change", async e => {
+const statsSelect = document.getElementById("stats-mesocycle");
+const analysisDashboard = document.getElementById("analysisDashboard");
+const exerciseAnalysis = document.getElementById("exerciseAnalysis");
+
+if (statsSelect) {
+
+  statsSelect.addEventListener("change", async e => {
 
     const mesocycleId = e.target.value;
+    const isAll = !mesocycleId;
 
-    if (!mesocycleId) {
-      // 🔵 TODOS
+    // 🔹 Mostrar / ocultar secciones
+    analysisDashboard?.classList.toggle("hidden", !isAll);
+    exerciseAnalysis?.classList.toggle("hidden", isAll);
+
+    if (isAll) {
       dashboardState.mode = "all";
       dashboardState.mesocycleId = null;
-
       await loadDashboardAllMesocycles();
-
     } else {
-      // 🟢 MESOCICLO ESPECÍFICO
       dashboardState.mode = "mesocycle";
       dashboardState.mesocycleId = mesocycleId;
-
       await loadDashboard(mesocycleId);
     }
   });
-document.addEventListener('DOMContentLoaded', () => {
 
-  const mesocycleSelect = document.getElementById('mesocycleSelect');
-  const analysisDashboard = document.getElementById('analysisDashboard');
-  const exerciseAnalysis = document.getElementById('exerciseAnalysis');
-
-  if (!mesocycleSelect) {
-    console.warn("mesocycleSelect no encontrado en el DOM");
-    return;
-  }
-
-  function updateStatsSections() {
-    const selected = mesocycleSelect.value;
-    const isAll = selected === '';
-
-    analysisDashboard?.classList.toggle('hidden', !isAll);
-    exerciseAnalysis?.classList.toggle('hidden', isAll);
-  }
-
-  mesocycleSelect.addEventListener('change', updateStatsSections);
-
-  updateStatsSections();
-
-});
+}
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("exportDashboardPDF");
 
