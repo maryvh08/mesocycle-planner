@@ -4027,6 +4027,27 @@ document.addEventListener('DOMContentLoaded', () => {
 const analysisDashboard = document.getElementById('analysisDashboard');
 const exerciseAnalysis = document.getElementById('exerciseAnalysis');
 
+document
+  .getElementById("stats-mesocycle")
+  .addEventListener("change", async e => {
+
+    const mesocycleId = e.target.value;
+
+    if (!mesocycleId) {
+      // 🔵 TODOS
+      dashboardState.mode = "all";
+      dashboardState.mesocycleId = null;
+
+      await loadDashboardAllMesocycles();
+
+    } else {
+      // 🟢 MESOCICLO ESPECÍFICO
+      dashboardState.mode = "mesocycle";
+      dashboardState.mesocycleId = mesocycleId;
+
+      await loadDashboard(mesocycleId);
+    }
+  });
 document.addEventListener('DOMContentLoaded', () => {
 
   const mesocycleSelect = document.getElementById('mesocycleSelect');
