@@ -4024,27 +4024,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-document
-  .getElementById("stats-mesocycle")
-  .addEventListener("change", async e => {
-
-    const mesocycleId = e.target.value;
-
-    if (!mesocycleId) {
-      // 🔵 TODOS
-      dashboardState.mode = "all";
-      dashboardState.mesocycleId = null;
-
-      await loadDashboardAllMesocycles();
-
-    } else {
-      // 🟢 MESOCICLO ESPECÍFICO
-      dashboardState.mode = "mesocycle";
-      dashboardState.mesocycleId = mesocycleId;
-
-      await loadDashboard(mesocycleId);
-    }
-  });
 const analysisDashboard = document.getElementById('analysisDashboard');
 const exerciseAnalysis = document.getElementById('exerciseAnalysis');
 
@@ -4054,20 +4033,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const analysisDashboard = document.getElementById('analysisDashboard');
   const exerciseAnalysis = document.getElementById('exerciseAnalysis');
 
+  if (!mesocycleSelect) {
+    console.warn("mesocycleSelect no encontrado en el DOM");
+    return;
+  }
+
   function updateStatsSections() {
     const selected = mesocycleSelect.value;
     const isAll = selected === '';
 
-    analysisDashboard.classList.toggle('hidden', !isAll);
-    exerciseAnalysis.classList.toggle('hidden', isAll);
+    analysisDashboard?.classList.toggle('hidden', !isAll);
+    exerciseAnalysis?.classList.toggle('hidden', isAll);
   }
 
   mesocycleSelect.addEventListener('change', updateStatsSections);
 
-  updateStatsSections(); // Estado inicial
+  updateStatsSections();
 
 });
-
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("exportDashboardPDF");
 
@@ -4086,25 +4069,3 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.getElementById("exportDashboardPDF")
-
-document
-  .getElementById("stats-mesocycle")
-  .addEventListener("change", async e => {
-    const mesocycleId = e.target.value;
-
-    if (!mesocycleId) {
-      // 🔵 TODOS LOS MESOCICLOS
-      hideKPIs();
-
-      await loadDashboardAllMesocycles(); // análisis agregado
-      dashboardState.mode = "all";
-
-    } else {
-      // 🟢 UN MESOCICLO
-      showKPIs();
-
-      await loadDashboard(mesocycleId);
-      dashboardState.mode = "mesocycle";
-      dashboardState.mesocycleId = mesocycleId;
-    }
-  });
