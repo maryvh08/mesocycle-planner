@@ -1604,9 +1604,6 @@ async function loadDashboard(mesocycleId) {
   const records = await fetchExerciseRecords(mesocycleId);
   if (!records.length) return;
 
-  const volumeData = calculateVolumeTrend(records);
-  renderVolumeTable(volumeData);
-
   const rawMuscle = calculateMuscleVolume(records);
   const muscleData = evaluateMuscleVolume(rawMuscle);
   renderMuscleTable(muscleData);
@@ -2342,36 +2339,19 @@ async function loadVolumeSection(mesocycleId) {
 // ------------------------
 function calculateVolumeTrend(records) {
 
-  // 1️⃣ Filtrar registros inválidos
-  const validRecords = records.filter(r =>
-    (r.reps ?? r.repetitions ?? r.reps_done ?? r.rep_count) != null &&
-    (r.weight ?? r.load ?? r.kg ?? r.weight_kg ?? r.weight_used) != null
-  );
-
   const byExercise = {};
 
-  validRecords.forEach(r => {
-    const exercise = r.exercise || r.exercise_name || "Desconocido";
-    const week = Number(r.week ?? r.week_number ?? 1);
+  records.forEach(r => {
+    const exercise = r.exercise_name || "Desconocido";
+    const week = Number(r.week_number);
+
+    if (!exercise || !week) return;
 
     const sets = Number(r.sets ?? 1);
-    const reps = Number(
-      r.reps ??
-      r.repetitions ??
-      r.reps_done ??
-      r.rep_count
-    );
+    const reps = Number(r.reps);
+    const weight = Number(r.weight);
 
-    const weight = Number(
-      r.weight ??
-      r.load ??
-      r.kg ??
-      r.weight_kg ??
-      r.weight_used
-    );
-
-    // 🧠 Seguridad extra
-    if (reps <= 0 || weight <= 0) return;
+    if (!sets || !reps || !weight) return;
 
     const volume = sets * reps * weight;
     const key = `${exercise}-W${week}`;
@@ -2389,23 +2369,25 @@ function calculateVolumeTrend(records) {
     byExercise[key].total_sets += sets;
   });
 
-  // 2️⃣ Agrupar por ejercicio
   const grouped = {};
+
   Object.values(byExercise).forEach(r => {
     if (!grouped[r.exercise]) grouped[r.exercise] = [];
     grouped[r.exercise].push(r);
   });
 
-  // 3️⃣ Calcular tendencia
   return Object.entries(grouped).map(([exercise, weeks]) => {
     weeks.sort((a, b) => a.week - b.week);
 
     const last = weeks.at(-1);
     const prev = weeks.at(-2);
 
-    const percent = prev && prev.total_volume > 0
-      ? ((last.total_volume - prev.total_volume) / prev.total_volume) * 100
-      : 0;
+    if (!last) return null;
+
+    const percent =
+      prev && prev.total_volume > 0
+        ? ((last.total_volume - prev.total_volume) / prev.total_volume) * 100
+        : 0;
 
     const trend =
       percent > 3 ? '↑' :
@@ -2419,7 +2401,7 @@ function calculateVolumeTrend(records) {
       trend,
       percent: Number(percent.toFixed(1))
     };
-  });
+  }).filter(Boolean);
 }
 
 // ------------------------
