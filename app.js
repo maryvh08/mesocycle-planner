@@ -1559,34 +1559,36 @@ async function loadDashboardAllMesocycles() {
 }
 
 async function loadWeeklyVolume(mesocycleId = null) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
 
   let query = supabase
     .from("exercise_records")
-    .select("exercise_name, week_number, weight, reps, sets")
-    .eq("user_id", user.id);
+    .select("*");
 
-  // 🔵 Si hay mesociclo específico, filtra
-  if (mesocycleId && mesocycleId !== "") {
+  if (mesocycleId) {
     query = query.eq("mesocycle_id", mesocycleId);
   }
 
   const { data, error } = await query;
 
   if (error) {
-    console.error("Error cargando volumen semanal:", error);
-    renderVolumeTable([]);
+    console.error(error);
     return;
   }
 
-  if (!data || data.length === 0) {
-    renderVolumeTable([]);
+  if (!data.length) {
+    document.getElementById("weeklyVolumeContainer").innerHTML =
+      "<p>No hay registros.</p>";
     return;
   }
 
-  const trendData = calculateVolumeTrend(data);
-  renderVolumeTable(trendData);
+  const volumeData = calculateVolumeTrend(data);
+  renderVolumeTable(volumeData);
+
+  const criticalDrops = volumeData.filter(v =>
+    v.trend === '↓' && Number(v.percent) < -5
+  );
+
+  renderFatigueAlerts(criticalDrops);
 }
 
 async function loadDashboard(mesocycleId) {
