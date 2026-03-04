@@ -4026,7 +4026,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 const analysisDashboard = document.getElementById('analysisDashboard');
 const exerciseAnalysis = document.getElementById('exerciseAnalysis');
-
+const mesocycleSelect = document.getElementById('mesocicloSelect');
 document
   .getElementById("stats-mesocycle")
   .addEventListener("change", async e => {
