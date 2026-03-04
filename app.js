@@ -1551,8 +1551,6 @@ async function loadDashboardAllMesocycles() {
   }
 
   updateCoachCard(coach);
-  await loadKPIs(null);
-  await loadStrengthChart(null);
 
   // 🔹 Sin filtro de mesociclo
   await loadWeeklyVolume(null);
