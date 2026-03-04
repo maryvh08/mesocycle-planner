@@ -4099,4 +4099,4 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-document.getElementById("exportDashboardPDF")
+document.addEventListener("DOMContentLoaded", setupExportButtons);
