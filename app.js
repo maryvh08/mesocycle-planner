@@ -4048,28 +4048,25 @@ document
 const analysisDashboard = document.getElementById('analysisDashboard');
 const exerciseAnalysis = document.getElementById('exerciseAnalysis');
 
-function updateStatsSections() {
-  const selected = mesocycleSelect.value;
+document.addEventListener('DOMContentLoaded', () => {
 
-  const isAll = selected === '';
+  const mesocycleSelect = document.getElementById('mesocycleSelect');
+  const analysisDashboard = document.getElementById('analysisDashboard');
+  const exerciseAnalysis = document.getElementById('exerciseAnalysis');
 
-  // 🧠 ANÁLISIS / DASHBOARD
-  analysisDashboard.classList.toggle('hidden', !isAll);
+  function updateStatsSections() {
+    const selected = mesocycleSelect.value;
+    const isAll = selected === '';
 
-  // 🧠 SELECCIÓN DE MESOCICLO
-  exerciseAnalysis.classList.toggle('hidden', isAll);
+    analysisDashboard.classList.toggle('hidden', !isAll);
+    exerciseAnalysis.classList.toggle('hidden', isAll);
+  }
 
-  // 🧠 GRÁFICA DE FUERZA
-  // 👉 NO SE TOCA: siempre visible
-}
+  mesocycleSelect.addEventListener('change', updateStatsSections);
 
-// Al cambiar el select
-mesocycleSelect.addEventListener('change', () => {
-  updateStatsSections();
+  updateStatsSections(); // Estado inicial
+
 });
-
-// Estado inicial
-updateStatsSections();
 
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("exportDashboardPDF");
