@@ -1617,7 +1617,8 @@ async function loadDashboard(mesocycleId) {
     return { ...m, fatigueScore: score, fatigueStatus: fatigueStatus(score) };
   });
 
-  // Estado global
+  // Estado global}
+   const volumeData = calculateVolumeTrend(records);
   const status = overallProgress(volumeData);
   Object.values(statusElements).forEach(el => el?.classList.remove('active'));
   statusElements[status]?.classList.add('active');
