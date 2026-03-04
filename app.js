@@ -2540,6 +2540,16 @@ async function loadPRTable(mesocycleId = null) {
   });
 }
 
+async function loadKPIs(mesocycleId = null) {
+  showKPIs();
+
+  await Promise.all([
+    loadVolumeKPI(mesocycleId),
+    loadPRsKPI(mesocycleId),
+    loadSessionsKPI(mesocycleId)
+  ]);
+}
+
 async function loadVolumeKPI(mesocycleId) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
@@ -2571,27 +2581,47 @@ async function loadVolumeKPI(mesocycleId) {
 
 async function loadPRsKPI(mesocycleId) {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user || !mesocycleId) return; // 👈 aquí SÍ es obligatorio
+  if (!user) return;
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("mesocycle_prs")
     .select("pr_count")
-    .eq("user_id", user.id)
-    .eq("mesocycle_id", mesocycleId)
-    .single();
+    .eq("user_id", user.id);
 
-  if (error) {
-    console.error("❌ Error PRs", error);
-    return;
+  if (mesocycleId) {
+    // 🟢 Mesociclo específico
+    query = query.eq("mesocycle_id", mesocycleId).single();
+
+    const { data, error } = await query;
+    if (error) {
+      console.error("❌ Error PRs", error);
+      return;
+    }
+
+    renderPRKPI(data?.pr_count || 0, "Mesociclo");
+
+  } else {
+    // 🔵 Todos → acumulado
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("❌ Error PRs global", error);
+      return;
+    }
+
+    const totalPRs = data.reduce((sum, r) => sum + (r.pr_count || 0), 0);
+
+    renderPRKPI(totalPRs, "Global");
   }
-
-  document.getElementById("kpi-prs").innerHTML = `
-    <h4>PRs</h4>
-    <strong>${data?.pr_count || 0}</strong>
-    <span class="kpi-sub">Récords personales</span>
-  `;
 }
 
+function renderPRKPI(value, label) {
+  document.getElementById("kpi-prs").innerHTML = `
+    <h4>PRs</h4>
+    <strong>${value}</strong>
+    <span class="kpi-sub">${label}</span>
+  `;
+}
 async function loadSessionsKPI(mesocycleId) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
