@@ -1553,6 +1553,7 @@ async function loadDashboardAllMesocycles() {
   updateCoachCard(coach);
 
   // 🔹 Sin filtro de mesociclo
+   await loadKPIs(null);
   await loadWeeklyVolume(null);
 }
 
@@ -1637,7 +1638,7 @@ async function loadDashboard(mesocycleId) {
   else if (status === 'green') coach = { type: 'success', message: 'Progresión sólida. Mantén estrategia.' };
 
   updateCoachCard(coach);
-
+   await loadKPIs(mesocycleId);
   // 🔹 NUEVO: volumen semanal centralizado
   await loadWeeklyVolume(mesocycleId);
 }
