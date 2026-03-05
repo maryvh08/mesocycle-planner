@@ -793,69 +793,66 @@ async function renderRegistroEditor(mesocycleId) {
      GUARDAR
   ====================== */
   saveBtn.onclick = async () => {
-    if (!selectedDay) return alert("Selecciona un día");
-    if (!exerciseSelect.value) return alert("Selecciona un ejercicio");
-
-    const exercise = exercisesById[exerciseSelect.value];
-    if (!exercise) return alert("Ejercicio inválido");
-
-      const setsInput = document.getElementById('sets');
-     
-    const payload = {
-      user_id: session.user.id,
-      mesocycle_id: mesocycleId,
-      exercise_id: exercise.id,
-      exercise_name: exercise.name,
-      week_number: Number(weekSelect.value),
-      day_number: selectedDay,
-      weight: Number(weightInput.value),
-      reps: Number(repsInput.value),
-      sets: Number(setsInput?.value) || 1
-    };
-
-    // 🚨 comprobar duplicado
-    const { data: existing, error: checkError } = await supabase
-      .from("exercise_records")
-      .select("id")
-      .eq("user_id", session.user.id)
-      .eq("mesocycle_id", mesocycleId)
-      .eq("exercise_id", exercise.id)
-      .eq("week_number", payload.week_number)
-      .eq("day_number", selectedDay)
-      .limit(1);
-
-    if (checkError) {
-      console.error(checkError);
-      alert("Error validando el ejercicio");
-      return;
-    }
-
-    if (existing?.length) {
-      alert("Ya ha registrado este ejercicio para este día");
-      return;
-    }
-
-    const { error } = await supabase
-      .from("exercise_records")
-      .insert(payload);
-
-    if (error) {
-      console.error(error);
-      alert("Error al guardar");
-      return;
-    }
-
-      weightInput.value = "";
-      repsInput.value = "";
-      setsInput.value = "";
-
-    renderExercisesForDay(
-      mesocycleId,
-      payload.week_number,
-      selectedDay
-    );
-  };
-
+     if (!selectedDay) return alert("Selecciona un día");
+     if (!exerciseSelect.value) return alert("Selecciona un ejercicio");
+   
+     const exercise = exercisesById[exerciseSelect.value];
+     if (!exercise) return alert("Ejercicio inválido");
+   
+     const payload = {
+       user_id: session.user.id,
+       mesocycle_id: mesocycleId,
+       exercise_id: exercise.id,
+       exercise_name: exercise.name,
+       week_number: Number(weekSelect.value),
+       day_number: selectedDay,
+       weight: Number(weightInput.value),
+       reps: Number(repsInput.value),
+       sets: Number(setsInput.value) || 1
+     };
+   
+     const { data: existing, error: checkError } = await supabase
+       .from("exercise_records")
+       .select("id")
+       .eq("user_id", session.user.id)
+       .eq("mesocycle_id", mesocycleId)
+       .eq("exercise_id", exercise.id)
+       .eq("week_number", payload.week_number)
+       .eq("day_number", selectedDay)
+       .limit(1);
+   
+     if (checkError) {
+       console.error(checkError);
+       alert("Error validando el ejercicio");
+       return;
+     }
+   
+     if (existing?.length) {
+       alert("Ya ha registrado este ejercicio para este día");
+       return;
+     }
+   
+     const { error } = await supabase
+       .from("exercise_records")
+       .insert(payload);
+   
+     if (error) {
+       console.error(error);
+       alert("Error al guardar");
+       return;
+     }
+   
+     weightInput.value = "";
+     repsInput.value = "";
+     setsInput.value = "";
+   
+     renderExercisesForDay(
+       mesocycleId,
+       payload.week_number,
+       selectedDay
+     );
+   };
+   
   console.log("✅ RegistroEditor renderizado correctamente");
 }
 
