@@ -3871,13 +3871,6 @@ document.addEventListener("click", e => {
   openExerciseChart(exercise, start, end);
 });
 
-document.getElementById("exercise-modal")
-  .addEventListener("click", e => {
-    if (e.target.id === "exercise-modal") {
-      closeModal();
-    }
-  });
-
 document.getElementById('tutorial-search')?.addEventListener('input', applyFilters);
 document.getElementById('sort-by')?.addEventListener('change', applyFilters);
 document.getElementById('filter-favorites')?.addEventListener('change', applyFilters);
@@ -4095,14 +4088,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("DOMContentLoaded", setupExportButtons);
 
-document.addEventListener("click", e => {
+document.addEventListener("DOMContentLoaded", () => {
 
-  if (e.target.id === "close-exercise-modal") {
-    closeModal();
+  const closeBtn = document.getElementById("closeExerciseChartModal");
+  const modal = document.getElementById("exerciseChartModal");
+
+  if (closeBtn && modal) {
+    closeBtn.addEventListener("click", () => {
+      modal.style.display = "none";
+    });
   }
 
-  if (e.target.id === "exercise-modal") {
-    closeModal();
+});
+
+window.addEventListener("click", (event) => {
+  const modal = document.getElementById("exerciseChartModal");
+
+  if (event.target === modal) {
+    modal.style.display = "none";
+  }
+});
+
+document.addEventListener("click", (e) => {
+
+  if (e.target.id === "closeExerciseChartModal") {
+    document.getElementById("exerciseChartModal").style.display = "none";
   }
 
 });
