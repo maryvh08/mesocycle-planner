@@ -3539,53 +3539,145 @@ function setupExportButtons() {
 }
 
 async function exportFullDashboardExcel() {
+
   const wb = XLSX.utils.book_new();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  // 1️⃣ TODOS
+  /* =========================
+     1️⃣ RESUMEN GLOBAL
+  ========================= */
+
   const allRecords = await fetchExerciseRecords();
-  if (allRecords.length) {
-    const allSheet = buildDashboardSheet(
-      allRecords,
-      "Todos los mesociclos"
+
+  if (allRecords?.length) {
+
+    const volume = calculateVolumeTrend(allRecords);
+    const muscle = evaluateMuscleVolume(
+      calculateMuscleVolume(allRecords)
     );
-    XLSX.utils.book_append_sheet(wb, allSheet, "Resumen General");
-  }
 
-  // 2️⃣ MESOCICLOS
-  const { data: mesocycles, error } = await supabase
-    .from("mesocycles")
-    .select("id, name")
-    .eq("user_id", user.id);
+    const weekly = calculateWeeklyVolume
+      ? calculateWeeklyVolume(allRecords)
+      : [];
 
-  if (error || !mesocycles?.length) {
-    XLSX.writeFile(wb, "Dashboard_Mesociclos.xlsx");
-    return;
-  }
+    const rows = [
+      ["DASHBOARD GLOBAL"],
+      [],
+      ["VOLUMEN POR EJERCICIO"],
+      ["Ejercicio", "Tendencia", "%"],
+      ...volume.map(v => [
+        v.exercise,
+        v.trend,
+        v.percent
+      ]),
+      [],
+      ["VOLUMEN POR GRUPO MUSCULAR"],
+      ["Músculo", "Sets", "Estado", "MEV-MRV"],
+      ...muscle.map(m => [
+        m.muscle,
+        m.sets,
+        m.status,
+        `${m.ranges?.MEV ?? "-"} - ${m.ranges?.MRV ?? "-"}`
+      ]),
+      [],
+      ["VOLUMEN SEMANAL"],
+      ["Semana", "Volumen"],
+      ...weekly.map(w => [
+        w.week,
+        w.volume
+      ])
+    ];
 
-  // 🚀 Paraleliza
-  const recordSets = await Promise.all(
-    mesocycles.map(m => fetchExerciseRecords(m.id))
-  );
-
-  mesocycles.forEach((m, index) => {
-    const records = recordSets[index];
-    if (!records.length) return;
-
-    const sheet = buildDashboardSheet(records, m.name);
+    const sheet = XLSX.utils.aoa_to_sheet(rows);
 
     XLSX.utils.book_append_sheet(
       wb,
       sheet,
-      sanitizeSheetName(m.name)
+      "Resumen_Global"
     );
-  });
+  }
 
-  XLSX.writeFile(wb, "Dashboard_Mesociclos.xlsx");
+  /* =========================
+     2️⃣ MESOCICLOS
+  ========================= */
+
+  const { data: mesocycles } = await supabase
+    .from("mesocycles")
+    .select("id,name")
+    .eq("user_id", user.id);
+
+  if (mesocycles?.length) {
+
+    const recordSets = await Promise.all(
+      mesocycles.map(m => fetchExerciseRecords(m.id))
+    );
+
+    mesocycles.forEach((m, i) => {
+
+      const records = recordSets[i];
+      if (!records?.length) return;
+
+      const volume = calculateVolumeTrend(records);
+      const muscle = evaluateMuscleVolume(
+        calculateMuscleVolume(records)
+      );
+
+      const weekly = calculateWeeklyVolume
+        ? calculateWeeklyVolume(records)
+        : [];
+
+      const rows = [
+        [`MESOCICLO: ${m.name}`],
+        [],
+        ["VOLUMEN POR EJERCICIO"],
+        ["Ejercicio", "Tendencia", "%"],
+        ...volume.map(v => [
+          v.exercise,
+          v.trend,
+          v.percent
+        ]),
+        [],
+        ["VOLUMEN POR GRUPO MUSCULAR"],
+        ["Músculo", "Sets", "Estado", "MEV-MRV"],
+        ...muscle.map(mu => [
+          mu.muscle,
+          mu.sets,
+          mu.status,
+          `${mu.ranges?.MEV ?? "-"} - ${mu.ranges?.MRV ?? "-"}`
+        ]),
+        [],
+        ["VOLUMEN SEMANAL"],
+        ["Semana", "Volumen"],
+        ...weekly.map(w => [
+          w.week,
+          w.volume
+        ])
+      ];
+
+      const sheet = XLSX.utils.aoa_to_sheet(rows);
+
+      XLSX.utils.book_append_sheet(
+        wb,
+        sheet,
+        sanitizeSheetName(m.name)
+      );
+
+    });
+
+  }
+
+  /* =========================
+     3️⃣ DESCARGAR
+  ========================= */
+
+  XLSX.writeFile(
+    wb,
+    "Dashboard_Entrenamiento.xlsx"
+  );
+
 }
-
 function buildDashboardSheet(records, title) {
   const volume = calculateVolumeTrend(records);
   const muscle = evaluateMuscleVolume(
@@ -3618,26 +3710,8 @@ async function exportDashboardToPDF(element) {
 
   const { jsPDF } = window.jspdf;
 
-  // 👇 TODO lo que use "element" va aquí dentro
-  const canvases = element.querySelectorAll("canvas");
-  const replacements = [];
-
-  canvases.forEach(canvas => {
-    const img = document.createElement("img");
-    img.src = canvas.toDataURL("image/png", 1.0);
-    img.style.width = canvas.offsetWidth + "px";
-    img.style.height = canvas.offsetHeight + "px";
-
-    canvas.style.display = "none";
-    canvas.parentNode.insertBefore(img, canvas);
-
-    replacements.push({ canvas, img });
-  });
-
-  await new Promise(resolve => setTimeout(resolve, 150));
-
-   const originalWidth = element.style.width;
-   element.style.width = "1200px"; // o el ancho real de tu layout
+  // ⏳ esperar a que gráficos terminen de renderizar
+  await new Promise(resolve => setTimeout(resolve, 500));
 
   const canvas = await html2canvas(element, {
     scale: 3,
@@ -3649,34 +3723,13 @@ async function exportDashboardToPDF(element) {
 
   const pdf = new jsPDF("l", "mm", "a4");
 
-   const pageWidth = pdf.internal.pageSize.getWidth();
-   const pageHeight = pdf.internal.pageSize.getHeight();
-   
-   // 🔥 Escalar SOLO en función del ancho
-   const imgWidth = pageWidth;
-   const imgHeight = (canvas.height * imgWidth) / canvas.width;
-   
-   let position = 0;
-   let heightLeft = imgHeight;
-   
-   pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-   
-   heightLeft -= pageHeight;
-   
-   while (heightLeft > 0) {
-     position = heightLeft - imgHeight;
-     pdf.addPage();
-     pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-     heightLeft -= pageHeight;
-   }
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const imgWidth = pageWidth;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-  pdf.save("Dashboard_High_Quality.pdf");
+  pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight);
 
-  // 🔁 Restaurar
-  replacements.forEach(({ canvas, img }) => {
-    canvas.style.display = "";
-    img.remove();
-  });
+  pdf.save("Dashboard.pdf");
 }
 
 function updateExportButtonsUI() {
