@@ -4097,3 +4097,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.addEventListener("DOMContentLoaded", setupExportButtons);
+
+document.getElementById("close-exercise-modal")
+  ?.addEventListener("click", closeModal);
