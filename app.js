@@ -4088,6 +4088,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("DOMContentLoaded", setupExportButtons);
 
+document.getElementById("exercise-modal") 
+   .addEventListener("click", e => { 
+      if (e.target.id === "exercise-modal") { 
+         closeModal(); } });
+
 document.addEventListener("DOMContentLoaded", () => {
 
   const closeBtn = document.getElementById("closeExerciseChartModal");
