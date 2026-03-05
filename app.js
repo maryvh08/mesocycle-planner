@@ -3541,93 +3541,190 @@ function setupExportButtons() {
 async function exportFullDashboardExcel() {
 
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet("Dashboard");
+  const sheet = workbook.addWorksheet("Dashboard");
 
-  // ----------------------------
+  sheet.columns = [
+    { width: 25 },
+    { width: 20 },
+    { width: 20 },
+    { width: 20 }
+  ];
+
+  // =============================
   // TITULO
-  // ----------------------------
-  worksheet.addRow(["DASHBOARD DE ENTRENAMIENTO"]);
-  worksheet.getRow(1).font = { size: 16, bold: true };
+  // =============================
 
-  worksheet.addRow([]);
+  sheet.mergeCells("A1:D1");
 
-  // ----------------------------
+  const title = sheet.getCell("A1");
+  title.value = "DASHBOARD DE ENTRENAMIENTO";
+  title.font = { size: 18, bold: true };
+  title.alignment = { horizontal: "center" };
+
+  sheet.addRow([]);
+
+  // =============================
   // KPIs
-  // ----------------------------
-  const volumenTotal = document.getElementById("kpi-total-volume")?.innerText || "";
+  // =============================
+
+  const volumen = document.getElementById("kpi-total-volume")?.innerText || "";
   const prs = document.getElementById("kpi-prs")?.innerText || "";
   const sesiones = document.getElementById("kpi-sessions")?.innerText || "";
 
-  worksheet.addRow(["KPIs"]);
-  worksheet.getRow(3).font = { bold: true };
+  sheet.addRow(["KPIs"]);
+  sheet.getRow(3).font = { bold: true };
 
-  worksheet.addRow(["Volumen total", volumenTotal]);
-  worksheet.addRow(["PRs", prs]);
-  worksheet.addRow(["Sesiones", sesiones]);
+  sheet.addRow(["Volumen total", volumen]);
+  sheet.addRow(["PRs", prs]);
+  sheet.addRow(["Sesiones", sesiones]);
 
-  worksheet.addRow([]);
+  sheet.addRow([]);
+  sheet.addRow([]);
 
-  // ----------------------------
+  // =============================
   // TABLA VOLUMEN SEMANAL
-  // ----------------------------
-  worksheet.addRow(["Volumen semanal por ejercicio"]);
-  worksheet.getRow(8).font = { bold: true };
+  // =============================
 
-  const table = document.getElementById("weekly-volume-table");
+  sheet.addRow(["Volumen semanal por ejercicio"]);
+  sheet.getRow(sheet.rowCount).font = { bold: true };
 
-  if (table) {
+  const volumeTable = document.getElementById("weekly-volume-table");
 
-    const rows = table.querySelectorAll("tr");
+  if (volumeTable) {
+
+    const rows = volumeTable.querySelectorAll("tr");
 
     rows.forEach(row => {
 
       const cols = row.querySelectorAll("td, th");
 
-      const rowData = [];
+      const data = [];
 
       cols.forEach(col => {
-        rowData.push(col.innerText);
+        data.push(col.innerText);
       });
 
-      worksheet.addRow(rowData);
+      sheet.addRow(data);
 
     });
 
   }
 
-  worksheet.addRow([]);
-  worksheet.addRow([]);
+  sheet.addRow([]);
+  sheet.addRow([]);
 
-  // ----------------------------
-  // INSERTAR GRÁFICA
-  // ----------------------------
-  const canvas = document.getElementById("volumeChart");
+  // =============================
+  // ALERTAS CRÍTICAS
+  // =============================
 
-  if (canvas) {
+  sheet.addRow(["Alertas críticas"]);
+  sheet.getRow(sheet.rowCount).font = { bold: true };
 
-    const base64Image = canvas.toDataURL("image/png");
+  const alerts = document.querySelectorAll("#alerts-container li");
+
+  if (alerts.length === 0) {
+    sheet.addRow(["Sin alertas"]);
+  } else {
+
+    alerts.forEach(alert => {
+      sheet.addRow([alert.innerText]);
+    });
+
+  }
+
+  sheet.addRow([]);
+  sheet.addRow([]);
+
+  // =============================
+  // PRs
+  // =============================
+
+  sheet.addRow(["PRs registrados"]);
+  sheet.getRow(sheet.rowCount).font = { bold: true };
+
+  const prTable = document.getElementById("pr-table");
+
+  if (prTable) {
+
+    const rows = prTable.querySelectorAll("tr");
+
+    rows.forEach(row => {
+
+      const cols = row.querySelectorAll("td, th");
+
+      const data = [];
+
+      cols.forEach(col => {
+        data.push(col.innerText);
+      });
+
+      sheet.addRow(data);
+
+    });
+
+  }
+
+  sheet.addRow([]);
+  sheet.addRow([]);
+
+  // =============================
+  // GRÁFICA VOLUMEN
+  // =============================
+
+  const volumeCanvas = document.getElementById("volumeChart");
+
+  if (volumeCanvas) {
+
+    const image = volumeCanvas.toDataURL("image/png");
 
     const imageId = workbook.addImage({
-      base64: base64Image,
+      base64: image,
       extension: "png"
     });
 
-    worksheet.addImage(imageId, {
-      tl: { col: 0, row: worksheet.rowCount + 2 },
+    sheet.addImage(imageId, {
+      tl: { col: 0, row: sheet.rowCount + 1 },
+      ext: { width: 800, height: 400 }
+    });
+
+    sheet.addRow([]);
+    sheet.addRow([]);
+    sheet.addRow([]);
+
+  }
+
+  // =============================
+  // GRÁFICA FUERZA
+  // =============================
+
+  const strengthCanvas = document.getElementById("strengthChart");
+
+  if (strengthCanvas) {
+
+    const image = strengthCanvas.toDataURL("image/png");
+
+    const imageId = workbook.addImage({
+      base64: image,
+      extension: "png"
+    });
+
+    sheet.addImage(imageId, {
+      tl: { col: 0, row: sheet.rowCount + 25 },
       ext: { width: 800, height: 400 }
     });
 
   }
 
-  // ----------------------------
+  // =============================
   // DESCARGA
-  // ----------------------------
+  // =============================
+
   const buffer = await workbook.xlsx.writeBuffer();
 
-  const blob = new Blob([buffer], {
-    type:
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-  });
+  const blob = new Blob(
+    [buffer],
+    { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }
+  );
 
   const link = document.createElement("a");
 
@@ -3637,7 +3734,6 @@ async function exportFullDashboardExcel() {
 
   link.click();
 }
-
 function buildDashboardSheet(records, title) {
   const volume = calculateVolumeTrend(records);
   const muscle = evaluateMuscleVolume(
