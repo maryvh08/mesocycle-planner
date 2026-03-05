@@ -3540,144 +3540,104 @@ function setupExportButtons() {
 
 async function exportFullDashboardExcel() {
 
-  const wb = XLSX.utils.book_new();
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Dashboard");
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+  // ----------------------------
+  // TITULO
+  // ----------------------------
+  worksheet.addRow(["DASHBOARD DE ENTRENAMIENTO"]);
+  worksheet.getRow(1).font = { size: 16, bold: true };
 
-  /* =========================
-     1️⃣ RESUMEN GLOBAL
-  ========================= */
+  worksheet.addRow([]);
 
-  const allRecords = await fetchExerciseRecords();
+  // ----------------------------
+  // KPIs
+  // ----------------------------
+  const volumenTotal = document.getElementById("kpi-total-volume")?.innerText || "";
+  const prs = document.getElementById("kpi-prs")?.innerText || "";
+  const sesiones = document.getElementById("kpi-sessions")?.innerText || "";
 
-  if (allRecords?.length) {
+  worksheet.addRow(["KPIs"]);
+  worksheet.getRow(3).font = { bold: true };
 
-    const volume = calculateVolumeTrend(allRecords);
-    const muscle = evaluateMuscleVolume(
-      calculateMuscleVolume(allRecords)
-    );
+  worksheet.addRow(["Volumen total", volumenTotal]);
+  worksheet.addRow(["PRs", prs]);
+  worksheet.addRow(["Sesiones", sesiones]);
 
-    const weekly = calculateWeeklyVolume
-      ? calculateWeeklyVolume(allRecords)
-      : [];
+  worksheet.addRow([]);
 
-    const rows = [
-      ["DASHBOARD GLOBAL"],
-      [],
-      ["VOLUMEN POR EJERCICIO"],
-      ["Ejercicio", "Tendencia", "%"],
-      ...volume.map(v => [
-        v.exercise,
-        v.trend,
-        v.percent
-      ]),
-      [],
-      ["VOLUMEN POR GRUPO MUSCULAR"],
-      ["Músculo", "Sets", "Estado", "MEV-MRV"],
-      ...muscle.map(m => [
-        m.muscle,
-        m.sets,
-        m.status,
-        `${m.ranges?.MEV ?? "-"} - ${m.ranges?.MRV ?? "-"}`
-      ]),
-      [],
-      ["VOLUMEN SEMANAL"],
-      ["Semana", "Volumen"],
-      ...weekly.map(w => [
-        w.week,
-        w.volume
-      ])
-    ];
+  // ----------------------------
+  // TABLA VOLUMEN SEMANAL
+  // ----------------------------
+  worksheet.addRow(["Volumen semanal por ejercicio"]);
+  worksheet.getRow(8).font = { bold: true };
 
-    const sheet = XLSX.utils.aoa_to_sheet(rows);
+  const table = document.getElementById("weekly-volume-table");
 
-    XLSX.utils.book_append_sheet(
-      wb,
-      sheet,
-      "Resumen_Global"
-    );
-  }
+  if (table) {
 
-  /* =========================
-     2️⃣ MESOCICLOS
-  ========================= */
+    const rows = table.querySelectorAll("tr");
 
-  const { data: mesocycles } = await supabase
-    .from("mesocycles")
-    .select("id,name")
-    .eq("user_id", user.id);
+    rows.forEach(row => {
 
-  if (mesocycles?.length) {
+      const cols = row.querySelectorAll("td, th");
 
-    const recordSets = await Promise.all(
-      mesocycles.map(m => fetchExerciseRecords(m.id))
-    );
+      const rowData = [];
 
-    mesocycles.forEach((m, i) => {
+      cols.forEach(col => {
+        rowData.push(col.innerText);
+      });
 
-      const records = recordSets[i];
-      if (!records?.length) return;
-
-      const volume = calculateVolumeTrend(records);
-      const muscle = evaluateMuscleVolume(
-        calculateMuscleVolume(records)
-      );
-
-      const weekly = calculateWeeklyVolume
-        ? calculateWeeklyVolume(records)
-        : [];
-
-      const rows = [
-        [`MESOCICLO: ${m.name}`],
-        [],
-        ["VOLUMEN POR EJERCICIO"],
-        ["Ejercicio", "Tendencia", "%"],
-        ...volume.map(v => [
-          v.exercise,
-          v.trend,
-          v.percent
-        ]),
-        [],
-        ["VOLUMEN POR GRUPO MUSCULAR"],
-        ["Músculo", "Sets", "Estado", "MEV-MRV"],
-        ...muscle.map(mu => [
-          mu.muscle,
-          mu.sets,
-          mu.status,
-          `${mu.ranges?.MEV ?? "-"} - ${mu.ranges?.MRV ?? "-"}`
-        ]),
-        [],
-        ["VOLUMEN SEMANAL"],
-        ["Semana", "Volumen"],
-        ...weekly.map(w => [
-          w.week,
-          w.volume
-        ])
-      ];
-
-      const sheet = XLSX.utils.aoa_to_sheet(rows);
-
-      XLSX.utils.book_append_sheet(
-        wb,
-        sheet,
-        sanitizeSheetName(m.name)
-      );
+      worksheet.addRow(rowData);
 
     });
 
   }
 
-  /* =========================
-     3️⃣ DESCARGAR
-  ========================= */
+  worksheet.addRow([]);
+  worksheet.addRow([]);
 
-  XLSX.writeFile(
-    wb,
-    "Dashboard_Entrenamiento.xlsx"
-  );
+  // ----------------------------
+  // INSERTAR GRÁFICA
+  // ----------------------------
+  const canvas = document.getElementById("volumeChart");
 
+  if (canvas) {
+
+    const base64Image = canvas.toDataURL("image/png");
+
+    const imageId = workbook.addImage({
+      base64: base64Image,
+      extension: "png"
+    });
+
+    worksheet.addImage(imageId, {
+      tl: { col: 0, row: worksheet.rowCount + 2 },
+      ext: { width: 800, height: 400 }
+    });
+
+  }
+
+  // ----------------------------
+  // DESCARGA
+  // ----------------------------
+  const buffer = await workbook.xlsx.writeBuffer();
+
+  const blob = new Blob([buffer], {
+    type:
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  });
+
+  const link = document.createElement("a");
+
+  link.href = URL.createObjectURL(blob);
+
+  link.download = "dashboard_entrenamiento.xlsx";
+
+  link.click();
 }
+
 function buildDashboardSheet(records, title) {
   const volume = calculateVolumeTrend(records);
   const muscle = evaluateMuscleVolume(
