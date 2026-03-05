@@ -1036,6 +1036,36 @@ function updateStatsMesocycleLabel() {
   }
 }
 
+async function updateRecord(id, updatedData) {
+
+  const { error } = await supabase
+    .from("exercise_records")
+    .update(updatedData)
+    .eq("id", id);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  // 🔄 refrescar interfaz
+  await refreshDashboard();
+
+}
+
+async function refreshDashboard() {
+
+  const mesocycleId = document.getElementById("mesocycleSelect")?.value || null;
+
+  await loadVolumeKPI(mesocycleId);
+  await loadPRsKPI(mesocycleId);
+  await loadSessionsKPI(mesocycleId);
+
+  loadWeeklyVolumeChart(mesocycleId);
+  loadVolumeByExerciseTable(mesocycleId);
+  loadExerciseHistory();
+
+}
 /* ======================
    RENDER EJERCICIOS DÍA
 ====================== */
