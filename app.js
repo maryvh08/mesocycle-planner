@@ -1016,12 +1016,9 @@ function renderMiniChart(name, data, start, end) {
 
 function closeModal() {
   const modal = document.getElementById("exercise-modal");
-  modal.classList.add("hidden");
+  if (!modal) return;
 
-  if (window.miniChart) {
-    window.miniChart.destroy();
-    window.miniChart = null;
-  }
+  modal.classList.add("hidden");
 }
 
 function updateStatsMesocycleLabel() {
@@ -4098,5 +4095,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("DOMContentLoaded", setupExportButtons);
 
-document.getElementById("close-exercise-modal")
-  ?.addEventListener("click", closeModal);
+document.addEventListener("click", e => {
+
+  if (e.target.id === "close-exercise-modal") {
+    closeModal();
+  }
+
+  if (e.target.id === "exercise-modal") {
+    closeModal();
+  }
+
+});
