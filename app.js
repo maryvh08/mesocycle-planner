@@ -4088,25 +4088,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("DOMContentLoaded", setupExportButtons);
 
-document.addEventListener("click", (e) => {
+document.getElementById("exercise-modal") 
+   .addEventListener("click", e => { 
+      if (e.target.id === "exercise-modal") { 
+         closeModal(); } });
 
+document.addEventListener("DOMContentLoaded", () => {
+
+  const closeBtn = document.getElementById("closeExerciseChartModal");
   const modal = document.getElementById("exerciseChartModal");
 
-  // cerrar con botón
-  if (e.target.id === "closeExerciseChartModal") {
-    modal.style.display = "none";
-  }
-
-  // cerrar haciendo click fuera del modal
-  if (e.target.id === "exerciseChartModal") {
-    modal.style.display = "none";
+  if (closeBtn && modal) {
+    closeBtn.addEventListener("click", () => {
+      modal.style.display = "none";
+    });
   }
 
 });
 
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    const modal = document.getElementById("exerciseChartModal");
-    if (modal) modal.style.display = "none";
+window.addEventListener("click", (event) => {
+  const modal = document.getElementById("exerciseChartModal");
+
+  if (event.target === modal) {
+    modal.style.display = "none";
   }
+});
+
+document.addEventListener("click", (e) => {
+
+  if (e.target.id === "closeExerciseChartModal") {
+    document.getElementById("exerciseChartModal").style.display = "none";
+  }
+
 });
