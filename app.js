@@ -3718,75 +3718,127 @@ function buildDashboardSheet(records, title) {
 
 async function exportDashboardToPDF() {
 
-  const element = document.getElementById("analysisDashboard");
-
-  if (!element) {
-    console.error("❌ Dashboard no encontrado");
-    return;
-  }
-
   const { jsPDF } = window.jspdf;
 
   try {
 
-    // Esperar que gráficas terminen de renderizar
-    await new Promise(resolve => setTimeout(resolve, 600));
+    const pdf = new jsPDF("l", "mm", "a4");
 
-    const canvas = await html2canvas(element, {
-      scale: 3,
-      useCORS: true,
-      backgroundColor: "#111",
-      scrollY: -window.scrollY
-    });
+    const pageWidth = pdf.internal.pageSize.getWidth();
 
-    const imgData = canvas.toDataURL("image/png");
+    // =========================
+    // PORTADA
+    // =========================
 
-    const pdf = new jsPDF({
-      orientation: "landscape",
-      unit: "px",
-      format: "a4"
-    });
+    pdf.setFontSize(26);
+    pdf.text("Reporte de Entrenamiento", pageWidth / 2, 40, { align: "center" });
 
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
+    pdf.setFontSize(14);
+    pdf.text(
+      "Fecha: " + new Date().toLocaleDateString(),
+      pageWidth / 2,
+      60,
+      { align: "center" }
+    );
 
-    const imgWidth = pdfWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    const mesocycle = document.getElementById("mesocycle-select")?.selectedOptions[0]?.text || "Todos";
 
-    let heightLeft = imgHeight;
-    let position = 0;
+    pdf.text(
+      "Mesociclo: " + mesocycle,
+      pageWidth / 2,
+      70,
+      { align: "center" }
+    );
 
-    // Primera página
-    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pdfHeight;
+    pdf.addPage();
 
-    // Páginas adicionales si el dashboard es largo
-    while (heightLeft > 0) {
+    // =========================
+    // KPIs
+    // =========================
 
-      position = heightLeft - imgHeight;
+    const volumen =
+      document.getElementById("kpi-volume")?.innerText || "N/A";
 
-      pdf.addPage();
+    const prs =
+      document.getElementById("kpi-prs")?.innerText || "N/A";
+
+    const sesiones =
+      document.getElementById("kpi-sessions")?.innerText || "N/A";
+
+    pdf.setFontSize(18);
+    pdf.text("KPIs del entrenamiento", 14, 20);
+
+    pdf.setFontSize(12);
+
+    pdf.text("Volumen total: " + volumen, 14, 40);
+    pdf.text("PRs: " + prs, 14, 50);
+    pdf.text("Sesiones: " + sesiones, 14, 60);
+
+    // =========================
+    // GRAFICA
+    // =========================
+
+    const canvas = document.getElementById("strength-chart");
+
+    if (canvas) {
+
+      const img = canvas.toDataURL("image/png", 1);
 
       pdf.addImage(
-        imgData,
+        img,
         "PNG",
-        0,
-        position,
-        imgWidth,
-        imgHeight
+        90,
+        30,
+        170,
+        90
       );
-
-      heightLeft -= pdfHeight;
 
     }
 
-    pdf.save("dashboard_entrenamiento.pdf");
+    // =========================
+    // TABLA VOLUMEN
+    // =========================
 
-    console.log("✅ PDF exportado correctamente");
+    pdf.addPage();
+
+    pdf.setFontSize(18);
+    pdf.text("Volumen semanal por ejercicio", 14, 20);
+
+    const table = document.getElementById("weekly-volume-table");
+
+    if (table) {
+
+      let y = 40;
+
+      const rows = table.querySelectorAll("tr");
+
+      rows.forEach(row => {
+
+        const cols = row.querySelectorAll("td, th");
+
+        let x = 14;
+
+        cols.forEach(col => {
+
+          pdf.text(col.innerText, x, y);
+
+          x += 50;
+
+        });
+
+        y += 10;
+
+      });
+
+    }
+
+    pdf.save("reporte_entrenamiento.pdf");
+
+    console.log("✅ PDF generado correctamente");
 
   } catch (err) {
 
-    console.error("❌ Error generando PDF:", err);
+    console.error("❌ Error exportando PDF:", err);
 
   }
 
