@@ -3828,7 +3828,6 @@ async function exportDashboardToPDF() {
          
                if (txt) {
          
-                 // extraer porcentaje si existe
                  const porcentaje = txt.match(/-?\d+%/)?.[0] || "";
          
                  if (txt.includes("↑")) {
@@ -3840,7 +3839,7 @@ async function exportDashboardToPDF() {
                  }
          
                  if (txt.includes("→")) {
-                   data.cell.text = [`Se mantiene ${porcentaje}`.trim()];
+                   data.cell.text = ["Se mantiene"];
                  }
          
                }
