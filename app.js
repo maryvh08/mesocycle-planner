@@ -3510,7 +3510,7 @@ function setupExportButtons() {
     exportDashboardBtn.addEventListener('click', () => {
       const analysis = document.getElementById('analysisDashboard');
 
-      exportFullDashboardExcel(window.__dashboardCache);
+      exportFullDashboardExcel();
     });
   }
 
@@ -3539,17 +3539,25 @@ function setupExportButtons() {
 }
 
 async function exportFullDashboardExcel() {
+
   try {
 
-    console.log("Exportando dashboard...");
+    console.log("📊 Exportando dashboard...");
+
+    const dashboard = document.getElementById("analysisDashboard");
+
+    if (!dashboard) {
+      console.error("❌ Dashboard no encontrado");
+      return;
+    }
 
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet("Dashboard");
 
     sheet.columns = [
       { width: 30 },
-      { width: 20 },
-      { width: 20 }
+      { width: 25 },
+      { width: 25 }
     ];
 
     // =========================
@@ -3562,13 +3570,14 @@ async function exportFullDashboardExcel() {
     sheet.getCell("A1").alignment = { horizontal: "center" };
 
     sheet.addRow([]);
+    sheet.addRow([]);
 
     // =========================
     // KPIs
     // =========================
 
     const volumen =
-      document.getElementById("kpi-total-volume")?.innerText || "N/A";
+      document.getElementById("kpi-volume")?.innerText || "N/A";
 
     const prs =
       document.getElementById("kpi-prs")?.innerText || "N/A";
@@ -3587,14 +3596,17 @@ async function exportFullDashboardExcel() {
     sheet.addRow([]);
 
     // =========================
-    // TABLA VOLUMEN SEMANAL
+    // TABLAS DEL DASHBOARD
     // =========================
 
-    const table = document.getElementById("weekly-volume-table");
+    const tables = dashboard.querySelectorAll("table");
 
-    if (table) {
+    tables.forEach(table => {
 
-      sheet.addRow(["Volumen semanal por ejercicio"]);
+      const title =
+        table.previousElementSibling?.innerText || "Tabla";
+
+      sheet.addRow([title]);
       sheet.getRow(sheet.rowCount).font = { bold: true };
 
       const rows = table.querySelectorAll("tr");
@@ -3611,46 +3623,42 @@ async function exportFullDashboardExcel() {
 
       });
 
-    } else {
+      sheet.addRow([]);
+      sheet.addRow([]);
 
-      console.warn("No se encontró la tabla weekly-volume-table");
-
-    }
-
-    sheet.addRow([]);
-    sheet.addRow([]);
+    });
 
     // =========================
-    // EXPORTAR GRAFICA
+    // GRAFICAS
     // =========================
 
-    const chartCanvas = document.getElementById("volumeChart");
+    const charts = dashboard.querySelectorAll("canvas");
 
-    if (chartCanvas) {
+    for (const canvas of charts) {
 
-      const imageBase64 = chartCanvas.toDataURL("image/png");
+      sheet.addRow(["Gráfica"]);
+      sheet.getRow(sheet.rowCount).font = { bold: true };
+
+      const imageBase64 = canvas.toDataURL("image/png");
 
       const imageId = workbook.addImage({
         base64: imageBase64,
         extension: "png"
       });
 
-      sheet.addRow([]);
-      sheet.addRow(["Gráfica de Volumen"]);
-
       sheet.addImage(imageId, {
         tl: { col: 0, row: sheet.rowCount },
         ext: { width: 700, height: 350 }
       });
 
-    } else {
-
-      console.warn("No se encontró el canvas volumeChart");
+      sheet.addRow([]);
+      sheet.addRow([]);
+      sheet.addRow([]);
 
     }
 
     // =========================
-    // DESCARGA
+    // DESCARGAR
     // =========================
 
     const buffer = await workbook.xlsx.writeBuffer();
@@ -3667,16 +3675,16 @@ async function exportFullDashboardExcel() {
 
     const a = document.createElement("a");
     a.href = url;
-    a.download = "dashboard.xlsx";
+    a.download = "dashboard_entrenamiento.xlsx";
     a.click();
 
     URL.revokeObjectURL(url);
 
-    console.log("Exportación completada");
+    console.log("✅ Exportación completada");
 
   } catch (err) {
 
-    console.error("Error exportando:", err);
+    console.error("❌ Error exportando:", err);
 
   }
 
@@ -3708,32 +3716,134 @@ function buildDashboardSheet(records, title) {
   return XLSX.utils.aoa_to_sheet(rows);
 }
 
-async function exportDashboardToPDF(element) {
+async function exportDashboardToPDF() {
 
-  if (!element) return;
+  try {
 
-  const { jsPDF } = window.jspdf;
+    console.log("📄 Generando informe PDF...");
 
-  // ⏳ esperar a que gráficos terminen de renderizar
-  await new Promise(resolve => setTimeout(resolve, 500));
+    const { jsPDF } = window.jspdf;
 
-  const canvas = await html2canvas(element, {
-    scale: 3,
-    useCORS: true,
-    backgroundColor: "#111"
-  });
+    const dashboard = document.getElementById("analysisDashboard");
 
-  const imgData = canvas.toDataURL("image/jpeg", 1.0);
+    if (!dashboard) {
+      console.error("❌ Dashboard no encontrado");
+      return;
+    }
 
-  const pdf = new jsPDF("l", "mm", "a4");
+    const pdf = new jsPDF("p", "mm", "a4");
 
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const imgWidth = pageWidth;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
 
-  pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight);
+    // =========================
+    // PORTADA
+    // =========================
 
-  pdf.save("Dashboard.pdf");
+    pdf.setFontSize(26);
+    pdf.text("Informe de Entrenamiento", pageWidth / 2, 60, {
+      align: "center"
+    });
+
+    pdf.setFontSize(14);
+    pdf.text(
+      `Fecha: ${new Date().toLocaleDateString()}`,
+      pageWidth / 2,
+      80,
+      { align: "center" }
+    );
+
+    pdf.addPage();
+
+    // =========================
+    // KPIs
+    // =========================
+
+    const volumen =
+      document.getElementById("kpi-volume")?.innerText || "N/A";
+
+    const prs =
+      document.getElementById("kpi-prs")?.innerText || "N/A";
+
+    const sesiones =
+      document.getElementById("kpi-sessions")?.innerText || "N/A";
+
+    pdf.setFontSize(18);
+    pdf.text("KPIs", 20, 20);
+
+    pdf.setFontSize(12);
+
+    pdf.text(`Volumen total: ${volumen}`, 20, 40);
+    pdf.text(`PRs: ${prs}`, 20, 50);
+    pdf.text(`Sesiones: ${sesiones}`, 20, 60);
+
+    // =========================
+    // GRAFICA DE VOLUMEN
+    // =========================
+
+    const chartCanvas = document.getElementById("volumeChart");
+
+    if (chartCanvas) {
+
+      const imgData = chartCanvas.toDataURL("image/png");
+
+      pdf.addImage(
+        imgData,
+        "PNG",
+        15,
+        80,
+        pageWidth - 30,
+        90
+      );
+
+    }
+
+    pdf.addPage();
+
+    // =========================
+    // CAPTURA TABLAS
+    // =========================
+
+    const tables = dashboard.querySelectorAll("table");
+
+    for (const table of tables) {
+
+      const canvas = await html2canvas(table, {
+        scale: 2
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+
+      const imgWidth = pageWidth - 20;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(
+        imgData,
+        "PNG",
+        10,
+        20,
+        imgWidth,
+        imgHeight
+      );
+
+      pdf.addPage();
+
+    }
+
+    // =========================
+    // GUARDAR
+    // =========================
+
+    pdf.save("Informe_Entrenamiento.pdf");
+
+    console.log("✅ PDF generado correctamente");
+
+  } catch (error) {
+
+    console.error("❌ Error generando PDF:", error);
+
+  }
+
 }
 
 function updateExportButtonsUI() {
