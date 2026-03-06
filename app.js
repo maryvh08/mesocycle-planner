@@ -3722,6 +3722,27 @@ function buildDashboardSheet(records, title) {
   return XLSX.utils.aoa_to_sheet(rows);
 }
 
+const ctx = document.getElementById('strength-chart').getContext('2d');
+const chart = new Chart(ctx, {
+  type: 'line',
+  data: chartData,
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        ticks: { font: { size: 10 } }  // eje X más pequeño
+      },
+      y: {
+        ticks: { font: { size: 10 } }  // eje Y más pequeño
+      }
+    },
+    plugins: {
+      legend: { labels: { font: { size: 12 } } }
+    }
+  }
+});
+
 async function exportDashboardToPDF() {
 
   const { jsPDF } = window.jspdf;
