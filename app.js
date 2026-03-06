@@ -3736,16 +3736,13 @@ async function exportDashboardToPDF() {
     // =========================
     // PORTADA
     // =========================
-
     pdf.setFontSize(28);
     pdf.text("Reporte de Entrenamiento", pageWidth / 2, 50, { align: "center" });
 
     pdf.setFontSize(14);
     pdf.text("Fecha: " + new Date().toLocaleDateString(), pageWidth / 2, 70, { align: "center" });
 
-    const mesocycle =
-      document.getElementById("mesocycle-select")?.selectedOptions[0]?.text || "Todos";
-
+    const mesocycle = document.getElementById("mesocycle-select")?.selectedOptions[0]?.text || "Todos";
     pdf.text("Mesociclo: " + mesocycle, pageWidth / 2, 80, { align: "center" });
 
     pdf.addPage();
@@ -3753,7 +3750,6 @@ async function exportDashboardToPDF() {
     // =========================
     // KPIs
     // =========================
-
     const volumen = document.getElementById("kpi-volume")?.innerText || "N/A";
     const prs = document.getElementById("kpi-prs")?.innerText || "N/A";
     const sesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
@@ -3768,14 +3764,9 @@ async function exportDashboardToPDF() {
     const gap = 10;
 
     function drawKPI(x, title, value) {
-      // cuadro
       pdf.rect(x, y, cardWidth, cardHeight);
-
-      // título
       pdf.setFontSize(12);
       pdf.text(title, x + cardWidth / 2, y + 12, { align: "center" });
-
-      // valor
       pdf.setFontSize(18);
       pdf.text(value, x + cardWidth / 2, y + cardHeight / 2 + 2, { align: "center" });
     }
@@ -3785,38 +3776,25 @@ async function exportDashboardToPDF() {
     drawKPI(startX + (cardWidth + gap) * 2, "Sesiones", sesiones);
 
     // =========================
-      // GRÁFICA
-      // =========================
-      
-      const canvas = document.getElementById("strength-chart");
-      
-      if (canvas) {
-      
-        const img = canvas.toDataURL("image/png", 1);
-      
-        const chartY = y + cardHeight + 20;
-      
-        const margin = 14; // margen izquierdo/derecho
-        const pdfWidth = pageWidth - margin * 2; // ancho máximo ajustado a página
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width; // mantiene proporción
-      
-        pdf.addImage(
-          img,
-          "PNG",
-          margin,
-          chartY,
-          pdfWidth,
-          pdfHeight
-        );
-      
-      }
+    // GRÁFICA
+    // =========================
+    const canvas = document.getElementById("strength-chart");
+
+    if (canvas) {
+      const img = canvas.toDataURL("image/png", 1);
+
+      const chartY = y + cardHeight + 15;
+      const margin = 14;
+      const pdfWidth = pageWidth - margin * 2;  // ancho máximo de la página
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;  // mantiene proporción
+
+      pdf.addImage(img, "PNG", margin, chartY, pdfWidth, pdfHeight);
+    }
 
     // =========================
     // TABLA VOLUMEN EJERCICIO
     // =========================
-
     const table = document.querySelector("#volumeTable table");
-
     if (table) {
       pdf.addPage();
       pdf.setFontSize(18);
@@ -3834,9 +3812,7 @@ async function exportDashboardToPDF() {
     // =========================
     // TABLA VOLUMEN MUSCULAR
     // =========================
-
     const muscleTable = document.querySelector("#muscleTable table");
-
     if (muscleTable) {
       pdf.addPage();
       pdf.setFontSize(18);
@@ -3852,9 +3828,8 @@ async function exportDashboardToPDF() {
     }
 
     // =========================
-    // NUMERACIÓN
+    // NUMERACIÓN DE PÁGINAS
     // =========================
-
     const pageCount = pdf.internal.getNumberOfPages();
     const pageHeight = pdf.internal.pageSize.getHeight();
 
@@ -3865,9 +3840,8 @@ async function exportDashboardToPDF() {
     }
 
     // =========================
-    // GUARDAR
+    // GUARDAR PDF
     // =========================
-
     pdf.save("reporte_entrenamiento.pdf");
     console.log("✅ PDF generado correctamente");
 
