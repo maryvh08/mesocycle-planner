@@ -3716,7 +3716,7 @@ function buildDashboardSheet(records, title) {
   return XLSX.utils.aoa_to_sheet(rows);
 }
 
-async function exportDashboardPDF() {
+async function exportDashboardtoPDF() {
 
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF("p", "mm", "a4");
