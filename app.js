@@ -3757,194 +3757,284 @@ async function exportDashboardToPDF() {
   try {
 
     const pdf = new jsPDF("l", "mm", "a4");
+
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
 
-    await new Promise(r => setTimeout(r, 300)); // espera que todo cargue
+    const primary = [41,128,185];
+    const dark = [44,62,80];
+    const light = [245,245,245];
+
+    await new Promise(r => setTimeout(r, 300));
 
     // =========================
     // PORTADA
     // =========================
-    pdf.setFontSize(28);
-    pdf.text("Reporte de Entrenamiento", pageWidth / 2, 50, { align: "center" });
 
+    pdf.setFillColor(...primary);
+    pdf.rect(0,0,pageWidth,50,"F");
+
+    pdf.setTextColor(255,255,255);
+    pdf.setFontSize(30);
+    pdf.text("Reporte de Entrenamiento", pageWidth/2,30,{align:"center"});
+
+    pdf.setTextColor(80,80,80);
     pdf.setFontSize(14);
-    pdf.text("Fecha: " + new Date().toLocaleDateString(), pageWidth / 2, 70, { align: "center" });
 
-    const mesocycle = document.getElementById("mesocycle-select")?.selectedOptions[0]?.text || "Todos";
-    pdf.text("Mesociclo: " + mesocycle, pageWidth / 2, 80, { align: "center" });
+    const fecha = new Date().toLocaleDateString();
+
+    const mesocycle =
+      document.getElementById("mesocycle-select")
+      ?.selectedOptions[0]?.text || "Todos";
+
+    pdf.text(`Fecha: ${fecha}`, pageWidth/2,90,{align:"center"});
+    pdf.text(`Mesociclo: ${mesocycle}`, pageWidth/2,100,{align:"center"});
+
+    pdf.setFontSize(11);
+    pdf.setTextColor(140,140,140);
+    pdf.text(
+      "Reporte generado automáticamente desde el dashboard",
+      pageWidth/2,
+      120,
+      {align:"center"}
+    );
 
     pdf.addPage();
 
     // =========================
     // KPIs
     // =========================
+
     const volumen = document.getElementById("kpi-volume")?.innerText || "N/A";
     const prs = document.getElementById("kpi-prs")?.innerText || "N/A";
     const sesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
 
     pdf.setFontSize(20);
-    pdf.text("Resumen del Entrenamiento", 14, 20);
+    pdf.setTextColor(...dark);
+    pdf.text("Resumen del Entrenamiento",14,20);
+
+    pdf.setDrawColor(220,220,220);
+    pdf.line(14,24,pageWidth-14,24);
 
     const cardWidth = 80;
-    const cardHeight = 35;
-    const startX = 14;
-    const y = 35;
+    const cardHeight = 40;
     const gap = 10;
+    const y = 35;
 
-    function drawKPI(x, title, value) {
-      pdf.rect(x, y, cardWidth, cardHeight); // cuadro
-      pdf.setFontSize(12);
-      pdf.text(title, x + cardWidth / 2, y + 12, { align: "center" });
-      pdf.setFontSize(18);
-      pdf.text(value, x + cardWidth / 2, y + cardHeight / 2 + 2, { align: "center" });
+    function drawKPI(x,title,value){
+
+      pdf.setFillColor(...light);
+      pdf.roundedRect(x,y,cardWidth,cardHeight,4,4,"F");
+
+      pdf.setFontSize(11);
+      pdf.setTextColor(...dark);
+      pdf.text(title,x+cardWidth/2,y+12,{align:"center"});
+
+      pdf.setFontSize(24);
+      pdf.setTextColor(...primary);
+      pdf.text(value,x+cardWidth/2,y+28,{align:"center"});
     }
 
-    drawKPI(startX, "Volumen Total", volumen);
-    drawKPI(startX + cardWidth + gap, "PRs", prs);
-    drawKPI(startX + (cardWidth + gap) * 2, "Sesiones", sesiones);
+    drawKPI(14,"Volumen Total",volumen);
+    drawKPI(14+(cardWidth+gap),"PRs",prs);
+    drawKPI(14+(cardWidth+gap)*2,"Sesiones",sesiones);
 
     // =========================
     // GRÁFICA
     // =========================
+
     const canvas = document.getElementById("strength-chart");
 
-    if (canvas) {
-      const img = canvas.toDataURL("image/png", 1);
+    if(canvas){
 
-      const chartY = y + cardHeight + 15; // posición debajo de los KPIs
-      const margin = 14;
+      pdf.setFontSize(18);
+      pdf.setTextColor(...dark);
+      pdf.text("Progreso de Fuerza",14,95);
 
-      // ancho máximo dentro de los márgenes
-      let pdfWidth = pageWidth - margin * 2;
+      pdf.setDrawColor(220,220,220);
+      pdf.line(14,98,pageWidth-14,98);
 
-      // altura proporcional
-      let pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      const maxHeight = pageHeight - chartY - 20; // deja margen inferior
+      const img = canvas.toDataURL("image/png",1);
 
-      if (pdfHeight > maxHeight) {
-        pdfHeight = maxHeight;
-        pdfWidth = (canvas.width * pdfHeight) / canvas.height; // recalcula ancho proporcional
+      const margin = 20;
+      let pdfWidth = pageWidth-margin*2;
+      let pdfHeight = (canvas.height*pdfWidth)/canvas.width;
+
+      if(pdfHeight>90){
+
+        pdfHeight = 90;
+        pdfWidth = (canvas.width*pdfHeight)/canvas.height;
+
       }
 
-      const chartX = (pageWidth - pdfWidth) / 2; // centrar horizontal
-      pdf.addImage(img, "PNG", chartX, chartY, pdfWidth, pdfHeight);
+      const chartX = (pageWidth-pdfWidth)/2;
+
+      pdf.addImage(img,"PNG",chartX,105,pdfWidth,pdfHeight);
     }
 
-      // =========================
-     // =========================
+    // =========================
     // TABLA VOLUMEN EJERCICIO
     // =========================
+
     const table = document.querySelector("#volumeTable table");
-    if (table) {
+
+    if(table){
+
       pdf.addPage();
+
       pdf.setFontSize(18);
-      pdf.text("Volumen semanal por ejercicio", 14, 20);
+      pdf.setTextColor(...dark);
+      pdf.text("Volumen semanal por ejercicio",14,20);
+
+      pdf.setDrawColor(220,220,220);
+      pdf.line(14,23,pageWidth-14,23);
 
       pdf.autoTable({
-           html: table,
-           startY: 30,
-           theme: "grid",
-           styles: { fontSize: 10 },
-           headStyles: { fillColor: [41,128,185] },
-         
-           didParseCell: function (data) {
-         
-             if (data.section === "body") {
-         
-               let txt = data.cell.text[0];
-         
-               if (txt) {
-         
-                 const porcentaje = txt.match(/-?\d+%/)?.[0] || "";
-         
-                 if (txt.includes("↑")) {
-                   data.cell.text = [`Sube ${porcentaje}`.trim()];
-                 }
-         
-                 if (txt.includes("↓")) {
-                   data.cell.text = [`Baja ${porcentaje}`.trim()];
-                 }
-         
-                 if (txt.includes("→")) {
-                   data.cell.text = ["Se mantiene"];
-                 }
-         
-               }
-         
-             }
-         
-           }
-         
-         });
+
+        html:table,
+        startY:30,
+
+        theme:"striped",
+
+        styles:{
+          fontSize:10,
+          cellPadding:4
+        },
+
+        headStyles:{
+          fillColor:primary,
+          textColor:255,
+          fontStyle:"bold"
+        },
+
+        alternateRowStyles:{
+          fillColor:[248,248,248]
+        },
+
+        didParseCell:function(data){
+
+          if(data.section==="body"){
+
+            let txt=data.cell.text[0];
+
+            if(txt){
+
+              const porcentaje=txt.match(/-?\d+%/)?.[0]||"";
+
+              if(txt.includes("↑")){
+                data.cell.text=[`Sube ${porcentaje}`.trim()];
+              }
+
+              if(txt.includes("↓")){
+                data.cell.text=[`Baja ${porcentaje}`.trim()];
+              }
+
+              if(txt.includes("→")){
+                data.cell.text=["Se mantiene"];
+              }
+
+            }
+
+          }
+
+        }
+
+      });
+
     }
+
     // =========================
     // TABLA VOLUMEN MUSCULAR
     // =========================
-    const muscleTable = document.querySelector("#muscleTable table");
-    if (muscleTable) {
+
+    const muscleTable=document.querySelector("#muscleTable table");
+
+    if(muscleTable){
+
       pdf.addPage();
+
       pdf.setFontSize(18);
-      pdf.text("Volumen por grupo muscular", 14, 20);
+      pdf.setTextColor(...dark);
+      pdf.text("Volumen por grupo muscular",14,20);
+
+      pdf.setDrawColor(220,220,220);
+      pdf.line(14,23,pageWidth-14,23);
 
       pdf.autoTable({
-           html: muscleTable,
-           startY: 30,
-           theme: "grid",
-           styles: { fontSize: 10 },
-           headStyles: { fillColor: [39,174,96] },
-         
-           didParseCell: function (data) {
-         
-             if (data.section === "body") {
-         
-               let txt = data.cell.text[0];
-         
-               if (txt) {
-         
-                 if (txt.includes("Exceso")) {
-                   data.cell.text = ["Exceso"];
-                 }
-         
-                 if (txt.includes("Alto")) {
-                   data.cell.text = ["Alto"];
-                 }
-         
-                 if (txt.includes("Óptimo")) {
-                   data.cell.text = ["Óptimo"];
-                 }
-         
-                 if (txt.includes("Bajo")) {
-                   data.cell.text = ["Bajo"];
-                 }
-         
-               }
-             }
-         
-           }
-         
-         });
+
+        html:muscleTable,
+        startY:30,
+
+        theme:"striped",
+
+        styles:{
+          fontSize:10,
+          cellPadding:4
+        },
+
+        headStyles:{
+          fillColor:[39,174,96],
+          textColor:255,
+          fontStyle:"bold"
+        },
+
+        alternateRowStyles:{
+          fillColor:[248,248,248]
+        },
+
+        didParseCell:function(data){
+
+          if(data.section==="body"){
+
+            let txt=data.cell.text[0];
+
+            if(txt){
+
+              if(txt.includes("Exceso")) data.cell.text=["Exceso"];
+              if(txt.includes("Alto")) data.cell.text=["Alto"];
+              if(txt.includes("Óptimo")) data.cell.text=["Óptimo"];
+              if(txt.includes("Bajo")) data.cell.text=["Bajo"];
+
+            }
+
+          }
+
+        }
+
+      });
+
     }
 
     // =========================
-    // NUMERACIÓN DE PÁGINAS
+    // PIE DE PAGINA
     // =========================
-    const pageCount = pdf.internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
+
+    const pageCount=pdf.internal.getNumberOfPages();
+
+    for(let i=1;i<=pageCount;i++){
+
       pdf.setPage(i);
+
+      pdf.setDrawColor(200,200,200);
+      pdf.line(14,pageHeight-15,pageWidth-14,pageHeight-15);
+
       pdf.setFontSize(10);
-      pdf.text(`Página ${i} de ${pageCount}`, pageWidth - 40, pageHeight - 10);
+      pdf.setTextColor(120,120,120);
+
+      pdf.text(`Página ${i} de ${pageCount}`,pageWidth-40,pageHeight-8);
+
     }
 
-    // =========================
-    // GUARDAR PDF
-    // =========================
     pdf.save("reporte_entrenamiento.pdf");
+
     console.log("✅ PDF generado correctamente");
 
-  } catch (err) {
-    console.error("❌ Error exportando PDF:", err);
+  } catch(err){
+
+    console.error("❌ Error exportando PDF:",err);
+
   }
+
 }
 
 function updateExportButtonsUI() {
