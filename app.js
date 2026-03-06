@@ -3720,127 +3720,173 @@ async function exportDashboardToPDF() {
 
   try {
 
-    console.log("📄 Generando informe PDF...");
-
     const { jsPDF } = window.jspdf;
-
-    const dashboard = document.getElementById("analysisDashboard");
-
-    if (!dashboard) {
-      console.error("❌ Dashboard no encontrado");
-      return;
-    }
-
-    const pdf = new jsPDF("p", "mm", "a4");
+    const pdf = new jsPDF("l", "mm", "a4");
 
     const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
 
-    // =========================
-    // PORTADA
-    // =========================
+    /* =========================
+       TITULO
+    ========================= */
 
-    pdf.setFontSize(26);
-    pdf.text("Informe de Entrenamiento", pageWidth / 2, 60, {
-      align: "center"
-    });
+    pdf.setFontSize(22);
+    pdf.text("Reporte de Entrenamiento", pageWidth / 2, 20, { align: "center" });
 
-    pdf.setFontSize(14);
+    pdf.setFontSize(11);
     pdf.text(
-      `Fecha: ${new Date().toLocaleDateString()}`,
+      "Generado: " + new Date().toLocaleDateString(),
       pageWidth / 2,
-      80,
+      28,
       { align: "center" }
     );
 
-    pdf.addPage();
-
-    // =========================
-    // KPIs
-    // =========================
+    /* =========================
+       KPIs
+    ========================= */
 
     const volumen =
-      document.getElementById("kpi-volume")?.innerText || "N/A";
+      document.querySelector("#kpi-volume strong")?.innerText || "0";
 
     const prs =
-      document.getElementById("kpi-prs")?.innerText || "N/A";
+      document.querySelector("#kpi-prs strong")?.innerText || "0";
 
     const sesiones =
-      document.getElementById("kpi-sessions")?.innerText || "N/A";
+      document.querySelector("#kpi-sessions strong")?.innerText || "0";
 
-    pdf.setFontSize(18);
-    pdf.text("KPIs", 20, 20);
+    pdf.setFontSize(14);
+    pdf.text("Indicadores Clave", 20, 50);
 
     pdf.setFontSize(12);
 
-    pdf.text(`Volumen total: ${volumen}`, 20, 40);
-    pdf.text(`PRs: ${prs}`, 20, 50);
-    pdf.text(`Sesiones: ${sesiones}`, 20, 60);
+    pdf.text(`Volumen total: ${volumen}`, 20, 65);
+    pdf.text(`PRs obtenidos: ${prs}`, 20, 75);
+    pdf.text(`Sesiones registradas: ${sesiones}`, 20, 85);
 
-    // =========================
-    // GRAFICA DE VOLUMEN
-    // =========================
+    /* =========================
+       GRAFICA DE VOLUMEN
+    ========================= */
 
-    const chartCanvas = document.getElementById("volumeChart");
+    const volumeChart = document.getElementById("volumeChart");
 
-    if (chartCanvas) {
+    if (volumeChart) {
 
-      const imgData = chartCanvas.toDataURL("image/png");
+      await new Promise(r => setTimeout(r, 500));
 
-      pdf.addImage(
-        imgData,
-        "PNG",
-        15,
-        80,
-        pageWidth - 30,
-        90
-      );
-
-    }
-
-    pdf.addPage();
-
-    // =========================
-    // CAPTURA TABLAS
-    // =========================
-
-    const tables = dashboard.querySelectorAll("table");
-
-    for (const table of tables) {
-
-      const canvas = await html2canvas(table, {
-        scale: 2
-      });
-
-      const imgData = canvas.toDataURL("image/png");
-
-      const imgWidth = pageWidth - 20;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      pdf.addImage(
-        imgData,
-        "PNG",
-        10,
-        20,
-        imgWidth,
-        imgHeight
-      );
+      const img = volumeChart.toDataURL("image/png", 1);
 
       pdf.addPage();
 
+      pdf.setFontSize(16);
+      pdf.text("Evolución del Volumen", 20, 20);
+
+      pdf.addImage(
+        img,
+        "PNG",
+        20,
+        30,
+        240,
+        120
+      );
+
     }
 
-    // =========================
-    // GUARDAR
-    // =========================
+    /* =========================
+       TABLA VOLUMEN EJERCICIO
+    ========================= */
 
-    pdf.save("Informe_Entrenamiento.pdf");
+    const table = document.getElementById("weekly-volume-table");
 
-    console.log("✅ PDF generado correctamente");
+    if (table) {
 
-  } catch (error) {
+      pdf.addPage();
 
-    console.error("❌ Error generando PDF:", error);
+      pdf.setFontSize(16);
+      pdf.text("Volumen semanal por ejercicio", 20, 20);
+
+      let y = 35;
+
+      const rows = table.querySelectorAll("tr");
+
+      rows.forEach(row => {
+
+        const cols = row.querySelectorAll("td, th");
+
+        let x = 20;
+
+        cols.forEach(col => {
+
+          pdf.setFontSize(11);
+          pdf.text(col.innerText, x, y);
+
+          x += 60;
+
+        });
+
+        y += 8;
+
+        if (y > 180) {
+          pdf.addPage();
+          y = 20;
+        }
+
+      });
+
+    }
+
+    /* =========================
+       ALERTAS MUSCULARES
+    ========================= */
+
+    const muscleTable = document.getElementById("muscle-volume-table");
+
+    if (muscleTable) {
+
+      pdf.addPage();
+
+      pdf.setFontSize(16);
+      pdf.text("Análisis de Volumen por Grupo Muscular", 20, 20);
+
+      let y = 35;
+
+      const rows = muscleTable.querySelectorAll("tr");
+
+      rows.forEach(row => {
+
+        const cols = row.querySelectorAll("td, th");
+
+        let x = 20;
+
+        cols.forEach(col => {
+
+          pdf.setFontSize(11);
+          pdf.text(col.innerText, x, y);
+
+          x += 60;
+
+        });
+
+        y += 8;
+
+        if (y > 180) {
+          pdf.addPage();
+          y = 20;
+        }
+
+      });
+
+    }
+
+    /* =========================
+       DESCARGA
+    ========================= */
+
+    pdf.save("Reporte_Entrenamiento.pdf");
+
+    console.log("PDF generado correctamente");
+
+  } catch (err) {
+
+    console.error("Error generando PDF:", err);
 
   }
 
