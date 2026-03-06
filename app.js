@@ -3699,7 +3699,6 @@ async function exportFullDashboardExcel() {
         mesNameExcel = mesocycleLabel.textContent.trim().replace(/\s+/g, "_");
       }
       
-      const a = document.createElement("a");
       a.href = url;
       a.download = `dashboard_entrenamiento_${mesNameExcel}.xlsx`;
       a.click();
