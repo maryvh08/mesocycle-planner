@@ -3761,73 +3761,48 @@ async function exportDashboardToPDF() {
 
     pdf.addPage();
 
-   // =========================
-   // KPIs (CARDS)
-   // =========================
-   const volumen = document.getElementById("kpi-volume")?.innerText || "N/A";
-   const prs = document.getElementById("kpi-prs")?.innerText || "N/A";
-   const sesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
-   
-   pdf.setFontSize(20);
-   pdf.setTextColor(30,30,30);
-   pdf.text("Resumen del Entrenamiento", 14, 20);
-   
-   // Tamaño
-   const cardWidth = 60;
-   const cardHeight = 35;
-   
-   const startX = 14;
-   const y = 35;
-   const gap = 10;
-   
-   // función KPI
-   function drawKPI(x, title, value, color){
-   
-     // fondo suave
-     pdf.setFillColor(245,245,245);
-     pdf.roundedRect(x, y, cardWidth, cardHeight, 4, 4, "F");
-   
-     // barra superior color
-     pdf.setFillColor(color[0], color[1], color[2]);
-     pdf.roundedRect(x, y, cardWidth, 6, 2, 2, "F");
-   
-     // titulo
-     pdf.setFontSize(11);
-     pdf.setTextColor(90,90,90);
-     pdf.text(
-       title,
-       x + cardWidth / 2,
-       y + 15,
-       { align: "center" }
-     );
-   
-     // valor
-     pdf.setFontSize(18);
-     pdf.setTextColor(20,20,20);
-     pdf.text(
-       value,
-       x + cardWidth / 2,
-       y + 26,
-       { align: "center" }
-     );
-   }
-   
-   // datos
-   const kpis = [
-     {title:"Volumen Total", value:volumen, color:[52,152,219]},
-     {title:"PRs", value:prs, color:[46,204,113]},
-     {title:"Sesiones", value:sesiones, color:[155,89,182]}
-   ];
-   
-   kpis.forEach((kpi,i)=>{
-     drawKPI(
-       startX + (cardWidth + gap) * i,
-       kpi.title,
-       kpi.value,
-       kpi.color
-     );
-   });
-     
+    // =========================
+    // KPIs
+    // =========================
+
+    const volumen = document.getElementById("kpi-volume")?.innerText || "N/A";
+    const prs = document.getElementById("kpi-prs")?.innerText || "N/A";
+    const sesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
+
+    pdf.setFontSize(20);
+    pdf.text("Resumen del Entrenamiento", 14, 20);
+
+    const cardWidth = 80;
+    const cardHeight = 35;
+    const startX = 14;
+    const y = 35;
+    const gap = 10;
+
+    function drawKPI(x, title, value) {
+
+      pdf.rect(x, y, cardWidth, cardHeight);
+
+      pdf.setFontSize(12);
+      pdf.text(
+        title,
+        x + cardWidth / 2,
+        y + cardHeight / 2 - 6,
+        { align: "center", baseline: "middle" }
+      );
+
+      pdf.setFontSize(16);
+      pdf.text(
+        value,
+        x + cardWidth / 2,
+        y + cardHeight / 2 + 6,
+        { align: "center", baseline: "middle" }
+      );
+    }
+
+    drawKPI(startX, "Volumen Total", volumen);
+    drawKPI(startX + cardWidth + gap, "PRs", prs);
+    drawKPI(startX + (cardWidth + gap) * 2, "Sesiones", sesiones);
+
     // =========================
     // GRÁFICA
     // =========================
@@ -3837,14 +3812,15 @@ async function exportDashboardToPDF() {
     if (canvas) {
 
       const img = canvas.toDataURL("image/png", 1);
-      const kpiBottom = 75; // donde terminan las tarjetas KPI
-      
+
+      const chartY = y + cardHeight + 20;
+
       pdf.addImage(
         img,
         "PNG",
-        60,
-        kpiBottom + 10,
-        170,
+        40,
+        chartY,
+        210,
         90
       );
     }
@@ -3867,7 +3843,7 @@ async function exportDashboardToPDF() {
         startY: 30,
         theme: "grid",
         styles: { fontSize: 10 },
-        headStyles: { fillColor: [41,128,185] }
+        headStyles: { fillColor: [41, 128, 185] }
       });
 
     }
@@ -3890,16 +3866,17 @@ async function exportDashboardToPDF() {
         startY: 30,
         theme: "grid",
         styles: { fontSize: 10 },
-        headStyles: { fillColor: [39,174,96] }
+        headStyles: { fillColor: [39, 174, 96] }
       });
 
     }
 
     // =========================
-    // NUMERACIÓN
+    // NUMERACIÓN DE PÁGINAS
     // =========================
 
     const pageCount = pdf.internal.getNumberOfPages();
+    const pageHeight = pdf.internal.pageSize.getHeight();
 
     for (let i = 1; i <= pageCount; i++) {
 
@@ -3909,11 +3886,15 @@ async function exportDashboardToPDF() {
 
       pdf.text(
         `Página ${i} de ${pageCount}`,
-        pageWidth - 30,
-        pdf.internal.pageSize.getHeight() - 10
+        pageWidth - 40,
+        pageHeight - 10
       );
 
     }
+
+    // =========================
+    // GUARDAR
+    // =========================
 
     pdf.save("reporte_entrenamiento.pdf");
 
