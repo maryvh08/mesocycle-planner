@@ -3721,7 +3721,7 @@ async function exportDashboardToPDF() {
   const element = document.getElementById("analysisDashboard");
 
   if (!element) {
-    console.error("Dashboard no encontrado");
+    console.error("❌ Dashboard no encontrado");
     return;
   }
 
@@ -3729,13 +3729,14 @@ async function exportDashboardToPDF() {
 
   try {
 
-    // esperar render de gráficas
+    // Esperar que gráficas terminen de renderizar
     await new Promise(resolve => setTimeout(resolve, 600));
 
     const canvas = await html2canvas(element, {
-      scale: 2,
+      scale: 3,
       useCORS: true,
-      backgroundColor: "#111"
+      backgroundColor: "#111",
+      scrollY: -window.scrollY
     });
 
     const imgData = canvas.toDataURL("image/png");
@@ -3747,22 +3748,45 @@ async function exportDashboardToPDF() {
     });
 
     const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    const pdfHeight = pdf.internal.pageSize.getHeight();
 
-    pdf.addImage(
-      imgData,
-      "PNG",
-      0,
-      0,
-      pdfWidth,
-      pdfHeight
-    );
+    const imgWidth = pdfWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    pdf.save("dashboard.pdf");
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // Primera página
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pdfHeight;
+
+    // Páginas adicionales si el dashboard es largo
+    while (heightLeft > 0) {
+
+      position = heightLeft - imgHeight;
+
+      pdf.addPage();
+
+      pdf.addImage(
+        imgData,
+        "PNG",
+        0,
+        position,
+        imgWidth,
+        imgHeight
+      );
+
+      heightLeft -= pdfHeight;
+
+    }
+
+    pdf.save("dashboard_entrenamiento.pdf");
+
+    console.log("✅ PDF exportado correctamente");
 
   } catch (err) {
 
-    console.error("Error generando PDF:", err);
+    console.error("❌ Error generando PDF:", err);
 
   }
 
