@@ -3729,10 +3729,23 @@ async function exportDashboardToPDF() {
   try {
 
     const pdf = new jsPDF("l", "mm", "a4");
+
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
 
-    await new Promise(r => setTimeout(r, 300)); // espera que todo cargue
+    // Espera a que el dashboard termine de renderizar
+    await new Promise(resolve => setTimeout(resolve, 400));
+
+    // =========================
+    // FORZAR RENDER DEL CHART
+    // =========================
+    const chart = Chart.getChart("strength-chart");
+
+    if (chart) {
+      chart.resize();
+      chart.update();
+      await new Promise(r => setTimeout(r, 200));
+    }
 
     // =========================
     // PORTADA
@@ -3743,7 +3756,9 @@ async function exportDashboardToPDF() {
     pdf.setFontSize(14);
     pdf.text("Fecha: " + new Date().toLocaleDateString(), pageWidth / 2, 70, { align: "center" });
 
-    const mesocycle = document.getElementById("mesocycle-select")?.selectedOptions[0]?.text || "Todos";
+    const mesocycle =
+      document.getElementById("mesocycle-select")?.selectedOptions[0]?.text || "Todos";
+
     pdf.text("Mesociclo: " + mesocycle, pageWidth / 2, 80, { align: "center" });
 
     pdf.addPage();
@@ -3751,26 +3766,35 @@ async function exportDashboardToPDF() {
     // =========================
     // KPIs
     // =========================
-    const volumen = document.getElementById("kpi-volume")?.innerText || "N/A";
-    const prs = document.getElementById("kpi-prs")?.innerText || "N/A";
-    const sesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
+    const volumen =
+      document.getElementById("kpi-volume")?.innerText || "N/A";
+
+    const prs =
+      document.getElementById("kpi-prs")?.innerText || "N/A";
+
+    const sesiones =
+      document.getElementById("kpi-sessions")?.innerText || "N/A";
 
     pdf.setFontSize(20);
     pdf.text("Resumen del Entrenamiento", 14, 20);
 
     const cardWidth = 80;
     const cardHeight = 35;
+
     const startX = 14;
     const y = 35;
     const gap = 10;
 
     function drawKPI(x, title, value) {
-      // cuadro
+
       pdf.rect(x, y, cardWidth, cardHeight);
+
       pdf.setFontSize(12);
       pdf.text(title, x + cardWidth / 2, y + 12, { align: "center" });
+
       pdf.setFontSize(18);
       pdf.text(value, x + cardWidth / 2, y + cardHeight / 2 + 2, { align: "center" });
+
     }
 
     drawKPI(startX, "Volumen Total", volumen);
@@ -3781,23 +3805,38 @@ async function exportDashboardToPDF() {
     // GRÁFICA
     // =========================
     const canvas = document.getElementById("strength-chart");
+
     if (canvas) {
-      const img = canvas.toDataURL("image/png", 1);
 
-      const chartY = y + cardHeight + 15;
+      const img = canvas.toDataURL("image/png", 2); // alta resolución
+
       const margin = 14;
-      const pdfWidth = pageWidth - margin * 2;  // ancho máximo
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;  // mantiene proporción
 
-      pdf.addImage(img, "PNG", margin, chartY, pdfWidth, pdfHeight);
+      const chartY = y + cardHeight + 20;
+
+      const pdfWidth = pageWidth - margin * 2;
+
+      const pdfHeight = 90; // altura fija evita deformaciones
+
+      pdf.addImage(
+        img,
+        "PNG",
+        margin,
+        chartY,
+        pdfWidth,
+        pdfHeight
+      );
     }
 
     // =========================
     // TABLA VOLUMEN EJERCICIO
     // =========================
     const table = document.querySelector("#volumeTable table");
+
     if (table) {
+
       pdf.addPage();
+
       pdf.setFontSize(18);
       pdf.text("Volumen semanal por ejercicio", 14, 20);
 
@@ -3808,14 +3847,18 @@ async function exportDashboardToPDF() {
         styles: { fontSize: 10 },
         headStyles: { fillColor: [41,128,185] }
       });
+
     }
 
     // =========================
-    // TABLA VOLUMEN MUSCULAR
+    // TABLA GRUPO MUSCULAR
     // =========================
     const muscleTable = document.querySelector("#muscleTable table");
+
     if (muscleTable) {
+
       pdf.addPage();
+
       pdf.setFontSize(18);
       pdf.text("Volumen por grupo muscular", 14, 20);
 
@@ -3826,26 +3869,39 @@ async function exportDashboardToPDF() {
         styles: { fontSize: 10 },
         headStyles: { fillColor: [39,174,96] }
       });
+
     }
 
     // =========================
     // NUMERACIÓN DE PÁGINAS
     // =========================
     const pageCount = pdf.internal.getNumberOfPages();
+
     for (let i = 1; i <= pageCount; i++) {
+
       pdf.setPage(i);
+
       pdf.setFontSize(10);
-      pdf.text(`Página ${i} de ${pageCount}`, pageWidth - 40, pageHeight - 10);
+
+      pdf.text(
+        `Página ${i} de ${pageCount}`,
+        pageWidth - 40,
+        pageHeight - 10
+      );
+
     }
 
     // =========================
-    // GUARDAR PDF
+    // DESCARGA
     // =========================
     pdf.save("reporte_entrenamiento.pdf");
+
     console.log("✅ PDF generado correctamente");
 
   } catch (err) {
+
     console.error("❌ Error exportando PDF:", err);
+
   }
 
 }
