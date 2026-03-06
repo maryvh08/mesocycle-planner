@@ -3804,7 +3804,7 @@ async function exportDashboardToPDF() {
     pdf.setFontSize(18);
     pdf.text("Volumen semanal por ejercicio", 14, 20);
 
-    const table = document.getElementById("weekly-volume-table");
+    const table = document.getElementById("volume-table");
 
     if (table) {
 
