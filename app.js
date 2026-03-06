@@ -3788,13 +3788,21 @@ async function exportDashboardToPDF() {
     // GRÁFICA
     // =========================
 
-    const canvas = document.getElementById("strength-chart");
+    const canvas = document.getElementById("volumeChart");
 
     if (canvas) {
-      const img = canvas.toDataURL("image/png", 1);
-      const chartY = y + cardHeight + 15; // espacio suficiente debajo de los KPIs
 
-      pdf.addImage(img, "PNG", 40, chartY, 210, 90);
+      const img = canvas.toDataURL("image/png", 1);
+
+      pdf.addImage(
+        img,
+        "PNG",
+        120,
+        30,
+        150,
+        90
+      );
+
     }
 
     // =========================
