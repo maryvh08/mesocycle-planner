@@ -3716,129 +3716,94 @@ function buildDashboardSheet(records, title) {
   return XLSX.utils.aoa_to_sheet(rows);
 }
 
-async function exportDashboardToPDF() {
+async function exportDashboardPDF() {
 
-  try {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p", "mm", "a4");
 
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF("l", "mm", "a4");
+  const pageWidth = pdf.internal.pageSize.getWidth();
 
-    const pageWidth = pdf.internal.pageSize.getWidth();
+  let y = 20;
 
-    /* =========================
-       TITULO
-    ========================= */
+  // ===== TITULO =====
 
-    pdf.setFontSize(22);
-    pdf.text("Dashboard de Entrenamiento", pageWidth / 2, 20, { align: "center" });
+  pdf.setFontSize(18);
+  pdf.text("Dashboard de Entrenamiento", pageWidth / 2, y, { align: "center" });
 
-    pdf.setFontSize(11);
-    pdf.text(
-      "Reporte generado: " + new Date().toLocaleDateString(),
-      pageWidth / 2,
-      28,
-      { align: "center" }
-    );
+  y += 10;
 
-    /* =========================
-       KPIs
-    ========================= */
+  const fecha = new Date().toLocaleDateString();
 
-    const volumen =
-      document.querySelector("#kpi-volume strong")?.innerText || "0";
+  pdf.setFontSize(10);
+  pdf.text("Fecha de exportación: " + fecha, 14, y);
 
-    const prs =
-      document.querySelector("#kpi-prs strong")?.innerText || "0";
+  y += 10;
 
-    const sesiones =
-      document.querySelector("#kpi-sessions strong")?.innerText || "0";
+  // ===== KPIs =====
 
-    pdf.setFontSize(14);
-    pdf.text("Indicadores clave", 20, 45);
+  const volumen = document.getElementById("kpiTotalVolumen")?.innerText || "-";
+  const prs = document.getElementById("kpiPRs")?.innerText || "-";
+  const sesiones = document.getElementById("kpiSesiones")?.innerText || "-";
+
+  pdf.autoTable({
+    startY: y,
+    head: [["Indicador", "Valor"]],
+    body: [
+      ["Volumen total", volumen],
+      ["PRs", prs],
+      ["Sesiones", sesiones]
+    ],
+    theme: "grid",
+    styles: { halign: "center" },
+    headStyles: { fillColor: [40,40,40] }
+  });
+
+  y = pdf.lastAutoTable.finalY + 10;
+
+  // ===== GRAFICA =====
+
+  const chartCanvas = document.getElementById("volumeChart");
+
+  if (chartCanvas) {
+
+    const chartImage = chartCanvas.toDataURL("image/png", 1.0);
 
     pdf.setFontSize(12);
+    pdf.text("Gráfica de Volumen de Entrenamiento", pageWidth / 2, y, { align: "center" });
 
-    pdf.text(`Volumen total: ${volumen}`, 20, 55);
-    pdf.text(`PRs: ${prs}`, 20, 63);
-    pdf.text(`Sesiones: ${sesiones}`, 20, 71);
+    y += 5;
 
-    /* =========================
-       TABLA VOLUMEN SEMANAL
-    ========================= */
+    pdf.addImage(
+      chartImage,
+      "PNG",
+      15,
+      y,
+      pageWidth - 30,
+      70
+    );
 
-    const table = document.getElementById("weekly-volume-table");
+    y += 80;
+  }
 
-    if (table) {
+  // ===== TABLA DE VOLUMEN SEMANAL =====
 
-      pdf.setFontSize(14);
-      pdf.text("Volumen semanal por ejercicio", 20, 90);
+  const tabla = document.querySelector("#tablaVolumenSemanal");
 
-      let y = 100;
+  if (tabla) {
 
-      const rows = table.querySelectorAll("tr");
-
-      rows.forEach(row => {
-
-        const cols = row.querySelectorAll("td, th");
-
-        let x = 20;
-
-        cols.forEach(col => {
-
-          pdf.text(col.innerText, x, y);
-
-          x += 60;
-
-        });
-
-        y += 8;
-
-      });
-
-    }
-
-    /* =========================
-       GRAFICA
-    ========================= */
-
-    const chart = document.getElementById("volumeChart");
-
-    if (chart) {
-
-      await new Promise(r => setTimeout(r, 400));
-
-      const imgData = chart.toDataURL("image/png", 1.0);
-
-      pdf.addPage();
-
-      pdf.setFontSize(16);
-      pdf.text("Gráfica de Volumen", 20, 20);
-
-      pdf.addImage(
-        imgData,
-        "PNG",
-        20,
-        30,
-        240,
-        120
-      );
-
-    }
-
-    /* =========================
-       DESCARGA
-    ========================= */
-
-    pdf.save("Dashboard_Entrenamiento.pdf");
-
-    console.log("PDF generado correctamente");
-
-  } catch (error) {
-
-    console.error("Error exportando PDF:", error);
+    pdf.autoTable({
+      html: "#tablaVolumenSemanal",
+      startY: y,
+      theme: "striped",
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [50,50,50] }
+    });
 
   }
 
+  // ===== GUARDAR PDF =====
+
+  pdf.save("dashboard_entrenamiento.pdf");
 }
 
 function updateExportButtonsUI() {
