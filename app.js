@@ -3723,6 +3723,7 @@ function buildDashboardSheet(records, title) {
 }
 
 async function exportDashboardToPDF() {
+
   const { jsPDF } = window.jspdf;
 
   try {
@@ -3730,8 +3731,7 @@ async function exportDashboardToPDF() {
     const pdf = new jsPDF("l", "mm", "a4");
     const pageWidth = pdf.internal.pageSize.getWidth();
 
-    // Esperar un poco para asegurar DOM cargado
-    await new Promise(r => setTimeout(r, 200));
+    await new Promise(r => setTimeout(r, 300));
 
     // =========================
     // PORTADA
@@ -3782,7 +3782,7 @@ async function exportDashboardToPDF() {
     // GRÁFICA
     // =========================
 
-    const canvas = document.getElementById("strength-chart");
+    const canvas = document.getElementById("volumeChart");
 
     if (canvas) {
 
@@ -3796,15 +3796,16 @@ async function exportDashboardToPDF() {
         150,
         90
       );
+
     }
 
     // =========================
     // TABLA VOLUMEN EJERCICIO
     // =========================
 
-    const table = document.getElementById("volumeTable");
+    const table = document.querySelector("#volumeTable table");
 
-    if (table && table.rows.length > 0) {
+    if (table) {
 
       pdf.addPage();
 
@@ -3815,12 +3816,8 @@ async function exportDashboardToPDF() {
         html: table,
         startY: 30,
         theme: "grid",
-        styles: {
-          fontSize: 10
-        },
-        headStyles: {
-          fillColor: [41, 128, 185]
-        }
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [41,128,185] }
       });
 
     }
@@ -3829,9 +3826,9 @@ async function exportDashboardToPDF() {
     // TABLA VOLUMEN MUSCULAR
     // =========================
 
-    const muscleTable = document.getElementById("muscleTable");
+    const muscleTable = document.querySelector("#muscleTable table");
 
-    if (muscleTable && muscleTable.rows.length > 0) {
+    if (muscleTable) {
 
       pdf.addPage();
 
@@ -3842,35 +3839,31 @@ async function exportDashboardToPDF() {
         html: muscleTable,
         startY: 30,
         theme: "grid",
-        styles: {
-          fontSize: 10
-        },
-        headStyles: {
-          fillColor: [39, 174, 96]
-        }
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [39,174,96] }
       });
 
     }
 
     // =========================
-    // NUMERACIÓN DE PÁGINAS
+    // NUMERACIÓN
     // =========================
 
     const pageCount = pdf.internal.getNumberOfPages();
 
     for (let i = 1; i <= pageCount; i++) {
+
       pdf.setPage(i);
+
       pdf.setFontSize(10);
+
       pdf.text(
         `Página ${i} de ${pageCount}`,
         pageWidth - 30,
         pdf.internal.pageSize.getHeight() - 10
       );
-    }
 
-    // =========================
-    // GUARDAR
-    // =========================
+    }
 
     pdf.save("reporte_entrenamiento.pdf");
 
@@ -3881,6 +3874,7 @@ async function exportDashboardToPDF() {
     console.error("❌ Error exportando PDF:", err);
 
   }
+
 }
 
 function updateExportButtonsUI() {
