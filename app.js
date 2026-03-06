@@ -3821,19 +3821,21 @@ async function exportDashboardToPDF() {
     const gap = 10;
     const y = 35;
 
-    function drawKPI(x,title,value){
-
-      pdf.setFillColor(...light);
-      pdf.roundedRect(x,y,cardWidth,cardHeight,4,4,"F");
-
-      pdf.setFontSize(11);
-      pdf.setTextColor(...dark);
-      pdf.text(title,x+cardWidth/2,y+12,{align:"center"});
-
-      pdf.setFontSize(24);
-      pdf.setTextColor(...primary);
-      pdf.text(value,x+cardWidth/2,y+28,{align:"center"});
-    }
+    function drawKPI(x, title, value){
+         pdf.setFillColor(...light);
+         pdf.roundedRect(x, y, cardWidth, cardHeight, 4, 4, "F");
+         
+         // título
+         pdf.setFontSize(10);
+         pdf.setTextColor(...dark);
+         pdf.text(title, x + cardWidth/2, y + 12, { align:"center" });
+         
+         // valor
+         pdf.setFontSize(18);
+         pdf.setTextColor(...primary);
+         pdf.text(value, x + cardWidth/2, y + 25, { align:"center" });
+         
+         }
 
     drawKPI(14,"Volumen Total",volumen);
     drawKPI(14+(cardWidth+gap),"PRs",prs);
