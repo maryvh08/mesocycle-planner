@@ -3840,7 +3840,6 @@ async function exportDashboardToPDF() {
          
            didParseCell: function (data) {
          
-             // Solo modificar las celdas del body
              if (data.section === "body") {
          
                let txt = data.cell.text[0];
@@ -3851,16 +3850,21 @@ async function exportDashboardToPDF() {
                    data.cell.text = ["Exceso"];
                  }
          
-                 if (txt.includes("Bajo")) {
-                   data.cell.text = ["Bajo"];
+                 if (txt.includes("Alto")) {
+                   data.cell.text = ["Alto"];
                  }
          
                  if (txt.includes("Óptimo")) {
                    data.cell.text = ["Óptimo"];
                  }
          
+                 if (txt.includes("Bajo")) {
+                   data.cell.text = ["Bajo"];
+                 }
+         
                }
              }
+         
            }
          
          });
