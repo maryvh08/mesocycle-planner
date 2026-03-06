@@ -3771,8 +3771,6 @@ async function exportDashboardToPDF() {
    // PORTADA
    // =========================
    
-   const pageWidth = pdf.internal.pageSize.getWidth();
-   
    // Color de fondo superior
    pdf.setFillColor(...primary); // usa tu array de color [R,G,B]
    pdf.rect(0, 0, pageWidth, 50, "F");
