@@ -3693,9 +3693,16 @@ async function exportFullDashboardExcel() {
 
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url;
-    a.download = "dashboard_entrenamiento.xlsx";
-    a.click();
+    let mesNameExcel = "Todos";
+
+      if (mesocycleLabel && mesocycleLabel.textContent.trim() !== "") {
+        mesNameExcel = mesocycleLabel.textContent.trim().replace(/\s+/g, "_");
+      }
+      
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `dashboard_entrenamiento_${mesNameExcel}.xlsx`;
+      a.click();
     URL.revokeObjectURL(url);
 
     console.log("✅ Exportación completada");
@@ -4027,7 +4034,14 @@ async function exportDashboardToPDF() {
 
     }
 
-    pdf.save("reporte_entrenamiento.pdf");
+    let mesName = "Todos";
+      
+      if (mesocycleSelect && mesocycleSelect.textContent.trim() !== "") {
+        mesName = mesocycleSelect.textContent.trim().replace(/\s+/g, "_");
+      }
+      
+      pdf.save(`reporte_entrenamiento_${mesName}.pdf`);
+      console.log(`✅ PDF generado correctamente: reporte_entrenamiento_${mesName}.pdf`);
 
     console.log("✅ PDF generado correctamente");
 
