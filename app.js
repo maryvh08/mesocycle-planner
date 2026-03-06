@@ -3777,33 +3777,6 @@ async function exportDashboardToPDF() {
     drawKPI(startX + (cardWidth + gap) * 2, "Sesiones", sesiones);
 
     // =========================
-    // GRÁFICA
-    // =========================
-    const canvas = document.getElementById("strength-chart");
-
-    if (canvas) {
-      const img = canvas.toDataURL("image/png", 1);
-
-      const chartY = y + cardHeight + 15; // posición debajo de los KPIs
-      const margin = 14;
-
-      // ancho máximo dentro de los márgenes
-      let pdfWidth = pageWidth - margin * 2;
-
-      // altura proporcional
-      let pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      const maxHeight = pageHeight - chartY - 20; // deja margen inferior
-
-      if (pdfHeight > maxHeight) {
-        pdfHeight = maxHeight;
-        pdfWidth = (canvas.width * pdfHeight) / canvas.height; // recalcula ancho proporcional
-      }
-
-      const chartX = (pageWidth - pdfWidth) / 2; // centrar horizontal
-      pdf.addImage(img, "PNG", chartX, chartY, pdfWidth, pdfHeight);
-    }
-
-    // =========================
     // TABLA VOLUMEN EJERCICIO
     // =========================
     const table = document.querySelector("#volumeTable table");
@@ -3843,6 +3816,8 @@ async function exportDashboardToPDF() {
     // NUMERACIÓN DE PÁGINAS
     // =========================
     const pageCount = pdf.internal.getNumberOfPages();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
     for (let i = 1; i <= pageCount; i++) {
       pdf.setPage(i);
       pdf.setFontSize(10);
