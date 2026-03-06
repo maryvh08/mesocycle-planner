@@ -3782,7 +3782,7 @@ async function exportDashboardToPDF() {
     // GRÁFICA
     // =========================
 
-    const canvas = document.getElementById("volumeChart");
+    const canvas = document.getElementById("strength-chart");
 
     if (canvas) {
 
