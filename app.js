@@ -3718,67 +3718,53 @@ function buildDashboardSheet(records, title) {
 
 async function exportDashboardToPDF() {
 
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF("p", "mm", "a4");
+  const element = document.getElementById("analysisDashboard");
 
-  let y = 20;
-
-  pdf.setFontSize(18);
-  pdf.text("Dashboard de Entrenamiento", 105, 15, { align: "center" });
-
-  // -------- KPIs --------
-
-  const totalVolume =
-     document.getElementById("totalVolume")?.innerText || "N/D";
-   
-   const totalPRs =
-     document.getElementById("totalPRs")?.innerText || "N/D";
-   
-   const totalSessions =
-     document.getElementById("totalSessions")?.innerText || "N/D";
-
-  pdf.setFontSize(12);
-
-  pdf.text(`Volumen Total: ${totalVolume}`, 20, y);
-  y += 8;
-
-  pdf.text(`PRs: ${totalPRs}`, 20, y);
-  y += 8;
-
-  pdf.text(`Sesiones: ${totalSessions}`, 20, y);
-  y += 15;
-
-  // -------- Función para capturar gráficos --------
-
-  async function addChart(chartId, title) {
-
-    const canvas = document.getElementById(chartId);
-
-    if (!canvas) return;
-
-    const img = canvas.toDataURL("image/png");
-
-    pdf.setFontSize(14);
-    pdf.text(title, 20, y);
-    y += 5;
-
-    pdf.addImage(img, "PNG", 15, y, 180, 90);
-
-    y += 100;
-
-    if (y > 260) {
-      pdf.addPage();
-      y = 20;
-    }
+  if (!element) {
+    console.error("Dashboard no encontrado");
+    return;
   }
 
-  // -------- Gráficas --------
+  const { jsPDF } = window.jspdf;
 
-  await addChart("strength-chart", "Volumen por Sesión");
+  try {
 
-  // -------- Descargar --------
+    // esperar render de gráficas
+    await new Promise(resolve => setTimeout(resolve, 600));
 
-  pdf.save("dashboard_entrenamiento.pdf");
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#111"
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF({
+      orientation: "landscape",
+      unit: "px",
+      format: "a4"
+    });
+
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    pdf.addImage(
+      imgData,
+      "PNG",
+      0,
+      0,
+      pdfWidth,
+      pdfHeight
+    );
+
+    pdf.save("dashboard.pdf");
+
+  } catch (err) {
+
+    console.error("Error generando PDF:", err);
+
+  }
 
 }
 
