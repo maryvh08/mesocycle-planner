@@ -3776,42 +3776,35 @@ async function exportDashboardToPDF() {
     drawKPI(startX + (cardWidth + gap) * 2, "Sesiones", sesiones);
 
     // =========================
-    // GRÁFICA
-    // =========================
-    const canvas = document.getElementById("strength-chart");
-
-     const ctx = document.getElementById('strength-chart').getContext('2d');
-      const chart = new Chart(ctx, {
-        type: 'line',
-        data: chartData,
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              ticks: { font: { size: 10 } }  // eje X más pequeño
-            },
-            y: {
-              ticks: { font: { size: 10 } }  // eje Y más pequeño
-            }
-          },
-          plugins: {
-            legend: { labels: { font: { size: 12 } } }
-          }
+      // GRÁFICA
+      // =========================
+      const canvas = document.getElementById("strength-chart");
+      
+      if (canvas) {
+        // Tomamos la imagen del canvas existente
+        const img = canvas.toDataURL("image/png", 1);
+      
+        const chartY = y + cardHeight + 15; // posición debajo de los KPIs
+        const margin = 14;
+      
+        // Definimos ancho máximo dentro de los márgenes
+        let pdfWidth = pageWidth - margin * 2;
+      
+        // Definimos altura máxima (para que no se pase de la página)
+        let pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        const maxHeight = pageHeight - chartY - 20; // dejando margen inferior
+      
+        if (pdfHeight > maxHeight) {
+          pdfHeight = maxHeight;
+          pdfWidth = (canvas.width * pdfHeight) / canvas.height; // recalcula ancho proporcional
         }
-      });
-
-    if (canvas) {
-      const img = canvas.toDataURL("image/png", 1);
-
-      const chartY = y + cardHeight + 15;
-      const margin = 14;
-      const pdfWidth = pageWidth - margin * 2;  // ancho máximo de la página
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;  // mantiene proporción
-
-      pdf.addImage(img, "PNG", margin, chartY, pdfWidth, pdfHeight);
-    }
-
+      
+        // Centramos la gráfica horizontalmente
+        const chartX = (pageWidth - pdfWidth) / 2;
+      
+        pdf.addImage(img, "PNG", chartX, chartY, pdfWidth, pdfHeight);
+      }
+     
     // =========================
     // TABLA VOLUMEN EJERCICIO
     // =========================
