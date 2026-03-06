@@ -3767,40 +3767,47 @@ async function exportDashboardToPDF() {
 
     await new Promise(r => setTimeout(r, 300));
 
-    // =========================
-    // PORTADA
-    // =========================
-
-    pdf.setFillColor(...primary);
-    pdf.rect(0,0,pageWidth,50,"F");
-
-    pdf.setTextColor(255,255,255);
-    pdf.setFontSize(30);
-    pdf.text("Reporte de Entrenamiento", pageWidth/2,30,{align:"center"});
-
-    pdf.setTextColor(80,80,80);
-    pdf.setFontSize(14);
-
-    const fecha = new Date().toLocaleDateString();
-
-    const mesocycle =
-      document.getElementById("mesocycle-select")
-      ?.selectedOptions[0]?.text || "Todos";
-
-    pdf.text(`Fecha: ${fecha}`, pageWidth/2,90,{align:"center"});
-    pdf.text(`Mesociclo: ${mesocycle}`, pageWidth/2,100,{align:"center"});
-
-    pdf.setFontSize(11);
-    pdf.setTextColor(140,140,140);
-    pdf.text(
-      "Reporte generado automáticamente desde el dashboard",
-      pageWidth/2,
-      120,
-      {align:"center"}
-    );
-
-    pdf.addPage();
-
+   // =========================
+   // PORTADA
+   // =========================
+   
+   // Fondo superior
+   pdf.setFillColor(...primary); // color principal de la marca
+   pdf.rect(0, 0, pageWidth, 50, "F");
+   
+   // Título principal
+   pdf.setTextColor(255, 255, 255);
+   pdf.setFontSize(30);
+   pdf.text("Reporte de Entrenamiento", pageWidth / 2, 30, { align: "center" });
+   
+   // Fecha y mesociclo
+   pdf.setTextColor(80, 80, 80);
+   pdf.setFontSize(14);
+   
+   const fecha = new Date().toLocaleDateString();
+   
+   // Obtener el mesociclo seleccionado, si es general se muestra "Todos"
+   const mesSelect = document.getElementById("mesocycle-select");
+   let mesocycle = "Todos";
+   if (mesSelect?.selectedOptions?.length > 0) {
+     const selectedText = mesSelect.selectedOptions[0].text.trim();
+     if (selectedText) mesocycle = selectedText;
+   }
+   
+   pdf.text(`Fecha: ${fecha}`, pageWidth / 2, 90, { align: "center" });
+   pdf.text(`Mesociclo: ${mesocycle}`, pageWidth / 2, 100, { align: "center" });
+   
+   // Nota al pie
+   pdf.setFontSize(11);
+   pdf.setTextColor(140, 140, 140);
+   pdf.text(
+     "Reporte generado automáticamente desde el dashboard",
+     pageWidth / 2,
+     120,
+     { align: "center" }
+   );
+   
+   pdf.addPage();
     // =========================
       // KPIs
       // =========================
