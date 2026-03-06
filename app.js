@@ -3693,6 +3693,7 @@ async function exportFullDashboardExcel() {
 
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
+      const mesocycleLabel = document.getElementById("stats-mesocycle-label");
     let mesNameExcel = "Todos";
 
       if (mesocycleLabel && mesocycleLabel.textContent.trim() !== "") {
@@ -4032,7 +4033,7 @@ async function exportDashboardToPDF() {
       pdf.text(`Página ${i} de ${pageCount}`,pageWidth-40,pageHeight-8);
 
     }
-
+      const mesocycleSelect = document.getElementById("stats-mesocycle-label");
     let mesName = "Todos";
       
       if (mesocycleSelect && mesocycleSelect.textContent.trim() !== "") {
