@@ -3802,47 +3802,55 @@ async function exportDashboardToPDF() {
     pdf.addPage();
 
     // =========================
-    // KPIs
-    // =========================
-
+      // KPIs
+      // =========================
       const volumenRaw = document.getElementById("kpi-volume")?.innerText || "";
       const prsRaw = document.getElementById("kpi-prs")?.innerText || "";
       const sesionesRaw = document.getElementById("kpi-sessions")?.innerText || "";
-      const volumen = volumenRaw.split("\n")[1] || volumenRaw;
-      const prs = prsRaw.split("\n")[1] || prsRaw;
-      const sesiones = sesionesRaw.split("\n")[1] || sesionesRaw;
-
-    pdf.setFontSize(20);
-    pdf.setTextColor(...dark);
-    pdf.text("Resumen del Entrenamiento",14,20);
-
-    pdf.setDrawColor(220,220,220);
-    pdf.line(14,24,pageWidth-14,24);
-
-    const cardWidth = 80;
-    const cardHeight = 40;
-    const gap = 10;
-    const y = 35;
-
-    function drawKPI(x, title, value){
-         pdf.setFillColor(...light);
-         pdf.roundedRect(x, y, cardWidth, cardHeight, 4, 4, "F");
-         
-         // título
-         pdf.setFontSize(10);
-         pdf.setTextColor(...dark);
-         pdf.text(title, x + cardWidth/2, y + 12, { align:"center" });
-         
-         // valor
-         pdf.setFontSize(18);
-         pdf.setTextColor(...primary);
-         pdf.text(value, x + cardWidth/2, y + 18, { align:"center" });
-         
-         }
-
-    drawKPI(14,"Volumen Total",volumen);
-    drawKPI(14+(cardWidth+gap),"PRs",prs);
-    drawKPI(14+(cardWidth+gap)*2,"Sesiones",sesiones);
+      
+      // Función para extraer solo el valor numérico (o principal) de un KPI
+      function extractValue(rawText) {
+        const lines = rawText.split("\n").map(l => l.trim()).filter(l => l);
+        // Buscar línea que contenga números o unidades, sino tomar la primera
+        const valueLine = lines.find(l => /\d/.test(l)) || lines[0] || "N/A";
+        return valueLine;
+      }
+      
+      const volumen = extractValue(volumenRaw);
+      const prs = extractValue(prsRaw);
+      const sesiones = extractValue(sesionesRaw);
+      
+      pdf.setFontSize(20);
+      pdf.setTextColor(...dark);
+      pdf.text("Resumen del Entrenamiento", 14, 20);
+      
+      pdf.setDrawColor(220, 220, 220);
+      pdf.line(14, 24, pageWidth - 14, 24);
+      
+      const cardWidth = 80;
+      const cardHeight = 40;
+      const gap = 10;
+      const y = 35;
+      
+      function drawKPI(x, title, value) {
+        pdf.setFillColor(...light);
+        pdf.roundedRect(x, y, cardWidth, cardHeight, 4, 4, "F");
+      
+        // título centrado
+        pdf.setFontSize(10);
+        pdf.setTextColor(...dark);
+        pdf.text(title, x + cardWidth / 2, y + 12, { align: "center" });
+      
+        // valor centrado vertical y horizontalmente
+        pdf.setFontSize(16);
+        pdf.setTextColor(...primary);
+        const valueY = y + cardHeight / 2 + 4; // ajusta el +4 si quieres centrar mejor
+        pdf.text(value, x + cardWidth / 2, valueY, { align: "center" });
+      }
+      
+      drawKPI(14, "Volumen Total", volumen);
+      drawKPI(14 + (cardWidth + gap), "PRs", prs);
+      drawKPI(14 + (cardWidth + gap) * 2, "Sesiones", sesiones);
 
     // =========================
     // GRÁFICA
