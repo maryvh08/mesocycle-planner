@@ -3730,8 +3730,9 @@ async function exportDashboardToPDF() {
 
     const pdf = new jsPDF("l", "mm", "a4");
     const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
 
-    await new Promise(r => setTimeout(r, 300));
+    await new Promise(r => setTimeout(r, 300)); // espera que todo cargue
 
     // =========================
     // PORTADA
@@ -3764,7 +3765,7 @@ async function exportDashboardToPDF() {
     const gap = 10;
 
     function drawKPI(x, title, value) {
-      pdf.rect(x, y, cardWidth, cardHeight);
+      pdf.rect(x, y, cardWidth, cardHeight); // cuadro
       pdf.setFontSize(12);
       pdf.text(title, x + cardWidth / 2, y + 12, { align: "center" });
       pdf.setFontSize(18);
@@ -3776,35 +3777,32 @@ async function exportDashboardToPDF() {
     drawKPI(startX + (cardWidth + gap) * 2, "Sesiones", sesiones);
 
     // =========================
-      // GRÁFICA
-      // =========================
-      const canvas = document.getElementById("strength-chart");
-      
-      if (canvas) {
-        // Tomamos la imagen del canvas existente
-        const img = canvas.toDataURL("image/png", 1);
-      
-        const chartY = y + cardHeight + 15; // posición debajo de los KPIs
-        const margin = 14;
-      
-        // Definimos ancho máximo dentro de los márgenes
-        let pdfWidth = pageWidth - margin * 2;
-      
-        // Definimos altura máxima (para que no se pase de la página)
-        let pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        const maxHeight = pageHeight - chartY - 20; // dejando margen inferior
-      
-        if (pdfHeight > maxHeight) {
-          pdfHeight = maxHeight;
-          pdfWidth = (canvas.width * pdfHeight) / canvas.height; // recalcula ancho proporcional
-        }
-      
-        // Centramos la gráfica horizontalmente
-        const chartX = (pageWidth - pdfWidth) / 2;
-      
-        pdf.addImage(img, "PNG", chartX, chartY, pdfWidth, pdfHeight);
+    // GRÁFICA
+    // =========================
+    const canvas = document.getElementById("strength-chart");
+
+    if (canvas) {
+      const img = canvas.toDataURL("image/png", 1);
+
+      const chartY = y + cardHeight + 15; // posición debajo de los KPIs
+      const margin = 14;
+
+      // ancho máximo dentro de los márgenes
+      let pdfWidth = pageWidth - margin * 2;
+
+      // altura proporcional
+      let pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      const maxHeight = pageHeight - chartY - 20; // deja margen inferior
+
+      if (pdfHeight > maxHeight) {
+        pdfHeight = maxHeight;
+        pdfWidth = (canvas.width * pdfHeight) / canvas.height; // recalcula ancho proporcional
       }
-     
+
+      const chartX = (pageWidth - pdfWidth) / 2; // centrar horizontal
+      pdf.addImage(img, "PNG", chartX, chartY, pdfWidth, pdfHeight);
+    }
+
     // =========================
     // TABLA VOLUMEN EJERCICIO
     // =========================
@@ -3845,8 +3843,6 @@ async function exportDashboardToPDF() {
     // NUMERACIÓN DE PÁGINAS
     // =========================
     const pageCount = pdf.internal.getNumberOfPages();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-
     for (let i = 1; i <= pageCount; i++) {
       pdf.setPage(i);
       pdf.setFontSize(10);
