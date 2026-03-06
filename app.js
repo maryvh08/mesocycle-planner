@@ -3833,7 +3833,7 @@ async function exportDashboardToPDF() {
          // valor
          pdf.setFontSize(18);
          pdf.setTextColor(...primary);
-         pdf.text(value, x + cardWidth/2, y + 25, { align:"center" });
+         pdf.text(value, x + cardWidth/2, y + 18, { align:"center" });
          
          }
 
