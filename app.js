@@ -3460,10 +3460,6 @@ function getCoachInsight(trend) {
 // =====================
 //EXPORTAR
 // =====================
-function getText(id){
-  return document.getElementById(id)?.innerText || "N/D";
-}
-
 const totalVolume = getText("totalVolume");
 const totalPRs = getText("totalPRs");
 const totalSessions = getText("totalSessions");
