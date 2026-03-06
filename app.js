@@ -3730,8 +3730,9 @@ async function exportDashboardToPDF() {
 
     const pdf = new jsPDF("l", "mm", "a4");
     const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
 
-    await new Promise(r => setTimeout(r, 300));
+    await new Promise(r => setTimeout(r, 300)); // espera que todo cargue
 
     // =========================
     // PORTADA
@@ -3764,6 +3765,7 @@ async function exportDashboardToPDF() {
     const gap = 10;
 
     function drawKPI(x, title, value) {
+      // cuadro
       pdf.rect(x, y, cardWidth, cardHeight);
       pdf.setFontSize(12);
       pdf.text(title, x + cardWidth / 2, y + 12, { align: "center" });
@@ -3779,34 +3781,12 @@ async function exportDashboardToPDF() {
     // GRÁFICA
     // =========================
     const canvas = document.getElementById("strength-chart");
-
-     const ctx = document.getElementById('strength-chart').getContext('2d');
-      const chart = new Chart(ctx, {
-        type: 'line',
-        data: chartData,
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              ticks: { font: { size: 10 } }  // eje X más pequeño
-            },
-            y: {
-              ticks: { font: { size: 10 } }  // eje Y más pequeño
-            }
-          },
-          plugins: {
-            legend: { labels: { font: { size: 12 } } }
-          }
-        }
-      });
-
     if (canvas) {
       const img = canvas.toDataURL("image/png", 1);
 
       const chartY = y + cardHeight + 15;
       const margin = 14;
-      const pdfWidth = pageWidth - margin * 2;  // ancho máximo de la página
+      const pdfWidth = pageWidth - margin * 2;  // ancho máximo
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;  // mantiene proporción
 
       pdf.addImage(img, "PNG", margin, chartY, pdfWidth, pdfHeight);
@@ -3852,8 +3832,6 @@ async function exportDashboardToPDF() {
     // NUMERACIÓN DE PÁGINAS
     // =========================
     const pageCount = pdf.internal.getNumberOfPages();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-
     for (let i = 1; i <= pageCount; i++) {
       pdf.setPage(i);
       pdf.setFontSize(10);
@@ -3869,6 +3847,7 @@ async function exportDashboardToPDF() {
   } catch (err) {
     console.error("❌ Error exportando PDF:", err);
   }
+
 }
 
 function updateExportButtonsUI() {
