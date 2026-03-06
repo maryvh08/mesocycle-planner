@@ -3662,7 +3662,35 @@ async function exportFullDashboardExcel() {
       sheet.addRow([]);
 
     }
-
+   // =========================
+   // GRAFICA DE FUERZA
+   // =========================
+   
+   const strengthCanvas = document.getElementById("strength-chart");
+   
+   if (strengthCanvas) {
+   
+     sheet.addRow(["Gráfica de Fuerza"]);
+     sheet.getRow(sheet.rowCount).font = { bold: true };
+   
+     const imageBase64 = strengthCanvas.toDataURL("image/png");
+   
+     const imageId = workbook.addImage({
+       base64: imageBase64,
+       extension: "png"
+     });
+   
+     sheet.addImage(imageId, {
+       tl: { col: 0, row: sheet.rowCount },
+       ext: { width: 900, height: 400 }
+     });
+   
+     sheet.addRow([]);
+     sheet.addRow([]);
+     sheet.addRow([]);
+     sheet.addRow([]);
+     sheet.addRow([]);
+   }
     // =========================
     // DESCARGAR
     // =========================
