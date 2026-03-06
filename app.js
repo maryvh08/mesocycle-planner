@@ -3785,32 +3785,31 @@ async function exportDashboardToPDF() {
     drawKPI(startX + (cardWidth + gap) * 2, "Sesiones", sesiones);
 
     // =========================
-    // GRÁFICA
-    // =========================
-
-    const canvas = document.getElementById("strength-chart");
-
-    if (canvas) {
-
-      const img = canvas.toDataURL("image/png", 1);
-
-      const chartY = y + cardHeight + 20;
-
-      const canvasWidth = canvas.width;
-      const canvasHeight = canvas.height;
+      // GRÁFICA
+      // =========================
       
-      const pdfWidth = 240; // ancho grande para aprovechar la página horizontal
-      const pdfHeight = (canvasHeight * pdfWidth) / canvasWidth;
+      const canvas = document.getElementById("strength-chart");
       
-      pdf.addImage(
-        img,
-        "PNG",
-        (pageWidth - pdfWidth) / 2,
-        chartY,
-        pdfWidth,
-        pdfHeight
-      );
-    }
+      if (canvas) {
+      
+        const img = canvas.toDataURL("image/png", 1);
+      
+        const chartY = y + cardHeight + 20;
+      
+        const margin = 14; // margen izquierdo/derecho
+        const pdfWidth = pageWidth - margin * 2; // ancho máximo ajustado a página
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width; // mantiene proporción
+      
+        pdf.addImage(
+          img,
+          "PNG",
+          margin,
+          chartY,
+          pdfWidth,
+          pdfHeight
+        );
+      
+      }
 
     // =========================
     // TABLA VOLUMEN EJERCICIO
