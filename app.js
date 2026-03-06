@@ -3788,19 +3788,16 @@ async function exportDashboardToPDF() {
    const fecha = new Date().toLocaleDateString();
    pdf.text(`Fecha: ${fecha}`, pageWidth / 2, 90, { align: "center" });
    
-   // Mesociclo seleccionado o "Todos"
+   // Intentar obtener el mesociclo desde la etiqueta que la dashboard está mostrando
    let mesocycle = "Todos"; // valor por defecto
-   const mesSelect = document.getElementById("mesocycle-select");
    
-   if (mesSelect && mesSelect.selectedIndex >= 0) {
-       const selectedOption = mesSelect.options[mesSelect.selectedIndex];
-       if (selectedOption && selectedOption.text.trim() !== "") {
-           mesocycle = selectedOption.text.trim(); // toma siempre el nombre del mesociclo
-       }
+   const mesElement = document.querySelector("#mesocycle-display"); // <-- este ID o clase debe ser el que la dashboard usa
+   if(mesElement && mesElement.innerText.trim() !== ""){
+       mesocycle = mesElement.innerText.trim();
    }
-   
-   // Imprimir en la portada
-   pdf.text(`Mesociclo: ${mesocycle}`, pageWidth / 2, 100, { align: "center" });
+
+// Portada
+pdf.text(`Mesociclo: ${mesocycle}`, pageWidth / 2, 100, { align: "center" });
       
    // Nota de generación automática
    pdf.setFontSize(11);
