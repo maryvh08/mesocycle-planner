@@ -3721,89 +3721,64 @@ async function exportDashboardToPDF() {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF("p", "mm", "a4");
 
-  const pageWidth = pdf.internal.pageSize.getWidth();
-
   let y = 20;
 
-  // ===== TITULO =====
-
   pdf.setFontSize(18);
-  pdf.text("Dashboard de Entrenamiento", pageWidth / 2, y, { align: "center" });
+  pdf.text("Dashboard de Entrenamiento", 105, 15, { align: "center" });
 
-  y += 10;
+  // -------- KPIs --------
 
-  const fecha = new Date().toLocaleDateString();
+  const totalVolume = document.getElementById("totalVolume").innerText;
+  const totalPRs = document.getElementById("totalPRs").innerText;
+  const totalSessions = document.getElementById("totalSessions").innerText;
 
-  pdf.setFontSize(10);
-  pdf.text("Fecha de exportación: " + fecha, 14, y);
+  pdf.setFontSize(12);
 
-  y += 10;
+  pdf.text(`Volumen Total: ${totalVolume}`, 20, y);
+  y += 8;
 
-  // ===== KPIs =====
+  pdf.text(`PRs: ${totalPRs}`, 20, y);
+  y += 8;
 
-  const volumen = document.getElementById("kpiTotalVolumen")?.innerText || "-";
-  const prs = document.getElementById("kpiPRs")?.innerText || "-";
-  const sesiones = document.getElementById("kpiSesiones")?.innerText || "-";
+  pdf.text(`Sesiones: ${totalSessions}`, 20, y);
+  y += 15;
 
-  pdf.autoTable({
-    startY: y,
-    head: [["Indicador", "Valor"]],
-    body: [
-      ["Volumen total", volumen],
-      ["PRs", prs],
-      ["Sesiones", sesiones]
-    ],
-    theme: "grid",
-    styles: { halign: "center" },
-    headStyles: { fillColor: [40,40,40] }
-  });
+  // -------- Función para capturar gráficos --------
 
-  y = pdf.lastAutoTable.finalY + 10;
+  async function addChart(chartId, title) {
 
-  // ===== GRAFICA =====
+    const canvas = document.getElementById(chartId);
 
-  const chartCanvas = document.getElementById("volumeChart");
+    if (!canvas) return;
 
-  if (chartCanvas) {
+    const img = canvas.toDataURL("image/png");
 
-    const chartImage = chartCanvas.toDataURL("image/png", 1.0);
-
-    pdf.setFontSize(12);
-    pdf.text("Gráfica de Volumen de Entrenamiento", pageWidth / 2, y, { align: "center" });
-
+    pdf.setFontSize(14);
+    pdf.text(title, 20, y);
     y += 5;
 
-    pdf.addImage(
-      chartImage,
-      "PNG",
-      15,
-      y,
-      pageWidth - 30,
-      70
-    );
+    pdf.addImage(img, "PNG", 15, y, 180, 90);
 
-    y += 80;
+    y += 100;
+
+    if (y > 260) {
+      pdf.addPage();
+      y = 20;
+    }
   }
 
-  // ===== TABLA DE VOLUMEN SEMANAL =====
+  // -------- Gráficas --------
 
-  const tabla = document.querySelector("#tablaVolumenSemanal");
+  await addChart("volumeChart", "Volumen por Sesión");
 
-  if (tabla) {
+  await addChart("weeklyVolumeChart", "Volumen Semanal");
 
-    pdf.autoTable({
-      html: "#tablaVolumenSemanal",
-      startY: y,
-      theme: "striped",
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [50,50,50] }
-    });
+  await addChart("muscleChart", "Distribución por Grupo Muscular");
 
-  }
-
-  // ===== GUARDAR PDF =====
+  // -------- Descargar --------
 
   pdf.save("dashboard_entrenamiento.pdf");
+
 }
 
 function updateExportButtonsUI() {
