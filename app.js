@@ -3730,11 +3730,11 @@ async function exportDashboardToPDF() {
     ========================= */
 
     pdf.setFontSize(22);
-    pdf.text("Reporte de Entrenamiento", pageWidth / 2, 20, { align: "center" });
+    pdf.text("Dashboard de Entrenamiento", pageWidth / 2, 20, { align: "center" });
 
     pdf.setFontSize(11);
     pdf.text(
-      "Generado: " + new Date().toLocaleDateString(),
+      "Reporte generado: " + new Date().toLocaleDateString(),
       pageWidth / 2,
       28,
       { align: "center" }
@@ -3754,56 +3754,26 @@ async function exportDashboardToPDF() {
       document.querySelector("#kpi-sessions strong")?.innerText || "0";
 
     pdf.setFontSize(14);
-    pdf.text("Indicadores Clave", 20, 50);
+    pdf.text("Indicadores clave", 20, 45);
 
     pdf.setFontSize(12);
 
-    pdf.text(`Volumen total: ${volumen}`, 20, 65);
-    pdf.text(`PRs obtenidos: ${prs}`, 20, 75);
-    pdf.text(`Sesiones registradas: ${sesiones}`, 20, 85);
+    pdf.text(`Volumen total: ${volumen}`, 20, 55);
+    pdf.text(`PRs: ${prs}`, 20, 63);
+    pdf.text(`Sesiones: ${sesiones}`, 20, 71);
 
     /* =========================
-       GRAFICA DE VOLUMEN
-    ========================= */
-
-    const volumeChart = document.getElementById("volumeChart");
-
-    if (volumeChart) {
-
-      await new Promise(r => setTimeout(r, 500));
-
-      const img = volumeChart.toDataURL("image/png", 1);
-
-      pdf.addPage();
-
-      pdf.setFontSize(16);
-      pdf.text("Evolución del Volumen", 20, 20);
-
-      pdf.addImage(
-        img,
-        "PNG",
-        20,
-        30,
-        240,
-        120
-      );
-
-    }
-
-    /* =========================
-       TABLA VOLUMEN EJERCICIO
+       TABLA VOLUMEN SEMANAL
     ========================= */
 
     const table = document.getElementById("weekly-volume-table");
 
     if (table) {
 
-      pdf.addPage();
+      pdf.setFontSize(14);
+      pdf.text("Volumen semanal por ejercicio", 20, 90);
 
-      pdf.setFontSize(16);
-      pdf.text("Volumen semanal por ejercicio", 20, 20);
-
-      let y = 35;
+      let y = 100;
 
       const rows = table.querySelectorAll("tr");
 
@@ -3815,7 +3785,6 @@ async function exportDashboardToPDF() {
 
         cols.forEach(col => {
 
-          pdf.setFontSize(11);
           pdf.text(col.innerText, x, y);
 
           x += 60;
@@ -3823,56 +3792,36 @@ async function exportDashboardToPDF() {
         });
 
         y += 8;
-
-        if (y > 180) {
-          pdf.addPage();
-          y = 20;
-        }
 
       });
 
     }
 
     /* =========================
-       ALERTAS MUSCULARES
+       GRAFICA
     ========================= */
 
-    const muscleTable = document.getElementById("muscle-volume-table");
+    const chart = document.getElementById("volumeChart");
 
-    if (muscleTable) {
+    if (chart) {
+
+      await new Promise(r => setTimeout(r, 400));
+
+      const imgData = chart.toDataURL("image/png", 1.0);
 
       pdf.addPage();
 
       pdf.setFontSize(16);
-      pdf.text("Análisis de Volumen por Grupo Muscular", 20, 20);
+      pdf.text("Gráfica de Volumen", 20, 20);
 
-      let y = 35;
-
-      const rows = muscleTable.querySelectorAll("tr");
-
-      rows.forEach(row => {
-
-        const cols = row.querySelectorAll("td, th");
-
-        let x = 20;
-
-        cols.forEach(col => {
-
-          pdf.setFontSize(11);
-          pdf.text(col.innerText, x, y);
-
-          x += 60;
-
-        });
-
-        y += 8;
-
-        if (y > 180) {
-          pdf.addPage();
-          y = 20;
-        }
-
-      });
+      pdf.addImage(
+        imgData,
+        "PNG",
+        20,
+        30,
+        240,
+        120
+      );
 
     }
 
@@ -3880,13 +3829,13 @@ async function exportDashboardToPDF() {
        DESCARGA
     ========================= */
 
-    pdf.save("Reporte_Entrenamiento.pdf");
+    pdf.save("Dashboard_Entrenamiento.pdf");
 
     console.log("PDF generado correctamente");
 
-  } catch (err) {
+  } catch (error) {
 
-    console.error("Error generando PDF:", err);
+    console.error("Error exportando PDF:", error);
 
   }
 
