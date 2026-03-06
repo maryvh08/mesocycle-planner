@@ -3769,11 +3769,7 @@ async function exportDashboardToPDF() {
 
   // -------- Gráficas --------
 
-  await addChart("volumeChart", "Volumen por Sesión");
-
-  await addChart("weeklyVolumeChart", "Volumen Semanal");
-
-  await addChart("muscleChart", "Distribución por Grupo Muscular");
+  await addChart("strength-chart", "Volumen por Sesión");
 
   // -------- Descargar --------
 
