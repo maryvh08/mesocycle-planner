@@ -3796,13 +3796,19 @@ async function exportDashboardToPDF() {
 
       const chartY = y + cardHeight + 20;
 
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+      
+      const pdfWidth = 240; // ancho grande para aprovechar la página horizontal
+      const pdfHeight = (canvasHeight * pdfWidth) / canvasWidth;
+      
       pdf.addImage(
         img,
         "PNG",
-        40,
+        (pageWidth - pdfWidth) / 2,
         chartY,
-        210,
-        90
+        pdfWidth,
+        pdfHeight
       );
     }
 
