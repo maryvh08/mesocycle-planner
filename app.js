@@ -3534,13 +3534,10 @@ function setupExportButtons() {
 }
 
 async function exportFullDashboardExcel() {
-
   try {
-
     console.log("📊 Exportando dashboard...");
 
     const dashboard = document.getElementById("analysisDashboard");
-
     if (!dashboard) {
       console.error("❌ Dashboard no encontrado");
       return;
@@ -3556,13 +3553,29 @@ async function exportFullDashboardExcel() {
     ];
 
     // =========================
-    // TITULO
+    // TITULO Y MESOCICLO
     // =========================
 
     sheet.mergeCells("A1:C1");
     sheet.getCell("A1").value = "Dashboard de Entrenamiento";
     sheet.getCell("A1").font = { size: 18, bold: true };
     sheet.getCell("A1").alignment = { horizontal: "center" };
+
+    // Fecha
+    sheet.mergeCells("A2:C2");
+    sheet.getCell("A2").value = `Fecha: ${new Date().toLocaleDateString()}`;
+    sheet.getCell("A2").alignment = { horizontal: "center" };
+
+    // Mesociclo actual
+    let mesocycle = "Todos los mesociclos";
+    const label = document.getElementById("stats-mesocycle-label");
+    if (label && label.textContent.trim() !== "") {
+      mesocycle = label.textContent.trim();
+    }
+
+    sheet.mergeCells("A3:C3");
+    sheet.getCell("A3").value = `Mesociclo: ${mesocycle}`;
+    sheet.getCell("A3").alignment = { horizontal: "center" };
 
     sheet.addRow([]);
     sheet.addRow([]);
@@ -3571,14 +3584,9 @@ async function exportFullDashboardExcel() {
     // KPIs
     // =========================
 
-    const volumen =
-      document.getElementById("kpi-volume")?.innerText || "N/A";
-
-    const prs =
-      document.getElementById("kpi-prs")?.innerText || "N/A";
-
-    const sesiones =
-      document.getElementById("kpi-sessions")?.innerText || "N/A";
+    const volumen = document.getElementById("kpi-volume")?.innerText || "N/A";
+    const prs = document.getElementById("kpi-prs")?.innerText || "N/A";
+    const sesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
 
     sheet.addRow(["KPIs"]);
     sheet.getRow(sheet.rowCount).font = { bold: true };
@@ -3595,54 +3603,39 @@ async function exportFullDashboardExcel() {
     // =========================
 
     const tables = dashboard.querySelectorAll("table");
-
     tables.forEach(table => {
-
-      const title =
-        table.previousElementSibling?.innerText || "Tabla";
+      const title = table.previousElementSibling?.innerText || "Tabla";
 
       sheet.addRow([title]);
       sheet.getRow(sheet.rowCount).font = { bold: true };
 
       const rows = table.querySelectorAll("tr");
-
       rows.forEach(row => {
-
         const cols = row.querySelectorAll("td, th");
-
         const data = [];
-
         cols.forEach(col => data.push(col.innerText));
-
         sheet.addRow(data);
-
       });
 
-       sheet.addRow([
-           "Fecha del reporte",
-           new Date().toLocaleDateString()
-         ]);
-         
-         sheet.addRow([]);
-
+      sheet.addRow([
+        "Fecha del reporte",
+        new Date().toLocaleDateString()
+      ]);
       sheet.addRow([]);
       sheet.addRow([]);
-
+      sheet.addRow([]);
     });
 
     // =========================
-    // GRAFICAS
+    // GRAFICAS DEL DASHBOARD
     // =========================
 
     const charts = dashboard.querySelectorAll("canvas");
-
     for (const canvas of charts) {
-
       sheet.addRow(["Gráfica"]);
       sheet.getRow(sheet.rowCount).font = { bold: true };
 
       const imageBase64 = canvas.toDataURL("image/png");
-
       const imageId = workbook.addImage({
         base64: imageBase64,
         extension: "png"
@@ -3652,76 +3645,63 @@ async function exportFullDashboardExcel() {
         tl: { col: 0, row: sheet.rowCount },
         ext: { width: 700, height: 350 }
       });
-      
-      sheet.addRow([]);
-      sheet.addRow([]);
-      sheet.addRow([]);
-      sheet.addRow([]);
-      sheet.addRow([]);
-      sheet.addRow([]);
-      sheet.addRow([]);
 
+      sheet.addRow([]);
+      sheet.addRow([]);
+      sheet.addRow([]);
+      sheet.addRow([]);
+      sheet.addRow([]);
+      sheet.addRow([]);
+      sheet.addRow([]);
     }
-   // =========================
-   // GRAFICA DE FUERZA
-   // =========================
-   
-   const strengthCanvas = document.getElementById("strength-chart");
-   
-   if (strengthCanvas) {
-   
-     sheet.addRow(["Gráfica de Fuerza"]);
-     sheet.getRow(sheet.rowCount).font = { bold: true };
-   
-     const imageBase64 = strengthCanvas.toDataURL("image/png");
-   
-     const imageId = workbook.addImage({
-       base64: imageBase64,
-       extension: "png"
-     });
-   
-     sheet.addImage(imageId, {
-       tl: { col: 0, row: sheet.rowCount },
-       ext: { width: 900, height: 400 }
-     });
-   
-     sheet.addRow([]);
-     sheet.addRow([]);
-     sheet.addRow([]);
-     sheet.addRow([]);
-     sheet.addRow([]);
-   }
+
+    // =========================
+    // GRAFICA DE FUERZA
+    // =========================
+
+    const strengthCanvas = document.getElementById("strength-chart");
+    if (strengthCanvas) {
+      sheet.addRow(["Gráfica de Fuerza"]);
+      sheet.getRow(sheet.rowCount).font = { bold: true };
+
+      const imageBase64 = strengthCanvas.toDataURL("image/png");
+      const imageId = workbook.addImage({
+        base64: imageBase64,
+        extension: "png"
+      });
+
+      sheet.addImage(imageId, {
+        tl: { col: 0, row: sheet.rowCount },
+        ext: { width: 900, height: 400 }
+      });
+
+      sheet.addRow([]);
+      sheet.addRow([]);
+      sheet.addRow([]);
+      sheet.addRow([]);
+      sheet.addRow([]);
+    }
+
     // =========================
     // DESCARGAR
     // =========================
 
     const buffer = await workbook.xlsx.writeBuffer();
-
-    const blob = new Blob(
-      [buffer],
-      {
-        type:
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      }
-    );
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    });
 
     const url = URL.createObjectURL(blob);
-
     const a = document.createElement("a");
     a.href = url;
     a.download = "dashboard_entrenamiento.xlsx";
     a.click();
-
     URL.revokeObjectURL(url);
 
     console.log("✅ Exportación completada");
-
   } catch (err) {
-
     console.error("❌ Error exportando:", err);
-
   }
-
 }
    
 function buildDashboardSheet(records, title) {
