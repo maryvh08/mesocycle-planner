@@ -3804,6 +3804,7 @@ async function exportDashboardToPDF() {
     }
 
       // =========================
+     // =========================
     // TABLA VOLUMEN EJERCICIO
     // =========================
     const table = document.querySelector("#volumeTable table");
