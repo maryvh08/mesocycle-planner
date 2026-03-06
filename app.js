@@ -3780,6 +3780,35 @@ async function exportDashboardToPDF() {
       const y = 35;
       const gap = 10;
       
+      // Función para dibujar KPI
+      function drawKPI(x, title, value) {
+      
+        pdf.rect(x, y, cardWidth, cardHeight);
+      
+        // título
+        pdf.setFontSize(12);
+        pdf.text(
+          title,
+          x + cardWidth / 2,
+          y + cardHeight / 2 - 6,
+          { align: "center", baseline: "middle" }
+        );
+      
+        // valor
+        pdf.setFontSize(16);
+        pdf.text(
+          value,
+          x + cardWidth / 2,
+          y + cardHeight / 2 + 6,
+          { align: "center", baseline: "middle" }
+        );
+      }
+      
+      // Dibujar KPIs
+      drawKPI(startX, "Volumen Total", volumen);
+      drawKPI(startX + cardWidth + gap, "PRs", prs);
+      drawKPI(startX + (cardWidth + gap) * 2, "Sesiones", sesiones);
+      
       // CARD 1
       pdf.rect(startX, y, cardWidth, cardHeight);
       pdf.setFontSize(12);
