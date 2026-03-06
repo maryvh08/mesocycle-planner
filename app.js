@@ -3832,12 +3832,38 @@ async function exportDashboardToPDF() {
       pdf.text("Volumen por grupo muscular", 14, 20);
 
       pdf.autoTable({
-        html: muscleTable,
-        startY: 30,
-        theme: "grid",
-        styles: { fontSize: 10 },
-        headStyles: { fillColor: [39,174,96] }
-      });
+           html: muscleTable,
+           startY: 30,
+           theme: "grid",
+           styles: { fontSize: 10 },
+           headStyles: { fillColor: [39,174,96] },
+         
+           didParseCell: function (data) {
+         
+             // Solo modificar las celdas del body
+             if (data.section === "body") {
+         
+               let txt = data.cell.text[0];
+         
+               if (txt) {
+         
+                 if (txt.includes("Exceso")) {
+                   data.cell.text = ["Exceso"];
+                 }
+         
+                 if (txt.includes("Bajo")) {
+                   data.cell.text = ["Bajo"];
+                 }
+         
+                 if (txt.includes("Óptimo")) {
+                   data.cell.text = ["Óptimo"];
+                 }
+         
+               }
+             }
+           }
+         
+         });
     }
 
     // =========================
