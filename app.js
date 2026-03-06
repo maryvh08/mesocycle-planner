@@ -3814,14 +3814,39 @@ async function exportDashboardToPDF() {
       pdf.text("Volumen semanal por ejercicio", 14, 20);
 
       pdf.autoTable({
-        html: table,
-        startY: 30,
-        theme: "grid",
-        styles: { fontSize: 10 },
-        headStyles: { fillColor: [41,128,185] }
-      });
-    }
-
+           html: table,
+           startY: 30,
+           theme: "grid",
+           styles: { fontSize: 10 },
+           headStyles: { fillColor: [41,128,185] },
+         
+           didParseCell: function (data) {
+         
+             if (data.section === "body") {
+         
+               let txt = data.cell.text[0];
+         
+               if (txt) {
+         
+                 if (txt.includes("↑")) {
+                   data.cell.text = ["Sube"];
+                 }
+         
+                 if (txt.includes("↓")) {
+                   data.cell.text = ["Baja"];
+                 }
+         
+                 if (txt.includes("→")) {
+                   data.cell.text = ["Se mantiene"];
+                 }
+         
+               }
+         
+             }
+         
+           }
+         
+         });
     // =========================
     // TABLA VOLUMEN MUSCULAR
     // =========================
