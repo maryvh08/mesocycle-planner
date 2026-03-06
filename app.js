@@ -4053,6 +4053,63 @@ async function exportDashboardToPDF() {
 
 }
 
+// Función para mostrar el botón solo si estamos en "Todos"
+function toggleExportAllButton() {
+  const label = document.getElementById("stats-mesocycle-label");
+  const btn = document.getElementById("exportAllMesocyclesBtn");
+
+  if (!label || !btn) return;
+
+  btn.style.display = label.textContent.includes("Todos") ? "inline-block" : "none";
+}
+
+// Llamar al cargar la página y cada vez que cambie el mesociclo
+toggleExportAllButton();
+
+async function exportAllMesocyclesExcel() {
+  const workbook = new ExcelJS.Workbook();
+
+  // 1️⃣ Hoja con la vista general
+  const generalSheet = workbook.addWorksheet("Todos los Mesociclos");
+  generalSheet.columns = [
+    { width: 30 }, { width: 25 }, { width: 25 }
+  ];
+  generalSheet.addRow(["Dashboard General de Todos los Mesociclos"]).font = { bold: true };
+  
+  // Aquí puedes copiar los KPIs y tablas de la vista general
+  // (similar a tu función exportFullDashboardExcel)
+
+  // 2️⃣ Hojas individuales por mesociclo
+  // Supongamos que tienes un array de mesociclos con id y nombre
+  const mesocycles = Array.from(document.getElementById("mesocycle-select").options)
+                           .filter(opt => opt.value.toLowerCase() !== "general");
+
+  for (const mes of mesocycles) {
+    const sheet = workbook.addWorksheet(mes.text);
+    sheet.columns = [
+      { width: 30 }, { width: 25 }, { width: 25 }
+    ];
+
+    sheet.addRow([`Dashboard Mesociclo: ${mes.text}`]).font = { bold: true };
+
+    // Aquí deberías llenar la hoja con KPIs y tablas filtradas para ese mesociclo
+    // Puedes usar tu función existente de exportación a Excel para cada mesociclo,
+    // adaptándola para escribir en la hoja correspondiente
+  }
+
+  // Descargar archivo
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `dashboard_todos_mesociclos.xlsx`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  console.log("✅ Excel con todos los mesociclos generado");
+}
+
 function updateExportButtonsUI() {
   const btn = document.getElementById('exportDashboard');
   if (!btn) return;
@@ -4525,3 +4582,5 @@ document.addEventListener("click", (e) => {
   }
 
 });
+
+document.getElementById("exportAllMesocyclesBtn").addEventListener("click", exportAllMesocyclesExcel);
