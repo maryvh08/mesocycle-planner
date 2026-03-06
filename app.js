@@ -3847,6 +3847,7 @@ async function exportDashboardToPDF() {
            }
          
          });
+    }
     // =========================
     // TABLA VOLUMEN MUSCULAR
     // =========================
