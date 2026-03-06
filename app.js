@@ -3794,15 +3794,16 @@ async function exportDashboardToPDF() {
 
       const img = canvas.toDataURL("image/png", 1);
 
+      const chartY = y + cardHeight + 20;
+
       pdf.addImage(
         img,
         "PNG",
-        120,
-        30,
-        150,
+        40,
+        chartY,
+        210,
         90
       );
-
     }
 
     // =========================
