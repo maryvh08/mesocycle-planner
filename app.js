@@ -3805,9 +3805,10 @@ async function exportDashboardToPDF() {
     // KPIs
     // =========================
 
-    const volumen = document.getElementById("kpi-volume")?.innerText || "N/A";
-    const prs = document.getElementById("kpi-prs")?.innerText || "N/A";
-    const sesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
+      const volumenRaw = document.getElementById("kpi-volume")?.innerText || "";
+      const volumen = volumenRaw.split("\n")[1] || volumenRaw;
+      const prs = document.getElementById("kpi-prs")?.innerText || "N/A";
+      const sesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
 
     pdf.setFontSize(20);
     pdf.setTextColor(...dark);
