@@ -3762,21 +3762,49 @@ async function exportDashboardToPDF() {
     pdf.addPage();
 
     // =========================
-    // KPIs
-    // =========================
-
-    const volumen = document.getElementById("kpi-volume")?.innerText || "N/A";
-    const prs = document.getElementById("kpi-prs")?.innerText || "N/A";
-    const sesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
-
-    pdf.setFontSize(20);
-    pdf.text("Resumen del Entrenamiento", 14, 20);
-
-    pdf.setFontSize(13);
-
-    pdf.text(`Volumen total: ${volumen}`, 14, 40);
-    pdf.text(`PRs logrados: ${prs}`, 14, 50);
-    pdf.text(`Sesiones completadas: ${sesiones}`, 14, 60);
+      // KPIs (CARDS)
+      // =========================
+      
+      const volumen = document.getElementById("kpi-volume")?.innerText || "N/A";
+      const prs = document.getElementById("kpi-prs")?.innerText || "N/A";
+      const sesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
+      
+      pdf.setFontSize(20);
+      pdf.text("Resumen del Entrenamiento", 14, 20);
+      
+      // Tamaño de tarjetas
+      const cardWidth = 80;
+      const cardHeight = 35;
+      
+      const startX = 14;
+      const y = 35;
+      const gap = 10;
+      
+      // CARD 1
+      pdf.rect(startX, y, cardWidth, cardHeight);
+      pdf.setFontSize(12);
+      pdf.text("Volumen Total", startX + cardWidth / 2, y + 10, { align: "center" });
+      
+      pdf.setFontSize(16);
+      pdf.text(volumen, startX + cardWidth / 2, y + 23, { align: "center" });
+      
+      
+      // CARD 2
+      pdf.rect(startX + cardWidth + gap, y, cardWidth, cardHeight);
+      pdf.setFontSize(12);
+      pdf.text("PRs", startX + cardWidth + gap + cardWidth / 2, y + 10, { align: "center" });
+      
+      pdf.setFontSize(16);
+      pdf.text(prs, startX + cardWidth + gap + cardWidth / 2, y + 23, { align: "center" });
+      
+      
+      // CARD 3
+      pdf.rect(startX + (cardWidth + gap) * 2, y, cardWidth, cardHeight);
+      pdf.setFontSize(12);
+      pdf.text("Sesiones", startX + (cardWidth + gap) * 2 + cardWidth / 2, y + 10, { align: "center" });
+      
+      pdf.setFontSize(16);
+      pdf.text(sesiones, startX + (cardWidth + gap) * 2 + cardWidth / 2, y + 23, { align: "center" });
 
     // =========================
     // GRÁFICA
