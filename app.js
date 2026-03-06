@@ -3771,8 +3771,10 @@ async function exportDashboardToPDF() {
    // PORTADA
    // =========================
    
-   // Fondo superior
-   pdf.setFillColor(...primary); // color principal de la marca
+   const pageWidth = pdf.internal.pageSize.getWidth();
+   
+   // Color de fondo superior
+   pdf.setFillColor(...primary); // usa tu array de color [R,G,B]
    pdf.rect(0, 0, pageWidth, 50, "F");
    
    // Título principal
@@ -3780,24 +3782,30 @@ async function exportDashboardToPDF() {
    pdf.setFontSize(30);
    pdf.text("Reporte de Entrenamiento", pageWidth / 2, 30, { align: "center" });
    
-   // Fecha y mesociclo
+   // Texto secundario
    pdf.setTextColor(80, 80, 80);
    pdf.setFontSize(14);
    
+   // Fecha
    const fecha = new Date().toLocaleDateString();
+   pdf.text(`Fecha: ${fecha}`, pageWidth / 2, 90, { align: "center" });
    
-   // Obtener el mesociclo seleccionado, si es general se muestra "Todos"
+   // Mesociclo seleccionado o "Todos"
    const mesSelect = document.getElementById("mesocycle-select");
-   let mesocycle = "Todos";
+   let mesocycle = "Todos"; // valor por defecto
+   
    if (mesSelect?.selectedOptions?.length > 0) {
-     const selectedText = mesSelect.selectedOptions[0].text.trim();
-     if (selectedText) mesocycle = selectedText;
+     const selectedOption = mesSelect.selectedOptions[0];
+   
+     // Si no es "general" usamos el nombre del mesociclo
+     if (selectedOption.value && selectedOption.value.toLowerCase() !== "general") {
+       mesocycle = selectedOption.text.trim();
+     }
    }
    
-   pdf.text(`Fecha: ${fecha}`, pageWidth / 2, 90, { align: "center" });
    pdf.text(`Mesociclo: ${mesocycle}`, pageWidth / 2, 100, { align: "center" });
    
-   // Nota al pie
+   // Nota de generación automática
    pdf.setFontSize(11);
    pdf.setTextColor(140, 140, 140);
    pdf.text(
@@ -3807,6 +3815,7 @@ async function exportDashboardToPDF() {
      { align: "center" }
    );
    
+   // Nueva página para contenido
    pdf.addPage();
     // =========================
       // KPIs
@@ -3849,7 +3858,7 @@ async function exportDashboardToPDF() {
         pdf.text(title, x + cardWidth / 2, y + 12, { align: "center" });
       
         // valor centrado vertical y horizontalmente
-        pdf.setFontSize(16);
+        pdf.setFontSize(24);
         pdf.setTextColor(...primary);
         const valueY = y + cardHeight / 2 + 4; // ajusta el +4 si quieres centrar mejor
         pdf.text(value, x + cardWidth / 2, valueY, { align: "center" });
