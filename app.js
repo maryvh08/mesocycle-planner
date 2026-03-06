@@ -3815,16 +3815,16 @@ async function exportDashboardToPDF() {
     if (canvas) {
 
       const img = canvas.toDataURL("image/png", 1);
-
+      const kpiBottom = 75; // donde terminan las tarjetas KPI
+      
       pdf.addImage(
         img,
         "PNG",
-        120,
-        30,
-        150,
+        60,
+        kpiBottom + 10,
+        170,
         90
       );
-
     }
 
     // =========================
