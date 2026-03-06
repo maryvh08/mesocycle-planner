@@ -3816,8 +3816,7 @@ async function exportDashboardToPDF() {
     // NUMERACIÓN DE PÁGINAS
     // =========================
     const pageCount = pdf.internal.getNumberOfPages();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-
+     
     for (let i = 1; i <= pageCount; i++) {
       pdf.setPage(i);
       pdf.setFontSize(10);
