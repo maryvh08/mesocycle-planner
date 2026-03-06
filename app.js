@@ -3460,10 +3460,6 @@ function getCoachInsight(trend) {
 // =====================
 //EXPORTAR
 // =====================
-const totalVolume = getText("totalVolume");
-const totalPRs = getText("totalPRs");
-const totalSessions = getText("totalSessions");
-
 async function exportHistoryToExcel() {
   const { data: records, error } = await supabase
     .from('exercise_records')
