@@ -3761,80 +3761,73 @@ async function exportDashboardToPDF() {
 
     pdf.addPage();
 
-    // =========================
-      // KPIs (CARDS)
-      // =========================
-      
-      const volumen = document.getElementById("kpi-volume")?.innerText || "N/A";
-      const prs = document.getElementById("kpi-prs")?.innerText || "N/A";
-      const sesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
-      
-      pdf.setFontSize(20);
-      pdf.text("Resumen del Entrenamiento", 14, 20);
-      
-      // Tamaño de tarjetas
-      const cardWidth = 80;
-      const cardHeight = 35;
-      
-      const startX = 14;
-      const y = 35;
-      const gap = 10;
-      
-      // Función para dibujar KPI
-      function drawKPI(x, title, value) {
-      
-        pdf.rect(x, y, cardWidth, cardHeight);
-      
-        // título
-        pdf.setFontSize(12);
-        pdf.text(
-          title,
-          x + cardWidth / 2,
-          y + cardHeight / 2 - 6,
-          { align: "center", baseline: "middle" }
-        );
-      
-        // valor
-        pdf.setFontSize(16);
-        pdf.text(
-          value,
-          x + cardWidth / 2,
-          y + cardHeight / 2 + 6,
-          { align: "center", baseline: "middle" }
-        );
-      }
-      
-      // Dibujar KPIs
-      drawKPI(startX, "Volumen Total", volumen);
-      drawKPI(startX + cardWidth + gap, "PRs", prs);
-      drawKPI(startX + (cardWidth + gap) * 2, "Sesiones", sesiones);
-      
-      // CARD 1
-      pdf.rect(startX, y, cardWidth, cardHeight);
-      pdf.setFontSize(12);
-      pdf.text("Volumen Total", startX + cardWidth / 2, y + 10, { align: "center" });
-      
-      pdf.setFontSize(16);
-      pdf.text(volumen, startX + cardWidth / 2, y + 23, { align: "center" });
-      
-      
-      // CARD 2
-      pdf.rect(startX + cardWidth + gap, y, cardWidth, cardHeight);
-      pdf.setFontSize(12);
-      pdf.text("PRs", startX + cardWidth + gap + cardWidth / 2, y + 10, { align: "center" });
-      
-      pdf.setFontSize(16);
-      pdf.text(prs, startX + cardWidth + gap + cardWidth / 2, y + 23, { align: "center" });
-      
-      
-      // CARD 3
-      pdf.rect(startX + (cardWidth + gap) * 2, y, cardWidth, cardHeight);
-      pdf.setFontSize(12);
-      pdf.text("Sesiones", startX + (cardWidth + gap) * 2 + cardWidth / 2, y + 10, { align: "center" });
-      
-      pdf.setFontSize(16);
-      pdf.text(sesiones, startX + (cardWidth + gap) * 2 + cardWidth / 2, y + 23, { align: "center" });
-
+   // =========================
+   // KPIs (CARDS)
+   // =========================
+   const volumen = document.getElementById("kpi-volume")?.innerText || "N/A";
+   const prs = document.getElementById("kpi-prs")?.innerText || "N/A";
+   const sesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
+   
+   pdf.setFontSize(20);
+   pdf.setTextColor(30,30,30);
+   pdf.text("Resumen del Entrenamiento", 14, 20);
+   
+   // Tamaño
+   const cardWidth = 60;
+   const cardHeight = 35;
+   
+   const startX = 14;
+   const y = 35;
+   const gap = 10;
+   
+   // función KPI
+   function drawKPI(x, title, value, color){
+   
+     // fondo suave
+     pdf.setFillColor(245,245,245);
+     pdf.roundedRect(x, y, cardWidth, cardHeight, 4, 4, "F");
+   
+     // barra superior color
+     pdf.setFillColor(color[0], color[1], color[2]);
+     pdf.roundedRect(x, y, cardWidth, 6, 2, 2, "F");
+   
+     // titulo
+     pdf.setFontSize(11);
+     pdf.setTextColor(90,90,90);
+     pdf.text(
+       title,
+       x + cardWidth / 2,
+       y + 15,
+       { align: "center" }
+     );
+   
+     // valor
+     pdf.setFontSize(18);
+     pdf.setTextColor(20,20,20);
+     pdf.text(
+       value,
+       x + cardWidth / 2,
+       y + 26,
+       { align: "center" }
+     );
+   }
+   
+   // datos
+   const kpis = [
+     {title:"Volumen Total", value:volumen, color:[52,152,219]},
+     {title:"PRs", value:prs, color:[46,204,113]},
+     {title:"Sesiones", value:sesiones, color:[155,89,182]}
+   ];
+   
+   kpis.forEach((kpi,i)=>{
+     drawKPI(
+       startX + (cardWidth + gap) * i,
+       kpi.title,
+       kpi.value,
+       kpi.color
+     );
+   });
+     
     // =========================
     // GRÁFICA
     // =========================
