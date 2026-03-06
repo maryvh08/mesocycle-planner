@@ -3724,187 +3724,196 @@ function buildDashboardSheet(records, title) {
 
 async function exportDashboardToPDF() {
 
-  const { jsPDF } = window.jspdf;
+const { jsPDF } = window.jspdf;
 
-  try {
+try {
 
-    const pdf = new jsPDF("l", "mm", "a4");
-    const pageWidth = pdf.internal.pageSize.getWidth();
+```
+const pdf = new jsPDF("l", "mm", "a4");
+const pageWidth = pdf.internal.pageSize.getWidth();
 
-    await new Promise(r => setTimeout(r, 300));
+await new Promise(r => setTimeout(r, 300));
 
-    // =========================
-    // PORTADA
-    // =========================
+// =========================
+// PORTADA
+// =========================
 
-    pdf.setFontSize(28);
-    pdf.text("Reporte de Entrenamiento", pageWidth / 2, 50, { align: "center" });
+pdf.setFontSize(28);
+pdf.text("Reporte de Entrenamiento", pageWidth / 2, 50, { align: "center" });
 
-    pdf.setFontSize(14);
+pdf.setFontSize(14);
 
-    pdf.text(
-      "Fecha: " + new Date().toLocaleDateString(),
-      pageWidth / 2,
-      70,
-      { align: "center" }
-    );
+pdf.text(
+  "Fecha: " + new Date().toLocaleDateString(),
+  pageWidth / 2,
+  70,
+  { align: "center" }
+);
 
-    const mesocycle =
-      document.getElementById("mesocycle-select")?.selectedOptions[0]?.text || "Todos";
+const mesocycle =
+  document.getElementById("mesocycle-select")?.selectedOptions[0]?.text || "Todos";
 
-    pdf.text(
-      "Mesociclo: " + mesocycle,
-      pageWidth / 2,
-      80,
-      { align: "center" }
-    );
+pdf.text(
+  "Mesociclo: " + mesocycle,
+  pageWidth / 2,
+  80,
+  { align: "center" }
+);
 
-    pdf.addPage();
+pdf.addPage();
 
-    // =========================
-    // KPIs
-    // =========================
+// =========================
+// KPIs
+// =========================
 
-    const volumen = document.getElementById("kpi-volume")?.innerText || "N/A";
-    const prs = document.getElementById("kpi-prs")?.innerText || "N/A";
-    const sesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
+const volumen = document.getElementById("kpi-volume")?.innerText || "N/A";
+const prs = document.getElementById("kpi-prs")?.innerText || "N/A";
+const sesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
 
-    pdf.setFontSize(20);
-    pdf.text("Resumen del Entrenamiento", 14, 20);
+pdf.setFontSize(20);
+pdf.text("Resumen del Entrenamiento", 14, 20);
 
-    const cardWidth = 80;
-    const cardHeight = 35;
-    const startX = 14;
-    const y = 35;
-    const gap = 10;
+const cardWidth = 80;
+const cardHeight = 35;
+const startX = 14;
+const y = 35;
+const gap = 10;
 
-    function drawKPI(x, title, value) {
+function drawKPI(x, title, value) {
 
-      pdf.rect(x, y, cardWidth, cardHeight);
+  // caja
+  pdf.rect(x, y, cardWidth, cardHeight);
 
-      pdf.setFontSize(12);
-      pdf.text(
-        title,
-        x + cardWidth / 2,
-        y + cardHeight / 2 - 6,
-        { align: "center", baseline: "middle" }
-      );
+  // título
+  pdf.setFontSize(12);
+  pdf.text(
+    title,
+    x + cardWidth / 2,
+    y + 12,
+    { align: "center" }
+  );
 
-      pdf.setFontSize(16);
-      pdf.text(
-        value,
-        x + cardWidth / 2,
-        y + cardHeight / 2 + 6,
-        { align: "center", baseline: "middle" }
-      );
-    }
+  // valor
+  pdf.setFontSize(18);
+  pdf.text(
+    value,
+    x + cardWidth / 2,
+    y + 24,
+    { align: "center" }
+  );
 
-    drawKPI(startX, "Volumen Total", volumen);
-    drawKPI(startX + cardWidth + gap, "PRs", prs);
-    drawKPI(startX + (cardWidth + gap) * 2, "Sesiones", sesiones);
+}
 
-    // =========================
-    // GRÁFICA
-    // =========================
+drawKPI(startX, "Volumen Total", volumen);
+drawKPI(startX + cardWidth + gap, "PRs", prs);
+drawKPI(startX + (cardWidth + gap) * 2, "Sesiones", sesiones);
 
-    const canvas = document.getElementById("strength-chart");
+// =========================
+// GRÁFICA
+// =========================
 
-    if (canvas) {
+const canvas = document.getElementById("strength-chart");
 
-      const img = canvas.toDataURL("image/png", 1);
+if (canvas) {
 
-      const chartY = y + cardHeight + 20;
+  const img = canvas.toDataURL("image/png", 1);
 
-      pdf.addImage(
-        img,
-        "PNG",
-        40,
-        chartY,
-        210,
-        90
-      );
-    }
+  const chartY = y + cardHeight + 20;
 
-    // =========================
-    // TABLA VOLUMEN EJERCICIO
-    // =========================
+  pdf.addImage(
+    img,
+    "PNG",
+    40,
+    chartY,
+    210,
+    90
+  );
 
-    const table = document.querySelector("#volumeTable table");
+}
 
-    if (table) {
+// =========================
+// TABLA VOLUMEN EJERCICIO
+// =========================
 
-      pdf.addPage();
+const table = document.querySelector("#volumeTable table");
 
-      pdf.setFontSize(18);
-      pdf.text("Volumen semanal por ejercicio", 14, 20);
+if (table) {
 
-      pdf.autoTable({
-        html: table,
-        startY: 30,
-        theme: "grid",
-        styles: { fontSize: 10 },
-        headStyles: { fillColor: [41, 128, 185] }
-      });
+  pdf.addPage();
 
-    }
+  pdf.setFontSize(18);
+  pdf.text("Volumen semanal por ejercicio", 14, 20);
 
-    // =========================
-    // TABLA VOLUMEN MUSCULAR
-    // =========================
+  pdf.autoTable({
+    html: table,
+    startY: 30,
+    theme: "grid",
+    styles: { fontSize: 10 },
+    headStyles: { fillColor: [41,128,185] }
+  });
 
-    const muscleTable = document.querySelector("#muscleTable table");
+}
 
-    if (muscleTable) {
+// =========================
+// TABLA VOLUMEN MUSCULAR
+// =========================
 
-      pdf.addPage();
+const muscleTable = document.querySelector("#muscleTable table");
 
-      pdf.setFontSize(18);
-      pdf.text("Volumen por grupo muscular", 14, 20);
+if (muscleTable) {
 
-      pdf.autoTable({
-        html: muscleTable,
-        startY: 30,
-        theme: "grid",
-        styles: { fontSize: 10 },
-        headStyles: { fillColor: [39, 174, 96] }
-      });
+  pdf.addPage();
 
-    }
+  pdf.setFontSize(18);
+  pdf.text("Volumen por grupo muscular", 14, 20);
 
-    // =========================
-    // NUMERACIÓN DE PÁGINAS
-    // =========================
+  pdf.autoTable({
+    html: muscleTable,
+    startY: 30,
+    theme: "grid",
+    styles: { fontSize: 10 },
+    headStyles: { fillColor: [39,174,96] }
+  });
 
-    const pageCount = pdf.internal.getNumberOfPages();
-    const pageHeight = pdf.internal.pageSize.getHeight();
+}
 
-    for (let i = 1; i <= pageCount; i++) {
+// =========================
+// NUMERACIÓN
+// =========================
 
-      pdf.setPage(i);
+const pageCount = pdf.internal.getNumberOfPages();
+const pageHeight = pdf.internal.pageSize.getHeight();
 
-      pdf.setFontSize(10);
+for (let i = 1; i <= pageCount; i++) {
 
-      pdf.text(
-        `Página ${i} de ${pageCount}`,
-        pageWidth - 40,
-        pageHeight - 10
-      );
+  pdf.setPage(i);
 
-    }
+  pdf.setFontSize(10);
 
-    // =========================
-    // GUARDAR
-    // =========================
+  pdf.text(
+    `Página ${i} de ${pageCount}`,
+    pageWidth - 40,
+    pageHeight - 10
+  );
 
-    pdf.save("reporte_entrenamiento.pdf");
+}
 
-    console.log("✅ PDF generado correctamente");
+// =========================
+// GUARDAR
+// =========================
 
-  } catch (err) {
+pdf.save("reporte_entrenamiento.pdf");
 
-    console.error("❌ Error exportando PDF:", err);
+console.log("✅ PDF generado correctamente");
+```
 
-  }
+} catch (err) {
+
+```
+console.error("❌ Error exportando PDF:", err);
+```
+
+}
 
 }
 
