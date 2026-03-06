@@ -3460,6 +3460,14 @@ function getCoachInsight(trend) {
 // =====================
 //EXPORTAR
 // =====================
+function getText(id){
+  return document.getElementById(id)?.innerText || "N/D";
+}
+
+const totalVolume = getText("totalVolume");
+const totalPRs = getText("totalPRs");
+const totalSessions = getText("totalSessions");
+
 async function exportHistoryToExcel() {
   const { data: records, error } = await supabase
     .from('exercise_records')
@@ -3728,9 +3736,14 @@ async function exportDashboardToPDF() {
 
   // -------- KPIs --------
 
-  const totalVolume = document.getElementById("totalVolume").innerText;
-  const totalPRs = document.getElementById("totalPRs").innerText;
-  const totalSessions = document.getElementById("totalSessions").innerText;
+  const totalVolume =
+     document.getElementById("totalVolume")?.innerText || "N/D";
+   
+   const totalPRs =
+     document.getElementById("totalPRs")?.innerText || "N/D";
+   
+   const totalSessions =
+     document.getElementById("totalSessions")?.innerText || "N/D";
 
   pdf.setFontSize(12);
 
