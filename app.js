@@ -3516,16 +3516,11 @@ function setupExportButtons() {
 
    if (exportDashboardPDFBtn) {
      exportDashboardPDFBtn.addEventListener('click', async () => {
+   
        console.log("🟢 Click PDF detectado");
    
-       const analysis = document.getElementById('analysisDashboard');
+       await exportDashboardToPDF();
    
-       if (!analysis) {
-         console.log("❌ analysisDashboard no encontrado");
-         return;
-       }
-   
-       await exportDashboardToPDF(analysis);
      });
    }
 
@@ -3623,6 +3618,13 @@ async function exportFullDashboardExcel() {
 
       });
 
+       sheet.addRow([
+           "Fecha del reporte",
+           new Date().toLocaleDateString()
+         ]);
+         
+         sheet.addRow([]);
+
       sheet.addRow([]);
       sheet.addRow([]);
 
@@ -3650,7 +3652,11 @@ async function exportFullDashboardExcel() {
         tl: { col: 0, row: sheet.rowCount },
         ext: { width: 700, height: 350 }
       });
-
+      
+      sheet.addRow([]);
+      sheet.addRow([]);
+      sheet.addRow([]);
+      sheet.addRow([]);
       sheet.addRow([]);
       sheet.addRow([]);
       sheet.addRow([]);
