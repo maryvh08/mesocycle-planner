@@ -3528,12 +3528,6 @@ function setupExportButtons() {
       exportHistoryToExcel();
     });
   }
-
-   if (exportAllMesocyclesBtn) {
-    exportAllMesocyclesBtn.addEventListener('click', () => {
-      exportAllMesocyclesExcel();
-    });
-  }
 }
 
 async function exportFullDashboardExcel() {
@@ -4069,127 +4063,7 @@ function toggleExportAllButton() {
 // Llamar al cargar la página y cuando cambie el mesociclo
 toggleExportAllButton();
 
-async function exportAllMesocyclesExcel(){
 
-  const workbook = new ExcelJS.Workbook();
-
-  const dashboard = document.getElementById("analysisDashboard");
-  const select = document.getElementById("stats-mesocycle");
-
-  if(!dashboard || !select){
-    console.error("Dashboard o selector no encontrado");
-    return;
-  }
-
-  const originalValue = select.value;
-
-  // función para esperar al render
-  function waitRender(){
-    return new Promise(resolve => requestAnimationFrame(resolve));
-  }
-
-  // ======================
-  // HOJA GENERAL
-  // ======================
-
-  select.value = "";
-  select.dispatchEvent(new Event("change"));
-
-  await waitRender();
-  await waitRender();
-
-  const generalSheet = workbook.addWorksheet("Todos los Mesociclos");
-
-  fillSheet(generalSheet, dashboard);
-
-  // ======================
-  // HOJAS POR MESOCICLO
-  // ======================
-
-  const options = Array.from(select.options);
-
-  for(const opt of options){
-
-    if(!opt.value) continue;
-
-    select.value = opt.value;
-
-    select.dispatchEvent(new Event("change"));
-
-    await waitRender();
-    await waitRender();
-
-    const sheet = workbook.addWorksheet(cleanName(opt.text));
-
-    fillSheet(sheet, dashboard);
-
-  }
-
-  // restaurar selector
-  select.value = originalValue;
-  select.dispatchEvent(new Event("change"));
-
-  // ======================
-  // DESCARGAR
-  // ======================
-
-  const buffer = await workbook.xlsx.writeBuffer();
-
-  const blob = new Blob(
-    [buffer],
-    {type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
-  );
-
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "dashboard_mesociclos.xlsx";
-  a.click();
-
-  URL.revokeObjectURL(url);
-}
-
-function fillSheet(sheet, dashboard){
-
-  const volumen = document.getElementById("kpi-volume")?.innerText || "";
-  const prs = document.getElementById("kpi-prs")?.innerText || "";
-  const sesiones = document.getElementById("kpi-sessions")?.innerText || "";
-
-  sheet.addRow(["Volumen total", volumen]);
-  sheet.addRow(["PRs", prs]);
-  sheet.addRow(["Sesiones", sesiones]);
-  sheet.addRow([]);
-
-  const tables = dashboard.querySelectorAll("table");
-
-  tables.forEach((table,i)=>{
-
-    const title = table.previousElementSibling?.innerText || `Tabla ${i+1}`;
-
-    sheet.addRow([title]).font = {bold:true};
-
-    const rows = table.querySelectorAll("tr");
-
-    rows.forEach(row=>{
-
-      const cols = row.querySelectorAll("td, th");
-
-      const data = Array.from(cols).map(c=>c.innerText);
-
-      sheet.addRow(data);
-
-    });
-
-    sheet.addRow([]);
-
-  });
-
-}
-
-function cleanName(name){
-  return name.replace(/[\\/?*[\]:]/g,"").slice(0,31);
-}
 function fillSheetWithDashboardData(sheet, dashboard){
 
   const volumen = document.getElementById("kpi-volume")?.innerText || "N/A";
@@ -4705,4 +4579,3 @@ document.getElementById("stats-mesocycle")?.addEventListener("change", () => {
   updateStatsMesocycleLabel();
   toggleExportAllButton();
 });
-document.getElementById("exportAllMesocyclesBtn").addEventListener("click", exportAllMesocyclesExcel);
