@@ -4064,44 +4064,49 @@ async function exportDashboardToPDF() {
 function toggleExportAllButton() {
   const label = document.getElementById("stats-mesocycle-label");
   const btn = document.getElementById("exportAllMesocyclesBtn");
-
   if (!label || !btn) return;
 
+  // Mostrar botón solo si estamos en la vista "Todos"
   btn.style.display = label.textContent.includes("Todos") ? "inline-block" : "none";
 }
 
-// Llamar al cargar la página y cada vez que cambie el mesociclo
+// Llamar al cargar la página y cuando cambie el mesociclo
 toggleExportAllButton();
 
 async function exportAllMesocyclesExcel() {
   const workbook = new ExcelJS.Workbook();
 
-  // 1️⃣ Hoja con la vista general
+  // 1️⃣ Hoja general (Todos los mesociclos)
   const generalSheet = workbook.addWorksheet("Todos los Mesociclos");
   generalSheet.columns = [
     { width: 30 }, { width: 25 }, { width: 25 }
   ];
   generalSheet.addRow(["Dashboard General de Todos los Mesociclos"]).font = { bold: true };
-  
+
   // Aquí puedes copiar los KPIs y tablas de la vista general
   // (similar a tu función exportFullDashboardExcel)
 
-  // 2️⃣ Hojas individuales por mesociclo
-  // Supongamos que tienes un array de mesociclos con id y nombre
-  const mesocycles = Array.from(document.getElementById("mesocycle-select").options)
+  // 2️⃣ Hoja por cada mesociclo registrado
+  const select = document.getElementById("stats-mesocycle");
+  if (!select) {
+    console.error("❌ No se encontró el select de mesociclos");
+    return;
+  }
+
+  const mesocycles = Array.from(select.options)
                            .filter(opt => opt.value.toLowerCase() !== "general");
 
   for (const mes of mesocycles) {
-    const sheet = workbook.addWorksheet(mes.text);
+    const sheetName = sanitizeSheetName(mes.text);
+    const sheet = workbook.addWorksheet(sheetName);
     sheet.columns = [
       { width: 30 }, { width: 25 }, { width: 25 }
     ];
 
     sheet.addRow([`Dashboard Mesociclo: ${mes.text}`]).font = { bold: true };
 
-    // Aquí deberías llenar la hoja con KPIs y tablas filtradas para ese mesociclo
-    // Puedes usar tu función existente de exportación a Excel para cada mesociclo,
-    // adaptándola para escribir en la hoja correspondiente
+    // Aquí deberías llenar la hoja con los KPIs y tablas filtradas para ese mesociclo
+    // Puedes reutilizar tu lógica de exportFullDashboardExcel adaptando a esta hoja
   }
 
   // Descargar archivo
@@ -4590,4 +4595,8 @@ document.addEventListener("click", (e) => {
 
 });
 
+document.getElementById("stats-mesocycle")?.addEventListener("change", () => {
+  updateStatsMesocycleLabel();
+  toggleExportAllButton();
+});
 document.getElementById("exportAllMesocyclesBtn").addEventListener("click", exportAllMesocyclesExcel);
