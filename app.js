@@ -4579,3 +4579,7 @@ document.getElementById("stats-mesocycle")?.addEventListener("change", () => {
   updateStatsMesocycleLabel();
   toggleExportAllButton();
 });
+
+exportAllMesocyclesBtn.addEventListener("click", async () => {
+  await exportAllMesocyclesExcel();
+});
