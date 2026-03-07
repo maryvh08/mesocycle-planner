@@ -4069,64 +4069,69 @@ function toggleExportAllButton() {
 // Llamar al cargar la página y cuando cambie el mesociclo
 toggleExportAllButton();
 
-async function exportAllMesocyclesExcel() {
+async function exportAllMesocyclesExcel(){
 
   const workbook = new ExcelJS.Workbook();
 
   const dashboard = document.getElementById("analysisDashboard");
   const select = document.getElementById("stats-mesocycle");
 
-  if (!dashboard || !select) {
-    console.error("❌ Dashboard o selector no encontrado");
+  if(!dashboard || !select){
+    console.error("Dashboard o selector no encontrado");
     return;
   }
 
-  const tables = dashboard.querySelectorAll("table");
+  const originalValue = select.value;
 
-  const mesocycles = Array.from(select.options);
+  // función para esperar al render
+  function waitRender(){
+    return new Promise(resolve => requestAnimationFrame(resolve));
+  }
 
-  // =========================
+  // ======================
   // HOJA GENERAL
-  // =========================
+  // ======================
 
   select.value = "";
   select.dispatchEvent(new Event("change"));
 
-  await new Promise(r => setTimeout(r, 600));
+  await waitRender();
+  await waitRender();
 
   const generalSheet = workbook.addWorksheet("Todos los Mesociclos");
 
-  fillSheetWithDashboardData(generalSheet, dashboard);
+  fillSheet(generalSheet, dashboard);
 
-  // =========================
+  // ======================
   // HOJAS POR MESOCICLO
-  // =========================
+  // ======================
 
-  for (const mes of mesocycles) {
+  const options = Array.from(select.options);
 
-    if (!mes.value) continue;
+  for(const opt of options){
 
-    select.value = mes.value;
+    if(!opt.value) continue;
+
+    select.value = opt.value;
+
     select.dispatchEvent(new Event("change"));
 
-    // esperar actualización del dashboard
-    await new Promise(r => setTimeout(r, 600));
+    await waitRender();
+    await waitRender();
 
-    const sheetName = sanitizeSheetName(mes.text);
+    const sheet = workbook.addWorksheet(cleanName(opt.text));
 
-    const sheet = workbook.addWorksheet(sheetName);
-
-    fillSheetWithDashboardData(sheet, dashboard);
+    fillSheet(sheet, dashboard);
 
   }
 
-  // volver a general
-  select.value = "";
+  // restaurar selector
+  select.value = originalValue;
   select.dispatchEvent(new Event("change"));
 
-  // =========================
+  // ======================
   // DESCARGAR
-  // =========================
+  // ======================
 
   const buffer = await workbook.xlsx.writeBuffer();
 
@@ -4143,12 +4148,48 @@ async function exportAllMesocyclesExcel() {
   a.click();
 
   URL.revokeObjectURL(url);
-
-  console.log("✅ Excel generado correctamente");
 }
 
+function fillSheet(sheet, dashboard){
 
+  const volumen = document.getElementById("kpi-volume")?.innerText || "";
+  const prs = document.getElementById("kpi-prs")?.innerText || "";
+  const sesiones = document.getElementById("kpi-sessions")?.innerText || "";
 
+  sheet.addRow(["Volumen total", volumen]);
+  sheet.addRow(["PRs", prs]);
+  sheet.addRow(["Sesiones", sesiones]);
+  sheet.addRow([]);
+
+  const tables = dashboard.querySelectorAll("table");
+
+  tables.forEach((table,i)=>{
+
+    const title = table.previousElementSibling?.innerText || `Tabla ${i+1}`;
+
+    sheet.addRow([title]).font = {bold:true};
+
+    const rows = table.querySelectorAll("tr");
+
+    rows.forEach(row=>{
+
+      const cols = row.querySelectorAll("td, th");
+
+      const data = Array.from(cols).map(c=>c.innerText);
+
+      sheet.addRow(data);
+
+    });
+
+    sheet.addRow([]);
+
+  });
+
+}
+
+function cleanName(name){
+  return name.replace(/[\\/?*[\]:]/g,"").slice(0,31);
+}
 function fillSheetWithDashboardData(sheet, dashboard){
 
   const volumen = document.getElementById("kpi-volume")?.innerText || "N/A";
