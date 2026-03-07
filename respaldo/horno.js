@@ -3521,6 +3521,13 @@ function setupExportButtons() {
      });
    }
 
+   if (exportAllMesocyclesBtn) {
+        exportAllMesocyclesBtn.addEventListener("click", async () => {
+          console.log("📊 Exportando todos los mesociclos");
+      
+          await exportAllMesocyclesExcel();
+        });
+      }
 
   if (exportHistoryBtn) {
     exportHistoryBtn.addEventListener('click', () => {
@@ -4050,6 +4057,84 @@ async function exportDashboardToPDF() {
 
 }
 
+async function exportAllMesocyclesExcel(){
+
+  try{
+
+    const { data: mesocycles, error } = await supabase
+      .from("mesocycles")
+      .select("id,name")
+      .order("created_at");
+
+    if(error){
+      console.error(error);
+      return;
+    }
+
+    const workbook = new ExcelJS.Workbook();
+
+    for(const meso of mesocycles){
+
+      const sheetName = sanitizeSheetName(meso.name);
+
+      const sheet = workbook.addWorksheet(sheetName);
+
+      sheet.columns = [
+        { header:"Fecha", width:15 },
+        { header:"Semana", width:10 },
+        { header:"Ejercicio", width:25 },
+        { header:"Peso", width:10 },
+        { header:"Reps", width:10 },
+        { header:"Sets", width:10 },
+        { header:"Volumen", width:15 }
+      ];
+
+      const { data: records } = await supabase
+        .from("exercise_records")
+        .select("*")
+        .eq("mesocycle_id", meso.id)
+        .order("updated_at");
+
+      records?.forEach(r=>{
+
+        sheet.addRow([
+          new Date(r.updated_at).toLocaleDateString(),
+          r.week_number,
+          r.exercise_name,
+          r.weight,
+          r.reps,
+          r.sets,
+          r.weight * r.reps * r.sets
+        ]);
+
+      });
+
+    }
+
+    const buffer = await workbook.xlsx.writeBuffer();
+
+    const blob = new Blob([buffer],{
+      type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "historial_mesociclos.xlsx";
+    a.click();
+
+    URL.revokeObjectURL(url);
+
+    console.log("✅ Exportación completa de mesociclos");
+
+  }catch(err){
+
+    console.error("❌ Error exportando mesociclos",err);
+
+  }
+
+}
 // Función para mostrar el botón solo si estamos en "Todos"
 function toggleExportAllButton() {
   const label = document.getElementById("stats-mesocycle-label");
