@@ -3505,6 +3505,7 @@ function setupExportButtons() {
   const exportDashboardBtn = document.getElementById('exportDashboard');
   const exportHistoryBtn = document.getElementById('exportHistory');
   const exportDashboardPDFBtn = document.getElementById('exportDashboardpdf');
+   const exportAllMesocyclesBtn = document.getElementById('exportAllMesocyclesBtn');
 
   if (exportDashboardBtn) {
     exportDashboardBtn.addEventListener('click', () => {
@@ -3529,6 +3530,12 @@ function setupExportButtons() {
     exportHistoryBtn.addEventListener('click', () => {
       console.log('📋 Export history click');
       exportHistoryToExcel();
+    });
+  }
+
+   if (exportAllMesocyclesBtn) {
+    exportAllMesocyclesBtn.addEventListener('click', () => {
+      exportAllMesocyclesExcel();
     });
   }
 }
