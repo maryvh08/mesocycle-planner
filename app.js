@@ -4076,17 +4076,44 @@ toggleExportAllButton();
 async function exportAllMesocyclesExcel() {
   const workbook = new ExcelJS.Workbook();
 
-  // 1️⃣ Hoja general (Todos los mesociclos)
+  // =========================
+  // Hoja general "Todos los Mesociclos"
+  // =========================
   const generalSheet = workbook.addWorksheet("Todos los Mesociclos");
   generalSheet.columns = [
     { width: 30 }, { width: 25 }, { width: 25 }
   ];
+
+  // KPIs de la vista general
+  const volumen = document.getElementById("kpi-volume")?.innerText || "N/A";
+  const prs = document.getElementById("kpi-prs")?.innerText || "N/A";
+  const sesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
+
   generalSheet.addRow(["Dashboard General de Todos los Mesociclos"]).font = { bold: true };
+  generalSheet.addRow([]);
+  generalSheet.addRow(["Volumen total", volumen]);
+  generalSheet.addRow(["PRs", prs]);
+  generalSheet.addRow(["Sesiones", sesiones]);
+  generalSheet.addRow([]);
 
-  // Aquí puedes copiar los KPIs y tablas de la vista general
-  // (similar a tu función exportFullDashboardExcel)
+  // Tablas de la vista general
+  const tables = document.querySelectorAll("#analysisDashboard table");
+  tables.forEach((table, index) => {
+    const title = table.previousElementSibling?.innerText || `Tabla ${index + 1}`;
+    generalSheet.addRow([title]).font = { bold: true };
 
-  // 2️⃣ Hoja por cada mesociclo registrado
+    const rows = table.querySelectorAll("tr");
+    rows.forEach(row => {
+      const cols = row.querySelectorAll("td, th");
+      const data = Array.from(cols).map(c => c.innerText);
+      generalSheet.addRow(data);
+    });
+    generalSheet.addRow([]);
+  });
+
+  // =========================
+  // Hojas individuales por mesociclo
+  // =========================
   const select = document.getElementById("stats-mesocycle");
   if (!select) {
     console.error("❌ No se encontró el select de mesociclos");
@@ -4103,13 +4130,32 @@ async function exportAllMesocyclesExcel() {
       { width: 30 }, { width: 25 }, { width: 25 }
     ];
 
+    // KPIs individuales (aquí puedes adaptarlo para filtrar por mesociclo)
     sheet.addRow([`Dashboard Mesociclo: ${mes.text}`]).font = { bold: true };
+    sheet.addRow([]);
+    sheet.addRow(["Volumen total", volumen]); // opcional: cambiar a KPIs filtrados
+    sheet.addRow(["PRs", prs]);
+    sheet.addRow(["Sesiones", sesiones]);
+    sheet.addRow([]);
 
-    // Aquí deberías llenar la hoja con los KPIs y tablas filtradas para ese mesociclo
-    // Puedes reutilizar tu lógica de exportFullDashboardExcel adaptando a esta hoja
+    // Tablas individuales (puedes filtrar rows según mesociclo si tienes los datos)
+    tables.forEach((table, index) => {
+      const title = table.previousElementSibling?.innerText || `Tabla ${index + 1}`;
+      sheet.addRow([title]).font = { bold: true };
+
+      const rows = table.querySelectorAll("tr");
+      rows.forEach(row => {
+        const cols = row.querySelectorAll("td, th");
+        const data = Array.from(cols).map(c => c.innerText);
+        sheet.addRow(data);
+      });
+      sheet.addRow([]);
+    });
   }
 
-  // Descargar archivo
+  // =========================
+  // Descargar Excel
+  // =========================
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   const url = URL.createObjectURL(blob);
