@@ -4077,14 +4077,12 @@ async function exportAllMesocyclesExcel() {
   const workbook = new ExcelJS.Workbook();
 
   // =========================
-  // Hoja general "Todos los Mesociclos"
+  // 1️⃣ Hoja general "Todos los Mesociclos"
   // =========================
   const generalSheet = workbook.addWorksheet("Todos los Mesociclos");
-  generalSheet.columns = [
-    { width: 30 }, { width: 25 }, { width: 25 }
-  ];
+  generalSheet.columns = [{ width: 30 }, { width: 25 }, { width: 25 }];
 
-  // KPIs de la vista general
+  // KPIs generales
   const volumen = document.getElementById("kpi-volume")?.innerText || "N/A";
   const prs = document.getElementById("kpi-prs")?.innerText || "N/A";
   const sesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
@@ -4096,7 +4094,7 @@ async function exportAllMesocyclesExcel() {
   generalSheet.addRow(["Sesiones", sesiones]);
   generalSheet.addRow([]);
 
-  // Tablas de la vista general
+  // Tablas generales
   const tables = document.querySelectorAll("#analysisDashboard table");
   tables.forEach((table, index) => {
     const title = table.previousElementSibling?.innerText || `Tabla ${index + 1}`;
@@ -4112,33 +4110,30 @@ async function exportAllMesocyclesExcel() {
   });
 
   // =========================
-  // Hojas individuales por mesociclo
+  // 2️⃣ Hojas individuales por mesociclo
   // =========================
-  const select = document.getElementById("stats-mesocycle");
+  const select = document.getElementById("mesocycle-select");
   if (!select) {
     console.error("❌ No se encontró el select de mesociclos");
     return;
   }
 
   const mesocycles = Array.from(select.options)
-                           .filter(opt => opt.value.toLowerCase() !== "general");
+    .filter(opt => opt.value.toLowerCase() !== "general" && opt.value.trim() !== "");
 
   for (const mes of mesocycles) {
-    const sheetName = sanitizeSheetName(mes.text);
+    const sheetName = sanitizeSheetName(mes.text) || `Mesociclo_${mes.value}`;
     const sheet = workbook.addWorksheet(sheetName);
-    sheet.columns = [
-      { width: 30 }, { width: 25 }, { width: 25 }
-    ];
+    sheet.columns = [{ width: 30 }, { width: 25 }, { width: 25 }];
 
-    // KPIs individuales (aquí puedes adaptarlo para filtrar por mesociclo)
     sheet.addRow([`Dashboard Mesociclo: ${mes.text}`]).font = { bold: true };
     sheet.addRow([]);
-    sheet.addRow(["Volumen total", volumen]); // opcional: cambiar a KPIs filtrados
+    // Actualmente usamos los mismos KPIs; si quieres filtrar por mesociclo, hazlo aquí
+    sheet.addRow(["Volumen total", volumen]);
     sheet.addRow(["PRs", prs]);
     sheet.addRow(["Sesiones", sesiones]);
     sheet.addRow([]);
 
-    // Tablas individuales (puedes filtrar rows según mesociclo si tienes los datos)
     tables.forEach((table, index) => {
       const title = table.previousElementSibling?.innerText || `Tabla ${index + 1}`;
       sheet.addRow([title]).font = { bold: true };
@@ -4154,7 +4149,7 @@ async function exportAllMesocyclesExcel() {
   }
 
   // =========================
-  // Descargar Excel
+  // 3️⃣ Descargar Excel
   // =========================
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
