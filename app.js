@@ -4073,127 +4073,67 @@ async function exportAllMesocyclesExcel() {
 
   const workbook = new ExcelJS.Workbook();
 
-  // =========================
-  // Obtener dashboard
-  // =========================
   const dashboard = document.getElementById("analysisDashboard");
-  if (!dashboard) {
-    console.error("❌ Dashboard no encontrado");
+  const select = document.getElementById("stats-mesocycle");
+
+  if (!dashboard || !select) {
+    console.error("❌ Dashboard o selector no encontrado");
     return;
   }
-
-  // KPIs
-  const kpiVolumen = document.getElementById("kpi-volume")?.innerText || "N/A";
-  const kpiPRs = document.getElementById("kpi-prs")?.innerText || "N/A";
-  const kpiSesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
 
   const tables = dashboard.querySelectorAll("table");
 
-  // ⚠️ ID CORRECTO DEL SELECT
-  const select = document.getElementById("stats-mesocycle");
-
-  if (!select) {
-    console.error("❌ No se encontró el select stats-mesocycle");
-    return;
-  }
-
-  const mesocycles = Array.from(select.options)
-    .filter(opt => opt.value !== "");
+  const mesocycles = Array.from(select.options);
 
   // =========================
   // HOJA GENERAL
   // =========================
+
+  select.value = "";
+  select.dispatchEvent(new Event("change"));
+
+  await new Promise(r => setTimeout(r, 600));
+
   const generalSheet = workbook.addWorksheet("Todos los Mesociclos");
 
-  generalSheet.addRow(["Dashboard General"]).font = { bold: true };
-  generalSheet.addRow([]);
-
-  generalSheet.addRow(["Volumen total", kpiVolumen]);
-  generalSheet.addRow(["PRs", kpiPRs]);
-  generalSheet.addRow(["Sesiones", kpiSesiones]);
-  generalSheet.addRow([]);
-
-  tables.forEach((table, index) => {
-
-    const title = table.previousElementSibling?.innerText || `Tabla ${index+1}`;
-
-    generalSheet.addRow([title]).font = { bold: true };
-
-    const rows = table.querySelectorAll("tr");
-
-    rows.forEach(row => {
-      const cols = row.querySelectorAll("td, th");
-      const data = Array.from(cols).map(c => c.innerText);
-      generalSheet.addRow(data);
-    });
-
-    generalSheet.addRow([]);
-  });
+  fillSheetWithDashboardData(generalSheet, dashboard);
 
   // =========================
   // HOJAS POR MESOCICLO
   // =========================
+
   for (const mes of mesocycles) {
 
-    // saltar la opción "todos"
     if (!mes.value) continue;
 
-    // cambiar dashboard al mesociclo
     select.value = mes.value;
     select.dispatchEvent(new Event("change"));
 
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // esperar actualización del dashboard
+    await new Promise(r => setTimeout(r, 600));
 
     const sheetName = sanitizeSheetName(mes.text);
 
     const sheet = workbook.addWorksheet(sheetName);
 
-    const volumen = document.getElementById("kpi-volume")?.innerText || "N/A";
-    const prs = document.getElementById("kpi-prs")?.innerText || "N/A";
-    const sesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
-
-    sheet.addRow([`Dashboard Mesociclo: ${mes.text}`]).font = { bold: true };
-    sheet.addRow([]);
-
-    sheet.addRow(["Volumen total", volumen]);
-    sheet.addRow(["PRs", prs]);
-    sheet.addRow(["Sesiones", sesiones]);
-    sheet.addRow([]);
-
-    const tablesMes = dashboard.querySelectorAll("table");
-
-    tablesMes.forEach((table, index) => {
-
-      const title = table.previousElementSibling?.innerText || `Tabla ${index+1}`;
-
-      sheet.addRow([title]).font = { bold: true };
-
-      const rows = table.querySelectorAll("tr");
-
-      rows.forEach(row => {
-        const cols = row.querySelectorAll("td, th");
-        const data = Array.from(cols).map(c => c.innerText);
-        sheet.addRow(data);
-      });
-
-      sheet.addRow([]);
-
-    });
+    fillSheetWithDashboardData(sheet, dashboard);
 
   }
 
-  // volver a "todos"
+  // volver a general
   select.value = "";
   select.dispatchEvent(new Event("change"));
 
   // =========================
   // DESCARGAR
   // =========================
+
   const buffer = await workbook.xlsx.writeBuffer();
 
-  const blob = new Blob([buffer], {
-    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-  });
+  const blob = new Blob(
+    [buffer],
+    {type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
+  );
 
   const url = URL.createObjectURL(blob);
 
@@ -4205,8 +4145,43 @@ async function exportAllMesocyclesExcel() {
   URL.revokeObjectURL(url);
 
   console.log("✅ Excel generado correctamente");
+}
+
+
+
+function fillSheetWithDashboardData(sheet, dashboard){
+
+  const volumen = document.getElementById("kpi-volume")?.innerText || "N/A";
+  const prs = document.getElementById("kpi-prs")?.innerText || "N/A";
+  const sesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
+
+  sheet.addRow(["Volumen total", volumen]);
+  sheet.addRow(["PRs", prs]);
+  sheet.addRow(["Sesiones", sesiones]);
+  sheet.addRow([]);
+
+  const tables = dashboard.querySelectorAll("table");
+
+  tables.forEach((table, index)=>{
+
+    const title = table.previousElementSibling?.innerText || `Tabla ${index+1}`;
+
+    sheet.addRow([title]).font = {bold:true};
+
+    const rows = table.querySelectorAll("tr");
+
+    rows.forEach(row=>{
+      const cols = row.querySelectorAll("td, th");
+      const data = Array.from(cols).map(c=>c.innerText);
+      sheet.addRow(data);
+    });
+
+    sheet.addRow([]);
+
+  });
 
 }
+
 
 function sanitizeSheetName(name){
   return name.replace(/[\\/?*[\]:]/g,"").slice(0,31);
