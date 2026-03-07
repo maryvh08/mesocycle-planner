@@ -3521,6 +3521,15 @@ function setupExportButtons() {
      });
    }
 
+   if (exportAllMesocyclesBtn) {
+     exportAllMesocyclesBtn.addEventListener("click", async () => {
+   
+       console.log("📊 Exportando todos los mesociclos");
+   
+       await exportAllMesocyclesExcel();
+   
+     });
+   }
 
   if (exportHistoryBtn) {
     exportHistoryBtn.addEventListener('click', () => {
