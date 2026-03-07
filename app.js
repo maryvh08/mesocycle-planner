@@ -3497,10 +3497,6 @@ async function exportHistoryToExcel() {
   XLSX.writeFile(wb, 'historial_entrenamiento.xlsx');
 }
 
-function sanitizeSheetName(name) {
-  return name.replace(/[\\/?*[\]:]/g, "").slice(0, 31);
-}
-
 function setupExportButtons() {
   const exportDashboardBtn = document.getElementById('exportDashboard');
   const exportHistoryBtn = document.getElementById('exportHistory');
