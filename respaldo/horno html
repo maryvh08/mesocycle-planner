@@ -273,10 +273,8 @@
               <div class="modal-card">
                 <h4 id="modal-title"></h4>
                 <canvas id="mini-chart"></canvas>
-                <button id="close-modal-btn">Cerrar</button>
               </div>
             </div>
-      
             <!-- ===== VOLUMEN POR EJERCICIO ===== -->
             <div class="analysis-block">
               <h3>Volumen por ejercicio (peso × reps)</h3>
@@ -433,7 +431,10 @@
 <!-- JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <script type="module" src="app.js"></script>
 
 </body>
