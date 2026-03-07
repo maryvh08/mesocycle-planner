@@ -4070,10 +4070,11 @@ function toggleExportAllButton() {
 toggleExportAllButton();
 
 async function exportAllMesocyclesExcel() {
+
   const workbook = new ExcelJS.Workbook();
 
   // =========================
-  // Obtener elementos de la dashboard
+  // Obtener dashboard
   // =========================
   const dashboard = document.getElementById("analysisDashboard");
   if (!dashboard) {
@@ -4081,108 +4082,134 @@ async function exportAllMesocyclesExcel() {
     return;
   }
 
+  // KPIs
   const kpiVolumen = document.getElementById("kpi-volume")?.innerText || "N/A";
   const kpiPRs = document.getElementById("kpi-prs")?.innerText || "N/A";
   const kpiSesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
 
   const tables = dashboard.querySelectorAll("table");
-  const select = document.getElementById("mesocycle-select");
+
+  // ⚠️ ID CORRECTO DEL SELECT
+  const select = document.getElementById("stats-mesocycle");
+
   if (!select) {
-    console.error("❌ No se encontró el select de mesociclos");
+    console.error("❌ No se encontró el select stats-mesocycle");
     return;
   }
 
   const mesocycles = Array.from(select.options)
-    .filter(opt => opt.value.toLowerCase() !== "general" && opt.value.trim() !== "");
+    .filter(opt => opt.value !== "");
 
   // =========================
-  // 1️⃣ Hoja general "Todos los Mesociclos"
+  // HOJA GENERAL
   // =========================
   const generalSheet = workbook.addWorksheet("Todos los Mesociclos");
-  generalSheet.columns = [{ width: 30 }, { width: 25 }, { width: 25 }];
 
-  generalSheet.addRow(["Dashboard General de Todos los Mesociclos"]).font = { bold: true };
+  generalSheet.addRow(["Dashboard General"]).font = { bold: true };
   generalSheet.addRow([]);
+
   generalSheet.addRow(["Volumen total", kpiVolumen]);
   generalSheet.addRow(["PRs", kpiPRs]);
   generalSheet.addRow(["Sesiones", kpiSesiones]);
   generalSheet.addRow([]);
 
   tables.forEach((table, index) => {
-    const title = table.previousElementSibling?.innerText || `Tabla ${index + 1}`;
+
+    const title = table.previousElementSibling?.innerText || `Tabla ${index+1}`;
+
     generalSheet.addRow([title]).font = { bold: true };
 
     const rows = table.querySelectorAll("tr");
+
     rows.forEach(row => {
       const cols = row.querySelectorAll("td, th");
       const data = Array.from(cols).map(c => c.innerText);
       generalSheet.addRow(data);
     });
+
     generalSheet.addRow([]);
   });
 
   // =========================
-  // 2️⃣ Hojas individuales por mesociclo
+  // HOJAS POR MESOCICLO
   // =========================
   for (const mes of mesocycles) {
-    const sheetName = sanitizeSheetName(mes.text) || `Mesociclo_${mes.value}`;
+
+    // saltar la opción "todos"
+    if (!mes.value) continue;
+
+    // cambiar dashboard al mesociclo
+    select.value = mes.value;
+    select.dispatchEvent(new Event("change"));
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const sheetName = sanitizeSheetName(mes.text);
+
     const sheet = workbook.addWorksheet(sheetName);
-    sheet.columns = [{ width: 30 }, { width: 25 }, { width: 25 }];
+
+    const volumen = document.getElementById("kpi-volume")?.innerText || "N/A";
+    const prs = document.getElementById("kpi-prs")?.innerText || "N/A";
+    const sesiones = document.getElementById("kpi-sessions")?.innerText || "N/A";
 
     sheet.addRow([`Dashboard Mesociclo: ${mes.text}`]).font = { bold: true };
     sheet.addRow([]);
 
-    // KPIs filtrados por mesociclo
-    // Aquí suponemos que tienes en tu HTML algún atributo para filtrar, por ejemplo:
-    // <div id="kpi-volume" data-mesocycle="Mesociclo 1">...</div>
-    // Si no, usamos los mismos valores generales.
-    const volumenFiltered = document.querySelector(`#kpi-volume[data-mesocycle="${mes.value}"]`)?.innerText || kpiVolumen;
-    const prsFiltered = document.querySelector(`#kpi-prs[data-mesocycle="${mes.value}"]`)?.innerText || kpiPRs;
-    const sesionesFiltered = document.querySelector(`#kpi-sessions[data-mesocycle="${mes.value}"]`)?.innerText || kpiSesiones;
-
-    sheet.addRow(["Volumen total", volumenFiltered]);
-    sheet.addRow(["PRs", prsFiltered]);
-    sheet.addRow(["Sesiones", sesionesFiltered]);
+    sheet.addRow(["Volumen total", volumen]);
+    sheet.addRow(["PRs", prs]);
+    sheet.addRow(["Sesiones", sesiones]);
     sheet.addRow([]);
 
-    // Tablas filtradas por mesociclo
-    tables.forEach((table, index) => {
-      const title = table.previousElementSibling?.innerText || `Tabla ${index + 1}`;
+    const tablesMes = dashboard.querySelectorAll("table");
+
+    tablesMes.forEach((table, index) => {
+
+      const title = table.previousElementSibling?.innerText || `Tabla ${index+1}`;
+
       sheet.addRow([title]).font = { bold: true };
 
       const rows = table.querySelectorAll("tr");
+
       rows.forEach(row => {
         const cols = row.querySelectorAll("td, th");
-        const data = Array.from(cols)
-          .map(c => {
-            // Filtrar por mesociclo si la columna tiene ese valor
-            if (c.dataset.mesocycle && c.dataset.mesocycle !== mes.value) return "";
-            return c.innerText;
-          });
+        const data = Array.from(cols).map(c => c.innerText);
         sheet.addRow(data);
       });
+
       sheet.addRow([]);
+
     });
+
   }
 
+  // volver a "todos"
+  select.value = "";
+  select.dispatchEvent(new Event("change"));
+
   // =========================
-  // 3️⃣ Descargar Excel
+  // DESCARGAR
   // =========================
   const buffer = await workbook.xlsx.writeBuffer();
-  const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  });
+
   const url = URL.createObjectURL(blob);
+
   const a = document.createElement("a");
   a.href = url;
-  a.download = `dashboard_todos_mesociclos.xlsx`;
+  a.download = "dashboard_mesociclos.xlsx";
   a.click();
+
   URL.revokeObjectURL(url);
 
-  console.log("✅ Excel con todos los mesociclos generado");
+  console.log("✅ Excel generado correctamente");
+
 }
 
-// Limpiar nombres inválidos de hoja
-function sanitizeSheetName(name) {
-  return name.replace(/[\\/?*[\]:]/g, "").slice(0, 31);
+function sanitizeSheetName(name){
+  return name.replace(/[\\/?*[\]:]/g,"").slice(0,31);
 }
 
 function updateExportButtonsUI() {
