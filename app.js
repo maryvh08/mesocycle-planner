@@ -4351,25 +4351,30 @@ function renderExerciseLibrary(data) {
 
 }
 
-function renderExerciseLibrary(data) {
+function populateExerciseFilters(data) {
 
-  const tbody = document.querySelector("#exerciseLibraryTable tbody");
-  tbody.innerHTML = "";
+  const typeFilter = document.getElementById("exerciseTypeFilter");
+  const subgroupFilter = document.getElementById("exerciseSubgroupFilter");
 
-  data.forEach(ex => {
+  const types = [...new Set(data.map(e => e.type))];
+  const subgroups = [...new Set(data.map(e => e.subgroup))];
 
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${ex.name}</td>
-      <td>${ex.type}</td>
-      <td>${ex.subgroup}</td>
-    `;
-
-    tbody.appendChild(tr);
-
+  types.forEach(t => {
+    const opt = document.createElement("option");
+    opt.value = t;
+    opt.textContent = t;
+    typeFilter.appendChild(opt);
   });
 
+  subgroups.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s;
+    opt.textContent = s;
+    subgroupFilter.appendChild(opt);
+  });
+
+  typeFilter.addEventListener("change", applyExerciseFilters);
+  subgroupFilter.addEventListener("change", applyExerciseFilters);
 }
 
 function applyExerciseFilters() {
