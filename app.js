@@ -4309,6 +4309,87 @@ function calculateSetVolume(record) {
 }
 
 // =====================
+// LIBRERIA
+// =====================
+
+async function loadExerciseLibrary() {
+
+  const { data, error } = await supabase
+    .from("exercises")
+    .select("name,type,subgroup")
+    .order("name");
+
+  if (error) {
+    console.error("Error cargando ejercicios", error);
+    return;
+  }
+
+  window.exerciseLibraryData = data;
+
+  renderExerciseLibrary(data);
+  populateExerciseFilters(data);
+}
+
+function renderExerciseLibrary(data) {
+
+  const tbody = document.querySelector("#exerciseLibraryTable tbody");
+  tbody.innerHTML = "";
+
+  data.forEach(ex => {
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${ex.name}</td>
+      <td>${ex.type}</td>
+      <td>${ex.subgroup}</td>
+    `;
+
+    tbody.appendChild(tr);
+
+  });
+
+}
+
+function renderExerciseLibrary(data) {
+
+  const tbody = document.querySelector("#exerciseLibraryTable tbody");
+  tbody.innerHTML = "";
+
+  data.forEach(ex => {
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${ex.name}</td>
+      <td>${ex.type}</td>
+      <td>${ex.subgroup}</td>
+    `;
+
+    tbody.appendChild(tr);
+
+  });
+
+}
+
+function applyExerciseFilters() {
+
+  const type = document.getElementById("exerciseTypeFilter").value;
+  const subgroup = document.getElementById("exerciseSubgroupFilter").value;
+
+  let filtered = window.exerciseLibraryData;
+
+  if (type) {
+    filtered = filtered.filter(e => e.type === type);
+  }
+
+  if (subgroup) {
+    filtered = filtered.filter(e => e.subgroup === subgroup);
+  }
+
+  renderExerciseLibrary(filtered);
+}
+// =====================
 // LISTENERS
 // =====================
 supabase.auth.onAuthStateChange((_e, session) => {
@@ -4592,3 +4673,5 @@ document.getElementById("stats-mesocycle")?.addEventListener("change", () => {
 exportAllMesocyclesBtn.addEventListener("click", async () => {
   await exportAllMesocyclesExcel();
 });
+
+loadExerciseLibrary();
