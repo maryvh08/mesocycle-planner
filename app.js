@@ -856,6 +856,21 @@ async function renderRegistroEditor(mesocycleId) {
   console.log("✅ RegistroEditor renderizado correctamente");
 }
 
+function enableExerciseSearch() {
+
+  const element = document.getElementById("exerciseSelect");
+
+  if (!element) return;
+
+  new Choices(element, {
+    searchEnabled: true,
+    itemSelectText: "",
+    shouldSort: false,
+    placeholder: true,
+    placeholderValue: "Buscar ejercicio...",
+  });
+
+}
 /* ======================
    TENDENCIAS Y PROGRESO
 ====================== */
@@ -4680,3 +4695,9 @@ exportAllMesocyclesBtn.addEventListener("click", async () => {
 });
 
 loadExerciseLibrary();
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  enableExerciseSearch();
+
+});
