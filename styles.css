@@ -2172,3 +2172,26 @@ h3 {
   font-size: 18px;
 }
 
+/* ================== PLANTILLA TABLA ================== */
+.template-table{
+  width:100%;
+  border-collapse:collapse;
+  margin:20px 0;
+  font-size:14px;
+}
+
+.template-table th{
+  background:#1f2937;
+  color:white;
+  padding:10px;
+  text-align:left;
+}
+
+.template-table td{
+  border:1px solid #ddd;
+  padding:10px;
+}
+
+.template-table tr:nth-child(even){
+  background:#f5f5f5;
+}
