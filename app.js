@@ -3516,8 +3516,6 @@ function setupExportButtons() {
   const exportDashboardBtn = document.getElementById('exportDashboard');
   const exportHistoryBtn = document.getElementById('exportHistory');
   const exportDashboardPDFBtn = document.getElementById('exportDashboardpdf');
-   const exportAllMesocyclesBtn = document.getElementById('exportAllMesocyclesBtn');
-
   if (exportDashboardBtn) {
     exportDashboardBtn.addEventListener('click', () => {
       const analysis = document.getElementById('analysisDashboard');
@@ -3532,16 +3530,6 @@ function setupExportButtons() {
        console.log("🟢 Click PDF detectado");
    
        await exportDashboardToPDF();
-   
-     });
-   }
-
-   if (exportAllMesocyclesBtn) {
-     exportAllMesocyclesBtn.addEventListener("click", async () => {
-   
-       console.log("📊 Exportando todos los mesociclos");
-   
-       await exportAllMesocyclesExcel();
    
      });
    }
@@ -4073,20 +4061,6 @@ async function exportDashboardToPDF() {
   }
 
 }
-
-// Función para mostrar el botón solo si estamos en "Todos"
-function toggleExportAllButton() {
-  const label = document.getElementById("stats-mesocycle-label");
-  const btn = document.getElementById("exportAllMesocyclesBtn");
-  if (!label || !btn) return;
-
-  // Mostrar botón solo si estamos en la vista "Todos"
-  btn.style.display = label.textContent.includes("Todos") ? "inline-block" : "none";
-}
-
-// Llamar al cargar la página y cuando cambie el mesociclo
-toggleExportAllButton();
-
 
 function fillSheetWithDashboardData(sheet, dashboard){
 
@@ -4688,10 +4662,6 @@ document.addEventListener("click", (e) => {
 document.getElementById("stats-mesocycle")?.addEventListener("change", () => {
   updateStatsMesocycleLabel();
   toggleExportAllButton();
-});
-
-exportAllMesocyclesBtn.addEventListener("click", async () => {
-  await exportAllMesocyclesExcel();
 });
 
 loadExerciseLibrary();
