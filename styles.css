@@ -2216,3 +2216,15 @@ h3 {
 .template-table tr:last-child td{
   border-bottom:none;
 }
+
+.exercise-search{
+  margin:15px 0;
+}
+
+.exercise-search input{
+  width:100%;
+  padding:8px 10px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  font-size:14px;
+}
