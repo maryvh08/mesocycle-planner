@@ -4456,6 +4456,36 @@ function setupExerciseSearch() {
   });
 
 }
+
+// =====================
+// NOTAS
+// =====================
+
+const notesArea = document.getElementById("workout-notes");
+const saveNotesBtn = document.getElementById("save-notes");
+const clearNotesBtn = document.getElementById("clear-notes");
+
+/* cargar notas guardadas */
+function loadNotes() {
+  const saved = localStorage.getItem("workout_notes");
+  if (saved) {
+    notesArea.value = saved;
+  }
+}
+
+/* guardar */
+saveNotesBtn.addEventListener("click", () => {
+  localStorage.setItem("workout_notes", notesArea.value);
+});
+
+/* borrar */
+clearNotesBtn.addEventListener("click", () => {
+  notesArea.value = "";
+  localStorage.removeItem("workout_notes");
+});
+
+loadNotes();
+
 // =====================
 // LISTENERS
 // =====================
