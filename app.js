@@ -4878,5 +4878,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-renderExerciseProgressRanking(records);
-renderStagnantExercises(allRecords);
+renderExerciseProgressRanking();
+renderStagnantExercises();
