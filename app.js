@@ -2181,7 +2181,6 @@ function calculateExerciseProgress(records) {
 
 function renderExerciseProgressRanking(records) {
 
-   const records = await fetchExerciseRecords(mesocycleId);
    const data = calculateExerciseProgress(records);
 
   const tbody = document.querySelector("#exerciseProgressTable tbody");
