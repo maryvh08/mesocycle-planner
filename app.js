@@ -2128,6 +2128,11 @@ function mesocycleCoach(a, b) {
 
 function calculateExerciseProgress(records) {
 
+  if (!records || !Array.isArray(records)) {
+    console.warn("⚠️ records no es un array:", records);
+    return [];
+  }
+
   const exercises = {};
 
   records.forEach(r => {
@@ -2137,7 +2142,7 @@ function calculateExerciseProgress(records) {
     const weight = Number(r.weight);
     const reps = Number(r.reps);
 
-    if (!weight || !reps) return;
+    if (!ex || !weight || !reps) return;
 
     const estimated1RM = weight * (1 + reps / 30);
 
@@ -2159,7 +2164,6 @@ function calculateExerciseProgress(records) {
     data.sort((a,b) => a.date - b.date);
 
     const initialPR = data[0].oneRM;
-
     const currentPR = Math.max(...data.map(d => d.oneRM));
 
     const progress = ((currentPR - initialPR) / initialPR) * 100;
@@ -2181,7 +2185,9 @@ function calculateExerciseProgress(records) {
 
 function renderExerciseProgressRanking(records) {
 
-   const data = calculateExerciseProgress(records);
+  if (!records || records.length === 0) return;
+
+  const data = calculateExerciseProgress(records);
 
   const tbody = document.querySelector("#exerciseProgressTable tbody");
 
@@ -2196,8 +2202,8 @@ function renderExerciseProgressRanking(records) {
     tr.innerHTML = `
       <td>${index+1}</td>
       <td>${row.exercise}</td>
-      <td>${row.initialPR.toFixed(1)} kg</td>
-      <td>${row.currentPR.toFixed(1)} kg</td>
+      <td>${row.initialPR.toFixed(1)}</td>
+      <td>${row.currentPR.toFixed(1)}</td>
       <td>${row.progress.toFixed(1)}%</td>
     `;
 
@@ -4878,5 +4884,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-renderExerciseProgressRanking();
+renderExerciseProgressRanking(allRecords);
 renderStagnantExercises();
