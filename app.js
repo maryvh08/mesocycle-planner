@@ -2181,7 +2181,8 @@ function calculateExerciseProgress(records) {
 
 function renderExerciseProgressRanking(records) {
 
-  const data = calculateExerciseProgress(records);
+   const records = await fetchExerciseRecords(mesocycleId);
+   const data = calculateExerciseProgress(records);
 
   const tbody = document.querySelector("#exerciseProgressTable tbody");
 
@@ -2215,6 +2216,98 @@ function overallProgress(exercises) {
   if (ratio >= 0.6) return 'green';
   if (ratio >= 0.35) return 'yellow';
   return 'red';
+}
+
+function detectStagnantExercises(records) {
+
+  const exercises = {};
+
+  records.forEach(r => {
+
+    const ex = r.exercise;
+
+    const weight = Number(r.weight);
+    const reps = Number(r.reps);
+
+    if (!weight || !reps) return;
+
+    const oneRM = weight * (1 + reps / 30);
+
+    if (!exercises[ex]) exercises[ex] = [];
+
+    exercises[ex].push({
+      date: new Date(r.date),
+      oneRM
+    });
+
+  });
+
+  const stagnant = [];
+
+  const now = new Date();
+
+  Object.entries(exercises).forEach(([exercise, data]) => {
+
+    data.sort((a,b) => a.date - b.date);
+
+    let best = 0;
+    let lastPRDate = null;
+
+    data.forEach(d => {
+
+      if (d.oneRM > best) {
+        best = d.oneRM;
+        lastPRDate = d.date;
+      }
+
+    });
+
+    if (!lastPRDate) return;
+
+    const weeks = (now - lastPRDate) / (1000*60*60*24*7);
+
+    if (weeks >= 4) {
+
+      stagnant.push({
+        exercise,
+        lastPRDate,
+        weeks
+      });
+
+    }
+
+  });
+
+  return stagnant;
+
+}
+
+function renderStagnantExercises(records) {
+
+  const data = detectStagnantExercises(records);
+
+  const tbody = document.querySelector("#stagnationTable tbody");
+
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  data.forEach(row => {
+
+    const tr = document.createElement("tr");
+
+    const date = row.lastPRDate.toLocaleDateString();
+
+    tr.innerHTML = `
+      <td>${row.exercise}</td>
+      <td>${date}</td>
+      <td>${row.weeks.toFixed(1)}</td>
+    `;
+
+    tbody.appendChild(tr);
+
+  });
+
 }
 
 function classifyExercise(e) {
@@ -4770,7 +4863,6 @@ document.addEventListener("click", (e) => {
 
 document.getElementById("stats-mesocycle")?.addEventListener("change", () => {
   updateStatsMesocycleLabel();
-  toggleExportAllButton();
 });
 
 loadExerciseLibrary();
@@ -4788,3 +4880,4 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 renderExerciseProgressRanking(records);
+renderStagnantExercises(allRecords);
