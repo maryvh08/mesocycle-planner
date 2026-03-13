@@ -4383,6 +4383,34 @@ function applyExerciseFilters() {
 
   renderExerciseLibrary(filtered);
 }
+
+function setupExerciseSearch() {
+
+  const input = document.getElementById("exerciseSearchInput");
+
+  if (!input) return;
+
+  input.addEventListener("input", () => {
+
+    const search = input.value.toLowerCase();
+
+    const rows = document.querySelectorAll("#exerciseLibraryTable tbody tr");
+
+    rows.forEach(row => {
+
+      const text = row.innerText.toLowerCase();
+
+      if (text.includes(search)) {
+        row.style.display = "";
+      } else {
+        row.style.display = "none";
+      }
+
+    });
+
+  });
+
+}
 // =====================
 // LISTENERS
 // =====================
@@ -4669,5 +4697,11 @@ loadExerciseLibrary();
 document.addEventListener("DOMContentLoaded", () => {
 
   enableExerciseSearch();
+
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  setupExerciseSearch();
 
 });
