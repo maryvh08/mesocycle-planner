@@ -2229,13 +2229,22 @@ h3 {
   font-size:14px;
 }
 
+/* ================== NOTAS ================== */
 .notes-area {
   width: 100%;
   min-height: 150px;
   resize: vertical;
   padding: 10px;
   font-size: 14px;
+
+  background: #ffffff;
+  color: #111;        /* color del texto */
+
   border-radius: 8px;
   border: 1px solid #ccc;
   margin-top: 10px;
+}
+
+.notes-area::placeholder {
+  color: #888;
 }
