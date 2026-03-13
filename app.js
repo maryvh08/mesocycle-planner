@@ -2226,22 +2226,28 @@ function overallProgress(exercises) {
 
 function detectStagnantExercises(records) {
 
+  if (!records || !Array.isArray(records)) {
+    console.warn("⚠️ records inválido en detectStagnantExercises:", records);
+    return [];
+  }
+
   const exercises = {};
 
   records.forEach(r => {
 
-    const ex = r.exercise;
-
+    const exercise = r.exercise;
     const weight = Number(r.weight);
     const reps = Number(r.reps);
 
-    if (!weight || !reps) return;
+    if (!exercise || !weight || !reps) return;
 
     const oneRM = weight * (1 + reps / 30);
 
-    if (!exercises[ex]) exercises[ex] = [];
+    if (!exercises[exercise]) {
+      exercises[exercise] = [];
+    }
 
-    exercises[ex].push({
+    exercises[exercise].push({
       date: new Date(r.date),
       oneRM
     });
@@ -2249,7 +2255,6 @@ function detectStagnantExercises(records) {
   });
 
   const stagnant = [];
-
   const now = new Date();
 
   Object.entries(exercises).forEach(([exercise, data]) => {
@@ -2290,6 +2295,8 @@ function detectStagnantExercises(records) {
 
 function renderStagnantExercises(records) {
 
+  if (!records || records.length === 0) return;
+
   const data = detectStagnantExercises(records);
 
   const tbody = document.querySelector("#stagnationTable tbody");
@@ -2302,11 +2309,9 @@ function renderStagnantExercises(records) {
 
     const tr = document.createElement("tr");
 
-    const date = row.lastPRDate.toLocaleDateString();
-
     tr.innerHTML = `
       <td>${row.exercise}</td>
-      <td>${date}</td>
+      <td>${row.lastPRDate.toLocaleDateString()}</td>
       <td>${row.weeks.toFixed(1)}</td>
     `;
 
@@ -4885,5 +4890,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
+const { data } = await supabase
+  .from("records")
+  .select("*");
+
+window.trainingRecords = data;
+
 renderExerciseProgressRanking(allRecords);
-renderStagnantExercises();
+renderStagnantExercises();renderExerciseProgressRanking(window.trainingRecords);
+renderStagnantExercises(window.trainingRecords);
