@@ -2225,6 +2225,20 @@ function overallProgress(exercises) {
   return 'red';
 }
 
+function getWorkoutRecords() {
+
+  const data = localStorage.getItem("workoutRecords");
+
+  if (!data) return [];
+
+  try {
+    return JSON.parse(data);
+  } catch {
+    return [];
+  }
+
+}
+
 function detectStagnantExercises(records = []) {
 
   if (!Array.isArray(records)) {
