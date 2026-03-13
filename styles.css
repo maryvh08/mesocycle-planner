@@ -2228,3 +2228,14 @@ h3 {
   border:1px solid #ccc;
   font-size:14px;
 }
+
+.notes-area {
+  width: 100%;
+  min-height: 150px;
+  resize: vertical;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+}
