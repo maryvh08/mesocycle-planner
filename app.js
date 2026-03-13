@@ -11,6 +11,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 /* ======================
    ESTADOS
 ====================== */
+const records = getWorkoutRecords() || [];
 let selectedDaysPerWeek = null;
 let editingMesocycleId = null;
 let statsChart = null;
@@ -2224,100 +2225,32 @@ function overallProgress(exercises) {
   return 'red';
 }
 
-function detectStagnantExercises(records) {
+function detectStagnantExercises(records = []) {
 
-  if (!records || !Array.isArray(records)) {
-    console.warn("⚠️ records inválido en detectStagnantExercises:", records);
+  if (!Array.isArray(records)) {
+    console.warn("records no es un array:", records);
     return [];
   }
 
-  const exercises = {};
+  const stagnant = [];
 
   records.forEach(r => {
-
-    const exercise = r.exercise;
-    const weight = Number(r.weight);
-    const reps = Number(r.reps);
-
-    if (!exercise || !weight || !reps) return;
-
-    const oneRM = weight * (1 + reps / 30);
-
-    if (!exercises[exercise]) {
-      exercises[exercise] = [];
-    }
-
-    exercises[exercise].push({
-      date: new Date(r.date),
-      oneRM
-    });
-
-  });
-
-  const stagnant = [];
-  const now = new Date();
-
-  Object.entries(exercises).forEach(([exercise, data]) => {
-
-    data.sort((a,b) => a.date - b.date);
-
-    let best = 0;
-    let lastPRDate = null;
-
-    data.forEach(d => {
-
-      if (d.oneRM > best) {
-        best = d.oneRM;
-        lastPRDate = d.date;
-      }
-
-    });
-
-    if (!lastPRDate) return;
-
-    const weeks = (now - lastPRDate) / (1000*60*60*24*7);
-
-    if (weeks >= 4) {
-
-      stagnant.push({
-        exercise,
-        lastPRDate,
-        weeks
-      });
-
-    }
-
+    // lógica aquí
   });
 
   return stagnant;
-
 }
 
 function renderStagnantExercises(records) {
 
-  if (!records || records.length === 0) return;
+  const data = detectStagnantExercises(records || []);
 
-  const data = detectStagnantExercises(records);
+  const table = document.querySelector("#stagnationTable tbody");
 
-  const tbody = document.querySelector("#stagnationTable tbody");
-
-  if (!tbody) return;
-
-  tbody.innerHTML = "";
-
-  data.forEach(row => {
-
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${row.exercise}</td>
-      <td>${row.lastPRDate.toLocaleDateString()}</td>
-      <td>${row.weeks.toFixed(1)}</td>
-    `;
-
-    tbody.appendChild(tr);
-
-  });
+  if (!data.length) {
+    table.innerHTML = "<tr><td colspan='3'>Sin datos</td></tr>";
+    return;
+  }
 
 }
 
