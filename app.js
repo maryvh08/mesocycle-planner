@@ -16,6 +16,7 @@ let editingMesocycleId = null;
 let statsChart = null;
 let generalStrengthData = null;
 let tutorialsData = [];
+let allRecords = [];
 let swTime = 0;
 let swInterval = null;
 let timerInterval = null;
