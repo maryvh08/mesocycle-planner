@@ -4837,8 +4837,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-const { data } = await supabase
-  .from("records")
+const { data, error } = await supabase
+  .from("exercise_records")
   .select("*");
 
 window.trainingRecords = data;
