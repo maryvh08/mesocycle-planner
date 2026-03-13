@@ -2225,18 +2225,18 @@ function overallProgress(exercises) {
   return 'red';
 }
 
-function getWorkoutRecords() {
+async function getWorkoutRecords() {
 
-  const data = localStorage.getItem("workoutRecords");
+  const { data, error } = await supabase
+    .from("exercise_records")
+    .select("*");
 
-  if (!data) return [];
-
-  try {
-    return JSON.parse(data);
-  } catch {
+  if (error) {
+    console.error(error);
     return [];
   }
 
+  return data;
 }
 
 function detectStagnantExercises(records = []) {
