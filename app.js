@@ -2128,93 +2128,6 @@ function mesocycleCoach(a, b) {
   return 'Ambos mesociclos tuvieron rendimiento similar.';
 }
 
-function calculateExerciseProgress(records) {
-
-  if (!records || !Array.isArray(records)) {
-    console.warn("⚠️ records no es un array:", records);
-    return [];
-  }
-
-  const exercises = {};
-
-  records.forEach(r => {
-
-    const ex = r.exercise;
-
-    const weight = Number(r.weight);
-    const reps = Number(r.reps);
-
-    if (!ex || !weight || !reps) return;
-
-    const estimated1RM = weight * (1 + reps / 30);
-
-    if (!exercises[ex]) {
-      exercises[ex] = [];
-    }
-
-    exercises[ex].push({
-      date: new Date(r.date),
-      oneRM: estimated1RM
-    });
-
-  });
-
-  const results = [];
-
-  Object.entries(exercises).forEach(([exercise, data]) => {
-
-    data.sort((a,b) => a.date - b.date);
-
-    const initialPR = data[0].oneRM;
-    const currentPR = Math.max(...data.map(d => d.oneRM));
-
-    const progress = ((currentPR - initialPR) / initialPR) * 100;
-
-    results.push({
-      exercise,
-      initialPR,
-      currentPR,
-      progress
-    });
-
-  });
-
-  results.sort((a,b) => b.progress - a.progress);
-
-  return results;
-
-}
-
-function renderExerciseProgressRanking(records) {
-
-  if (!records || records.length === 0) return;
-
-  const data = calculateExerciseProgress(records);
-
-  const tbody = document.querySelector("#exerciseProgressTable tbody");
-
-  if (!tbody) return;
-
-  tbody.innerHTML = "";
-
-  data.slice(0,10).forEach((row, index) => {
-
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${index+1}</td>
-      <td>${row.exercise}</td>
-      <td>${row.initialPR.toFixed(1)}</td>
-      <td>${row.currentPR.toFixed(1)}</td>
-      <td>${row.progress.toFixed(1)}%</td>
-    `;
-
-    tbody.appendChild(tr);
-
-  });
-
-}
-
 function overallProgress(exercises) {
   const up = exercises.filter(e => e.trend === 'up').length;
   const total = exercises.length;
@@ -4836,13 +4749,3 @@ document.addEventListener("DOMContentLoaded", () => {
   setupExerciseSearch();
 
 });
-
-const { data, error } = await supabase
-  .from("exercise_records")
-  .select("*");
-
-window.trainingRecords = data;
-
-renderExerciseProgressRanking(allRecords);
-renderStagnantExercises();renderExerciseProgressRanking(window.trainingRecords);
-renderStagnantExercises(window.trainingRecords);
