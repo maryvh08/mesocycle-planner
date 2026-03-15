@@ -444,39 +444,28 @@
           </div>
 
           <div class="card tool-card">
-            <h3>✅ Checklist de sesión</h3>
+            <h3>🔥 Calculadora de calentamiento</h3>
           
-            <div id="session-checklist" class="checklist">
+            <div class="tool-inputs">
+              <input 
+                type="number" 
+                id="target-weight" 
+                placeholder="Peso objetivo (kg)"
+              >
           
-              <label class="check-item">
-                <input type="checkbox" value="warmup">
-                Calentamiento general
-              </label>
-          
-              <label class="check-item">
-                <input type="checkbox" value="mobility">
-                Movilidad
-              </label>
-          
-              <label class="check-item">
-                <input type="checkbox" value="main">
-                Ejercicio principal
-              </label>
-          
-              <label class="check-item">
-                <input type="checkbox" value="accessories">
-                Accesorios
-              </label>
-          
-              <label class="check-item">
-                <input type="checkbox" value="stretch">
-                Estiramiento
-              </label>
-          
+              <input 
+                type="number" 
+                id="target-reps" 
+                placeholder="Reps objetivo"
+              >
             </div>
           
             <div class="tool-actions">
-              <button id="reset-checklist">Reiniciar</button>
+              <button id="calculate-warmup">Generar calentamiento</button>
+            </div>
+          
+            <div id="warmup-result" class="warmup-list">
+              <p class="placeholder">Aún no hay cálculo</p>
             </div>
           </div>
         </div>
