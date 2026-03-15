@@ -4514,52 +4514,31 @@ convertBtn.addEventListener("click", () => {
 });
 
 // =====================
-// WARM UP
+// RPE/RIR
 // =====================
-const targetWeightInput = document.getElementById("target-weight");
-const targetRepsInput = document.getElementById("target-reps");
-const warmupBtn = document.getElementById("calculate-warmup");
-const warmupResult = document.getElementById("warmup-result");
+const rpeWeight = document.getElementById("rpe-weight");
+const rpeReps = document.getElementById("rpe-reps");
+const rirInput = document.getElementById("rir-input");
+const rpeBtn = document.getElementById("calculate-rpe");
+const rpeResult = document.getElementById("rpe-result");
 
-warmupBtn.addEventListener("click", () => {
+rpeBtn.addEventListener("click", () => {
 
-  const weight = parseFloat(targetWeightInput.value);
-  const reps = parseInt(targetRepsInput.value);
+  const weight = parseFloat(rpeWeight.value);
+  const reps = parseInt(rpeReps.value);
+  const rir = parseInt(rirInput.value);
 
-  if (!weight || !reps) {
-    warmupResult.innerHTML = "<p>Ingresa peso y reps</p>";
+  if (!weight || !reps || rir === "") {
+    rpeResult.textContent = "Resultado: Ingresa datos válidos";
     return;
   }
 
-  const warmups = [
-    { percent: 0.40, reps: 8 },
-    { percent: 0.60, reps: 5 },
-    { percent: 0.75, reps: 3 },
-    { percent: 0.85, reps: 1 }
-  ];
+  const totalReps = reps + rir;
 
-  warmupResult.innerHTML = "";
+  const estimated1RM = weight * (1 + totalReps / 30);
 
-  warmups.forEach(set => {
-
-    const warmWeight = Math.round(weight * set.percent);
-
-    const div = document.createElement("div");
-    div.className = "warmup-set";
-
-    div.textContent = `${warmWeight} kg × ${set.reps} reps`;
-
-    warmupResult.appendChild(div);
-
-  });
-
-  const topSet = document.createElement("div");
-  topSet.className = "warmup-set";
-
-  topSet.textContent = `🏋️ Serie objetivo: ${weight} kg × ${reps} reps`;
-
-  warmupResult.appendChild(topSet);
-
+  rpeResult.textContent =
+    `1RM estimado: ${estimated1RM.toFixed(1)} kg`;
 });
 
 // =====================
