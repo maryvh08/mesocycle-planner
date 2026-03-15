@@ -2261,17 +2261,3 @@ h3 {
   flex: 1;
   padding: 8px;
 }
-
-/* ================== WARM UP ================== */
-.warmup-list {
-  margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.warmup-set {
-  background: rgba(255,255,255,0.05);
-  padding: 6px 10px;
-  border-radius: 6px;
-}
