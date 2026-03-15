@@ -416,68 +416,70 @@
               <source src="alarm.mp3" type="audio/mpeg">
             </audio>
           </div>
-
-          <div class="card tool-card">
-            <h3>⚖️ Conversor de peso</h3>
-          
-            <div class="tool-inputs">
-              <input 
-                type="number" 
-                id="weight-input" 
-                placeholder="Peso"
-                step="0.1"
-              >
-          
-              <select id="weight-unit">
-                <option value="kg">kg → lb</option>
-                <option value="lb">lb → kg</option>
-              </select>
-            </div>
-          
-            <div id="weight-result" class="tool-display">
-              Resultado: —
-            </div>
-          
-            <div class="tool-actions">
-              <button id="convert-weight">Convertir</button>
-            </div>
-          </div>
-
-          <div class="card tool-card">
-            <h3>📊 Calculadora RPE / RIR</h3>
-          
-            <div class="tool-inputs">
-              <input 
-                type="number" 
-                id="rpe-weight" 
-                placeholder="Peso levantado (kg)"
-              >
-          
-              <input 
-                type="number" 
-                id="rpe-reps" 
-                placeholder="Repeticiones"
-              >
-          
-              <input 
-                type="number" 
-                id="rir-input" 
-                placeholder="RIR (reps en reserva)"
-                min="0"
-                max="5"
-              >
-            </div>
-          
-            <div class="tool-actions">
-              <button id="calculate-rpe">Calcular 1RM estimado</button>
-            </div>
-          
-            <div id="rpe-result" class="tool-display">
-              Resultado: —
-            </div>
-          </div>
         </div>
-      
+        
+        <div class="screen-content tools-grid">
+          <div class="card tool-card">
+              <h3>⚖️ Conversor de peso</h3>
+            
+              <div class="tool-inputs">
+                <input 
+                  type="number" 
+                  id="weight-input" 
+                  placeholder="Peso"
+                  step="0.1"
+                >
+            
+                <select id="weight-unit">
+                  <option value="kg">kg → lb</option>
+                  <option value="lb">lb → kg</option>
+                </select>
+              </div>
+            
+              <div id="weight-result" class="tool-display">
+                Resultado: —
+              </div>
+            
+              <div class="tool-actions">
+                <button id="convert-weight">Convertir</button>
+              </div>
+            </div>
+  
+            <div class="card tool-card">
+              <h3>📊 Calculadora RPE / RIR</h3>
+            
+              <div class="tool-inputs">
+                <input 
+                  type="number" 
+                  id="rpe-weight" 
+                  placeholder="Peso levantado (kg)"
+                >
+            
+                <input 
+                  type="number" 
+                  id="rpe-reps" 
+                  placeholder="Repeticiones"
+                >
+            
+                <input 
+                  type="number" 
+                  id="rir-input" 
+                  placeholder="RIR (reps en reserva)"
+                  min="0"
+                  max="5"
+                >
+              </div>
+            
+              <div class="tool-actions">
+                <button id="calculate-rpe">Calcular 1RM estimado</button>
+              </div>
+            
+              <div id="rpe-result" class="tool-display">
+                Resultado: —
+              </div>
+            </div>
+        </div>
+        
         <div class="card tool-card">
           <h3>📜 Historial de tiempos</h3>
           <div id="time-history" class="time-history">
