@@ -4514,6 +4514,50 @@ convertBtn.addEventListener("click", () => {
 });
 
 // =====================
+// CHECKLIST
+// =====================
+const checklist = document.querySelectorAll("#session-checklist input");
+const resetChecklistBtn = document.getElementById("reset-checklist");
+
+/* cargar estado guardado */
+function loadChecklist() {
+  const saved = JSON.parse(localStorage.getItem("session_checklist")) || [];
+
+  checklist.forEach(item => {
+    item.checked = saved.includes(item.value);
+  });
+}
+
+/* guardar estado */
+checklist.forEach(item => {
+  item.addEventListener("change", () => {
+
+    const checkedItems = [];
+
+    checklist.forEach(i => {
+      if (i.checked) checkedItems.push(i.value);
+    });
+
+    localStorage.setItem(
+      "session_checklist",
+      JSON.stringify(checkedItems)
+    );
+  });
+});
+
+/* reiniciar */
+resetChecklistBtn.addEventListener("click", () => {
+
+  checklist.forEach(item => {
+    item.checked = false;
+  });
+
+  localStorage.removeItem("session_checklist");
+});
+
+loadChecklist();
+
+// =====================
 // LISTENERS
 // =====================
 supabase.auth.onAuthStateChange((_e, session) => {
