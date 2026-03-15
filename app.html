@@ -416,6 +416,32 @@
               <source src="alarm.mp3" type="audio/mpeg">
             </audio>
           </div>
+
+          <div class="card tool-card">
+            <h3>⚖️ Conversor de peso</h3>
+          
+            <div class="tool-inputs">
+              <input 
+                type="number" 
+                id="weight-input" 
+                placeholder="Peso"
+                step="0.1"
+              >
+          
+              <select id="weight-unit">
+                <option value="kg">kg → lb</option>
+                <option value="lb">lb → kg</option>
+              </select>
+            </div>
+          
+            <div id="weight-result" class="tool-display">
+              Resultado: —
+            </div>
+          
+            <div class="tool-actions">
+              <button id="convert-weight">Convertir</button>
+            </div>
+          </div>
       
         </div>
       
@@ -427,32 +453,6 @@
           <button id="clear-history">Borrar historial</button>
         </div>
 
-        <div class="card tool-card">
-          <h3>⚖️ Conversor de peso</h3>
-        
-          <div class="tool-inputs">
-            <input 
-              type="number" 
-              id="weight-input" 
-              placeholder="Peso"
-              step="0.1"
-            >
-        
-            <select id="weight-unit">
-              <option value="kg">kg → lb</option>
-              <option value="lb">lb → kg</option>
-            </select>
-          </div>
-        
-          <div id="weight-result" class="tool-display">
-            Resultado: —
-          </div>
-        
-          <div class="tool-actions">
-            <button id="convert-weight">Convertir</button>
-          </div>
-        </div>
-        
         <div class="card tool-card">
           <h3>📝 Notas de entrenamiento</h3>
         
