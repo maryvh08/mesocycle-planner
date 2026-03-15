@@ -4487,6 +4487,33 @@ clearNotesBtn.addEventListener("click", () => {
 loadNotes();
 
 // =====================
+// CONVERSROR
+// =====================
+const weightInput = document.getElementById("weight-input");
+const weightUnit = document.getElementById("weight-unit");
+const convertBtn = document.getElementById("convert-weight");
+const weightResult = document.getElementById("weight-result");
+
+convertBtn.addEventListener("click", () => {
+  const value = parseFloat(weightInput.value);
+
+  if (isNaN(value)) {
+    weightResult.textContent = "Resultado: Ingresa un peso válido";
+    return;
+  }
+
+  let result;
+
+  if (weightUnit.value === "kg") {
+    result = value * 2.20462;
+    weightResult.textContent = `Resultado: ${result.toFixed(2)} lb`;
+  } else {
+    result = value / 2.20462;
+    weightResult.textContent = `Resultado: ${result.toFixed(2)} kg`;
+  }
+});
+
+// =====================
 // LISTENERS
 // =====================
 supabase.auth.onAuthStateChange((_e, session) => {
