@@ -4514,48 +4514,53 @@ convertBtn.addEventListener("click", () => {
 });
 
 // =====================
-// CHECKLIST
+// WARM UP
 // =====================
-const checklist = document.querySelectorAll("#session-checklist input");
-const resetChecklistBtn = document.getElementById("reset-checklist");
+const targetWeightInput = document.getElementById("target-weight");
+const targetRepsInput = document.getElementById("target-reps");
+const warmupBtn = document.getElementById("calculate-warmup");
+const warmupResult = document.getElementById("warmup-result");
 
-/* cargar estado guardado */
-function loadChecklist() {
-  const saved = JSON.parse(localStorage.getItem("session_checklist")) || [];
+warmupBtn.addEventListener("click", () => {
 
-  checklist.forEach(item => {
-    item.checked = saved.includes(item.value);
+  const weight = parseFloat(targetWeightInput.value);
+  const reps = parseInt(targetRepsInput.value);
+
+  if (!weight || !reps) {
+    warmupResult.innerHTML = "<p>Ingresa peso y reps</p>";
+    return;
+  }
+
+  const warmups = [
+    { percent: 0.40, reps: 8 },
+    { percent: 0.60, reps: 5 },
+    { percent: 0.75, reps: 3 },
+    { percent: 0.85, reps: 1 }
+  ];
+
+  warmupResult.innerHTML = "";
+
+  warmups.forEach(set => {
+
+    const warmWeight = Math.round(weight * set.percent);
+
+    const div = document.createElement("div");
+    div.className = "warmup-set";
+
+    div.textContent = `${warmWeight} kg × ${set.reps} reps`;
+
+    warmupResult.appendChild(div);
+
   });
-}
 
-/* guardar estado */
-checklist.forEach(item => {
-  item.addEventListener("change", () => {
+  const topSet = document.createElement("div");
+  topSet.className = "warmup-set";
 
-    const checkedItems = [];
+  topSet.textContent = `🏋️ Serie objetivo: ${weight} kg × ${reps} reps`;
 
-    checklist.forEach(i => {
-      if (i.checked) checkedItems.push(i.value);
-    });
+  warmupResult.appendChild(topSet);
 
-    localStorage.setItem(
-      "session_checklist",
-      JSON.stringify(checkedItems)
-    );
-  });
 });
-
-/* reiniciar */
-resetChecklistBtn.addEventListener("click", () => {
-
-  checklist.forEach(item => {
-    item.checked = false;
-  });
-
-  localStorage.removeItem("session_checklist");
-});
-
-loadChecklist();
 
 // =====================
 // LISTENERS
