@@ -2261,3 +2261,7 @@ h3 {
   flex: 1;
   padding: 8px;
 }
+
+.result-small {
+  font-size: 14px;
+}
