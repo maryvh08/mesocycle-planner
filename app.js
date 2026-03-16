@@ -4265,8 +4265,8 @@ function openTutorial(name, tutorial) {
   document.getElementById('tutorial-video').src = embedUrl;
   document.getElementById('tutorial-cues').innerHTML =
     `<strong>Consejo:</strong> ${tutorial.cues}`;
-      <strong>Nivel:</strong> ${exercise.level || 'No especificado'}
-      <strong>Errores comunes:</strong> ${exercise.common_errors || 'No disponibles'}
+      `<strong>Nivel:</strong> ${exercise.level || 'No especificado'}`;
+      `<strong>Errores comunes:</strong> ${exercise.common_errors || 'No disponibles'}`;
 
   document.getElementById('tutorial-modal').classList.remove('hidden');
 }
