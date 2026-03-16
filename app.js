@@ -4350,7 +4350,7 @@ async function loadExerciseLibrary() {
 
   const { data, error } = await supabase
     .from("exercises")
-    .select("name,type,subgroup")
+    .select("name,type,subgroup,muscle_principal,equipo")
     .order("name");
 
   if (error) {
@@ -4377,6 +4377,8 @@ function renderExerciseLibrary(data) {
       <td>${ex.name}</td>
       <td>${ex.type}</td>
       <td>${ex.subgroup}</td>
+      <td>${ex.muscle_principal}</td>
+      <td>${ex.equipo}</td>
     `;
 
     tbody.appendChild(tr);
