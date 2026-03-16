@@ -4542,6 +4542,37 @@ rpeBtn.addEventListener("click", () => {
 });
 
 // =====================
+// CALCULADORA RITMO
+// =====================
+const paceMinutes = document.getElementById("pace-minutes");
+const paceSeconds = document.getElementById("pace-seconds");
+const paceSets = document.getElementById("pace-sets");
+const paceBtn = document.getElementById("calculate-pace");
+const paceResult = document.getElementById("pace-result");
+
+paceBtn.addEventListener("click", () => {
+
+  const minutes = parseInt(paceMinutes.value) || 0;
+  const seconds = parseInt(paceSeconds.value) || 0;
+  const sets = parseInt(paceSets.value);
+
+  if (!sets || sets <= 0) {
+    paceResult.textContent = "Resultado: Ingresa sets válidos";
+    return;
+  }
+
+  const totalSeconds = minutes * 60 + seconds;
+
+  const secondsPerSet = totalSeconds / sets;
+
+  const min = Math.floor(secondsPerSet / 60);
+  const sec = Math.round(secondsPerSet % 60);
+
+  paceResult.textContent =
+    `Ritmo promedio: ${min} min ${sec} s por set`;
+});
+
+// =====================
 // LISTENERS
 // =====================
 supabase.auth.onAuthStateChange((_e, session) => {
