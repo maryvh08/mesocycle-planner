@@ -4262,7 +4262,7 @@ function openTutorial(name, tutorial, exercise = {}) {
   }
 
   // Nivel y errores comunes
-  const nivel = exercise.nivel || 'No especificado';
+  const nivel = exercise.level || 'No especificado';
   const errors = exercise.common_errors || 'No disponibles';
 
   document.getElementById('tutorial-title').textContent = name;
