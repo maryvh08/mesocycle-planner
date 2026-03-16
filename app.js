@@ -4234,7 +4234,7 @@ function renderTutorials(exercises){
         <button class="fav-btn ${favorite?'active':''}" title="Favorito"><span class="star">★</span></button>
         <button class="play-btn">▶ Ver</button>
       </div>`;
-    card.querySelector('.play-btn').onclick = ()=>openTutorial(ex.name, ex.exercise_tutorials[0]);
+    card.querySelector('.play-btn').onclick = () => openTutorial(ex.name, ex.exercise_tutorials[0], ex);
     card.querySelector('.fav-btn').onclick = (e)=>{
       e.stopPropagation();
       toggleFavorite(ex.id);
@@ -4251,22 +4251,27 @@ function handleTutorialSelect(e) {
   const exercise = tutorialsData.find(ex => ex.id === exerciseId);
   if (!exercise || !exercise.exercise_tutorials.length) return;
 
-  openTutorial(exercise.name, exercise.exercise_tutorials[0]);
+  openTutorial(exercise.name, exercise.exercise_tutorials[0], exercise);
 }
 
-function openTutorial(name, tutorial, exercises) {
+function openTutorial(name, tutorial, exercise = {}) {
   const embedUrl = toEmbedUrl(tutorial.video_url);
   if (!embedUrl) {
     alert('URL de video inválida');
     return;
   }
 
+  // Nivel y errores comunes
+  const nivel = exercise.nivel || 'No especificado';
+  const errors = exercise.common_errors || 'No disponibles';
+
   document.getElementById('tutorial-title').textContent = name;
   document.getElementById('tutorial-video').src = embedUrl;
-  document.getElementById('tutorial-cues').innerHTML =
-    `<strong>Consejo:</strong> ${tutorial.cues}`;
-      `<strong>Nivel:</strong> ${exercises.level || 'No especificado'}`;
-      `<strong>Errores comunes:</strong> ${exercises.common_errors || 'No disponibles'}`;
+  document.getElementById('tutorial-cues').innerHTML = `
+    <strong>Consejo:</strong> ${tutorial.cues}<br>
+    <strong>Nivel:</strong> ${nivel}<br>
+    <strong>Errores comunes:</strong> ${errors}
+  `;
 
   document.getElementById('tutorial-modal').classList.remove('hidden');
 }
