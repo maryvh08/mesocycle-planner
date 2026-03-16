@@ -4254,7 +4254,7 @@ function handleTutorialSelect(e) {
   openTutorial(exercise.name, exercise.exercise_tutorials[0]);
 }
 
-function openTutorial(name, tutorial) {
+function openTutorial(name, tutorial, exercises) {
   const embedUrl = toEmbedUrl(tutorial.video_url);
   if (!embedUrl) {
     alert('URL de video inválida');
