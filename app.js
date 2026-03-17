@@ -4261,7 +4261,6 @@ function openTutorial(name, tutorial, exercise = {}) {
     return;
   }
 
-  // Nivel y errores comunes
   const nivel = exercise.level || 'No especificado';
   const errors = exercise.common_errors || 'No disponibles';
 
@@ -4269,8 +4268,8 @@ function openTutorial(name, tutorial, exercise = {}) {
   document.getElementById('tutorial-video').src = embedUrl;
   document.getElementById('tutorial-cues').innerHTML = `
     <strong>Consejo:</strong> ${tutorial.cues}<br>
-    <strong>Nivel:</strong> ${nivel}<br>
     <strong>Errores comunes:</strong> ${errors}
+    <strong>Nivel:</strong> ${nivel}<br>
   `;
 
   document.getElementById('tutorial-modal').classList.remove('hidden');
