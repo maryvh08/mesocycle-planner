@@ -2266,3 +2266,25 @@ h3 {
 .result-small {
   font-size: 18px;
 }
+
+/* ================== RESULTADOS ================== */
+.results-box {
+  border: 1px solid #ccc;
+  max-height: 150px;
+  overflow-y: auto;
+  background: white;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  z-index: 999;
+}
+
+.result-item {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.result-item:hover {
+  background-color: #eee;
+}
