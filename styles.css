@@ -2156,8 +2156,10 @@ h3 {
   overflow-y: auto;
   background: white;
   position: absolute;
-  width: 200px;
-  z-index: 10;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  z-index: 999;
 }
 
 .result-item {
@@ -2168,6 +2170,7 @@ h3 {
 .result-item:hover {
   background-color: #eee;
 }
+
 /* ================== PASSWORD ================== */
 
 .password-wrapper {
