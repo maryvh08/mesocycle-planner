@@ -818,14 +818,14 @@ async function renderRegistroEditor(mesocycleId) {
   const saveBtn = document.createElement("button");
   saveBtn.textContent = "Guardar";
 
-  registroEditor.append(
-    searchInput,
-    resultsBox,
-    weightInput,
-    repsInput,
-    setsInput,
-    saveBtn
-  );
+  const wrapper = document.createElement("div");
+   wrapper.style.position = "relative";
+   wrapper.style.width = "200px";
+   
+   wrapper.appendChild(searchInput);
+   wrapper.appendChild(resultsBox);
+   
+   registroEditor.appendChild(wrapper);
 
   /* ======================
      GUARDAR
