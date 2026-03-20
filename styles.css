@@ -287,14 +287,15 @@ section {
 ====================== */
 .day-buttons {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
-  gap: 30px; /* 🔥 más aire */
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 16px;
+  margin-top: 10px;
 }
 
 .day-buttons button {
-  background: #1a1a22;
-  border-radius: 12px;
-  font-weight: 700;
+  padding: 16px 0; /* 🔥 más alto */
+  border-radius: 14px;
+  font-size: 15px;
 }
 
 .day-buttons button.active {
