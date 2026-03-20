@@ -287,8 +287,8 @@ section {
 ====================== */
 .day-buttons {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  gap: 14px; /* 🔥 más aire */
 }
 
 .day-buttons button {
