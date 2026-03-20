@@ -958,9 +958,7 @@ function renderExerciseDropdown(exercises) {
 
 async function createExercise(name) {
 
-  const { data: { session } } =
-    await supabase.auth.getSession();
-
+  const { data: { session } } = await supabase.auth.getSession();
   if (!session) return null;
 
   const { data, error } = await supabase
@@ -974,16 +972,12 @@ async function createExercise(name) {
     .single();
 
   if (error) {
-
     console.error(error);
     alert("No se pudo crear el ejercicio");
-
     return null;
-
   }
 
   return data;
-
 }
 
 function enableExerciseSearch() {
