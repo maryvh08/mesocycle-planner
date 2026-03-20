@@ -762,7 +762,11 @@ async function renderRegistroEditor(mesocycleId) {
     dayContainer.appendChild(btn);
   }
 
-  const exerciseSelect = document.createElement("select");
+  const exerciseSelect = new Choices("#exercise-select", {
+     searchEnabled: true,
+     itemSelectText: "",
+     shouldSort: false
+   });
   exerciseSelect.innerHTML = `<option value="">Selecciona ejercicio</option>`;
   exercises.forEach(ex =>
     exerciseSelect.append(new Option(ex.name, ex.id))
