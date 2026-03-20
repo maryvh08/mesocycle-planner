@@ -714,11 +714,7 @@ async function renderRegistroEditor(mesocycleId) {
     .filter(e => e && e.id && e.name);
 
   if (!exercises.length) {
-    registroEditor.innerHTML = `
-      <p class="error">
-        ⚠ La plantilla existe pero no tiene ejercicios válidos.
-      </p>
-    `;
+    registroEditor.innerHTML = `<p class="error">⚠ Sin ejercicios válidos</p>`;
     return;
   }
 
@@ -727,7 +723,7 @@ async function renderRegistroEditor(mesocycleId) {
   );
 
   /* ======================
-     UI
+     UI BASE
   ====================== */
   const title = document.createElement("h3");
   title.textContent = mesocycle.name;
@@ -763,42 +759,107 @@ async function renderRegistroEditor(mesocycleId) {
   }
 
   /* ======================
-     🔎 BUSCADOR DE EJERCICIOS
+     🔥 AUTOCOMPLETE PRO
   ====================== */
-  const searchInput = document.createElement("input");
-  searchInput.placeholder = "Buscar ejercicio...";
-  searchInput.className = "search-input";
+  const wrapper = document.createElement("div");
+  wrapper.className = "autocomplete-wrapper";
 
-  const resultsBox = document.createElement("div");
-  resultsBox.className = "results-box";
+  const input = document.createElement("input");
+  input.placeholder = "Buscar ejercicio...";
+  input.className = "autocomplete-input";
+
+  const dropdown = document.createElement("div");
+  dropdown.className = "autocomplete-dropdown";
 
   let selectedExerciseId = null;
+  let currentFocus = -1;
+  let filtered = [];
 
-  searchInput.addEventListener("input", () => {
-    const value = searchInput.value.toLowerCase();
-    resultsBox.innerHTML = "";
+  function renderDropdown(list) {
+    dropdown.innerHTML = "";
+    if (!list.length) {
+      dropdown.style.display = "none";
+      return;
+    }
+
+    list.forEach((ex, index) => {
+      const item = document.createElement("div");
+      item.className = "autocomplete-item";
+      item.textContent = ex.name;
+
+      item.onclick = () => selectItem(index);
+
+      dropdown.appendChild(item);
+    });
+
+    dropdown.style.display = "block";
+  }
+
+  function selectItem(index) {
+    const ex = filtered[index];
+    if (!ex) return;
+
+    input.value = ex.name;
+    selectedExerciseId = ex.id;
+    dropdown.style.display = "none";
+    currentFocus = -1;
+  }
+
+  function updateActive(items) {
+    items.forEach(i => i.classList.remove("active"));
+    if (currentFocus >= 0 && items[currentFocus]) {
+      items[currentFocus].classList.add("active");
+    }
+  }
+
+  input.addEventListener("input", () => {
+    const value = input.value.toLowerCase();
     selectedExerciseId = null;
+    currentFocus = -1;
 
-    if (!value) return;
+    if (!value) {
+      dropdown.style.display = "none";
+      return;
+    }
 
-    const filtered = exercises.filter(ex =>
+    filtered = exercises.filter(ex =>
       ex.name.toLowerCase().includes(value)
     );
 
-    filtered.forEach(ex => {
-      const item = document.createElement("div");
-      item.textContent = ex.name;
-      item.className = "result-item";
-
-      item.onclick = () => {
-        searchInput.value = ex.name;
-        selectedExerciseId = ex.id;
-        resultsBox.innerHTML = "";
-      };
-
-      resultsBox.appendChild(item);
-    });
+    renderDropdown(filtered);
   });
+
+  input.addEventListener("keydown", (e) => {
+    const items = dropdown.querySelectorAll(".autocomplete-item");
+
+    if (e.key === "ArrowDown") {
+      currentFocus++;
+      if (currentFocus >= items.length) currentFocus = 0;
+      updateActive(items);
+    }
+
+    if (e.key === "ArrowUp") {
+      currentFocus--;
+      if (currentFocus < 0) currentFocus = items.length - 1;
+      updateActive(items);
+    }
+
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (currentFocus >= 0) {
+        selectItem(currentFocus);
+      }
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!wrapper.contains(e.target)) {
+      dropdown.style.display = "none";
+    }
+  });
+
+  wrapper.append(input, dropdown);
+  registroEditor.appendChild(wrapper);
 
   /* ======================
      INPUTS
@@ -818,14 +879,12 @@ async function renderRegistroEditor(mesocycleId) {
   const saveBtn = document.createElement("button");
   saveBtn.textContent = "Guardar";
 
-  const wrapper = document.createElement("div");
-   wrapper.style.position = "relative";
-   wrapper.style.width = "200px";
-   
-   wrapper.appendChild(searchInput);
-   wrapper.appendChild(resultsBox);
-   
-   registroEditor.appendChild(wrapper);
+  registroEditor.append(
+    weightInput,
+    repsInput,
+    setsInput,
+    saveBtn
+  );
 
   /* ======================
      GUARDAR
@@ -849,7 +908,7 @@ async function renderRegistroEditor(mesocycleId) {
       sets: Number(setsInput.value) || 1
     };
 
-    const { data: existing, error: checkError } = await supabase
+    const { data: existing } = await supabase
       .from("exercise_records")
       .select("id")
       .eq("user_id", session.user.id)
@@ -859,14 +918,8 @@ async function renderRegistroEditor(mesocycleId) {
       .eq("day_number", selectedDay)
       .limit(1);
 
-    if (checkError) {
-      console.error(checkError);
-      alert("Error validando el ejercicio");
-      return;
-    }
-
     if (existing?.length) {
-      alert("Ya ha registrado este ejercicio para este día");
+      alert("Ya ha registrado este ejercicio");
       return;
     }
 
@@ -880,11 +933,11 @@ async function renderRegistroEditor(mesocycleId) {
       return;
     }
 
+    input.value = "";
+    selectedExerciseId = null;
     weightInput.value = "";
     repsInput.value = "";
     setsInput.value = "";
-    searchInput.value = "";
-    selectedExerciseId = null;
 
     renderExercisesForDay(
       mesocycleId,
@@ -893,7 +946,7 @@ async function renderRegistroEditor(mesocycleId) {
     );
   };
 
-  console.log("✅ RegistroEditor renderizado correctamente");
+  console.log("✅ UI PRO lista");
 }
 
 function enableExerciseSearch() {
