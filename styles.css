@@ -2290,11 +2290,6 @@ h3 {
 }
 
 .select-dropdown {
-  position: absolute;
-  top: calc(100% + 4px); /* justo debajo */
-  left: 0;
-
-  width: 100%;
   max-height: 200px;
   overflow-y: auto;
 
