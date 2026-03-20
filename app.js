@@ -702,10 +702,10 @@ async function renderRegistroEditor(mesocycleId) {
      EJERCICIOS CUSTOM
   ====================== */
 
-  const { data: customExercises } = await supabase
-    .from("exercises")
-    .select("id, name, subgroup")
-    .eq("created_by", session.user.id);
+  const { data: customExercises = [] } = await supabase
+     .from("exercises")
+     .select("id, name, subgroup")
+     .eq("created_by", session.user.id);
 
   const exercises = [
     ...templateExercises.map(te => te.exercises),
