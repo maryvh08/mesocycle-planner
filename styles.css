@@ -111,6 +111,7 @@ button {
    border: none;
    color: white;
    padding: 14px;
+   gap: 8px;
    border-radius: var(--radius);
    font-weight: 700;
    letter-spacing: .5px;
@@ -286,9 +287,10 @@ section {
    DÍAS
 ====================== */
 .day-buttons {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-  margin-top: 10px;
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+   gap: 8px;
+   margin-top: 10px;
 }
 
 .day-buttons button {
