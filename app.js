@@ -739,7 +739,7 @@ async function renderRegistroEditor(mesocycleId) {
   wrapper.className = "select-wrapper";
 
   const input = document.createElement("input");
-  input.placeholder = "Selecciona ejercicio...";
+  input.placeholder = "Selecciona un ejercicio para registrar";
   input.className = "select-input";
 
   const dropdown = document.createElement("div");
