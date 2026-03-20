@@ -2291,17 +2291,18 @@ h3 {
 
 .select-dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 4px); /* justo debajo */
   left: 0;
-  width: 100%;
 
-  max-height: 200px;   /* 🔥 limita la altura */
-  overflow-y: auto;    /* 🔥 activa scroll vertical */
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
 
   border: 1px solid #ccc;
   background: white;
+  z-index: 9999;
+
   display: none;
-  z-index: 999;
 }
 
 .select-dropdown::-webkit-scrollbar {
@@ -2315,4 +2316,9 @@ h3 {
 
 .select-dropdown::-webkit-scrollbar-thumb:hover {
   background: #777;
+}
+
+.select-wrapper {
+  position: relative; /* 🔥 CLAVE */
+  width: 250px;
 }
