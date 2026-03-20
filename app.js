@@ -867,39 +867,35 @@ function renderExerciseDropdown(exercises) {
 
   let selectedExercise = null;
 
-  function render(list) {
+  // Función para normalizar texto (quitar tildes y pasar a minúsculas)
+  function normalizeText(text) {
+    return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  }
 
+  function render(list) {
     dropdown.innerHTML = "";
 
     list.forEach(ex => {
-
       const item = document.createElement("div");
       item.className = "select-item";
       item.textContent = ex.name;
 
       item.onclick = () => {
-
         input.value = ex.name;
         selectedExercise = ex;
         dropdown.style.display = "none";
-
       };
 
       dropdown.appendChild(item);
-
     });
 
     if (list.length === 0) {
-
       const add = document.createElement("div");
       add.className = "select-add";
       add.textContent = `Agregar "${input.value}"`;
 
       add.onclick = async () => {
-
-        const newExercise =
-          await createExercise(input.value);
-
+        const newExercise = await createExercise(input.value);
         if (!newExercise) return;
 
         exercises.push(newExercise);
@@ -908,41 +904,32 @@ function renderExerciseDropdown(exercises) {
         selectedExercise = newExercise;
 
         dropdown.style.display = "none";
-
       };
 
       dropdown.appendChild(add);
-
     }
-
   }
 
   input.addEventListener("focus", () => {
-
     render(exercises);
     dropdown.style.display = "block";
-
   });
 
   input.addEventListener("input", () => {
-
-    const value = input.value.toLowerCase();
+    const value = normalizeText(input.value);
 
     const filtered = exercises.filter(ex =>
-      ex.name.toLowerCase().includes(value)
+      normalizeText(ex.name).includes(value)
     );
 
     selectedExercise = null;
 
     render(filtered);
-
   });
 
   document.addEventListener("click", e => {
-
     if (!wrapper.contains(e.target))
       dropdown.style.display = "none";
-
   });
 
   wrapper.append(input, dropdown);
