@@ -107,16 +107,17 @@ h1 {
    ELEMENTOS BÁSICOS
 ====================== */
 button {
-  background: linear-gradient(135deg, var(--accent), var(--accent-light));
-  border: none;
-  color: white;
-  padding: 14px;
-  border-radius: var(--radius);
-  font-weight: 700;
-  letter-spacing: .5px;
-  cursor: pointer;
-  box-shadow: 0 10px 30px var(--accent-glow);
-  transition: .2s;
+   background: linear-gradient(135deg, var(--accent), var(--accent-light));
+   border: none;
+   color: white;
+   padding: 14px;
+   gap: 14px;
+   border-radius: var(--radius);
+   font-weight: 700;
+   letter-spacing: .5px;
+   cursor: pointer;
+   box-shadow: 0 10px 30px var(--accent-glow);
+   transition: .2s;
 }
 
 button:hover {
