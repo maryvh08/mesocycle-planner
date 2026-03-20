@@ -949,12 +949,15 @@ async function createExercise(name) {
   if (!session) return null;
 
   const payload = {
-    name: name,
-    subgroup: "Custom",
+    name: name.trim(),
+    type: "custom",
+    subgroup: "Otros",
+    muscle_principal: "No especificado",
+    equipo: "No especificado",
+    level: "General",
+    common_errors: "",
     created_by: session.user.id
   };
-
-  console.log("Insert payload:", payload);
 
   const { data, error } = await supabase
     .from("exercises")
@@ -963,8 +966,8 @@ async function createExercise(name) {
     .single();
 
   if (error) {
-    console.error("Supabase error:", error);
-    alert(error.message);
+    console.error(error);
+    alert("No se pudo crear el ejercicio");
     return null;
   }
 
