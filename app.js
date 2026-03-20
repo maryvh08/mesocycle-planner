@@ -4964,12 +4964,6 @@ loadExerciseLibrary();
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  enableExerciseSearch();
-
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-
   setupExerciseSearch();
 
 });
