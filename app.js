@@ -948,40 +948,29 @@ async function createExercise(name) {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return null;
 
+  const payload = {
+    name: name,
+    subgroup: "Custom",
+    created_by: session.user.id
+  };
+
+  console.log("Insert payload:", payload);
+
   const { data, error } = await supabase
     .from("exercises")
-    .insert({
-      name: name,
-      subgroup: "Custom",
-      created_by: session.user.id
-    })
+    .insert(payload)
     .select()
     .single();
 
   if (error) {
-    console.error(error);
-    alert("No se pudo crear el ejercicio");
+    console.error("Supabase error:", error);
+    alert(error.message);
     return null;
   }
 
   return data;
 }
 
-function enableExerciseSearch() {
-
-  const element = document.getElementById("exerciseSelect");
-
-  if (!element) return;
-
-  new Choices(element, {
-    searchEnabled: true,
-    itemSelectText: "",
-    shouldSort: false,
-    placeholder: true,
-    placeholderValue: "Buscar ejercicio...",
-  });
-
-}
 /* ======================
    TENDENCIAS Y PROGRESO
 ====================== */
