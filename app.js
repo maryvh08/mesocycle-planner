@@ -768,24 +768,42 @@ async function renderRegistroEditor(mesocycleId) {
 
   // 🔹 Abrir como SELECT (muestra todo)
   input.addEventListener("focus", () => {
-    filtered = [...exercises];
-    render(filtered);
-    dropdown.style.display = "block";
-  });
+     const rect = input.getBoundingClientRect();
+   
+     dropdown.style.display = "block";
+     dropdown.style.position = "fixed";
+     dropdown.style.top = rect.bottom + "px";
+     dropdown.style.left = rect.left + "px";
+     dropdown.style.width = rect.width + "px";
+   });
 
   // 🔹 Escribir = filtrar
   input.addEventListener("input", () => {
-    const value = input.value.toLowerCase();
-    selectedExerciseId = null;
+     const value = input.value.toLowerCase();
+     selectedExerciseId = null;
+   
+     filtered = exercises.filter(ex =>
+       ex.name.toLowerCase().includes(value)
+     );
+   
+     render(filtered);
+   
+     const rect = input.getBoundingClientRect();
+   
+     dropdown.style.display = "block";
+     dropdown.style.position = "fixed";
+     dropdown.style.top = rect.bottom + "px";
+     dropdown.style.left = rect.left + "px";
+     dropdown.style.width = rect.width + "px";
+   });
 
-    filtered = exercises.filter(ex =>
-      ex.name.toLowerCase().includes(value)
-    );
-
-    render(filtered);
-    dropdown.style.display = "block";
-  });
-
+   window.addEventListener("scroll", () => {
+     if (dropdown.style.display === "block") {
+       const rect = input.getBoundingClientRect();
+       dropdown.style.top = rect.bottom + "px";
+       dropdown.style.left = rect.left + "px";
+     }
+   });
   // 🔹 Cerrar al hacer click fuera
   document.addEventListener("click", (e) => {
     if (!wrapper.contains(e.target)) {
