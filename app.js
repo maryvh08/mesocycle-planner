@@ -662,6 +662,7 @@ async function openRegistro(mesocycleId) {
    REGISTRO EDITOR
 ====================== */
 async function renderRegistroEditor(mesocycleId) {
+
   const registroEditor = document.getElementById("registro-editor");
   const registeredContainer = document.getElementById("registered-exercises");
 
@@ -671,11 +672,19 @@ async function renderRegistroEditor(mesocycleId) {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return;
 
+  /* ======================
+     MESOCICLO
+  ====================== */
+
   const { data: mesocycle } = await supabase
     .from("mesocycles")
     .select("id, name, weeks, days_per_week, template_id")
     .eq("id", mesocycleId)
     .single();
+
+  /* ======================
+     EJERCICIOS DE PLANTILLA
+  ====================== */
 
   const { data: templateExercises } = await supabase
     .from("template_exercises")
@@ -689,9 +698,19 @@ async function renderRegistroEditor(mesocycleId) {
     `)
     .eq("template_id", mesocycle.template_id);
 
-  const exercises = templateExercises
-    .map(te => te.exercises)
-    .filter(e => e && e.id && e.name);
+  /* ======================
+     EJERCICIOS CUSTOM
+  ====================== */
+
+  const { data: customExercises } = await supabase
+    .from("exercises")
+    .select("id, name, subgroup")
+    .eq("created_by", session.user.id);
+
+  const exercises = [
+    ...templateExercises.map(te => te.exercises),
+    ...customExercises
+  ].filter(Boolean);
 
   const exercisesById = Object.fromEntries(
     exercises.map(ex => [ex.id, ex])
@@ -700,25 +719,36 @@ async function renderRegistroEditor(mesocycleId) {
   /* ======================
      UI BASE
   ====================== */
+
   const title = document.createElement("h3");
   title.textContent = mesocycle.name;
   registroEditor.appendChild(title);
 
   const weekSelect = document.createElement("select");
+
   for (let i = 1; i <= mesocycle.weeks; i++) {
     weekSelect.append(new Option(`Semana ${i}`, i));
   }
+
   registroEditor.appendChild(weekSelect);
 
   const dayContainer = document.createElement("div");
+
   let selectedDay = null;
 
   for (let i = 1; i <= mesocycle.days_per_week; i++) {
+
     const btn = document.createElement("button");
     btn.textContent = `Día ${i}`;
+
     btn.onclick = () => {
-      [...dayContainer.children].forEach(b => b.classList.remove("active"));
+
+      [...dayContainer.children].forEach(b =>
+        b.classList.remove("active")
+      );
+
       btn.classList.add("active");
+
       selectedDay = i;
 
       renderExercisesForDay(
@@ -726,79 +756,32 @@ async function renderRegistroEditor(mesocycleId) {
         Number(weekSelect.value),
         selectedDay
       );
+
     };
+
     dayContainer.appendChild(btn);
+
   }
 
   registroEditor.appendChild(dayContainer);
 
   /* ======================
-     🔥 SELECT BUSCABLE
+     SELECT BUSCABLE
   ====================== */
-  const wrapper = document.createElement("div");
-  wrapper.className = "select-wrapper";
 
-  const input = document.createElement("input");
-  input.placeholder = "Selecciona un ejercicio para registrar";
-  input.className = "select-input";
+  const {
+    wrapper,
+    input,
+    dropdown,
+    getSelectedExercise
+  } = renderExerciseDropdown(exercises);
 
-  const dropdown = document.createElement("div");
-  dropdown.className = "select-dropdown";
-
-  let selectedExerciseId = null;
-  let filtered = [...exercises];
-
-  function render(list) {
-    dropdown.innerHTML = "";
-
-    list.forEach(ex => {
-      const item = document.createElement("div");
-      item.className = "select-item";
-      item.textContent = ex.name;
-
-      item.onclick = () => {
-        input.value = ex.name;
-        selectedExerciseId = ex.id;
-        dropdown.style.display = "none";
-      };
-
-      dropdown.appendChild(item);
-    });
-  }
-
-  // 🔹 Abrir como SELECT (muestra todo)
-  input.addEventListener("focus", () => {
-    filtered = [...exercises];
-    render(filtered);
-    dropdown.style.display = "block";
-  });
-
-  // 🔹 Escribir = filtrar
-  input.addEventListener("input", () => {
-    const value = input.value.toLowerCase();
-    selectedExerciseId = null;
-
-    filtered = exercises.filter(ex =>
-      ex.name.toLowerCase().includes(value)
-    );
-
-    render(filtered);
-    dropdown.style.display = "block";
-  });
-
-  // 🔹 Cerrar al hacer click fuera
-  document.addEventListener("click", (e) => {
-    if (!wrapper.contains(e.target)) {
-      dropdown.style.display = "none";
-    }
-  });
-
-  wrapper.append(input, dropdown);
   registroEditor.appendChild(wrapper);
 
   /* ======================
      INPUTS
   ====================== */
+
   const setsInput = document.createElement("input");
   setsInput.type = "number";
   setsInput.placeholder = "Sets";
@@ -824,28 +807,39 @@ async function renderRegistroEditor(mesocycleId) {
   /* ======================
      GUARDAR
   ====================== */
-  saveBtn.onclick = async () => {
-    if (!selectedDay) return alert("Selecciona un día");
-    if (!selectedExerciseId) return alert("Selecciona un ejercicio");
 
-    const exercise = exercisesById[selectedExerciseId];
+  saveBtn.onclick = async () => {
+
+    if (!selectedDay)
+      return alert("Selecciona un día");
+
+    const exercise = getSelectedExercise();
+
+    if (!exercise)
+      return alert("Selecciona un ejercicio");
 
     const payload = {
+
       user_id: session.user.id,
       mesocycle_id: mesocycleId,
+
       exercise_id: exercise.id,
       exercise_name: exercise.name,
+
       week_number: Number(weekSelect.value),
       day_number: selectedDay,
+
       weight: Number(weightInput.value),
       reps: Number(repsInput.value),
       sets: Number(setsInput.value) || 1
+
     };
 
-    await supabase.from("exercise_records").insert(payload);
+    await supabase
+      .from("exercise_records")
+      .insert(payload);
 
     input.value = "";
-    selectedExerciseId = null;
     weightInput.value = "";
     repsInput.value = "";
     setsInput.value = "";
@@ -855,7 +849,141 @@ async function renderRegistroEditor(mesocycleId) {
       payload.week_number,
       selectedDay
     );
+
   };
+
+}
+
+function renderExerciseDropdown(exercises) {
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "select-wrapper";
+
+  const input = document.createElement("input");
+  input.placeholder = "Selecciona o escribe un ejercicio";
+
+  const dropdown = document.createElement("div");
+  dropdown.className = "select-dropdown";
+
+  let selectedExercise = null;
+
+  function render(list) {
+
+    dropdown.innerHTML = "";
+
+    list.forEach(ex => {
+
+      const item = document.createElement("div");
+      item.className = "select-item";
+      item.textContent = ex.name;
+
+      item.onclick = () => {
+
+        input.value = ex.name;
+        selectedExercise = ex;
+        dropdown.style.display = "none";
+
+      };
+
+      dropdown.appendChild(item);
+
+    });
+
+    if (list.length === 0) {
+
+      const add = document.createElement("div");
+      add.className = "select-add";
+      add.textContent = `Agregar "${input.value}"`;
+
+      add.onclick = async () => {
+
+        const newExercise =
+          await createExercise(input.value);
+
+        if (!newExercise) return;
+
+        exercises.push(newExercise);
+
+        input.value = newExercise.name;
+        selectedExercise = newExercise;
+
+        dropdown.style.display = "none";
+
+      };
+
+      dropdown.appendChild(add);
+
+    }
+
+  }
+
+  input.addEventListener("focus", () => {
+
+    render(exercises);
+    dropdown.style.display = "block";
+
+  });
+
+  input.addEventListener("input", () => {
+
+    const value = input.value.toLowerCase();
+
+    const filtered = exercises.filter(ex =>
+      ex.name.toLowerCase().includes(value)
+    );
+
+    selectedExercise = null;
+
+    render(filtered);
+
+  });
+
+  document.addEventListener("click", e => {
+
+    if (!wrapper.contains(e.target))
+      dropdown.style.display = "none";
+
+  });
+
+  wrapper.append(input, dropdown);
+
+  return {
+    wrapper,
+    input,
+    dropdown,
+    getSelectedExercise: () => selectedExercise
+  };
+
+}
+
+async function createExercise(name) {
+
+  const { data: { session } } =
+    await supabase.auth.getSession();
+
+  if (!session) return null;
+
+  const { data, error } = await supabase
+    .from("exercises")
+    .insert({
+      name: name,
+      subgroup: "Custom",
+      created_by: session.user.id
+    })
+    .select()
+    .single();
+
+  if (error) {
+
+    console.error(error);
+    alert("No se pudo crear el ejercicio");
+
+    return null;
+
+  }
+
+  return data;
+
 }
 
 function enableExerciseSearch() {
