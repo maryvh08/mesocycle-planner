@@ -2150,6 +2150,24 @@ h3 {
   font-size: 1.1rem;
 }
 
+.results-box {
+  border: 1px solid #ccc;
+  max-height: 150px;
+  overflow-y: auto;
+  background: white;
+  position: absolute;
+  width: 200px;
+  z-index: 10;
+}
+
+.result-item {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.result-item:hover {
+  background-color: #eee;
+}
 /* ================== PASSWORD ================== */
 
 .password-wrapper {
