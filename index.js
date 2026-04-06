@@ -25,7 +25,6 @@ animatedElements.forEach(el => observer.observe(el));
 // ==============================
 // HERO ENTRY (on load)
 // ==============================
-
 window.addEventListener("load", () => {
   document.body.classList.add("loaded");
 });
