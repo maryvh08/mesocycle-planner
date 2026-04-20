@@ -12,6 +12,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
    ESTADOS
 ====================== */
 const records = getWorkoutRecords() || [];
+let generalStrengthData = null;
 let selectedDaysPerWeek = null;
 let editingMesocycleId = null;
 let statsChart = null;
@@ -3455,7 +3456,7 @@ document.addEventListener("click", (e) => {
   if (e.target.id === "back-to-general") {
     if (!generalStrengthData) return;
 
-    const ctx = document.getElementById("strength-chart");
+    const ctx = document.getElementById("strength-chart").getContext("2d");
     if (window.statsChart) window.statsChart.destroy();
 
     const labels = generalStrengthData.map(r => r.day);
