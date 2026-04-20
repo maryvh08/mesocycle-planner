@@ -3376,12 +3376,14 @@ function setupChartModal() {
         },
 
         scales: {
-          x: {
-            ticks: {
-              autoSkip: false
-            }
-          }
-        }
+           x: {
+             ticks: {
+               autoSkip: false,
+               maxRotation: 45,
+               minRotation: 45
+             }
+           }
+         }
       }
     });
 
