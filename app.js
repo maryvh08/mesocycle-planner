@@ -3252,7 +3252,7 @@ async function loadStrengthChart(mesocycleId = null, exerciseName = "") {
   if (!user) return;
 
   const exerciseLabel = document.getElementById("strength-exercise-label");
-  const ctx = document.getElementById("strength-chart");
+  const ctx = document.getElementById("strength-chart").getContext("2d");;
   const backBtn = document.getElementById("back-to-general");
 
   // Mostrar el nombre del ejercicio y el badge solo si es ejercicio individual
