@@ -3369,7 +3369,14 @@ function setupChartModal() {
     const data = JSON.parse(JSON.stringify(originalChart.data));
 
     // 🔥 crear chart
-    modalChart = new Chart(modalCanvas, {
+    const ctx = modalCanvas.getContext("2d");
+
+      if (!ctx) {
+        console.error("❌ No se pudo obtener el contexto del canvas modal");
+        return;
+      }
+      
+      modalChart = new Chart(ctx, {
       type: originalChart.config.type,
       data: data,
       options: {
