@@ -3320,6 +3320,72 @@ async function loadStrengthChart(mesocycleId = null, exerciseName = "") {
   });
 }
 
+let modalChart = null;
+
+function setupChartModal() {
+
+  const originalCanvas = document.getElementById("strength-chart");
+  const modal = document.getElementById("chart-modal");
+  const modalCanvas = document.getElementById("chart-modal-canvas");
+  const closeBtn = document.getElementById("close-chart-modal");
+
+  if (!originalCanvas) return;
+
+  // 🔥 SOLO en móvil
+  function isMobile() {
+    return window.innerWidth <= 768;
+  }
+
+  // 👉 abrir modal al hacer click
+  originalCanvas.addEventListener("click", () => {
+
+    if (!isMobile()) return;
+
+    modal.classList.remove("hidden");
+
+    // destruir gráfico previo si existe
+    if (modalChart) {
+      modalChart.destroy();
+    }
+
+    // 🔥 clonar config del chart original
+    const originalChart = Chart.getChart(originalCanvas);
+
+    if (!originalChart) return;
+
+    const config = structuredClone(originalChart.config);
+
+    // 👉 mejorar visual en modal
+    config.options.plugins.legend.display = true;
+    config.options.maintainAspectRatio = false;
+
+    modalChart = new Chart(modalCanvas, config);
+
+  });
+
+  // 👉 cerrar modal
+  closeBtn.addEventListener("click", () => {
+    modal.classList.add("hidden");
+
+    if (modalChart) {
+      modalChart.destroy();
+      modalChart = null;
+    }
+  });
+
+  // 👉 cerrar tocando fuera
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) {
+      modal.classList.add("hidden");
+
+      if (modalChart) {
+        modalChart.destroy();
+        modalChart = null;
+      }
+    }
+  });
+
+}
 // Evento para volver a la evolución general
 document.addEventListener("click", (e) => {
   if (e.target.id === "back-to-general") {
@@ -4970,3 +5036,5 @@ document.addEventListener("DOMContentLoaded", () => {
   setupExerciseSearch();
 
 });
+
+setupChartModal();
