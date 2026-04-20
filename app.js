@@ -12,7 +12,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
    ESTADOS
 ====================== */
 const records = getWorkoutRecords() || [];
-let generalStrengthData = null;
 let selectedDaysPerWeek = null;
 let editingMesocycleId = null;
 let statsChart = null;
