@@ -2430,3 +2430,7 @@ h3 {
   width: 100% !important;
   height: 70vh !important;
 }
+
+.chart-modal-content {
+  overflow-x: auto;
+}
