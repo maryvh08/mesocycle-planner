@@ -3354,30 +3354,35 @@ function setupChartModal() {
 
     if (!isMobile()) return;
 
+    const originalChart = Chart.getChart(originalCanvas);
+    if (!originalChart) return;
+
     modal.classList.remove("hidden");
 
+    // destruir anterior
     if (modalChart) {
       modalChart.destroy();
       modalChart = null;
     }
 
-    const originalChart = Chart.getChart(originalCanvas);
-    if (!originalChart) return;
-
+    // 🔥 CLONAR DATA
     const data = structuredClone(originalChart.data);
 
-    // 🔥 ancho dinámico
+    // 🔥 CALCULAR ANCHO DINÁMICO (AQUÍ SÍ)
     const labelsCount = data.labels?.length || 0;
     const dynamicWidth = Math.max(900, labelsCount * 80);
 
     modalCanvas.style.width = dynamicWidth + "px";
     modalCanvas.style.height = "400px";
 
-    // ⏳ esperar render
+    // ⏳ esperar render del modal
     setTimeout(() => {
 
       const ctx = modalCanvas.getContext("2d");
-      if (!ctx) return;
+      if (!ctx) {
+        console.error("❌ No se pudo obtener el contexto");
+        return;
+      }
 
       modalChart = new Chart(ctx, {
         type: originalChart.config.type,
@@ -3386,24 +3391,35 @@ function setupChartModal() {
           responsive: true,
           maintainAspectRatio: false,
 
+          interaction: {
+            mode: 'nearest',
+            intersect: false
+          },
+
           plugins: {
-            legend: { display: true }
+            legend: { display: true },
+            tooltip: { enabled: true }
           },
 
           scales: {
             x: {
               ticks: {
-                autoSkip: false
+                autoSkip: false,
+                maxRotation: 45,
+                minRotation: 45
               }
             }
           }
         }
       });
 
+      modalChart.resize();
+
     }, 50);
 
   });
 
+  // cerrar botón
   closeBtn.addEventListener("click", () => {
     modal.classList.add("hidden");
 
@@ -3413,6 +3429,7 @@ function setupChartModal() {
     }
   });
 
+  // cerrar tocando fuera
   modal.addEventListener("click", (e) => {
     if (e.target === modal) {
       modal.classList.add("hidden");
