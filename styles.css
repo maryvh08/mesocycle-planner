@@ -2444,3 +2444,8 @@ h3 {
   height: 400px;
   min-width: 900px; /* 👈 base */
 }
+
+#back-to-general.mobile {
+  position: static;
+  margin-top: 10px;
+}
