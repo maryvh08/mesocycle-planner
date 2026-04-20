@@ -3514,20 +3514,7 @@ async function loadExerciseVolumeList(mesocycleId = null) {
     });
 }
 
-function updateBackButtonVisibility() {
-  const btn = document.getElementById("back-to-general");
 
-  if (!btn) return;
-
-  if (window.innerWidth <= 768) {
-    btn.classList.add("mobile");
-  } else {
-    btn.classList.remove("mobile");
-  }
-}
-
-window.addEventListener("resize", updateBackButtonVisibility);
-updateBackButtonVisibility();
 async function loadExerciseProgress(exerciseName) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
