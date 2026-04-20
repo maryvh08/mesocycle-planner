@@ -3353,14 +3353,35 @@ function setupChartModal() {
 
     if (!originalChart) return;
 
-    const config = structuredClone(originalChart.config);
-
-    // 👉 mejorar visual en modal
-    config.options.plugins.legend.display = true;
-    config.options.maintainAspectRatio = false;
-
-    modalChart = new Chart(modalCanvas, config);
-
+    const originalChart = Chart.getChart(originalCanvas);
+      if (!originalChart) return;
+      
+      // 🔥 extraer datos reales
+      const data = originalChart.data;
+      
+      // 🔥 crear nueva gráfica limpia
+      modalChart = new Chart(modalCanvas, {
+        type: originalChart.config.type,
+        data: data,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+      
+          plugins: {
+            legend: {
+              display: true
+            }
+          },
+      
+          scales: {
+            x: {
+              ticks: {
+                autoSkip: false   // 👈 clave para que no se amontonen
+              }
+            }
+          }
+        }
+      });
   });
 
   // 👉 cerrar modal
