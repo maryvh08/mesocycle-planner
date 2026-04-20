@@ -2434,3 +2434,13 @@ h3 {
 .chart-modal-content {
   overflow-x: auto;
 }
+
+.chart-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+#chart-modal-canvas {
+  height: 400px;
+  min-width: 900px; /* 👈 base */
+}
