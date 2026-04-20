@@ -3344,7 +3344,7 @@ function setupChartModal() {
   const modalCanvas = document.getElementById("chart-modal-canvas");
   const closeBtn = document.getElementById("close-chart-modal");
 
-  if (!originalCanvas) return;
+  if (!originalCanvas || !modal || !modalCanvas) return;
 
   function isMobile() {
     return window.innerWidth <= 768;
@@ -3354,76 +3354,56 @@ function setupChartModal() {
 
     if (!isMobile()) return;
 
-    const originalChart = Chart.getChart(originalCanvas);
-    if (!originalChart) return;
-
     modal.classList.remove("hidden");
 
-    // destruir anterior
     if (modalChart) {
       modalChart.destroy();
       modalChart = null;
     }
 
-    // 🔥 CLONAR DATA correctamente
-    const data = JSON.parse(JSON.stringify(originalChart.data));
+    const originalChart = Chart.getChart(originalCanvas);
+    if (!originalChart) return;
 
-    // 🔥 crear chart
-    const ctx = modalCanvas.getContext("2d");
+    const data = structuredClone(originalChart.data);
 
-      if (!ctx) {
-        console.error("❌ No se pudo obtener el contexto del canvas modal");
-        return;
-      }
-      
-      modalChart = new Chart(ctx, {
-      type: originalChart.config.type,
-      data: data,
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
+    // 🔥 ancho dinámico
+    const labelsCount = data.labels?.length || 0;
+    const dynamicWidth = Math.max(900, labelsCount * 80);
 
-        interaction: {
-          mode: 'nearest',
-          intersect: false
-        },
+    modalCanvas.style.width = dynamicWidth + "px";
+    modalCanvas.style.height = "400px";
 
-        plugins: {
-          legend: {
-            display: true
-          },
-          tooltip: {
-            enabled: true
-          }
-        },
-
-        scales: {
-           x: {
-             ticks: {
-               autoSkip: false,
-               maxRotation: 45,
-               minRotation: 45
-             }
-           }
-         }
-      }
-    });
-
-    // 🔥 FORZAR RENDER (CLAVE)
+    // ⏳ esperar render
     setTimeout(() => {
-      modalChart.resize();
-    }, 100);
+
+      const ctx = modalCanvas.getContext("2d");
+      if (!ctx) return;
+
+      modalChart = new Chart(ctx, {
+        type: originalChart.config.type,
+        data: data,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+
+          plugins: {
+            legend: { display: true }
+          },
+
+          scales: {
+            x: {
+              ticks: {
+                autoSkip: false
+              }
+            }
+          }
+        }
+      });
+
+    }, 50);
 
   });
 
-   const labelsCount = data.labels?.length || 0;
-
-   // 👉 ancho dinámico (más datos = más ancho)
-   const dynamicWidth = Math.max(900, labelsCount * 80);
-   
-   modalCanvas.style.width = dynamicWidth + "px";
-   modalCanvas.style.height = "400px";
-  // cerrar
   closeBtn.addEventListener("click", () => {
     modal.classList.add("hidden");
 
@@ -3433,7 +3413,6 @@ function setupChartModal() {
     }
   });
 
-  // cerrar tocando fuera
   modal.addEventListener("click", (e) => {
     if (e.target === modal) {
       modal.classList.add("hidden");
