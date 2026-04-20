@@ -3329,14 +3329,9 @@ async function loadStrengthChart(mesocycleId = null, exerciseName = "") {
 
 function updateBackButtonVisibility() {
   const btn = document.getElementById("back-to-general");
-
   if (!btn) return;
 
-  if (window.innerWidth <= 768) {
-    btn.classList.add("mobile");
-  } else {
-    btn.classList.remove("mobile");
-  }
+  btn.classList.toggle("mobile", window.innerWidth <= 768);
 }
 
 window.addEventListener("resize", updateBackButtonVisibility);
