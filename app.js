@@ -3331,60 +3331,68 @@ function setupChartModal() {
 
   if (!originalCanvas) return;
 
-  // 🔥 SOLO en móvil
   function isMobile() {
     return window.innerWidth <= 768;
   }
 
-  // 👉 abrir modal al hacer click
   originalCanvas.addEventListener("click", () => {
 
     if (!isMobile()) return;
 
-    modal.classList.remove("hidden");
-
-    // destruir gráfico previo si existe
-    if (modalChart) {
-      modalChart.destroy();
-    }
-
-    // 🔥 clonar config del chart original
     const originalChart = Chart.getChart(originalCanvas);
-
     if (!originalChart) return;
 
-    const originalChart = Chart.getChart(originalCanvas);
-      if (!originalChart) return;
-      
-      // 🔥 extraer datos reales
-      const data = originalChart.data;
-      
-      // 🔥 crear nueva gráfica limpia
-      modalChart = new Chart(modalCanvas, {
-        type: originalChart.config.type,
-        data: data,
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-      
-          plugins: {
-            legend: {
-              display: true
-            }
+    modal.classList.remove("hidden");
+
+    // destruir anterior
+    if (modalChart) {
+      modalChart.destroy();
+      modalChart = null;
+    }
+
+    // 🔥 CLONAR DATA correctamente
+    const data = JSON.parse(JSON.stringify(originalChart.data));
+
+    // 🔥 crear chart
+    modalChart = new Chart(modalCanvas, {
+      type: originalChart.config.type,
+      data: data,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+
+        interaction: {
+          mode: 'nearest',
+          intersect: false
+        },
+
+        plugins: {
+          legend: {
+            display: true
           },
-      
-          scales: {
-            x: {
-              ticks: {
-                autoSkip: false   // 👈 clave para que no se amontonen
-              }
+          tooltip: {
+            enabled: true
+          }
+        },
+
+        scales: {
+          x: {
+            ticks: {
+              autoSkip: false
             }
           }
         }
-      });
+      }
+    });
+
+    // 🔥 FORZAR RENDER (CLAVE)
+    setTimeout(() => {
+      modalChart.resize();
+    }, 100);
+
   });
 
-  // 👉 cerrar modal
+  // cerrar
   closeBtn.addEventListener("click", () => {
     modal.classList.add("hidden");
 
@@ -3394,7 +3402,7 @@ function setupChartModal() {
     }
   });
 
-  // 👉 cerrar tocando fuera
+  // cerrar tocando fuera
   modal.addEventListener("click", (e) => {
     if (e.target === modal) {
       modal.classList.add("hidden");
@@ -3407,6 +3415,7 @@ function setupChartModal() {
   });
 
 }
+
 // Evento para volver a la evolución general
 document.addEventListener("click", (e) => {
   if (e.target.id === "back-to-general") {
